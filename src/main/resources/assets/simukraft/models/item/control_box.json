@@ -1,0 +1,7 @@
+{
+  "parent": "block/cube_column",
+  "textures": {
+    "end": "simukraft:block/control_box_top",
+    "side": "simukraft:block/control_box_side"
+  }
+}
