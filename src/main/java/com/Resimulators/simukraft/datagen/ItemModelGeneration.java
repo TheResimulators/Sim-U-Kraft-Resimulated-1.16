@@ -14,7 +14,11 @@ public class ItemModelGeneration extends ItemModelProvider {
     }
     @Override
     protected void registerModels(){
-        getBuilder("rainbow_light").element().cube("#all").textureAll("block/rainbow_light");
+        getBuilder("rainbow_light").parent(getExistingFile(mcLoc("block/cube_all"))).texture("all","block/rainbow_light");
+        getBuilder("mine_box").parent(getExistingFile(mcLoc("block/cube_all"))).texture("side","block/mine_box_side").texture("top","block/mine_box_top");
+        getBuilder("composite_brick").parent(getExistingFile(mcLoc("block/cube_all"))).texture("all","block/composite_brick");
+        getBuilder("cheese_block").parent(getExistingFile(mcLoc("block/cube_all"))).texture("all","block/cheese_block");
+
         }
 
     @Override

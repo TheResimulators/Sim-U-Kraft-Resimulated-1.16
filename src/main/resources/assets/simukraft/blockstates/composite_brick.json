@@ -1,6 +1,7 @@
 {
   "variants": {
-    "normal": { "model": "simukraft:composite_brick" },
-    "inventory": { "model": "simukraft:composite_brick" }
+    "": {
+      "model": "simukraft:block/composite_brick"
+    }
   }
 }

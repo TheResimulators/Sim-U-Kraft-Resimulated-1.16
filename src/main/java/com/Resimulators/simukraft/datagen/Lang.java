@@ -1,6 +1,7 @@
 package com.Resimulators.simukraft.datagen;
 
 import com.Resimulators.simukraft.Reference;
+import com.Resimulators.simukraft.SimUTab;
 import com.Resimulators.simukraft.init.ModBlocks;
 import net.minecraft.block.Block;
 import net.minecraft.data.DataGenerator;
@@ -21,5 +22,11 @@ public class Lang extends LanguageProvider {
             if(color.equals(DyeColor.LIGHT_GRAY))continue;
             add(ModBlocks.LIGHT_BLOCKS.get("light_"+color.toString()),color.toString()+" Light");
         }
+            add(ModBlocks.MINE_BOX,"Mine Box");
+            add(ModBlocks.CHEESE_BLOCK,"Cheese Block");
+            add(ModBlocks.COMPOSITE_BRICK,"Composite Brick");
+            add(ModBlocks.RAINBOW_LIGHT,"Rainbow Light");
+            add(SimUTab.tab.getTranslationKey(),"Sim-U-Kraft");
+
     }
 }

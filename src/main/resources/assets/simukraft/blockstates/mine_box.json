@@ -1,7 +1,7 @@
 {
-  "forge_marker": 1,
   "variants": {
-    "normal": { "model": "simukraft:mine_box" },
-    "inventory": { "model": "simukraft:mine_box" }
+    "": {
+      "model": "simukraft:block/mine_box"
+    }
   }
 }

@@ -1,4 +1,6 @@
 {
+  "block.simukraft.cheese_block": "Cheese Block",
+  "block.simukraft.composite_brick": "Composite Brick",
   "block.simukraft.constructor_box": "Constructor Box",
   "block.simukraft.control_box": "Control Box",
   "block.simukraft.farm_box": "Farm Box",
@@ -16,5 +18,8 @@
   "block.simukraft.light_purple": "purple Light",
   "block.simukraft.light_red": "red Light",
   "block.simukraft.light_white": "white Light",
-  "block.simukraft.light_yellow": "yellow Light"
+  "block.simukraft.light_yellow": "yellow Light",
+  "block.simukraft.mine_box": "Mine Box",
+  "block.simukraft.rainbow_light": "Rainbow Light",
+  "itemGroup.Sim-U-Kraft": "Sim-U-Kraft"
 }

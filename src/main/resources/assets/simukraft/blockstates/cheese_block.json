@@ -1,6 +1,7 @@
 {
   "variants": {
-    "normal": { "model": "simukraft:cheese_block" },
-    "inventory": { "model": "simukraft:cheese_block" }
+    "": {
+      "model": "simukraft:block/cheese_block"
+    }
   }
 }
