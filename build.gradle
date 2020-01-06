@@ -43,7 +43,7 @@ minecraft {
             property 'forge.logging.console.level', 'debug'
 
             mods {
-                examplemod {
+                simukraft {
                     source sourceSets.main
                 }
             }
@@ -59,7 +59,7 @@ minecraft {
             property 'forge.logging.console.level', 'debug'
 
             mods {
-                examplemod {
+                simukraft {
                     source sourceSets.main
                 }
             }
@@ -73,11 +73,14 @@ minecraft {
 
             // Recommended logging level for the console
             property 'forge.logging.console.level', 'debug'
+            //targeting DataGeneration
+            environment 'target', 'fmluserdevdata'
+            args '--mod', 'simukraft', '--all', '--output', file('src/generated/resources/'),
+                    '--existing', '"' + rootProject.file('src/main/resources') + '"'
 
-            args '--mod', 'examplemod', '--all', '--output', file('src/generated/resources/')
 
             mods {
-                examplemod {
+                simukraft {
                     source sourceSets.main
                 }
             }
