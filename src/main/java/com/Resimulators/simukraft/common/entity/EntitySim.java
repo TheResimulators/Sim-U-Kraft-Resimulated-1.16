@@ -6,6 +6,7 @@ import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
@@ -16,9 +17,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class EntitySim extends AgeableEntity implements INPC {
-    @SuppressWarnings("unchecked")
     public EntitySim(EntityType<? extends AgeableEntity> type, World worldIn) {
-        super((EntityType<? extends AgeableEntity>) ModEntities.ENTITY_SIM, worldIn);
+        super(ModEntities.ENTITY_SIM, worldIn);
     }
 
 
@@ -36,7 +36,9 @@ public class EntitySim extends AgeableEntity implements INPC {
     @Nullable
     @Override
     public AgeableEntity createChild(AgeableEntity ageable) {
-        return null;
+        EntitySim entitySim = new EntitySim(ModEntities.ENTITY_SIM, world);
+        entitySim.onInitialSpawn(this.world, this.world.getDifficultyForLocation(new BlockPos(entitySim)), SpawnReason.BREEDING, new AgeableData(), null);
+        return entitySim;
     }
 
 
