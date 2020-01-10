@@ -2,6 +2,8 @@ package com.Resimulators.simukraft.client.model;
 
 import com.Resimulators.simukraft.Reference;
 import com.Resimulators.simukraft.common.entity.EntitySim;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
@@ -19,8 +21,6 @@ import javax.annotation.Nonnull;
 import java.awt.*;
 
 public class EntitySimModel extends BipedModel<EntitySim> {
-    private static final ResourceLocation ENTITY_TEXTURE = new ResourceLocation(Reference.MODID+":textures/entity/entity_sim.png");
-    private final RenderType RENDER_TYPE = func_228282_a_(ENTITY_TEXTURE);
     private boolean smallArms;
 
     public ModelRenderer bipedLeftArmwear;
@@ -35,11 +35,6 @@ public class EntitySimModel extends BipedModel<EntitySim> {
     public ModelRenderer maleArmLeft;
     public ModelRenderer maleArmRight;
     private EntitySim sim;
-    @Override
-    public void func_225597_a_(EntitySim entitySim, float v, float v1, float v2, float v3, float v4) {
-        sim = entitySim;
-
-    }
 
     public EntitySimModel(float modelSize) {
         super(modelSize, 0.0F, 64, 64);
@@ -82,66 +77,31 @@ public class EntitySimModel extends BipedModel<EntitySim> {
         this.bipedRightLegwear.func_228301_a_(-2.0F, 0.0F, -2.0F, 4, 12, 4, modelSize + 0.25F);
         this.bipedRightLegwear.setRotationPoint(-1.9F, 12.0F, 0.0F);
         this.bipedBodyWear = new ModelRenderer(this, 16, 32);
-        this.bipedBodyWear.func_228301_a_(4.0F, 0.0F, -2.0F, 8, 12, 4, modelSize + 0.25F);
+        this.bipedBodyWear.func_228301_a_(-4.0F, 0.0F, -2.0F, 8, 12, 4, modelSize + 0.25F);
         this.bipedBodyWear.setRotationPoint(0.0F, 0.0F, 0.0F);
         setVisible(true,true);
     }
 
-    public void render(@Nonnull MatrixStack matrix, @Nonnull IRenderTypeBuffer renderer, int light) {
-        Color color = Color.pink;
-        matrix.func_227860_a_();
-        matrix.func_227863_a_(Vector3f.field_229179_b_.func_229187_a_(180));
-        IVertexBuilder vertexBuilder = renderer.getBuffer(RENDER_TYPE);
-        func_225598_a_(matrix, vertexBuilder, light, OverlayTexture.field_229196_a_, color.getRed(), color.getGreen(), color.getBlue(), 1);
-        matrix.func_227865_b_();
-    }
     @Override
-    public void func_225598_a_(@Nonnull MatrixStack matrix, @Nonnull IVertexBuilder vertexBuilder, int light, int overlayLight, float red, float green, float blue, float alpha) {
-        super.func_225598_a_(matrix,vertexBuilder,light,overlayLight,red,green,blue,alpha);
-        matrix.func_227860_a_();
-        matrix.func_227862_a_(1.5F, 1.5F, 1.5F);
-        matrix.func_227861_a_(0, -0.07, 0);
-        GlStateManager.func_227626_N_();
-
-        if (this.isChild) {
-            GlStateManager.func_227672_b_(0.5F, 0.5F, 0.5F);
-
-           // GlStateManager.func_227688_c_(0.0F, 24.0F * scale, 0.0F);
-            this.femaleArmLeft.func_228309_a_(matrix, vertexBuilder, light, overlayLight, red, green, blue, alpha);
-            this.femaleArmRight.func_228309_a_(matrix, vertexBuilder, light, overlayLight, red, green, blue, alpha);
-            this.bipedLeftLegwear.func_228309_a_(matrix, vertexBuilder, light, overlayLight, red, green, blue, alpha);
-            this.bipedRightLegwear.func_228309_a_(matrix, vertexBuilder, light, overlayLight, red, green, blue, alpha);
-            this.bipedLeftArmwear.func_228309_a_(matrix, vertexBuilder, light, overlayLight, red, green, blue, alpha);
-            this.bipedRightArmwear.func_228309_a_(matrix, vertexBuilder, light, overlayLight, red, green, blue, alpha);
-            this.femaleLeftArmwear.func_228309_a_(matrix, vertexBuilder, light, overlayLight, red, green, blue, alpha);
-            this.femaleRightArmwear.func_228309_a_(matrix, vertexBuilder, light, overlayLight, red, green, blue, alpha);
-            this.bipedBodyWear.func_228309_a_(matrix, vertexBuilder, light, overlayLight, red, green, blue, alpha);
-        } else {
-            //if (sim.isCrouching()) {
-               // GlStateManager.func_227688_c_(0.0F, 0.2F, 0.0F);
-            //}
-            this.femaleArmLeft.func_228309_a_(matrix, vertexBuilder, light, overlayLight, red, green, blue, alpha);
-            this.femaleArmRight.func_228309_a_(matrix, vertexBuilder, light, overlayLight, red, green, blue, alpha);
-            this.bipedLeftLegwear.func_228309_a_(matrix, vertexBuilder, light, overlayLight, red, green, blue, alpha);
-            this.bipedRightLegwear.func_228309_a_(matrix, vertexBuilder, light, overlayLight, red, green, blue, alpha);
-            this.bipedLeftArmwear.func_228309_a_(matrix, vertexBuilder, light, overlayLight, red, green, blue, alpha);
-            this.bipedRightArmwear.func_228309_a_(matrix, vertexBuilder, light, overlayLight, red, green, blue, alpha);
-            this.femaleLeftArmwear.func_228309_a_(matrix, vertexBuilder, light, overlayLight, red, green, blue, alpha);
-            this.femaleRightArmwear.func_228309_a_(matrix, vertexBuilder, light, overlayLight, red, green, blue, alpha);
-            this.bipedBodyWear.func_228309_a_(matrix, vertexBuilder, light, overlayLight, red, green, blue, alpha);
-        }
-        matrix.func_227860_a_();
-        matrix.func_227862_a_(0.2F, 1, 0.2F);
-        matrix.func_227865_b_();
-        //String.func_228309_a_(matrix, vertexBuilder, light, overlayLight, 1, 1, 1, 1);
-        matrix.func_227865_b_();
-        GlStateManager.func_227627_O_();
+    protected Iterable<ModelRenderer> func_225600_b_() {
+        return Iterables.concat(super.func_225600_b_(), ImmutableList.of(this.bipedLeftLegwear, this.bipedRightLegwear, this.bipedLeftArmwear, this.bipedRightArmwear, this.bipedBodyWear));
     }
 
     private void copyModelAnglesWithoutPoints(ModelRenderer source, ModelRenderer dest) {
         dest.rotateAngleX = source.rotateAngleX;
         dest.rotateAngleY = source.rotateAngleY;
         dest.rotateAngleZ = source.rotateAngleZ;
+    }
+
+    @Override
+    public void func_225597_a_(EntitySim entitySim, float v, float v1, float v2, float v3, float v4) {
+        super.func_225597_a_(entitySim, v, v1, v2, v3, v4);
+
+        this.bipedLeftLegwear.copyModelAngles(this.bipedLeftLeg);
+        this.bipedRightLegwear.copyModelAngles(this.bipedRightLeg);
+        this.bipedLeftArmwear.copyModelAngles(this.bipedLeftArm);
+        this.bipedRightArmwear.copyModelAngles(this.bipedRightArm);
+        this.bipedBodyWear.copyModelAngles(this.bipedBody);
     }
 
     public void setVisible(boolean visible, boolean female) {
@@ -172,15 +132,16 @@ public class EntitySimModel extends BipedModel<EntitySim> {
         this.bipedBodyWear.showModel = visible;
     }
 
-    public void postRenderArm(float scale, HandSide side) {
+    @Override
+    public void func_225599_a_(HandSide side, MatrixStack matrix) {
         ModelRenderer modelrenderer = this.getArmForSide(side);
         if (this.smallArms) {
             float f = 0.5F * (float) (side == HandSide.RIGHT ? 1 : -1);
             modelrenderer.rotationPointX += f;
-            //modelrenderer.postRender(scale);
+            modelrenderer.func_228307_a_(matrix);
             modelrenderer.rotationPointX -= f;
         } else {
-          //  modelrenderer.postRender(scale);
+          modelrenderer.func_228307_a_(matrix);
         }
     }
 

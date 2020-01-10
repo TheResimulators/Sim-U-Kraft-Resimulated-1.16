@@ -5,48 +5,55 @@ import com.Resimulators.simukraft.client.model.EntitySimModel;
 import com.Resimulators.simukraft.common.entity.EntitySim;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.entity.LivingRenderer;
+import net.minecraft.client.renderer.entity.layers.ArrowLayer;
+import net.minecraft.client.renderer.entity.layers.BipedArmorLayer;
+import net.minecraft.client.renderer.entity.layers.HeadLayer;
+import net.minecraft.client.renderer.entity.layers.HeldItemLayer;
+import net.minecraft.client.renderer.entity.model.BipedModel;
+import net.minecraft.item.CrossbowItem;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.item.UseAction;
+import net.minecraft.util.Hand;
+import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.client.registry.IRenderFactory;
 
 import javax.annotation.Nonnull;
-import java.awt.*;
 
-public class EntitySimRender extends EntityRenderer<EntitySim> {
-
-
-    private static final EntitySimModel model = new EntitySimModel(2);
-
+public class EntitySimRender extends LivingRenderer<EntitySim, EntitySimModel> {
     public EntitySimRender(EntityRendererManager manager) {
-        super(manager);
+        super(manager, new EntitySimModel(0.0f), 0.5f);
+        this.addLayer(new BipedArmorLayer<>(this, new BipedModel(0.5f), new BipedModel(1.0f)));
+        this.addLayer(new HeldItemLayer<>(this));
+        this.addLayer(new HeadLayer<>(this));
     }
 
     @Override
-    public ResourceLocation getEntityTexture(EntitySim entity) {
+    public void func_225623_a_(@Nonnull EntitySim entitySim, float entityYaw, float partialTick, @Nonnull MatrixStack matrix, @Nonnull IRenderTypeBuffer renderer, int light) {
+        this.setModelVisibilities(entitySim);
+        super.func_225623_a_(entitySim, entityYaw, partialTick, matrix, renderer, light);
+    }
+
+    private void setModelVisibilities(EntitySim entitySim) {
+        EntitySimModel model = this.getEntityModel();
+        ItemStack itemStack = entitySim.getHeldItemMainhand();
+        ItemStack itemStack1 = entitySim.getHeldItemOffhand();
+        model.setVisible(true, true);
+        model.field_228270_o_ = entitySim.isCrouching();
+        if (entitySim.getPrimaryHand() == HandSide.RIGHT) {
+        } else {
+        }
+    }
+
+    @Override
+    public ResourceLocation getEntityTexture(EntitySim entitySim) {
         return new ResourceLocation(Reference.MODID + ":textures/entity/entity_sim.png");
     }
 
 
-    @Override
-    public void func_225623_a_(@Nonnull EntitySim entitySim, float entityYaw, float partialTick, @Nonnull MatrixStack matrix, @Nonnull IRenderTypeBuffer renderer, int light) {
-        matrix.func_227860_a_();
-        model.render(matrix, renderer,light);
-        matrix.func_227865_b_();
-        super.func_225623_a_(entitySim, entityYaw, partialTick, matrix, renderer, light);
 
-    }
-
-
-    public static class RenderFactory implements IRenderFactory<EntitySim> {
-
-
-        @Override
-        public EntityRenderer<? super EntitySim> createRenderFor(EntityRendererManager manager) {
-            return new EntitySimRender(manager);
-        }
-    }
 }
 
 
