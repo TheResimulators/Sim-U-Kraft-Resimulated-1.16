@@ -1,4 +1,5 @@
 {
+  "_comment": "BLOCKS",
   "block.simukraft.cheese_block": "Cheese Block",
   "block.simukraft.composite_brick": "Composite Brick",
   "block.simukraft.constructor_box": "Constructor Box",
@@ -21,5 +22,12 @@
   "block.simukraft.light_yellow": "yellow Light",
   "block.simukraft.mine_box": "Mine Box",
   "block.simukraft.rainbow_light": "Rainbow Light",
+
+  "_comment": "ITEMS",
+
+  "_comment": "Entities",
+  "entity.simukraft.entity_sim": "Sim",
+
+  "_comment": "MISC",
   "itemGroup.Sim-U-Kraft": "Sim-U-Kraft"
 }
