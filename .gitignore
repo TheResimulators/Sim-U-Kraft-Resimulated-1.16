@@ -49,3 +49,7 @@ run
 forge*changelog.txt
 
 CREDITS.txt
+
+src/generated/resources/data/
+
+src/generated/

@@ -15,6 +15,8 @@ public class ModItems {
 
     public static void init(RegistryEvent.Register<Item> event){
         IForgeRegistry<Item> registry = event.getRegistry();
+        //register spawn eggs
+        registry.register(ModEntities.registerEntitySpawnegg(ModEntities.ENTITY_SIM,0x07b351,0x614500,"sim_egg"));
         for (final Block block : ForgeRegistries.BLOCKS.getValues()) {
 
             final ResourceLocation blockRegistryName = block.getRegistryName();
