@@ -42,9 +42,47 @@ public class EntitySimRender extends LivingRenderer<EntitySim, EntitySimModel> {
         ItemStack itemStack1 = entitySim.getHeldItemOffhand();
         model.setVisible(true, true);
         model.field_228270_o_ = entitySim.isCrouching();
+        BipedModel.ArmPose bipedmodel$armpose = this.getArmpose(entitySim, itemStack, itemStack1, Hand.MAIN_HAND);
+        BipedModel.ArmPose bipedmodel$armpose1 = this.getArmpose(entitySim, itemStack, itemStack1, Hand.OFF_HAND);
         if (entitySim.getPrimaryHand() == HandSide.RIGHT) {
+            model.rightArmPose = bipedmodel$armpose;
+            model.leftArmPose = bipedmodel$armpose1;
         } else {
+            model.rightArmPose = bipedmodel$armpose;
+            model.leftArmPose = bipedmodel$armpose1;
         }
+    }
+
+    private BipedModel.ArmPose getArmpose(EntitySim entitySim, ItemStack primary, ItemStack secondary, Hand hand) {
+        BipedModel.ArmPose bipedmodel$armpose = BipedModel.ArmPose.EMPTY;
+        ItemStack itemStack = hand == Hand.MAIN_HAND ? primary : secondary;
+        if (!itemStack.isEmpty()) {
+            bipedmodel$armpose = BipedModel.ArmPose.ITEM;
+            if (entitySim.getItemInUseCount() > 0) {
+                UseAction useAction = itemStack.getUseAction();
+                if (useAction == UseAction.BLOCK) {
+                    bipedmodel$armpose = BipedModel.ArmPose.BLOCK;
+                } else if (useAction == UseAction.BOW) {
+                    bipedmodel$armpose = BipedModel.ArmPose.BOW_AND_ARROW;
+                } else if (useAction == UseAction.SPEAR) {
+                    bipedmodel$armpose = BipedModel.ArmPose.THROW_SPEAR;
+                } else if (useAction == UseAction.CROSSBOW && hand == entitySim.getActiveHand()) {
+                    bipedmodel$armpose = BipedModel.ArmPose.CROSSBOW_CHARGE;
+                }
+            } else {
+                boolean flag = primary.getItem() == Items.CROSSBOW;
+                boolean flag1 = CrossbowItem.isCharged(primary);
+                boolean flag2 = secondary.getItem() == Items.CROSSBOW;
+                boolean flag3 = CrossbowItem.isCharged(secondary);
+                if (flag && flag1) {
+                    bipedmodel$armpose = BipedModel.ArmPose.CROSSBOW_HOLD;
+                }
+                if (flag2 && flag3 && primary.getItem().getUseAction(primary) == UseAction.NONE) {
+                    bipedmodel$armpose = BipedModel.ArmPose.CROSSBOW_HOLD;
+                }
+            }
+        }
+        return bipedmodel$armpose;
     }
 
     @Override
