@@ -55,6 +55,13 @@ public class EntitySim extends AgeableEntity implements INPC {
         this.goalSelector.addGoal(13, new LookRandomlyGoal(this));
     }
 
+    @Override
+    protected void registerAttributes() {
+        super.registerAttributes();
+        this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.5D);
+        this.getAttributes().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(1);
+    }
+
     @Nullable
     @Override
     public AgeableEntity createChild(AgeableEntity ageable) {
