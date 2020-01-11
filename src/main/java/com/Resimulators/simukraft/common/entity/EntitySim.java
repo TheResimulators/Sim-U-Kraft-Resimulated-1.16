@@ -1,13 +1,12 @@
 package com.Resimulators.simukraft.common.entity;
 
+import com.Resimulators.simukraft.Configs;
 import com.Resimulators.simukraft.init.ModEntities;
 import com.Resimulators.simukraft.utils.Utils;
-import com.google.common.base.Preconditions;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.NBTTypes;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
@@ -18,13 +17,16 @@ import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
+import java.util.Random;
 
 public class EntitySim extends AgeableEntity implements INPC {
     private static final DataParameter<Integer> VARIATION = EntityDataManager.createKey(EntitySim.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> PROFESSION = EntityDataManager.createKey(EntitySim.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> FEMALE = EntityDataManager.createKey(EntitySim.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> STAFF = EntityDataManager.createKey(EntitySim.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> SPECIAL = EntityDataManager.createKey(EntitySim.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> LEFTHANDED = EntityDataManager.createKey(EntitySim.class, DataSerializers.BOOLEAN);
+
+    Random rand = new Random();
 
     public EntitySim(EntityType<? extends AgeableEntity> type, World worldIn) {
         super(ModEntities.ENTITY_SIM, worldIn);
@@ -36,7 +38,7 @@ public class EntitySim extends AgeableEntity implements INPC {
         this.dataManager.register(VARIATION, 0);
         this.dataManager.register(PROFESSION, 0);
         this.dataManager.register(FEMALE, false);
-        this.dataManager.register(STAFF, false);
+        this.dataManager.register(SPECIAL, false);
         this.dataManager.register(LEFTHANDED, false);
     }
 
@@ -44,19 +46,18 @@ public class EntitySim extends AgeableEntity implements INPC {
     public ILivingEntityData onInitialSpawn(IWorld world, DifficultyInstance difficultyInstance, SpawnReason spawnReason, @Nullable ILivingEntityData livingEntityData, @Nullable CompoundNBT nbt) {
         ILivingEntityData livingData = super.onInitialSpawn(world, difficultyInstance, spawnReason, livingEntityData, nbt);
 
-        //TODO: Add configuration for staff spawn chance
-        this.setStaff(Utils.randomizeBooleanWithChance(20));
+        //TODO: Add configuration for special spawn chance
+        this.setSpecial(Utils.randomizeBooleanWithChance(20));
 
         //TODO: Add professions
         //this.setProfession(rand.nextInt(/*Amount of professions*/));
 
         this.setLefthanded(Utils.randomizeBooleanWithChance(10));
 
-        if (this.getStaff()) {
-            //TODO: Add staff names
-            String name = "Custom Name";
+        if (this.getSpecial()) {
+            String name = Configs.SIMS.specialSimNames.get().get(rand.nextInt(Configs.SIMS.specialSimNames.get().size()));
             this.setCustomName(new StringTextComponent(name));
-            this.setFemale(false /*TODO: Add way to find staff skin gender*/);
+            this.setFemale(Configs.SIMS.specialSimGenders.get().contains(name));
         } else {
             this.setFemale(Utils.randomizeBoolean());
             if (this.getFemale()) {
@@ -109,7 +110,7 @@ public class EntitySim extends AgeableEntity implements INPC {
         compound.putInt("Variation", this.getVariation());
         compound.putInt("Profession", this.getProfession());
         compound.putBoolean("Female", this.getFemale());
-        compound.putBoolean("Staff", this.getStaff());
+        compound.putBoolean("Special", this.getSpecial());
         compound.putBoolean("Lefthanded", this.getLefthanded());
     }
 
@@ -122,8 +123,8 @@ public class EntitySim extends AgeableEntity implements INPC {
             this.setProfession(compound.getInt("Profession"));
         if (compound.contains("Female"))
             this.setFemale(compound.getBoolean("Female"));
-        if (compound.contains("Staff"))
-            this.setStaff(compound.getBoolean("Staff"));
+        if (compound.contains("Special"))
+            this.setSpecial(compound.getBoolean("Special"));
         if (compound.contains("Lefthanded"))
             this.setLefthanded(compound.getBoolean("Lefthanded"));
     }
@@ -165,13 +166,13 @@ public class EntitySim extends AgeableEntity implements INPC {
         }
     }
 
-    public void setStaff(boolean staff) {
-        this.dataManager.set(STAFF, staff);
+    public void setSpecial(boolean special) {
+        this.dataManager.set(SPECIAL, special);
     }
 
-    public boolean getStaff() {
+    public boolean getSpecial() {
         try {
-            return this.dataManager.get(STAFF);
+            return this.dataManager.get(SPECIAL);
         } catch (NullPointerException e) {
             return false;
         }
