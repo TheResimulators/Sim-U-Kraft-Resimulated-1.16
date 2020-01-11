@@ -159,6 +159,10 @@ public class EntitySim extends AgeableEntity implements INPC {
         super.livingTick();
     }
 
+    public boolean shouldHeal() {
+        return this.getHealth() > 0.0F && this.getHealth() < this.getMaxHealth();
+    }
+
     //Data Manager Interaction
     public void setVariation(int variationID) {
         this.dataManager.set(VARIATION, variationID);
