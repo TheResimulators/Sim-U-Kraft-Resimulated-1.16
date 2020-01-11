@@ -1,6 +1,7 @@
 package com.Resimulators.simukraft.client.render;
 
 import com.Resimulators.simukraft.Reference;
+import com.Resimulators.simukraft.client.data.SkinCacher;
 import com.Resimulators.simukraft.client.model.EntitySimModel;
 import com.Resimulators.simukraft.common.entity.EntitySim;
 import com.google.common.base.Preconditions;
@@ -91,7 +92,10 @@ public class EntitySimRender extends LivingRenderer<EntitySim, EntitySimModel> {
 
     @Override
     public ResourceLocation getEntityTexture(EntitySim entitySim) {
-        return new ResourceLocation(Reference.MODID, DIR + (entitySim.getFemale() ? "female/" : "male/") + "entity_sim" + entitySim.getVariation() + ".png");
+        ResourceLocation location = SkinCacher.getSkinForSim(entitySim.getName().getFormattedText());
+        if (location == null || !entitySim.getSpecial())
+            location = new ResourceLocation(Reference.MODID, DIR + (entitySim.getFemale() ? "female/" : "male/") + "entity_sim" + entitySim.getVariation() + ".png");
+        return location;
     }
 }
 
