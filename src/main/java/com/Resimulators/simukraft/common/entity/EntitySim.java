@@ -31,16 +31,19 @@ public class EntitySim extends AgeableEntity implements INPC {
         return this.skin_texture;
     }
 
-
     @Override
-    protected void registerGoals(){
-        this.goalSelector.addGoal(0,new SwimGoal(this));
-        this.goalSelector.addGoal(1,new RandomWalkingGoal(this,0.7d));
-        this.goalSelector.addGoal(2, new LookAtGoal(this, PlayerEntity.class,0.5f));
-        this.goalSelector.addGoal(3,new LookRandomlyGoal(this));
     }
 
+    protected void registerGoals(){
+        this.goalSelector.addGoal(0, new SwimGoal(this));
 
+        //Unimportant "make more alive"-goals
+        this.goalSelector.addGoal(9, new OpenDoorGoal(this, true));
+        this.goalSelector.addGoal(10, new LookAtGoal(this, PlayerEntity.class, 2.0f, 1.0f));
+        this.goalSelector.addGoal(11, new WaterAvoidingRandomWalkingGoal(this, 0.6d));
+        this.goalSelector.addGoal(12, new LookAtGoal(this, PlayerEntity.class,8f));
+        this.goalSelector.addGoal(13, new LookRandomlyGoal(this));
+    }
 
     @Nullable
     @Override
