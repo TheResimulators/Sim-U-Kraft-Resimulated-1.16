@@ -3,6 +3,7 @@ package com.Resimulators.simukraft.client.render;
 import com.Resimulators.simukraft.Reference;
 import com.Resimulators.simukraft.client.model.EntitySimModel;
 import com.Resimulators.simukraft.common.entity.EntitySim;
+import com.google.common.base.Preconditions;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
@@ -23,6 +24,8 @@ import net.minecraft.util.ResourceLocation;
 import javax.annotation.Nonnull;
 
 public class EntitySimRender extends LivingRenderer<EntitySim, EntitySimModel> {
+    String DIR = "textures/entity/sim/";
+
     public EntitySimRender(EntityRendererManager manager) {
         super(manager, new EntitySimModel(0.0f), 0.5f);
         this.addLayer(new BipedArmorLayer<>(this, new BipedModel(0.5f), new BipedModel(1.0f)));
@@ -41,7 +44,7 @@ public class EntitySimRender extends LivingRenderer<EntitySim, EntitySimModel> {
         EntitySimModel model = this.getEntityModel();
         ItemStack itemStack = entitySim.getHeldItemMainhand();
         ItemStack itemStack1 = entitySim.getHeldItemOffhand();
-        model.setVisible(true, true);
+        model.setVisible(true, entitySim.getFemale());
         model.field_228270_o_ = entitySim.isCrouching();
         BipedModel.ArmPose bipedmodel$armpose = this.getArmpose(entitySim, itemStack, itemStack1, Hand.MAIN_HAND);
         BipedModel.ArmPose bipedmodel$armpose1 = this.getArmpose(entitySim, itemStack, itemStack1, Hand.OFF_HAND);
@@ -88,7 +91,7 @@ public class EntitySimRender extends LivingRenderer<EntitySim, EntitySimModel> {
 
     @Override
     public ResourceLocation getEntityTexture(EntitySim entitySim) {
-        return entitySim.getSkin();
+        return new ResourceLocation(Reference.MODID, DIR + (entitySim.getFemale() ? "female/" : "male/") + "entity_sim" + entitySim.getVariation() + ".png");
     }
 }
 
