@@ -24,6 +24,7 @@ public class EntitySim extends AgeableEntity implements INPC {
     private static final DataParameter<Boolean> FEMALE = EntityDataManager.createKey(EntitySim.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> SPECIAL = EntityDataManager.createKey(EntitySim.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> LEFTHANDED = EntityDataManager.createKey(EntitySim.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Float> HUNGER = EntityDataManager.createKey(EntitySim.class, DataSerializers.FLOAT);
 
     FoodStats foodStats = new FoodStats();
 
@@ -222,6 +223,7 @@ public class EntitySim extends AgeableEntity implements INPC {
         } catch (NullPointerException e) {
             return false;
         }
+
     }
 
     public void addExhaustion(float exhaustion) {
