@@ -38,6 +38,11 @@ public class EntitySim extends AgeableEntity implements INPC {
         this.goalSelector.addGoal(1,new RandomWalkingGoal(this,0.7d));
         this.goalSelector.addGoal(2, new LookAtGoal(this, PlayerEntity.class,0.5f));
         this.goalSelector.addGoal(3,new LookRandomlyGoal(this));
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> master
     }
 
 
