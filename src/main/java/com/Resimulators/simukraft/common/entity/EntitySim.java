@@ -42,6 +42,7 @@ public class EntitySim extends AgeableEntity implements INPC {
     @Override
     }
 
+    @Override
     protected void registerGoals(){
         this.goalSelector.addGoal(0, new SwimGoal(this));
 
@@ -61,6 +62,10 @@ public class EntitySim extends AgeableEntity implements INPC {
         return entitySim;
     }
 
+    @Override
+    public boolean canDespawn(double p_213397_1_) {
+        return false;
+    }
     //Data Manager Interaction
     public void setVariation(int variationID) {
         this.dataManager.set(VARIATION, variationID);
