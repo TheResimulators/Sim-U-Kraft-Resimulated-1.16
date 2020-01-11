@@ -7,6 +7,7 @@ import net.minecraft.entity.*;
 import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.NBTTypes;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
@@ -66,6 +67,32 @@ public class EntitySim extends AgeableEntity implements INPC {
     public boolean canDespawn(double p_213397_1_) {
         return false;
     }
+
+    @Override
+    public void writeAdditional(CompoundNBT compound) {
+        super.writeAdditional(compound);
+        compound.putInt("Variation", this.getVariation());
+        compound.putInt("Profession", this.getProfession());
+        compound.putBoolean("Female", this.getFemale());
+        compound.putBoolean("Staff", this.getStaff());
+        compound.putBoolean("Lefthanded", this.getLefthanded());
+    }
+
+    @Override
+    public void readAdditional(CompoundNBT compound) {
+        super.readAdditional(compound);
+        if (compound.contains("Variation"))
+            this.setVariation(compound.getInt("Variation"));
+        if (compound.contains("Profession"))
+            this.setProfession(compound.getInt("Profession"));
+        if (compound.contains("Female"))
+            this.setFemale(compound.getBoolean("Female"));
+        if (compound.contains("Staff"))
+            this.setStaff(compound.getBoolean("Staff"));
+        if (compound.contains("Lefthanded"))
+            this.setLefthanded(compound.getBoolean("Lefthanded"));
+    }
+
     //Data Manager Interaction
     public void setVariation(int variationID) {
         this.dataManager.set(VARIATION, variationID);
