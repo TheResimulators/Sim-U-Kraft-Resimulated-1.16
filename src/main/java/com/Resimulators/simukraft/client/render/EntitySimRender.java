@@ -36,6 +36,7 @@ public class EntitySimRender extends LivingRenderer<EntitySim, EntitySimModel> {
         super.func_225623_a_(entitySim, entityYaw, partialTick, matrix, renderer, light);
     }
 
+
     private void setModelVisibilities(EntitySim entitySim) {
         EntitySimModel model = this.getEntityModel();
         ItemStack itemStack = entitySim.getHeldItemMainhand();
@@ -87,11 +88,8 @@ public class EntitySimRender extends LivingRenderer<EntitySim, EntitySimModel> {
 
     @Override
     public ResourceLocation getEntityTexture(EntitySim entitySim) {
-        return new ResourceLocation(Reference.MODID + ":textures/entity/entity_sim.png");
+        return entitySim.getSkin();
     }
-
-
-
 }
 
 
