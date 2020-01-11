@@ -41,6 +41,34 @@ public class EntitySim extends AgeableEntity implements INPC {
     }
 
     @Override
+    public ILivingEntityData onInitialSpawn(IWorld world, DifficultyInstance difficultyInstance, SpawnReason spawnReason, @Nullable ILivingEntityData livingEntityData, @Nullable CompoundNBT nbt) {
+        ILivingEntityData livingData = super.onInitialSpawn(world, difficultyInstance, spawnReason, livingEntityData, nbt);
+
+        //TODO: Add configuration for staff spawn chance
+        this.setStaff(Utils.randomizeBooleanWithChance(20));
+
+        //TODO: Add professions
+        //this.setProfession(rand.nextInt(/*Amount of professions*/));
+
+        this.setLefthanded(Utils.randomizeBooleanWithChance(10));
+
+        if (this.getStaff()) {
+            //TODO: Add staff names
+            String name = "Custom Name";
+            this.setCustomName(new StringTextComponent(name));
+            this.setFemale(false /*TODO: Add way to find staff skin gender*/);
+        } else {
+            this.setFemale(Utils.randomizeBoolean());
+            if (this.getFemale()) {
+                //TODO: Add female name database
+                this.setVariation(rand.nextInt(13));
+            } else {
+                //TODO: Add male name database
+                this.setVariation(rand.nextInt(8));
+            }
+        }
+
+        return livingData;
     }
 
     @Override
