@@ -1,5 +1,7 @@
 {
+  "item.simukraft.sim_egg": "Sim Spawn Egg",
   "_comment": "BLOCKS",
+  "item.simukraft.sim_egg": "Sim Spawn Egg",
   "block.simukraft.cheese_block": "Cheese Block",
   "block.simukraft.composite_brick": "Composite Brick",
   "block.simukraft.constructor_box": "Constructor Box",
