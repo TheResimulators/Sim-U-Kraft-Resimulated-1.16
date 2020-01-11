@@ -1,5 +1,6 @@
 package com.Resimulators.simukraft;
 
+import com.Resimulators.simukraft.client.data.SkinCacher;
 import com.Resimulators.simukraft.init.ModBlocks;
 import com.Resimulators.simukraft.init.ModEntities;
 import com.Resimulators.simukraft.init.ModItems;
@@ -74,6 +75,12 @@ public class SimuKraft {
 
     private void doClientStuff(final FMLClientSetupEvent event) {
         // do something that can only be done on the client
+
+        //Registering SkinCache and Special Skins
+        SkinCacher skinCacher = new SkinCacher();
+        skinCacher.initSkinService();
+        skinCacher.registerSpecialSkins();
+
         ModRenders.registerEntityRenders();
     }
 
