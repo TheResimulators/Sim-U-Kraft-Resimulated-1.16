@@ -1,34 +1,42 @@
 package com.Resimulators.simukraft.common.entity;
 
-import com.Resimulators.simukraft.Reference;
 import com.Resimulators.simukraft.init.ModEntities;
+import com.Resimulators.simukraft.utils.Utils;
+import com.google.common.base.Preconditions;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.datasync.DataSerializers;
+import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
-import net.minecraftforge.common.util.LazyOptional;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class EntitySim extends AgeableEntity implements INPC {
-    ResourceLocation skin_texture;
-    private static final int SIM_TEXTURE_COUNT = 6;
+    private static final DataParameter<Integer> VARIATION = EntityDataManager.createKey(EntitySim.class, DataSerializers.VARINT);
+    private static final DataParameter<Integer> PROFESSION = EntityDataManager.createKey(EntitySim.class, DataSerializers.VARINT);
+    private static final DataParameter<Boolean> FEMALE = EntityDataManager.createKey(EntitySim.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> STAFF = EntityDataManager.createKey(EntitySim.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> LEFTHANDED = EntityDataManager.createKey(EntitySim.class, DataSerializers.BOOLEAN);
+
     public EntitySim(EntityType<? extends AgeableEntity> type, World worldIn) {
         super(ModEntities.ENTITY_SIM, worldIn);
-        int skin_texture_number = (int)Math.floor(Math.random() * SIM_TEXTURE_COUNT + 1);
-        this.skin_texture = new ResourceLocation(Reference.MODID + ":textures/entity/entity_sim" + skin_texture_number + ".png");
     }
 
-    public ResourceLocation getSkin() {
-        return this.skin_texture;
+    @Override
+    protected void registerData() {
+        super.registerData();
+        this.dataManager.register(VARIATION, 0);
+        this.dataManager.register(PROFESSION, 0);
+        this.dataManager.register(FEMALE, false);
+        this.dataManager.register(STAFF, false);
+        this.dataManager.register(LEFTHANDED, false);
     }
 
     @Override
@@ -53,14 +61,64 @@ public class EntitySim extends AgeableEntity implements INPC {
         return entitySim;
     }
 
-
-    @Override
-    public void deserializeNBT(CompoundNBT nbt) {
-
+    //Data Manager Interaction
+    public void setVariation(int variationID) {
+        this.dataManager.set(VARIATION, variationID);
     }
 
-    @Override
-    public CompoundNBT serializeNBT() {
-        return null;
+    public int getVariation() {
+        try {
+            return Math.max(this.dataManager.get(VARIATION), 0);
+        } catch (NullPointerException e) {
+            return 0;
+        }
+    }
+
+    public void setProfession(int professionID) {
+        this.dataManager.set(PROFESSION, professionID);
+    }
+
+    public int getProfession() {
+        try {
+            return Math.max(this.dataManager.get(PROFESSION), 0);
+        } catch (NullPointerException e) {
+            return 0;
+        }
+    }
+
+    public void setFemale(boolean female) {
+        this.dataManager.set(FEMALE, female);
+    }
+
+    public boolean getFemale() {
+        try {
+            return this.dataManager.get(FEMALE);
+        } catch (NullPointerException e) {
+            return false;
+        }
+    }
+
+    public void setStaff(boolean staff) {
+        this.dataManager.set(STAFF, staff);
+    }
+
+    public boolean getStaff() {
+        try {
+            return this.dataManager.get(STAFF);
+        } catch (NullPointerException e) {
+            return false;
+        }
+    }
+
+    public void setLefthanded(boolean lefthanded) {
+        this.dataManager.set(LEFTHANDED, lefthanded);
+    }
+
+    public boolean getLefthanded() {
+        try {
+            return this.dataManager.get(LEFTHANDED);
+        } catch (NullPointerException e) {
+            return false;
+        }
     }
 }
