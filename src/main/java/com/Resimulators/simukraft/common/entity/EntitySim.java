@@ -15,6 +15,7 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
+import net.minecraftforge.registries.DataSerializerEntry;
 
 import javax.annotation.Nullable;
 import java.util.Random;
@@ -25,6 +26,7 @@ public class EntitySim extends AgeableEntity implements INPC {
     private static final DataParameter<Boolean> FEMALE = EntityDataManager.createKey(EntitySim.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> SPECIAL = EntityDataManager.createKey(EntitySim.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> LEFTHANDED = EntityDataManager.createKey(EntitySim.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Float> HUNGER = EntityDataManager.createKey(EntitySim.class, DataSerializers.FLOAT);
 
     Random rand = new Random();
 
@@ -40,6 +42,8 @@ public class EntitySim extends AgeableEntity implements INPC {
         this.dataManager.register(FEMALE, false);
         this.dataManager.register(SPECIAL, false);
         this.dataManager.register(LEFTHANDED, false);
+        this.dataManager.register(HUNGER,20.0f);
+
     }
 
     @Override
@@ -112,7 +116,9 @@ public class EntitySim extends AgeableEntity implements INPC {
         compound.putBoolean("Female", this.getFemale());
         compound.putBoolean("Special", this.getSpecial());
         compound.putBoolean("Lefthanded", this.getLefthanded());
+        compound.putFloat("Hunger",this.getHunger());
     }
+
 
     @Override
     public void readAdditional(CompoundNBT compound) {
@@ -188,5 +194,15 @@ public class EntitySim extends AgeableEntity implements INPC {
         } catch (NullPointerException e) {
             return false;
         }
+
+    }
+
+
+    public float getHunger() {
+        return dataManager.get(HUNGER);
+    }
+
+    public void setHunger(float hunger){
+        this.dataManager.set(HUNGER,hunger);
     }
 }
