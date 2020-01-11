@@ -1,6 +1,7 @@
 package com.Resimulators.simukraft.common.entity;
 
 import com.Resimulators.simukraft.Configs;
+import com.Resimulators.simukraft.handlers.FoodStats;
 import com.Resimulators.simukraft.init.ModEntities;
 import com.Resimulators.simukraft.utils.Utils;
 import net.minecraft.entity.*;
@@ -12,10 +13,7 @@ import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.world.DifficultyInstance;
-import net.minecraft.world.IWorld;
-import net.minecraft.world.World;
-import net.minecraftforge.registries.DataSerializerEntry;
+import net.minecraft.world.*;
 
 import javax.annotation.Nullable;
 import java.util.Random;
@@ -26,7 +24,8 @@ public class EntitySim extends AgeableEntity implements INPC {
     private static final DataParameter<Boolean> FEMALE = EntityDataManager.createKey(EntitySim.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> SPECIAL = EntityDataManager.createKey(EntitySim.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> LEFTHANDED = EntityDataManager.createKey(EntitySim.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Float> HUNGER = EntityDataManager.createKey(EntitySim.class, DataSerializers.FLOAT);
+
+    FoodStats foodStats = new FoodStats();
 
     Random rand = new Random();
 
@@ -42,7 +41,6 @@ public class EntitySim extends AgeableEntity implements INPC {
         this.dataManager.register(FEMALE, false);
         this.dataManager.register(SPECIAL, false);
         this.dataManager.register(LEFTHANDED, false);
-        this.dataManager.register(HUNGER,20.0f);
 
     }
 
@@ -116,7 +114,7 @@ public class EntitySim extends AgeableEntity implements INPC {
         compound.putBoolean("Female", this.getFemale());
         compound.putBoolean("Special", this.getSpecial());
         compound.putBoolean("Lefthanded", this.getLefthanded());
-        compound.putFloat("Hunger",this.getHunger());
+        this.foodStats.write(compound);
     }
 
 
@@ -133,6 +131,32 @@ public class EntitySim extends AgeableEntity implements INPC {
             this.setSpecial(compound.getBoolean("Special"));
         if (compound.contains("Lefthanded"))
             this.setLefthanded(compound.getBoolean("Lefthanded"));
+
+        this.foodStats.read(compound);
+    }
+
+    //Updates
+    @Override
+    public void tick() {
+        super.tick();
+        if (!world.isRemote()) {
+            foodStats.tick(this);
+        }
+    }
+
+    @Override
+    public void livingTick() {
+        if (this.world.getDifficulty() == Difficulty.PEACEFUL && this.world.getGameRules().getBoolean(GameRules.NATURAL_REGENERATION)) {
+            if (this.getHealth() < this.getMaxHealth() && this.ticksExisted % 20 == 0) {
+                this.heal(1.0F);
+            }
+
+            if (this.foodStats.needFood() && this.ticksExisted % 10 == 0) {
+                this.foodStats.setFoodLevel(this.foodStats.getFoodLevel() + 1);
+            }
+        }
+
+        super.livingTick();
     }
 
     //Data Manager Interaction
@@ -194,15 +218,22 @@ public class EntitySim extends AgeableEntity implements INPC {
         } catch (NullPointerException e) {
             return false;
         }
-
     }
 
-
-    public float getHunger() {
-        return dataManager.get(HUNGER);
+    public void addExhaustion(float exhaustion) {
+        if (!this.isInvulnerable()) {
+            if (!this.world.isRemote) {
+                this.foodStats.addExhaustion(exhaustion);
+            }
+        }
     }
 
-    public void setHunger(float hunger){
-        this.dataManager.set(HUNGER,hunger);
+    public FoodStats getFoodStats() {
+        return this.foodStats;
     }
+
+    public boolean canEat(boolean ignoreHunger) {
+        return this.isInvulnerable() || ignoreHunger || this.foodStats.needFood();
+    }
+
 }
