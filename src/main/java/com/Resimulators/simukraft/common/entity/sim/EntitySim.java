@@ -7,13 +7,17 @@ import com.Resimulators.simukraft.utils.Utils;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.*;
+import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.Nullable;
 import java.util.Random;
@@ -25,12 +29,15 @@ public class EntitySim extends AgeableEntity implements INPC {
     private static final DataParameter<Boolean> SPECIAL = EntityDataManager.createKey(EntitySim.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> LEFTHANDED = EntityDataManager.createKey(EntitySim.class, DataSerializers.BOOLEAN);
 
+    private final SimInventory inventory;
+
     FoodStats foodStats = new FoodStats();
 
     Random rand = new Random();
 
     public EntitySim(EntityType<? extends AgeableEntity> type, World worldIn) {
         super(ModEntities.ENTITY_SIM, worldIn);
+        this.inventory = new SimInventory("Items", false, 27);
     }
 
     @Override
@@ -114,6 +121,7 @@ public class EntitySim extends AgeableEntity implements INPC {
         compound.putBoolean("Female", this.getFemale());
         compound.putBoolean("Special", this.getSpecial());
         compound.putBoolean("Lefthanded", this.getLefthanded());
+        compound.put("Inventory", this.inventory.write(new ListNBT()));
         this.foodStats.write(compound);
     }
 
@@ -131,8 +139,18 @@ public class EntitySim extends AgeableEntity implements INPC {
             this.setSpecial(compound.getBoolean("Special"));
         if (compound.contains("Lefthanded"))
             this.setLefthanded(compound.getBoolean("Lefthanded"));
-
+        if (compound.contains("Inventory"))
+            this.inventory.read(compound.getList("Inventory", 10));
         this.foodStats.read(compound);
+    }
+
+    //Interaction
+
+
+    @Override
+    public boolean processInteract(PlayerEntity player, Hand hand) {
+        player.openContainer(inventory);
+        return true;
     }
 
     //Updates
