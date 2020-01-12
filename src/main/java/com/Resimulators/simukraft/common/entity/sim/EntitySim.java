@@ -3,24 +3,29 @@ package com.Resimulators.simukraft.common.entity.sim;
 import com.Resimulators.simukraft.Configs;
 import com.Resimulators.simukraft.common.jobs.JobBuilder;
 import com.Resimulators.simukraft.common.jobs.core.IJob;
+import com.Resimulators.simukraft.common.entity.goals.PickupItemGoal;
 import com.Resimulators.simukraft.handlers.FoodStats;
 import com.Resimulators.simukraft.init.ModEntities;
 import com.Resimulators.simukraft.utils.Utils;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.goal.*;
+import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
+import net.minecraft.inventory.InventoryHelper;
+import net.minecraft.item.*;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.*;
-import net.minecraftforge.common.util.Constants;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Random;
 
@@ -50,7 +55,6 @@ public class EntitySim extends AgeableEntity implements INPC {
         this.dataManager.register(FEMALE, false);
         this.dataManager.register(SPECIAL, false);
         this.dataManager.register(LEFTHANDED, false);
-
     }
 
     @Override
@@ -58,7 +62,7 @@ public class EntitySim extends AgeableEntity implements INPC {
         ILivingEntityData livingData = super.onInitialSpawn(world, difficultyInstance, spawnReason, livingEntityData, nbt);
 
         //TODO: Add configuration for special spawn chance
-        this.setSpecial(Utils.randomizeBooleanWithChance(20));
+        this.setSpecial(Utils.randomizeBooleanWithChance(Configs.SIMS.specialSpawnChance.get()));
 
         //TODO: Add professions
         //this.setProfession(rand.nextInt(/*Amount of professions*/));
@@ -76,7 +80,7 @@ public class EntitySim extends AgeableEntity implements INPC {
                 this.setVariation(rand.nextInt(13));
             } else {
                 //TODO: Add male name database
-                this.setVariation(rand.nextInt(8));
+                this.setVariation(rand.nextInt(10));
             }
         }
 
@@ -110,6 +114,7 @@ public class EntitySim extends AgeableEntity implements INPC {
         return entitySim;
     }
 
+    //Logic
     @Override
     public boolean canDespawn(double p_213397_1_) {
         return false;
@@ -158,8 +163,6 @@ public class EntitySim extends AgeableEntity implements INPC {
     }
 
     //Interaction
-
-
     @Override
     public boolean processInteract(PlayerEntity player, Hand hand) {
         player.openContainer(inventory);

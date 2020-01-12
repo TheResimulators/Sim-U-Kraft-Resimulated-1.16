@@ -60,7 +60,7 @@ public class Configs {
             //Here's where the configuration options go:
             specialSpawnChance = COMMON_BUILDER.comment("How big is the chance that a special Sim spawns (1 in n)")
                     .translation(LANG_KEY_SIMS + ".specialspawnchance")
-                    .defineInRange("Spawn Chance", 1, 1, Integer.MAX_VALUE);
+                    .defineInRange("Spawn Chance", 20, 1, Integer.MAX_VALUE);
             specialSimNames = COMMON_BUILDER.comment("Player usernames that will be assigned to the Sims.", "Skins of these players will also render on the Sims.")
                     .translation(LANG_KEY_SIMS + ".simnames")
                     .defineList("Special Names", ImmutableList.of("General5001", "Div4Wom4n", "fabbe50", "zakando", "Ellisenator", "jakegalen", "brodydavid1126", "Maiyr_Cordeth", "Korath"), obj -> obj instanceof String);
