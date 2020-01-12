@@ -1,6 +1,8 @@
 package com.Resimulators.simukraft.common.entity;
 
 import com.Resimulators.simukraft.Configs;
+import com.Resimulators.simukraft.common.jobs.JobBuilder;
+import com.Resimulators.simukraft.common.jobs.core.IJob;
 import com.Resimulators.simukraft.handlers.FoodStats;
 import com.Resimulators.simukraft.init.ModEntities;
 import com.Resimulators.simukraft.utils.Utils;
@@ -8,12 +10,14 @@ import net.minecraft.entity.*;
 import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.*;
+import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.Nullable;
 import java.util.Random;
@@ -24,9 +28,8 @@ public class EntitySim extends AgeableEntity implements INPC {
     private static final DataParameter<Boolean> FEMALE = EntityDataManager.createKey(EntitySim.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> SPECIAL = EntityDataManager.createKey(EntitySim.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> LEFTHANDED = EntityDataManager.createKey(EntitySim.class, DataSerializers.BOOLEAN);
-    private int periodsworked = 0;
     FoodStats foodStats = new FoodStats();
-
+    IJob job;
     Random rand = new Random();
 
     public EntitySim(EntityType<? extends AgeableEntity> type, World worldIn) {
@@ -75,14 +78,14 @@ public class EntitySim extends AgeableEntity implements INPC {
     }
 
     @Override
-    protected void registerGoals(){
+    protected void registerGoals() {
         this.goalSelector.addGoal(0, new SwimGoal(this));
 
         //Unimportant "make more alive"-goals
         this.goalSelector.addGoal(9, new OpenDoorGoal(this, true));
         this.goalSelector.addGoal(10, new LookAtGoal(this, PlayerEntity.class, 2.0f, 1.0f));
         this.goalSelector.addGoal(11, new WaterAvoidingRandomWalkingGoal(this, 0.6d));
-        this.goalSelector.addGoal(12, new LookAtGoal(this, PlayerEntity.class,8f));
+        this.goalSelector.addGoal(12, new LookAtGoal(this, PlayerEntity.class, 8f));
         this.goalSelector.addGoal(13, new LookRandomlyGoal(this));
     }
 
@@ -115,6 +118,9 @@ public class EntitySim extends AgeableEntity implements INPC {
         compound.putBoolean("Special", this.getSpecial());
         compound.putBoolean("Lefthanded", this.getLefthanded());
         this.foodStats.write(compound);
+        if (job != null){
+           compound.put("job",this.job.writeToNbt(new ListNBT()));
+        }
     }
 
 
@@ -133,6 +139,14 @@ public class EntitySim extends AgeableEntity implements INPC {
             this.setLefthanded(compound.getBoolean("Lefthanded"));
 
         this.foodStats.read(compound);
+        String jobType = compound.getList("job",Constants.NBT.TAG_LIST).getCompound(0).getString("Builder");
+        switch (jobType){
+            case "Builder":
+                job = new JobBuilder(this);
+
+        }
+
+        this.job.readFromNbt(compound.getList("job", Constants.NBT.TAG_LIST));
     }
 
     //Updates
@@ -239,17 +253,5 @@ public class EntitySim extends AgeableEntity implements INPC {
 
     public boolean canEat(boolean ignoreHunger) {
         return this.isInvulnerable() || ignoreHunger || this.foodStats.needFood();
-    }
-
-    public void resetPeriodsWorked(){
-        periodsworked = 0;
-    }
-
-    public void setPeriodsworked(int periodsworked){
-        this.periodsworked = periodsworked;
-    }
-
-    public void workedPeriod(){
-        this.periodsworked = periodsworked++;
     }
 }
