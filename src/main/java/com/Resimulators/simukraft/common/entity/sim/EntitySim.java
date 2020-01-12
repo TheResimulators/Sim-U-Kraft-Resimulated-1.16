@@ -1,4 +1,4 @@
-package com.Resimulators.simukraft.common.entity;
+package com.Resimulators.simukraft.common.entity.sim;
 
 import com.Resimulators.simukraft.Configs;
 import com.Resimulators.simukraft.handlers.FoodStats;
