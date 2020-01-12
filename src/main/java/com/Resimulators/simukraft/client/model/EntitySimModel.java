@@ -1,24 +1,12 @@
 package com.Resimulators.simukraft.client.model;
 
-import com.Resimulators.simukraft.Reference;
-import com.Resimulators.simukraft.common.entity.EntitySim;
+import com.Resimulators.simukraft.common.entity.sim.EntitySim;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.Vector3f;
 import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.client.renderer.model.ModelRenderer;
-import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.entity.Entity;
 import net.minecraft.util.HandSide;
-import net.minecraft.util.ResourceLocation;
-
-import javax.annotation.Nonnull;
-import java.awt.*;
 
 public class EntitySimModel extends BipedModel<EntitySim> {
     private boolean smallArms;

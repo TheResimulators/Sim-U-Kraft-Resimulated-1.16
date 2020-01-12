@@ -1,8 +1,6 @@
 package com.Resimulators.simukraft.client.data;
 
 import com.Resimulators.simukraft.Configs;
-import com.Resimulators.simukraft.client.render.EntitySimRender;
-import com.Resimulators.simukraft.common.entity.EntitySim;
 import com.google.common.collect.Iterables;
 import com.mojang.authlib.AuthenticationService;
 import com.mojang.authlib.GameProfile;

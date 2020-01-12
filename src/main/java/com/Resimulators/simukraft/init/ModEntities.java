@@ -3,7 +3,7 @@ package com.Resimulators.simukraft.init;
 import com.Resimulators.simukraft.Reference;
 import com.Resimulators.simukraft.SimUTab;
 import com.Resimulators.simukraft.SimuKraft;
-import com.Resimulators.simukraft.common.entity.EntitySim;
+import com.Resimulators.simukraft.common.entity.sim.EntitySim;
 import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;

@@ -1,6 +1,6 @@
 package com.Resimulators.simukraft.common.jobs;
 
-import com.Resimulators.simukraft.common.entity.EntitySim;
+import com.Resimulators.simukraft.common.entity.sim.EntitySim;
 import com.Resimulators.simukraft.common.jobs.core.EnumJobState;
 import com.Resimulators.simukraft.common.jobs.core.IJob;
 import net.minecraft.command.arguments.NBTCompoundTagArgument;

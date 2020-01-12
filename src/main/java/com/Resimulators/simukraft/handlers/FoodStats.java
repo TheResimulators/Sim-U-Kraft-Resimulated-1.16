@@ -1,6 +1,6 @@
 package com.Resimulators.simukraft.handlers;
 
-import com.Resimulators.simukraft.common.entity.EntitySim;
+import com.Resimulators.simukraft.common.entity.sim.EntitySim;
 import net.minecraft.item.Food;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
