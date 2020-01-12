@@ -9,6 +9,7 @@ import net.minecraft.entity.ai.goal.MoveTowardsTargetGoal;
 public class JobBuilder implements IJob {
     private EntitySim sim;
     private Goal goal1;
+    
     JobBuilder(EntitySim sim){
         this.sim = sim;
 
@@ -20,18 +21,20 @@ public class JobBuilder implements IJob {
 
     @Override
     public int intervaltime() {
-        return 2000;
+        return 1000;
     }
 
     @Override
     public int workTime() {
-        return 4000;
+        return 12000;
     }
 
-    @Override
-    public int maximumworkperiods() {
-        return 2;
-    }
+        @Override
+        public int maximumworkperiods() {
+            return -1;
+            //negative one so that it can work as much as it can. builder should work all day.
+            // if it can't find resources it take a 1000 tick break
+        }
 
     @Override
     public boolean nightShift() {

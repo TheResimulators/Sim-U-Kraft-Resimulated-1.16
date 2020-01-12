@@ -24,8 +24,7 @@ public class EntitySim extends AgeableEntity implements INPC {
     private static final DataParameter<Boolean> FEMALE = EntityDataManager.createKey(EntitySim.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> SPECIAL = EntityDataManager.createKey(EntitySim.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> LEFTHANDED = EntityDataManager.createKey(EntitySim.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Float> HUNGER = EntityDataManager.createKey(EntitySim.class, DataSerializers.FLOAT);
-
+    private int periodsworked = 0;
     FoodStats foodStats = new FoodStats();
 
     Random rand = new Random();
@@ -242,4 +241,15 @@ public class EntitySim extends AgeableEntity implements INPC {
         return this.isInvulnerable() || ignoreHunger || this.foodStats.needFood();
     }
 
+    public void resetPeriodsWorked(){
+        periodsworked = 0;
+    }
+
+    public void setPeriodsworked(int periodsworked){
+        this.periodsworked = periodsworked;
+    }
+
+    public void workedPeriod(){
+        this.periodsworked = periodsworked++;
+    }
 }
