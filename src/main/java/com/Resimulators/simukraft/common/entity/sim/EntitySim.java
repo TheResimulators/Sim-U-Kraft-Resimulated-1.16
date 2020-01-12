@@ -42,7 +42,7 @@ public class EntitySim extends AgeableEntity implements INPC {
 
     public EntitySim(EntityType<? extends AgeableEntity> type, World worldIn) {
         super(ModEntities.ENTITY_SIM, worldIn);
-        this.inventory = new SimInventory("Items", false, 27);
+        this.inventory = new SimInventory(this, "Items", false, 27);
     }
 
     @Override
@@ -88,6 +88,7 @@ public class EntitySim extends AgeableEntity implements INPC {
     @Override
     protected void registerGoals(){
         this.goalSelector.addGoal(0, new SwimGoal(this));
+        this.goalSelector.addGoal(8, new PickupItemGoal(this));
 
         //Unimportant "make more alive"-goals
         this.goalSelector.addGoal(9, new OpenDoorGoal(this, true));
@@ -118,6 +119,11 @@ public class EntitySim extends AgeableEntity implements INPC {
         return false;
     }
 
+    public boolean canPickupStack(@Nonnull ItemStack stack) {
+        return Utils.canInsertStack(inventory.getHandler(), stack);
+    }
+
+    //NBT Data
     @Override
     public void writeAdditional(CompoundNBT compound) {
         super.writeAdditional(compound);
@@ -152,8 +158,9 @@ public class EntitySim extends AgeableEntity implements INPC {
     //Interaction
     @Override
     public boolean processInteract(PlayerEntity player, Hand hand) {
-        player.openContainer(inventory);
-        return true;
+        if (!player.isCrouching())
+            player.openContainer(inventory);
+        return super.processInteract(player, hand);
     }
 
     //Updates
@@ -182,6 +189,67 @@ public class EntitySim extends AgeableEntity implements INPC {
 
     public boolean shouldHeal() {
         return this.getHealth() > 0.0F && this.getHealth() < this.getMaxHealth();
+    }
+
+    @Override
+    public void onItemPickup(Entity entity, int quantity) {
+        super.onItemPickup(entity, quantity);
+        if (entity instanceof ItemEntity) {
+            ItemStack itemStack = ((ItemEntity) entity).getItem();
+            Item item = itemStack.getItem();
+            if (!(item instanceof ToolItem || item instanceof SwordItem || item instanceof CrossbowItem || item instanceof BowItem)) {
+                if (this.getHeldItemMainhand() == itemStack) {
+                    this.inventory.addItem(itemStack);
+                    this.setHeldItem(Hand.MAIN_HAND, ItemStack.EMPTY);
+                } else if (this.getHeldItemOffhand() == itemStack) {
+                    this.inventory.addItem(itemStack);
+                    this.setHeldItem(Hand.OFF_HAND, ItemStack.EMPTY);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onDeath(DamageSource cause) {
+        super.onDeath(cause);
+        this.dropInventory();
+    }
+
+    @Override
+    protected void dropInventory() {
+        super.dropInventory();
+        this.inventory.dropAllItems();
+    }
+
+    @Nullable
+    public ItemEntity dropItem(ItemStack droppedItem, boolean dropAround, boolean traceItem) {
+        if (droppedItem.isEmpty()) {
+            return null;
+        } else {
+            double d0 = this.func_226280_cw_() - (double)0.3F;
+            ItemEntity itementity = new ItemEntity(this.world, this.func_226277_ct_(), d0, this.func_226281_cx_(), droppedItem);
+            itementity.setPickupDelay(40);
+            if (traceItem) {
+                itementity.setThrowerId(this.getUniqueID());
+            }
+
+            if (dropAround) {
+                float f = this.rand.nextFloat() * 0.5F;
+                float f1 = this.rand.nextFloat() * ((float)Math.PI * 2F);
+                itementity.setMotion((double)(-MathHelper.sin(f1) * f), (double)0.2F, (double)(MathHelper.cos(f1) * f));
+            } else {
+                float f7 = 0.3F;
+                float f8 = MathHelper.sin(this.rotationPitch * ((float)Math.PI / 180F));
+                float f2 = MathHelper.cos(this.rotationPitch * ((float)Math.PI / 180F));
+                float f3 = MathHelper.sin(this.rotationYaw * ((float)Math.PI / 180F));
+                float f4 = MathHelper.cos(this.rotationYaw * ((float)Math.PI / 180F));
+                float f5 = this.rand.nextFloat() * ((float)Math.PI * 2F);
+                float f6 = 0.02F * this.rand.nextFloat();
+                itementity.setMotion((double)(-f3 * f2 * 0.3F) + Math.cos((double)f5) * (double)f6, (double)(-f8 * 0.3F + 0.1F + (this.rand.nextFloat() - this.rand.nextFloat()) * 0.1F), (double)(f4 * f2 * 0.3F) + Math.sin((double)f5) * (double)f6);
+            }
+
+            return itementity;
+        }
     }
 
     //Data Manager Interaction
@@ -261,4 +329,7 @@ public class EntitySim extends AgeableEntity implements INPC {
         return this.isInvulnerable() || ignoreHunger || this.foodStats.needFood();
     }
 
+    public SimInventory getInventory() {
+        return inventory;
+    }
 }

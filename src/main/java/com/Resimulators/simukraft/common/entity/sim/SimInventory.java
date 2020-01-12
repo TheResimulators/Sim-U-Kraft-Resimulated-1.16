@@ -1,6 +1,7 @@
 package com.Resimulators.simukraft.common.entity.sim;
 
 import com.google.common.collect.Lists;
+import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.IInventory;
@@ -18,6 +19,8 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.items.IItemHandlerModifiable;
+import net.minecraftforge.items.wrapper.InvWrapper;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -26,20 +29,18 @@ public class SimInventory implements IInventory, INamedContainerProvider {
     private String inventoryTitle;
     private final int slotsCount;
     private final NonNullList<ItemStack> inventoryContents;
+    private final EntitySim sim;
     /** Listeners notified when any item in this inventory is changed. */
     private List<IInventoryChangedListener> changeListeners;
     private boolean hasCustomName;
+    private IItemHandlerModifiable handler;
 
-    public SimInventory(String title, boolean customName, int slotCount) {
+    public SimInventory(EntitySim sim, String title, boolean customName, int slotCount) {
+        this.sim = sim;
         this.inventoryTitle = title;
         this.hasCustomName = customName;
         this.slotsCount = slotCount;
         this.inventoryContents = NonNullList.<ItemStack>withSize(slotCount, ItemStack.EMPTY);
-    }
-
-    @OnlyIn(Dist.CLIENT)
-    public SimInventory(ITextComponent title, int slotCount) {
-        this(title.getUnformattedComponentText(), true, slotCount);
     }
 
     public void addInventoryChangeListener(IInventoryChangedListener listener) {
@@ -183,6 +184,17 @@ public class SimInventory implements IInventory, INamedContainerProvider {
         this.inventoryContents.clear();
     }
 
+    public void dropAllItems() {
+        for (int i = 0; i < inventoryContents.size(); i++) {
+            ItemStack itemstack = inventoryContents.get(i);
+            if (!itemstack.isEmpty()) {
+                ItemEntity item = this.sim.dropItem(itemstack, true, false);
+                sim.world.addEntity(item);
+                inventoryContents.set(i, ItemStack.EMPTY);
+            }
+        }
+    }
+
     public ListNBT write(ListNBT nbt) {
         for (int i = 0; i < this.inventoryContents.size(); i++) {
             if (!this.inventoryContents.get(i).isEmpty()) {
@@ -212,5 +224,10 @@ public class SimInventory implements IInventory, INamedContainerProvider {
     @Override
     public Container createMenu(int i, PlayerInventory playerInventory, PlayerEntity playerEntity) {
         return ChestContainer.createGeneric9X3(i, playerInventory, this);
+    }
+
+    public IItemHandlerModifiable getHandler() {
+        if (handler == null) handler = new InvWrapper(this);
+        return handler;
     }
 }
