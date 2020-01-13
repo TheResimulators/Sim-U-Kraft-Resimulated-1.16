@@ -36,19 +36,18 @@ minecraft {
         client {
             workingDirectory project.file('run')
 
-            // Recommended logging data for a userdev environment
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-
-            // Recommended logging level for the console
+            property 'forge.logging.markers', ''
             property 'forge.logging.console.level', 'debug'
 
-            mods {
-                simukraft {
-                    source sourceSets.main
-                }
-            }
-        }
+            ideaModule "${project.name}.main"
 
+            environment 'MOD_CLASSES', "${project.file("out/production/resources").canonicalPath};${project.file("out/production/classes").canonicalPath}"
+            /*mods {
+                main {
+                    sources sourceSets.main
+                }
+            }*/
+        }
         server {
             workingDirectory project.file('run')
 
