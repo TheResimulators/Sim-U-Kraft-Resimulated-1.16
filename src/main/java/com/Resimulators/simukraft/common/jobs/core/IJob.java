@@ -1,11 +1,8 @@
 package com.Resimulators.simukraft.common.jobs.core;
 
-import com.Resimulators.simukraft.common.entity.EntitySim;
-import com.Resimulators.simukraft.common.jobs.core.EnumJobState;
-import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 
-public abstract interface IJob {
+public interface IJob {
 
     EnumJobState state();
 

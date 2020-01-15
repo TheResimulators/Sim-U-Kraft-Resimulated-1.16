@@ -5,13 +5,11 @@ import com.Resimulators.simukraft.common.jobs.core.EnumJobState;
 import com.Resimulators.simukraft.common.jobs.core.IJob;
 import net.minecraft.command.arguments.NBTCompoundTagArgument;
 import net.minecraft.entity.ai.goal.Goal;
-<<<<<<< HEAD
 import net.minecraft.entity.ai.goal.MoveTowardsTargetGoal;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
-=======
->>>>>>> master
+
 
 public class JobBuilder implements IJob {
     private EntitySim sim;
