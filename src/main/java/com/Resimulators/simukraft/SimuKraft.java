@@ -1,24 +1,18 @@
 package com.Resimulators.simukraft;
 
 import com.Resimulators.simukraft.client.data.SkinCacher;
+import com.Resimulators.simukraft.common.events.world.NewDayEvent;
 import com.Resimulators.simukraft.init.ModBlocks;
 import com.Resimulators.simukraft.init.ModEntities;
 import com.Resimulators.simukraft.init.ModItems;
 import com.Resimulators.simukraft.init.ModRenders;
-import com.google.common.base.Preconditions;
 import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.InterModComms;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
@@ -28,12 +22,8 @@ import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModProcessEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.registries.IForgeRegistryEntry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import javax.annotation.Nonnull;
-import java.util.stream.Collectors;
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(Reference.MODID)
@@ -70,7 +60,7 @@ public class SimuKraft {
     }
 
     private void setup(final FMLCommonSetupEvent event) {
-        // some preinit code
+        MinecraftForge.EVENT_BUS.register(new NewDayEvent());
     }
 
     private void doClientStuff(final FMLClientSetupEvent event) {

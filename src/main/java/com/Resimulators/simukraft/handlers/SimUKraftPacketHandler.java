@@ -11,7 +11,7 @@ public class SimUKraftPacketHandler {
     private static int ID = 0;
 
     private int newId(){
-        return ID;
+        return ID++;
     }
 
 
