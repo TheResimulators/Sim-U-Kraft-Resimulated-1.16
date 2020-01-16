@@ -2,8 +2,14 @@ package com.Resimulators.simukraft;
 
 import com.Resimulators.simukraft.client.data.SkinCacher;
 import com.Resimulators.simukraft.common.events.world.NewDayEvent;
+
 import com.Resimulators.simukraft.handlers.SimUKraftPacketHandler;
 import com.Resimulators.simukraft.init.*;
+
+import com.Resimulators.simukraft.init.ModBlocks;
+import com.Resimulators.simukraft.init.ModEntities;
+import com.Resimulators.simukraft.init.ModItems;
+import com.Resimulators.simukraft.init.ModRenders;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
@@ -61,6 +67,7 @@ public class SimuKraft {
         MinecraftForge.EVENT_BUS.register(new NewDayEvent());
         ModCapabilities.init();
         SimUKraftPacketHandler.init();
+
     }
 
     private void doClientStuff(final FMLClientSetupEvent event) {
