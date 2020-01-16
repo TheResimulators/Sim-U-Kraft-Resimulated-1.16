@@ -1,6 +1,7 @@
 package com.Resimulators.simukraft.handlers;
 
 import com.Resimulators.simukraft.Reference;
+import com.Resimulators.simukraft.packets.SyncPlayerCapability;
 import net.minecraft.util.ResourceLocation;
 
 import net.minecraftforge.fml.network.NetworkRegistry;
@@ -10,7 +11,7 @@ public class SimUKraftPacketHandler {
 
     private static int ID = 0;
 
-    private int newId(){
+    private static int newId(){
         return ID++;
     }
 
@@ -26,6 +27,7 @@ public class SimUKraftPacketHandler {
 
 
     public static void init(){
+        INSTANCE.registerMessage(newId(), SyncPlayerCapability.class,SyncPlayerCapability::encode,SyncPlayerCapability::decode,SyncPlayerCapability::handler);
 
     }
 
