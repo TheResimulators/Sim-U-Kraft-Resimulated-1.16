@@ -4,6 +4,7 @@ import com.Resimulators.simukraft.Reference;
 import com.Resimulators.simukraft.client.data.SkinCacher;
 import com.Resimulators.simukraft.client.model.EntitySimModel;
 import com.Resimulators.simukraft.common.entity.sim.EntitySim;
+import com.Resimulators.simukraft.utils.Utils;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
@@ -16,6 +17,8 @@ import net.minecraft.item.CrossbowItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.UseAction;
+import net.minecraft.scoreboard.ScoreObjective;
+import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
@@ -94,6 +97,23 @@ public class EntitySimRender extends LivingRenderer<EntitySim, EntitySimModel> {
         if (location == null || !entitySim.getSpecial())
             location = new ResourceLocation(Reference.MODID, DIR + (entitySim.getFemale() ? "female/" : "male/") + "entity_sim" + entitySim.getVariation() + ".png");
         return location;
+    }
+
+    @Override
+    protected void func_225629_a_(EntitySim entitySim, String text, MatrixStack matrix, IRenderTypeBuffer renderBuffer, int p_225629_5_) {
+        double d = this.renderManager.func_229099_b_(entitySim);
+        matrix.func_227860_a_();
+        if (d < 100.0d) {
+            super.func_225629_a_(entitySim, entitySim.getTotalArmorValue() + "/20 Armor", matrix, renderBuffer, p_225629_5_);
+            matrix.func_227861_a_(0, (double)(9.0F * 1.15F * 0.025F), 0);
+            super.func_225629_a_(entitySim, entitySim.getFoodStats().getFoodLevel() + "/20 Hunger", matrix, renderBuffer, p_225629_5_);
+            matrix.func_227861_a_(0, (double)(9.0F * 1.15F * 0.025F), 0);
+            super.func_225629_a_(entitySim, (int)entitySim.getHealth() + "/" + (int)entitySim.getMaxHealth() + " Health", matrix, renderBuffer, p_225629_5_);
+            matrix.func_227861_a_(0, (double)(9.0F * 1.15F * 0.025F), 0);
+        }
+
+        super.func_225629_a_(entitySim, text, matrix, renderBuffer, p_225629_5_);
+        matrix.func_227865_b_();
     }
 }
 
