@@ -25,7 +25,7 @@ minecraft {
     // stable_#            Stables are built at the discretion of the MCP team.
     // Use non-default mappings at your own risk. they may not always work.
     // Simply re-run your setup task after changing the mappings to update your workspace.
-    mappings channel: 'snapshot', version: '20200109-1.14.3'
+    mappings channel: 'snapshot', version: '20200116-1.14.3'
     // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
     
     // accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
@@ -36,19 +36,18 @@ minecraft {
         client {
             workingDirectory project.file('run')
 
-            // Recommended logging data for a userdev environment
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-
-            // Recommended logging level for the console
+            property 'forge.logging.markers', ''
             property 'forge.logging.console.level', 'debug'
 
-            mods {
-                simukraft {
-                    source sourceSets.main
-                }
-            }
-        }
+            ideaModule "${project.name}.main"
 
+            environment 'MOD_CLASSES', "${project.file("out/production/resources").canonicalPath};${project.file("out/production/classes").canonicalPath}"
+            /*mods {
+                main {
+                    sources sourceSets.main
+                }
+            }*/
+        }
         server {
             workingDirectory project.file('run')
 

@@ -1,6 +1,8 @@
 package com.Resimulators.simukraft.common.entity.sim;
 
 import com.Resimulators.simukraft.Configs;
+import com.Resimulators.simukraft.common.jobs.JobBuilder;
+import com.Resimulators.simukraft.common.jobs.core.IJob;
 import com.Resimulators.simukraft.common.entity.goals.PickupItemGoal;
 import com.Resimulators.simukraft.handlers.FoodStats;
 import com.Resimulators.simukraft.init.ModEntities;
@@ -9,7 +11,6 @@ import net.minecraft.entity.*;
 import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.*;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
@@ -22,9 +23,11 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.*;
+import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Random;
 
 public class EntitySim extends AgeableEntity implements INPC {
@@ -33,16 +36,23 @@ public class EntitySim extends AgeableEntity implements INPC {
     private static final DataParameter<Boolean> FEMALE = EntityDataManager.createKey(EntitySim.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> SPECIAL = EntityDataManager.createKey(EntitySim.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> LEFTHANDED = EntityDataManager.createKey(EntitySim.class, DataSerializers.BOOLEAN);
+    private final ArrayList<String> list = new ArrayList<>();
 
     private final SimInventory inventory;
 
     FoodStats foodStats = new FoodStats();
-
+    IJob job;
     Random rand = new Random();
 
     public EntitySim(EntityType<? extends AgeableEntity> type, World worldIn) {
         super(ModEntities.ENTITY_SIM, worldIn);
         this.inventory = new SimInventory(this, "Items", false, 27);
+        list.add("debra");
+        list.add("john");
+        list.add("jack");
+        list.add("jake");
+        list.add("hannah");
+
     }
 
     @Override
@@ -70,11 +80,17 @@ public class EntitySim extends AgeableEntity implements INPC {
         if (this.getSpecial()) {
             String name = Configs.SIMS.specialSimNames.get().get(rand.nextInt(Configs.SIMS.specialSimNames.get().size()));
             this.setCustomName(new StringTextComponent(name));
+
+
             this.setFemale(Configs.SIMS.specialSimGenders.get().contains(name));
         } else {
+            String name = list.get(rand.nextInt(list.size()));
             this.setFemale(Utils.randomizeBoolean());
+            this.setCustomName(new StringTextComponent(name));
             if (this.getFemale()) {
                 //TODO: Add female name database
+
+
                 this.setVariation(rand.nextInt(13));
             } else {
                 //TODO: Add male name database
@@ -86,7 +102,7 @@ public class EntitySim extends AgeableEntity implements INPC {
     }
 
     @Override
-    protected void registerGoals(){
+    protected void registerGoals() {
         this.goalSelector.addGoal(0, new SwimGoal(this));
         this.goalSelector.addGoal(8, new PickupItemGoal(this));
 
@@ -94,7 +110,7 @@ public class EntitySim extends AgeableEntity implements INPC {
         this.goalSelector.addGoal(9, new OpenDoorGoal(this, true));
         this.goalSelector.addGoal(10, new LookAtGoal(this, PlayerEntity.class, 2.0f, 1.0f));
         this.goalSelector.addGoal(11, new WaterAvoidingRandomWalkingGoal(this, 0.6d));
-        this.goalSelector.addGoal(12, new LookAtGoal(this, PlayerEntity.class,8f));
+        this.goalSelector.addGoal(12, new LookAtGoal(this, PlayerEntity.class, 8f));
         this.goalSelector.addGoal(13, new LookRandomlyGoal(this));
     }
 
@@ -134,6 +150,9 @@ public class EntitySim extends AgeableEntity implements INPC {
         compound.putBoolean("Lefthanded", this.getLefthanded());
         compound.put("Inventory", this.inventory.write(new ListNBT()));
         this.foodStats.write(compound);
+        if (job != null){
+           compound.put("job",this.job.writeToNbt(new ListNBT()));
+        }
     }
 
 
@@ -153,6 +172,14 @@ public class EntitySim extends AgeableEntity implements INPC {
         if (compound.contains("Inventory"))
             this.inventory.read(compound.getList("Inventory", 10));
         this.foodStats.read(compound);
+        String jobType = compound.getList("job", Constants.NBT.TAG_LIST).getCompound(0).getString("Builder");
+        switch (jobType){
+            case "Builder":
+                job = new JobBuilder(this);
+
+        }
+
+        this.job.readFromNbt(compound.getList("job", Constants.NBT.TAG_LIST));
     }
 
     //Interaction
@@ -179,11 +206,12 @@ public class EntitySim extends AgeableEntity implements INPC {
                 this.heal(1.0F);
             }
 
+
             if (this.foodStats.needFood() && this.ticksExisted % 10 == 0) {
                 this.foodStats.setFoodLevel(this.foodStats.getFoodLevel() + 1);
             }
         }
-
+        this.setCustomNameVisible(false);
         super.livingTick();
     }
 
@@ -311,6 +339,7 @@ public class EntitySim extends AgeableEntity implements INPC {
         } catch (NullPointerException e) {
             return false;
         }
+
     }
 
     public void addExhaustion(float exhaustion) {
