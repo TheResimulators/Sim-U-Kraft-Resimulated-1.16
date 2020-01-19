@@ -2,6 +2,7 @@ package com.Resimulators.simukraft.init;
 import com.Resimulators.simukraft.Reference;
 import com.Resimulators.simukraft.SimUTab;
 import com.Resimulators.simukraft.SimuKraft;
+import com.Resimulators.simukraft.common.item.ItemTest;
 import com.google.common.base.Preconditions;
 import net.minecraft.block.Block;
 import net.minecraft.item.BlockItem;
@@ -20,6 +21,11 @@ public class ModItems {
     private static List<Item> REGISTRY = new ArrayList<>();
 
     public static final Item SIM_EGG = register(ModEntities.registerEntitySpawnegg(ModEntities.ENTITY_SIM, 0x07b351, 0x614500, "sim_egg"), SimUTab.tab);
+    public ModItems() {
+        for (Block block : ModBlocks.getRegistry()) {
+            register(block, SimUTab.tab);
+        }
+    }
 
     private static Item register(Block block, ItemGroup group) {
         if (block != null && block.getRegistryName() != null) {

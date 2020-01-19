@@ -115,9 +115,11 @@ public class SimuKraft {
     @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
     public static class RegistryEvents {
         @SubscribeEvent
-        public static void onBlocksRegistry(final RegistryEvent.Register<Block> blockRegistryEvent) {
-            ModBlocks.init(blockRegistryEvent);
-
+        public static void onBlocksRegistry(final RegistryEvent.Register<Block> event) {
+            new ModBlocks();
+            for (Block block : ModBlocks.getRegistry()) {
+                event.getRegistry().register(block);
+            }
         }
 
         @SubscribeEvent
