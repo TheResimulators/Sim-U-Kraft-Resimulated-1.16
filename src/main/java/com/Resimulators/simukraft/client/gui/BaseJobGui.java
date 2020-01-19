@@ -1,4 +1,4 @@
-package com.Resimulators.simukraft.client.interfaces;
+package com.Resimulators.simukraft.client.gui;
 
 import com.Resimulators.simukraft.common.entity.sim.EntitySim;
 import net.minecraft.client.Minecraft;
