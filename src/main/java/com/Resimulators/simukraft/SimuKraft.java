@@ -3,6 +3,7 @@ package com.Resimulators.simukraft;
 import com.Resimulators.simukraft.client.data.SkinCacher;
 import com.Resimulators.simukraft.client.gui.GuiMod;
 import com.Resimulators.simukraft.client.gui.GuiSimInventory;
+import com.Resimulators.simukraft.client.interfaces.SimHud;
 import com.Resimulators.simukraft.common.entity.sim.EntitySim;
 import com.Resimulators.simukraft.common.entity.sim.SimContainer;
 import com.Resimulators.simukraft.common.events.world.NewDayEvent;
