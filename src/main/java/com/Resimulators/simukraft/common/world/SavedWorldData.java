@@ -2,11 +2,17 @@ package com.Resimulators.simukraft.common.world;
 
 import com.Resimulators.simukraft.Reference;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.DimensionSavedDataManager;
 import net.minecraft.world.storage.WorldSavedData;
+import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.minecraftforge.fml.server.ServerLifecycleHooks;
 
 import java.lang.reflect.Array;
 import java.util.*;
@@ -39,12 +45,29 @@ public class SavedWorldData extends WorldSavedData {
 
     @Override
     public void read(CompoundNBT nbt) {
-
+        ListNBT list = nbt.getList("factions", Constants.NBT.TAG_COMPOUND);
+        for (INBT factionNBT:list){
+            CompoundNBT compound = (CompoundNBT)factionNBT;
+            Faction faction = new Faction();
+            faction.read(compound);
+            int id = compound.getInt("id");
+            this.factions.put(id,faction);
+        }
     }
 
     @Override
     public CompoundNBT write(CompoundNBT compound) {
-        return null;
+        ListNBT list = new ListNBT();
+        for (int i :factions.keySet()){
+            CompoundNBT nbt = new CompoundNBT();
+            nbt.putInt("id",i);
+            nbt.put("faction",factions.get(i).write(new CompoundNBT()));
+            list.add(nbt);
+
+
+        }
+        compound.put("factions",list);
+        return compound;
     }
 
     public int getFactionId(Faction faction){
@@ -70,7 +93,9 @@ public class SavedWorldData extends WorldSavedData {
 
     }
 
-
+    public void setFaction(int id, Faction faction){
+        this.factions.put(id,faction);
+    }
     public Faction getFaction(int id){
             return factions.get(id);
     }
@@ -79,6 +104,7 @@ public class SavedWorldData extends WorldSavedData {
         ArrayList<Integer> factionIds = new ArrayList<>();
         factionIds.addAll(factions.keySet());
         return factionIds;
+
     }
 
 }

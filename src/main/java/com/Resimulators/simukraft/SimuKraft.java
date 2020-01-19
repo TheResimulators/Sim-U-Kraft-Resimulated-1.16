@@ -3,6 +3,7 @@ package com.Resimulators.simukraft;
 import com.Resimulators.simukraft.client.data.SkinCacher;
 import com.Resimulators.simukraft.client.gui.GuiMod;
 import com.Resimulators.simukraft.client.gui.GuiSimInventory;
+import com.Resimulators.simukraft.client.interfaces.SimHud;
 import com.Resimulators.simukraft.common.entity.sim.EntitySim;
 import com.Resimulators.simukraft.common.entity.sim.SimContainer;
 import com.Resimulators.simukraft.common.events.world.NewDayEvent;
@@ -79,11 +80,12 @@ public class SimuKraft {
         MinecraftForge.EVENT_BUS.register(new NewDayEvent());
         ModCapabilities.init();
         SimUKraftPacketHandler.init();
+
     }
 
     private void doClientStuff(final FMLClientSetupEvent event) {
         // do something that can only be done on the client
-
+        MinecraftForge.EVENT_BUS.register(new SimHud() );
         //Registering SkinCache and Special Skins
 
         SkinCacher skinCacher = new SkinCacher();
