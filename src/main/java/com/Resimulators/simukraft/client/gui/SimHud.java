@@ -1,4 +1,4 @@
-package com.Resimulators.simukraft.client.interfaces;
+package com.Resimulators.simukraft.client.gui;
 
 import com.Resimulators.simukraft.common.capabilities.PlayerCapability;
 import com.Resimulators.simukraft.common.events.world.NewDayEvent;
