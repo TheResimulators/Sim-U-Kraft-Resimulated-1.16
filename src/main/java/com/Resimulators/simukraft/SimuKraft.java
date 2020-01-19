@@ -1,7 +1,6 @@
 package com.Resimulators.simukraft;
 
 import com.Resimulators.simukraft.client.data.SkinCacher;
-import com.Resimulators.simukraft.event.SimStatsRenderer;
 import com.Resimulators.simukraft.common.events.world.NewDayEvent;
 import com.Resimulators.simukraft.handlers.SimUKraftPacketHandler;
 import com.Resimulators.simukraft.init.*;
@@ -77,8 +76,6 @@ public class SimuKraft {
         SkinCacher skinCacher = new SkinCacher();
         skinCacher.initSkinService();
         skinCacher.registerSpecialSkins();
-
-        MinecraftForge.EVENT_BUS.register(new SimStatsRenderer());
 
         ModRenders.registerEntityRenders();
     }
