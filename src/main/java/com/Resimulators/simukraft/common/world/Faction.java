@@ -1,8 +1,17 @@
 package com.Resimulators.simukraft.common.world;
 
 import com.Resimulators.simukraft.common.entity.sim.EntitySim;
+import net.minecraft.client.Minecraft;
+import net.minecraft.command.arguments.NBTCompoundTagArgument;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.fml.loading.FMLCommonLaunchHandler;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 
 import javax.naming.ldap.LdapReferralException;
 import java.util.ArrayList;
@@ -11,24 +20,58 @@ import java.util.Random;
 import java.util.UUID;
 
 public class Faction {
-    private HashMap<UUID,SimInfo> players = new HashMap<>();
+    private ArrayList<UUID> players = new ArrayList<>();
     private HashMap<UUID,SimInfo> sims = new HashMap<>();
     private double credits = 0d;
     private static Random rand = new Random();
     //TODO: add Housing to this
 
+
     public CompoundNBT write(CompoundNBT nbt){
-        nbt.putDouble("test",5d);
+        ListNBT list = new ListNBT();
+        for(UUID uuid: players){
+            CompoundNBT compound = new CompoundNBT();
+            compound.putUniqueId("player",uuid);
+            list.add(compound);
+
+
+        }
+        nbt.put("players",list);
+
+        list = new ListNBT();
+        for (UUID id:sims.keySet()){
+            CompoundNBT compound = new CompoundNBT();
+            compound.putUniqueId("sim",id);
+            compound.put("siminfo",sims.get(id).write());
+            list.add(compound);
+        }
+        nbt.put("sims",list);
+        nbt.putDouble("credits",credits);
         return nbt;
     }
 
     public void read(CompoundNBT nbt){
+        ListNBT players = nbt.getList("players", Constants.NBT.TAG_COMPOUND);
+        for (INBT player : players) {
+            CompoundNBT compound = (CompoundNBT) player;
+            this.players.add(compound.getUniqueId("player"));
+        }
+        ListNBT sims = nbt.getList("sims",Constants.NBT.TAG_COMPOUND);
 
+        for (INBT sim : players){
+            CompoundNBT compound = (CompoundNBT) sim;
+            UUID id =compound.getUniqueId("sim");
+            SimInfo info = new SimInfo(id);
+            info.read(compound.getCompound("siminfo"));
+            this.sims.put(id,info);
+
+        }
+        this.credits = nbt.getDouble("credits");
     }
 
     public void addsim(EntitySim sim){
 
-        sims.put(sim.getUniqueID(), new SimInfo(sim));
+        sims.put(sim.getUniqueID(), new SimInfo(sim.getUniqueID()));
     }
 
 
@@ -45,8 +88,8 @@ public class Faction {
         return this.credits;
     }
 
-    public ArrayList<EntitySim> getUnemployedSims(){
-        ArrayList<EntitySim> sims = new ArrayList<EntitySim>();
+    public ArrayList<UUID> getUnemployedSims(){
+        ArrayList<UUID> sims = new ArrayList<>();
 
         for (SimInfo info:this.sims.values()) {
             if (!info.hired){
@@ -73,20 +116,39 @@ public class Faction {
     public void fireSim(EntitySim sim){
         this.fireSim(sim.getUniqueID());
     }
+
+
+    public int getAmountOfSims(){
+        return sims.size();
+    }
+
     static class SimInfo {
-        private EntitySim sim;
+        private UUID sim;
         private boolean hired;
         private boolean homeless;
-        SimInfo(EntitySim sim){
+        SimInfo(UUID sim){
             this.sim = sim;
         }
 
 
-        public EntitySim getSim(){
+        public UUID getSim(){
             return sim;
         }
 
+        public CompoundNBT write(){
+            CompoundNBT nbt = new CompoundNBT();
+            nbt.putBoolean("homeless",homeless);
+            nbt.putBoolean("hired",hired);
+            nbt.putString("sim",sim.toString());
 
+            return nbt;
+        }
+
+        public void read(CompoundNBT nbt){
+            homeless = nbt.getBoolean("homeless");
+            hired = nbt.getBoolean("hired");
+            this.sim = UUID.fromString(nbt.getString("sim"));
+        }
 
 
 

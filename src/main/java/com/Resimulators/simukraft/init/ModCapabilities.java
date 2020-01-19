@@ -82,10 +82,11 @@ public class ModCapabilities {
 
         public void syncToPlayer(ServerPlayerEntity entity) {
             Faction faction = SavedWorldData.get(entity.world).createNewFaction();
+            int id = SavedWorldData.get(entity.world).getFactionId(faction);
             LazyOptional<PlayerCapability> cap = ModCapabilities.get(entity);
             cap.ifPresent(playerCapability -> {
                 playerCapability.setFaction(faction);
-                        SimUKraftPacketHandler.INSTANCE.sendTo(new SyncPlayerCapability(playerCapability.serializeNBT()),
+                        SimUKraftPacketHandler.INSTANCE.sendTo(new SyncPlayerCapability(playerCapability.serializeNBT(),id),
                                 entity.connection.netManager, NetworkDirection.PLAY_TO_CLIENT);
                     }
             );

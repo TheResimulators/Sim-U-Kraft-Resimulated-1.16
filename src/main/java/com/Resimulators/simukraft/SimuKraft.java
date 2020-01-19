@@ -84,7 +84,7 @@ public class SimuKraft {
 
     private void doClientStuff(final FMLClientSetupEvent event) {
         // do something that can only be done on the client
-
+        MinecraftForge.EVENT_BUS.register(new SimHud() );
         //Registering SkinCache and Special Skins
 
         SkinCacher skinCacher = new SkinCacher();

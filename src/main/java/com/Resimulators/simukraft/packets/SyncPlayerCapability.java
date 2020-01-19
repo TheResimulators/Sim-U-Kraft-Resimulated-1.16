@@ -2,6 +2,7 @@ package com.Resimulators.simukraft.packets;
 
 import com.Resimulators.simukraft.common.capabilities.PlayerCapability;
 import com.Resimulators.simukraft.common.world.Faction;
+import com.Resimulators.simukraft.common.world.SavedWorldData;
 import com.Resimulators.simukraft.init.ModCapabilities;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.PlayerEntity;
@@ -15,20 +16,25 @@ import java.util.function.Supplier;
 
 public class SyncPlayerCapability {
     private CompoundNBT nbt;
+    private int id;
 
-    public SyncPlayerCapability(CompoundNBT nbt){
+    public SyncPlayerCapability(CompoundNBT nbt, int id){
+
         this.nbt = nbt;
+        this.id = id;
     }
 
     public static void encode(SyncPlayerCapability pkt,PacketBuffer buffer){
         buffer.writeCompoundTag(pkt.nbt);
+        buffer.writeInt(pkt.id);
 
     }
 
 
     public static SyncPlayerCapability decode(PacketBuffer buffer){
         CompoundNBT nbt = buffer.readCompoundTag();
-        return new SyncPlayerCapability(nbt);
+        int id = buffer.readInt();
+        return new SyncPlayerCapability(nbt,id);
 
     }
     public static void handler(SyncPlayerCapability message, Supplier<NetworkEvent.Context> ctx){
@@ -37,6 +43,7 @@ public class SyncPlayerCapability {
             LazyOptional<PlayerCapability> cap = ModCapabilities.get(player);
             Faction faction = new Faction();
             faction.read(message.nbt);
+            SavedWorldData.get(Minecraft.getInstance().world).setFaction(message.id,faction);
             cap.ifPresent(playerCapability -> {
                         playerCapability.setFaction(faction);
                         System.out.println(playerCapability.getFaction());
