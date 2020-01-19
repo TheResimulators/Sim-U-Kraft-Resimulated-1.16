@@ -7,10 +7,14 @@ import com.Resimulators.simukraft.common.entity.goals.PickupItemGoal;
 import com.Resimulators.simukraft.handlers.FoodStats;
 import com.Resimulators.simukraft.init.ModEntities;
 import com.Resimulators.simukraft.utils.Utils;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerModelPart;
+import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.*;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
@@ -21,29 +25,34 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.*;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Random;
+import java.util.*;
 
 public class EntitySim extends AgeableEntity implements INPC {
+    private static final EntitySize SIZE = EntitySize.flexible(0.6f, 1.8f);
+    private static final Map<Pose, EntitySize> SIZE_BY_POSE = ImmutableMap.<Pose, EntitySize>builder().put(Pose.STANDING, SIZE).put(Pose.SLEEPING, SLEEPING_SIZE).put(Pose.CROUCHING, EntitySize.flexible(0.6F, 1.5F)).put(Pose.DYING, EntitySize.fixed(0.2F, 0.2F)).build();
     private static final DataParameter<Integer> VARIATION = EntityDataManager.createKey(EntitySim.class, DataSerializers.VARINT);
     private static final DataParameter<Integer> PROFESSION = EntityDataManager.createKey(EntitySim.class, DataSerializers.VARINT);
     private static final DataParameter<Boolean> FEMALE = EntityDataManager.createKey(EntitySim.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> SPECIAL = EntityDataManager.createKey(EntitySim.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> LEFTHANDED = EntityDataManager.createKey(EntitySim.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Byte> MODEL_FLAG = EntityDataManager.createKey(EntitySim.class, DataSerializers.BYTE);
     private static final DataParameter<String> STATUS = EntityDataManager.createKey(EntitySim.class, DataSerializers.STRING);
     private static final DataParameter<Integer> NAME_COLOR = EntityDataManager.createKey(EntitySim.class, DataSerializers.VARINT);
 
     private final SimInventory inventory;
 
-    FoodStats foodStats = new FoodStats();
-    IJob job;
-    Random rand = new Random();
+    protected FoodStats foodStats = new FoodStats();
+    private IJob job;
+    private Random rand = new Random();
 
     public EntitySim(EntityType<? extends AgeableEntity> type, World worldIn) {
         super(ModEntities.ENTITY_SIM, worldIn);
@@ -58,6 +67,7 @@ public class EntitySim extends AgeableEntity implements INPC {
         this.dataManager.register(FEMALE, false);
         this.dataManager.register(SPECIAL, false);
         this.dataManager.register(LEFTHANDED, false);
+        this.dataManager.register(MODEL_FLAG, (byte)0);
         this.dataManager.register(STATUS, "");
         this.dataManager.register(NAME_COLOR, 0);
     }
@@ -217,6 +227,8 @@ public class EntitySim extends AgeableEntity implements INPC {
                 this.foodStats.setFoodLevel(this.foodStats.getFoodLevel() + 1);
             }
         }
+        this.inventory.tick();
+
         super.livingTick();
     }
 
@@ -283,6 +295,10 @@ public class EntitySim extends AgeableEntity implements INPC {
 
             return itementity;
         }
+    }
+
+    public SimInventory getInventory() {
+        return inventory;
     }
 
     //Data Manager Interaction
@@ -375,8 +391,11 @@ public class EntitySim extends AgeableEntity implements INPC {
         return this.isInvulnerable() || ignoreHunger || this.foodStats.needFood();
     }
 
-    public SimInventory getInventory() {
-        return inventory;
+    @Override
+    public EntitySize getSize(Pose poseIn) {
+        return SIZE_BY_POSE.getOrDefault(poseIn, SIZE);
+    }
+
     public void setNameColor(int colorID) {
         if (0 <= colorID && colorID < 16) {
             this.dataManager.set(NAME_COLOR, colorID);
@@ -396,5 +415,9 @@ public class EntitySim extends AgeableEntity implements INPC {
         super.setCustomName(name);
         this.inventory.setCustomName(name.getFormattedText());
     }
+
+    @OnlyIn(Dist.CLIENT)
+    public boolean isWearing(PlayerModelPart part) {
+        return (this.getDataManager().get(MODEL_FLAG) & part.getPartMask()) == part.getPartMask();
     }
 }
