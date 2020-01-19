@@ -126,8 +126,11 @@ public class SimuKraft {
         }
 
         @SubscribeEvent
-        public static void OnItemEntityRegistry(final RegistryEvent.Register<Item> itemRegisterEvent) {
-            ModItems.init(itemRegisterEvent);
+        public static void OnItemEntityRegistry(final RegistryEvent.Register<Item> event) {
+            new ModItems();
+            for (Item item : ModItems.getRegistry()) {
+                event.getRegistry().register(item);
+            }
         }
 
 
