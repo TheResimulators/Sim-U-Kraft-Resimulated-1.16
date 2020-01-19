@@ -11,10 +11,7 @@ public class SimUKraftPacketHandler {
 
     private static int ID = 0;
 
-
     private static int newId(){
-
-    private int newId(){
         return ID++;
     }
 
@@ -33,7 +30,4 @@ public class SimUKraftPacketHandler {
         INSTANCE.registerMessage(newId(), SyncPlayerCapability.class,SyncPlayerCapability::encode,SyncPlayerCapability::decode,SyncPlayerCapability::handler);
 
     }
-
-
-
 }
