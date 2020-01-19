@@ -36,7 +36,8 @@ public class EntitySim extends AgeableEntity implements INPC {
     private static final DataParameter<Boolean> FEMALE = EntityDataManager.createKey(EntitySim.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> SPECIAL = EntityDataManager.createKey(EntitySim.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> LEFTHANDED = EntityDataManager.createKey(EntitySim.class, DataSerializers.BOOLEAN);
-    private final ArrayList<String> list = new ArrayList<>();
+    private static final DataParameter<String> STATUS = EntityDataManager.createKey(EntitySim.class, DataSerializers.STRING);
+    private static final DataParameter<Integer> NAME_COLOR = EntityDataManager.createKey(EntitySim.class, DataSerializers.VARINT);
 
     private final SimInventory inventory;
 
@@ -46,13 +47,7 @@ public class EntitySim extends AgeableEntity implements INPC {
 
     public EntitySim(EntityType<? extends AgeableEntity> type, World worldIn) {
         super(ModEntities.ENTITY_SIM, worldIn);
-        this.inventory = new SimInventory(this, "Items", false, 27);
-        list.add("debra");
-        list.add("john");
-        list.add("jack");
-        list.add("jake");
-        list.add("hannah");
-
+        this.inventory = new SimInventory(this, "Sim Inventory", false, 27);
     }
 
     @Override
@@ -63,6 +58,8 @@ public class EntitySim extends AgeableEntity implements INPC {
         this.dataManager.register(FEMALE, false);
         this.dataManager.register(SPECIAL, false);
         this.dataManager.register(LEFTHANDED, false);
+        this.dataManager.register(STATUS, "");
+        this.dataManager.register(NAME_COLOR, 0);
     }
 
     @Override
@@ -80,11 +77,9 @@ public class EntitySim extends AgeableEntity implements INPC {
         if (this.getSpecial()) {
             String name = Configs.SIMS.specialSimNames.get().get(rand.nextInt(Configs.SIMS.specialSimNames.get().size()));
             this.setCustomName(new StringTextComponent(name));
-
-
             this.setFemale(Configs.SIMS.specialSimGenders.get().contains(name));
         } else {
-            String name = list.get(rand.nextInt(list.size()));
+            String name = "Sim";
             this.setFemale(Utils.randomizeBoolean());
             this.setCustomName(new StringTextComponent(name));
             if (this.getFemale()) {
@@ -149,6 +144,8 @@ public class EntitySim extends AgeableEntity implements INPC {
         compound.putBoolean("Special", this.getSpecial());
         compound.putBoolean("Lefthanded", this.getLefthanded());
         compound.put("Inventory", this.inventory.write(new ListNBT()));
+        compound.putInt("NameColor", this.getNameColor());
+        compound.putString("Status", this.getStatus());
         this.foodStats.write(compound);
         if (job != null){
            compound.put("job",this.job.writeToNbt(new ListNBT()));
@@ -171,6 +168,11 @@ public class EntitySim extends AgeableEntity implements INPC {
             this.setLefthanded(compound.getBoolean("Lefthanded"));
         if (compound.contains("Inventory"))
             this.inventory.read(compound.getList("Inventory", 10));
+        if (compound.contains("NameColor"))
+            this.setNameColor(compound.getInt("NameColor"));
+        if (compound.contains("Status")) {
+            this.setStatus(compound.getString("Status"));
+        }
         this.foodStats.read(compound);
         String jobType = compound.getList("job", Constants.NBT.TAG_LIST).getCompound(0).getString("Builder");
         switch (jobType){
@@ -185,8 +187,12 @@ public class EntitySim extends AgeableEntity implements INPC {
     //Interaction
     @Override
     public boolean processInteract(PlayerEntity player, Hand hand) {
-        if (!player.isCrouching())
+        if (player.isCrouching())
             player.openContainer(inventory);
+
+        if (player.getHeldItem(hand).getItem() instanceof DyeItem) {
+            this.setNameColor(((DyeItem) player.getHeldItem(hand).getItem()).getDyeColor().getId());
+        }
         return super.processInteract(player, hand);
     }
 
@@ -211,7 +217,6 @@ public class EntitySim extends AgeableEntity implements INPC {
                 this.foodStats.setFoodLevel(this.foodStats.getFoodLevel() + 1);
             }
         }
-        this.setCustomNameVisible(false);
         super.livingTick();
     }
 
@@ -342,6 +347,18 @@ public class EntitySim extends AgeableEntity implements INPC {
 
     }
 
+    public void setStatus(String status) {
+        this.dataManager.set(STATUS, status);
+    }
+
+    public String getStatus() {
+        try {
+            return this.dataManager.get(STATUS);
+        } catch (NullPointerException e) {
+            return "";
+        }
+    }
+
     public void addExhaustion(float exhaustion) {
         if (!this.isInvulnerable()) {
             if (!this.world.isRemote) {
@@ -360,5 +377,24 @@ public class EntitySim extends AgeableEntity implements INPC {
 
     public SimInventory getInventory() {
         return inventory;
+    public void setNameColor(int colorID) {
+        if (0 <= colorID && colorID < 16) {
+            this.dataManager.set(NAME_COLOR, colorID);
+        }
+    }
+
+    public int getNameColor() {
+        try {
+            return this.dataManager.get(NAME_COLOR);
+        } catch (NullPointerException e) {
+            return 0;
+        }
+    }
+
+    @Override
+    public void setCustomName(ITextComponent name) {
+        super.setCustomName(name);
+        this.inventory.setCustomName(name.getFormattedText());
+    }
     }
 }
