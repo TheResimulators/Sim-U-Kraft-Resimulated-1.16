@@ -112,7 +112,6 @@ public class EntitySimRender extends LivingRenderer<EntitySim, EntitySimModel> {
     protected void func_225629_a_(EntitySim entitySim, String text, MatrixStack matrix, IRenderTypeBuffer renderBuffer, int p_225629_5_) {
         double d = this.renderManager.func_229099_b_(entitySim);
         matrix.func_227860_a_();
-        float pastTranslate = 0f;
         if (d < 100.0d && !entitySim.getStatus().equals("")) {
             super.func_225629_a_(entitySim, entitySim.getStatus(), matrix, renderBuffer, p_225629_5_);
             matrix.func_227861_a_(0, (double) (9.0F * 1.15F * 0.025F), 0);

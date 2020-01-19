@@ -248,6 +248,15 @@ public class EntitySim extends AgeableEntity implements INPC {
     }
 
     //Inventory
+    public void selectSlot(int i) {
+        if (0 <= i && i < 27)
+            inventory.currentItem = i;
+    }
+
+    public int getSelectedSlot() {
+        return inventory.currentItem;
+    }
+
     @Override
     public void onItemPickup(Entity entity, int quantity) {
         super.onItemPickup(entity, quantity);

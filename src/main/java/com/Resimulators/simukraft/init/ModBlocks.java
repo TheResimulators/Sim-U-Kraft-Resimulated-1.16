@@ -21,8 +21,8 @@ public final class ModBlocks {
     private static List<Block> REGISTRY = new ArrayList<>();
 
     //Basic Blocks
-    public static final Block COMPOSITE_BRICK = new BlockBase(Block.Properties.create(Material.ROCK,MaterialColor.STONE),"composite_brick");
-    public static final Block CHEESE_BLOCK = new BlockBase(Block.Properties.create(Material.SPONGE,MaterialColor.YELLOW),"cheese_block");
+    public static final Block COMPOSITE_BRICK = register(new BlockBase(Block.Properties.create(Material.ROCK,MaterialColor.STONE),"composite_brick"));
+    public static final Block CHEESE_BLOCK = register(new BlockBase(Block.Properties.create(Material.SPONGE,MaterialColor.YELLOW),"cheese_block"));
 
     //Sim-u-kraft Structure Blocks
     public static Map<String, Block> LIGHT_BLOCKS = new HashMap<>();
