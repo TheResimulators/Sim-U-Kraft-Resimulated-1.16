@@ -31,11 +31,12 @@ public class Configs {
 
         private CategoryGeneral() {
             //Creating the configuration category for each side.
-            COMMON_BUILDER.comment("General settings").push("general");
             SERVER_BUILDER.comment("General settings").push("general");
+            COMMON_BUILDER.comment("General settings").push("general");
             CLIENT_BUILDER.comment("General settings").push("general");
 
             //Here's where the configuration options go:
+            //WARNING: Don't use a '.'(period) in the "define"-method call. This completely BREAKS the config file.
 
 
             //Finishes off the configuration category.
@@ -50,6 +51,7 @@ public class Configs {
         public final IntValue specialSpawnChance;
         public final ConfigValue<List<? extends String>> specialSimNames;
         public final ConfigValue<List<? extends String>> specialSimGenders;
+        public final BooleanValue coloredNames;
 
         private CategorySims() {
             //Creating the configuration category for each side.
@@ -67,6 +69,9 @@ public class Configs {
             specialSimGenders = COMMON_BUILDER.comment("Names of skins that use the model with thin arms.")
                     .translation(LANG_KEY_SIMS + ".simgenders")
                     .defineList("Thin model", ImmutableList.of("Div4Wom4n", "fabbe50"), obj -> obj instanceof String);
+            coloredNames = COMMON_BUILDER.comment("Should you be able to color the Sim's names?")
+                    .translation(LANG_KEY_SIMS + ".colorednames")
+                    .define("Colored Names", true);
 
             //Finishes off the configuration category.
             CLIENT_BUILDER.pop();

@@ -4,13 +4,9 @@ import com.Resimulators.simukraft.common.entity.sim.EntitySim;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.util.HandSide;
-import org.lwjgl.opengl.GL11;
 
 public class EntitySimModel extends BipedModel<EntitySim> {
     private boolean smallArms;
