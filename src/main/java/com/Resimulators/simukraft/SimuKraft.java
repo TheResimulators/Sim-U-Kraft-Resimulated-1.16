@@ -1,6 +1,10 @@
 package com.Resimulators.simukraft;
 
 import com.Resimulators.simukraft.client.data.SkinCacher;
+import com.Resimulators.simukraft.client.gui.GuiMod;
+import com.Resimulators.simukraft.client.gui.GuiSimInventory;
+import com.Resimulators.simukraft.common.entity.sim.EntitySim;
+import com.Resimulators.simukraft.common.entity.sim.SimContainer;
 import com.Resimulators.simukraft.common.events.world.NewDayEvent;
 import com.Resimulators.simukraft.handlers.SimUKraftPacketHandler;
 import com.Resimulators.simukraft.init.*;
@@ -9,12 +13,18 @@ import com.Resimulators.simukraft.init.ModEntities;
 import com.Resimulators.simukraft.init.ModItems;
 import com.Resimulators.simukraft.init.ModRenders;
 import net.minecraft.block.Block;
+import net.minecraft.client.gui.ScreenManager;
 import net.minecraft.entity.EntityType;
+import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntityType;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.extensions.IForgeContainerType;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.fml.ExtensionPoint;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
@@ -24,6 +34,7 @@ import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModProcessEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.registries.IForgeRegistry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -48,6 +59,9 @@ public class SimuKraft {
 
         // Register the enqueueIMC method for modloading
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::enqueueIMC);
+
+        DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY, () -> GuiMod::openScreen));
+
         // Register the processIMC method for modloading
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::processIMC);
         // Register the doClientStuff method for modloading
@@ -65,7 +79,6 @@ public class SimuKraft {
         MinecraftForge.EVENT_BUS.register(new NewDayEvent());
         ModCapabilities.init();
         SimUKraftPacketHandler.init();
-
     }
 
     private void doClientStuff(final FMLClientSetupEvent event) {
@@ -78,6 +91,8 @@ public class SimuKraft {
         skinCacher.registerSpecialSkins();
 
         ModRenders.registerEntityRenders();
+
+        ScreenManager.registerFactory(OHRegistry.simContainer, GuiSimInventory::new);
     }
 
     private void enqueueIMC(final InterModEnqueueEvent event) {
@@ -119,6 +134,12 @@ public class SimuKraft {
         @SubscribeEvent
         public static void OnEntityRegistry(final RegistryEvent.Register<EntityType<?>> entityRegisterEvent) {
             ModEntities.init(entityRegisterEvent);
+        }
+
+        @SubscribeEvent
+        public static void onContainerRegistry(RegistryEvent.Register<ContainerType<?>> event) {
+            IForgeRegistry<ContainerType<?>> r = event.getRegistry();
+            r.register(IForgeContainerType.create((windowId, inv, data) -> new SimContainer(windowId,false, new EntitySim(ModEntities.ENTITY_SIM, null), inv)).setRegistryName(Reference.MODID, "sim_container"));
         }
     }
 }

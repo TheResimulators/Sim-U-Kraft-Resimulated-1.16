@@ -76,6 +76,7 @@ public class EntitySim extends AgeableEntity implements INPC {
     public ILivingEntityData onInitialSpawn(IWorld world, DifficultyInstance difficultyInstance, SpawnReason spawnReason, @Nullable ILivingEntityData livingEntityData, @Nullable CompoundNBT nbt) {
         ILivingEntityData livingData = super.onInitialSpawn(world, difficultyInstance, spawnReason, livingEntityData, nbt);
 
+
         //TODO: Add configuration for special spawn chance
         this.setSpecial(Utils.randomizeBooleanWithChance(Configs.SIMS.specialSpawnChance.get()));
 
@@ -154,6 +155,7 @@ public class EntitySim extends AgeableEntity implements INPC {
         compound.putBoolean("Special", this.getSpecial());
         compound.putBoolean("Lefthanded", this.getLefthanded());
         compound.put("Inventory", this.inventory.write(new ListNBT()));
+        compound.putInt("SelectedItemSlot", this.inventory.currentItem);
         compound.putInt("NameColor", this.getNameColor());
         compound.putString("Status", this.getStatus());
         this.foodStats.write(compound);
@@ -178,6 +180,8 @@ public class EntitySim extends AgeableEntity implements INPC {
             this.setLefthanded(compound.getBoolean("Lefthanded"));
         if (compound.contains("Inventory"))
             this.inventory.read(compound.getList("Inventory", 10));
+        if (compound.contains("SelectedItemSlot"))
+            this.inventory.currentItem = compound.getInt("SelectedItemSlot");
         if (compound.contains("NameColor"))
             this.setNameColor(compound.getInt("NameColor"));
         if (compound.contains("Status")) {
@@ -191,7 +195,8 @@ public class EntitySim extends AgeableEntity implements INPC {
 
         }
 
-        this.job.readFromNbt(compound.getList("job", Constants.NBT.TAG_LIST));
+        if (compound.contains("job"))
+            this.job.readFromNbt(compound.getList("job", Constants.NBT.TAG_LIST));
     }
 
     //Interaction
@@ -237,27 +242,15 @@ public class EntitySim extends AgeableEntity implements INPC {
     }
 
     @Override
-    public void onItemPickup(Entity entity, int quantity) {
-        super.onItemPickup(entity, quantity);
-        if (entity instanceof ItemEntity) {
-            ItemStack itemStack = ((ItemEntity) entity).getItem();
-            Item item = itemStack.getItem();
-            if (!(item instanceof ToolItem || item instanceof SwordItem || item instanceof CrossbowItem || item instanceof BowItem)) {
-                if (this.getHeldItemMainhand() == itemStack) {
-                    this.inventory.addItem(itemStack);
-                    this.setHeldItem(Hand.MAIN_HAND, ItemStack.EMPTY);
-                } else if (this.getHeldItemOffhand() == itemStack) {
-                    this.inventory.addItem(itemStack);
-                    this.setHeldItem(Hand.OFF_HAND, ItemStack.EMPTY);
-                }
-            }
-        }
-    }
-
-    @Override
     public void onDeath(DamageSource cause) {
         super.onDeath(cause);
         this.dropInventory();
+    }
+
+    //Inventory
+    @Override
+    public void onItemPickup(Entity entity, int quantity) {
+        super.onItemPickup(entity, quantity);
     }
 
     @Override
@@ -295,6 +288,87 @@ public class EntitySim extends AgeableEntity implements INPC {
 
             return itementity;
         }
+    }
+
+    public ItemStack getItemStackFromSlot(EquipmentSlotType slotIn) {
+        if (slotIn == EquipmentSlotType.MAINHAND) {
+            return this.inventory.getCurrentItem();
+        } else if (slotIn == EquipmentSlotType.OFFHAND) {
+            return this.inventory.handInventory.get(0);
+        } else {
+            return slotIn.getSlotType() == EquipmentSlotType.Group.ARMOR ? this.inventory.armorInventory.get(slotIn.getIndex()) : ItemStack.EMPTY;
+        }
+    }
+
+    @Override
+    public void setItemStackToSlot(EquipmentSlotType slotIn, ItemStack stack) {
+        if (slotIn == EquipmentSlotType.MAINHAND) {
+            this.playEquipSound(stack);
+            this.inventory.mainInventory.set(this.inventory.currentItem, stack);
+        } else if (slotIn == EquipmentSlotType.OFFHAND) {
+            this.playEquipSound(stack);
+            this.inventory.handInventory.set(0, stack);
+        } else if (slotIn.getSlotType() == EquipmentSlotType.Group.ARMOR) {
+            this.playEquipSound(stack);
+            this.inventory.armorInventory.set(slotIn.getIndex(), stack);
+        }
+    }
+
+    public boolean addItemStackToInventory(ItemStack p_191521_1_) {
+        this.playEquipSound(p_191521_1_);
+        return this.inventory.addItemStackToInventory(p_191521_1_);
+    }
+
+    @Override
+    public boolean replaceItemInInventory(int inventorySlot, ItemStack itemStackIn) {
+        if (inventorySlot >= 0 && inventorySlot < this.inventory.mainInventory.size()) {
+            this.inventory.setInventorySlotContents(inventorySlot, itemStackIn);
+            return true;
+        } else {
+            EquipmentSlotType equipmentslottype;
+            if (inventorySlot == 100 + EquipmentSlotType.HEAD.getIndex()) {
+                equipmentslottype = EquipmentSlotType.HEAD;
+            } else if (inventorySlot == 100 + EquipmentSlotType.CHEST.getIndex()) {
+                equipmentslottype = EquipmentSlotType.CHEST;
+            } else if (inventorySlot == 100 + EquipmentSlotType.LEGS.getIndex()) {
+                equipmentslottype = EquipmentSlotType.LEGS;
+            } else if (inventorySlot == 100 + EquipmentSlotType.FEET.getIndex()) {
+                equipmentslottype = EquipmentSlotType.FEET;
+            } else {
+                equipmentslottype = null;
+            }
+
+            if (inventorySlot == 98) {
+                this.setItemStackToSlot(EquipmentSlotType.MAINHAND, itemStackIn);
+                return true;
+            } else if (inventorySlot == 99) {
+                this.setItemStackToSlot(EquipmentSlotType.OFFHAND, itemStackIn);
+                return true;
+            } else {
+                if (!itemStackIn.isEmpty()) {
+                    if (!(itemStackIn.getItem() instanceof ArmorItem) && !(itemStackIn.getItem() instanceof ElytraItem)) {
+                        if (equipmentslottype != EquipmentSlotType.HEAD) {
+                            return false;
+                        }
+                    } else if (MobEntity.getSlotForItemStack(itemStackIn) != equipmentslottype) {
+                        return false;
+                    }
+                }
+
+                this.inventory.setInventorySlotContents(equipmentslottype.getIndex() + this.inventory.mainInventory.size(), itemStackIn);
+                return true;
+            }
+        }
+    }
+
+    @Override
+    public Iterable<ItemStack> getHeldEquipment() {
+        return Lists.newArrayList(this.getHeldItemMainhand(), this.getHeldItemOffhand());
+    }
+
+    @Override
+    public Iterable<ItemStack> getArmorInventoryList() {
+        return this.inventory.armorInventory;
     }
 
     public SimInventory getInventory() {
@@ -389,6 +463,16 @@ public class EntitySim extends AgeableEntity implements INPC {
 
     public boolean canEat(boolean ignoreHunger) {
         return this.isInvulnerable() || ignoreHunger || this.foodStats.needFood();
+    }
+
+    @Override
+    public int getGrowingAge() {
+        return super.getGrowingAge();
+    }
+
+    @Override
+    public boolean isChild() {
+        return super.isChild();
     }
 
     @Override
