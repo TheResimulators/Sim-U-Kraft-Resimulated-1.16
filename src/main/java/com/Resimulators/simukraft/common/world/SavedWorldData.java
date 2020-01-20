@@ -48,9 +48,10 @@ public class SavedWorldData extends WorldSavedData {
         ListNBT list = nbt.getList("factions", Constants.NBT.TAG_COMPOUND);
         for (INBT factionNBT:list){
             CompoundNBT compound = (CompoundNBT)factionNBT;
-            Faction faction = new Faction();
-            faction.read(compound);
             int id = compound.getInt("id");
+            Faction faction = new Faction(id);
+            faction.read(compound);
+
             this.factions.put(id,faction);
         }
     }
@@ -60,7 +61,7 @@ public class SavedWorldData extends WorldSavedData {
         ListNBT list = new ListNBT();
         for (int i :factions.keySet()){
             CompoundNBT nbt = new CompoundNBT();
-            nbt.putInt("id",i);
+
             nbt.put("faction",factions.get(i).write(new CompoundNBT()));
             list.add(nbt);
 
@@ -83,7 +84,7 @@ public class SavedWorldData extends WorldSavedData {
         while (factions.containsKey(id)) {
             id = rand.nextInt();
         }
-        Faction faction = new Faction();
+        Faction faction = new Faction(id);
         factions.put(id, faction);
         return faction;
     }
