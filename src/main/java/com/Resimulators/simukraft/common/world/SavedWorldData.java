@@ -12,7 +12,14 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.DimensionSavedDataManager;
 import net.minecraft.world.storage.WorldSavedData;
 import net.minecraftforge.common.util.Constants;
+
 import java.util.*;
+
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Random;
+
 
 public class SavedWorldData extends WorldSavedData {
     private static final String DATA_NAME = Reference.MODID + "_SavedWorldData";
@@ -101,15 +108,20 @@ public class SavedWorldData extends WorldSavedData {
         markDirty();
         this.factions.put(id,faction);
     }
-    public Faction getFaction(int id){
-            return factions.get(id);
+
+    public Faction getFaction(int id) {
+        return factions.get(id);
     }
 
-    public ArrayList<Integer> getFactionIds(){
+    public ArrayList<Integer> getFactionIds() {
         ArrayList<Integer> factionIds = new ArrayList<>();
         factionIds.addAll(factions.keySet());
         return factionIds;
+    }
 
+    public ArrayList<Faction> getFactions() {
+        ArrayList<Faction> allFactions = new ArrayList<Faction>(factions.values());
+        return allFactions;
     }
 
     public Faction getFactionWithPlayer(UUID id){
