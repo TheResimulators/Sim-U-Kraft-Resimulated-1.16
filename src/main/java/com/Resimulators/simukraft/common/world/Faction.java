@@ -1,19 +1,11 @@
 package com.Resimulators.simukraft.common.world;
 
 import com.Resimulators.simukraft.common.entity.sim.EntitySim;
-import net.minecraft.client.Minecraft;
-import net.minecraft.command.arguments.NBTCompoundTagArgument;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.fml.loading.FMLCommonLaunchHandler;
-import net.minecraftforge.fml.loading.FMLEnvironment;
 
-import javax.naming.ldap.LdapReferralException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
@@ -79,8 +71,6 @@ public class Faction {
         sims.put(sim.getUniqueID(), new SimInfo(sim.getUniqueID()));
     }
 
-
-
     public void setCredits(double credits){
         this.credits = credits;
     }
@@ -116,15 +106,18 @@ public class Faction {
 
     public void fireSim(UUID id){
         this.sims.get(id).hired = false;
-
     }
-    public void fireSim(EntitySim sim){
+
+    public void fireSim(EntitySim sim) {
         this.fireSim(sim.getUniqueID());
     }
 
-
-    public int getAmountOfSims(){
+    public int getAmountOfSims() {
         return sims.size();
+    }
+
+    public ArrayList<UUID> getPlayers() {
+        return players;
     }
 
     public void addPlayer(UUID player){
@@ -139,7 +132,8 @@ public class Faction {
         private UUID sim;
         private boolean hired;
         private boolean homeless;
-        SimInfo(UUID sim){
+
+        SimInfo(UUID sim) {
             this.sim = sim;
         }
 
