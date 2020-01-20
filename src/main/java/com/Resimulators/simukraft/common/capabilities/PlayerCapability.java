@@ -29,7 +29,7 @@ public class PlayerCapability implements INBTSerializable<CompoundNBT> {
 
     @Override
     public void deserializeNBT(CompoundNBT nbt) {
-        faction = new Faction();
+        faction = new Faction(nbt.getInt("id"));
         faction.read(nbt.getCompound("faction"));
     }
 
@@ -40,6 +40,8 @@ public class PlayerCapability implements INBTSerializable<CompoundNBT> {
     public void setFaction(Faction faction) {
         this.faction = faction;
     }
+
+
 
     public static class Provider implements ICapabilitySerializable<INBT> {
         @CapabilityInject(PlayerCapability.class)
@@ -71,7 +73,10 @@ public class PlayerCapability implements INBTSerializable<CompoundNBT> {
                 return LazyOptional.empty();
             }
         }
+
     }
+
+
 
     public static class Storage implements Capability.IStorage<PlayerCapability> {
         @Nullable

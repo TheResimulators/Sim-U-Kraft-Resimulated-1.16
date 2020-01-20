@@ -6,14 +6,9 @@ import net.minecraft.command.arguments.NBTCompoundTagArgument;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.fml.loading.FMLCommonLaunchHandler;
-import net.minecraftforge.fml.loading.FMLEnvironment;
 
-import javax.naming.ldap.LdapReferralException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
@@ -23,10 +18,13 @@ public class Faction {
     private ArrayList<UUID> players = new ArrayList<>();
     private HashMap<UUID,SimInfo> sims = new HashMap<>();
     private double credits = 0d;
+    private int id;
     private static Random rand = new Random();
     //TODO: add Housing to this
 
-
+    public Faction(int id){
+        this.id = id;
+    }
     public CompoundNBT write(CompoundNBT nbt){
         ListNBT list = new ListNBT();
         for(UUID uuid: players){
@@ -47,6 +45,7 @@ public class Faction {
         }
         nbt.put("sims",list);
         nbt.putDouble("credits",credits);
+        nbt.putInt("id",id);
         return nbt;
     }
 
@@ -67,14 +66,13 @@ public class Faction {
 
         }
         this.credits = nbt.getDouble("credits");
+
     }
 
     public void addsim(EntitySim sim){
 
         sims.put(sim.getUniqueID(), new SimInfo(sim.getUniqueID()));
     }
-
-
 
     public void setCredits(double credits){
         this.credits = credits;
@@ -111,22 +109,44 @@ public class Faction {
 
     public void fireSim(UUID id){
         this.sims.get(id).hired = false;
-
     }
-    public void fireSim(EntitySim sim){
+
+    public void fireSim(EntitySim sim) {
         this.fireSim(sim.getUniqueID());
     }
 
-
-    public int getAmountOfSims(){
+    public int getAmountOfSims() {
         return sims.size();
+    }
+
+
+
+    public ArrayList<Integer> getSimIds(ServerWorld world){
+        ArrayList<Integer> simids = new ArrayList<>();
+        for (UUID id:sims.keySet()){
+            simids.add(world.getEntityByUuid(id).getEntityId());
+        }
+        return simids;
+    }
+    public ArrayList<UUID> getPlayers() {
+        return players;
+    }
+    
+
+    public void addPlayer(UUID player){
+        this.players.add(player);
+    }
+
+    public int getId(){
+        return id;
     }
 
     static class SimInfo {
         private UUID sim;
         private boolean hired;
         private boolean homeless;
-        SimInfo(UUID sim){
+
+        SimInfo(UUID sim) {
             this.sim = sim;
         }
 

@@ -72,7 +72,16 @@ public class ModCapabilities {
         @SubscribeEvent
         public void joinWorld(PlayerEvent.PlayerLoggedInEvent event) {
             ServerPlayerEntity entity = (ServerPlayerEntity) event.getEntity();
+            LazyOptional<PlayerCapability> cap = ModCapabilities.get(entity);
+            SavedWorldData data = SavedWorldData.get(entity.world);
+            cap.ifPresent(playerCapability -> {
+                if (playerCapability.getFaction() == null) {
+                    Faction faction = data.createNewFaction();
+                    playerCapability.setFaction(faction);
+                    faction.addPlayer(event.getPlayer().getUniqueID());
+                }
 
+            });
             if (entity.world.isRemote) return;
             syncToPlayer(entity);
 
@@ -81,14 +90,13 @@ public class ModCapabilities {
 
 
         public void syncToPlayer(ServerPlayerEntity entity) {
-            Faction faction = SavedWorldData.get(entity.world).createNewFaction();
-            int id = SavedWorldData.get(entity.world).getFactionId(faction);
+
             LazyOptional<PlayerCapability> cap = ModCapabilities.get(entity);
             cap.ifPresent(playerCapability -> {
-                playerCapability.setFaction(faction);
-                        SimUKraftPacketHandler.INSTANCE.sendTo(new SyncPlayerCapability(playerCapability.serializeNBT(),id),
-                                entity.connection.netManager, NetworkDirection.PLAY_TO_CLIENT);
-                    }
+                int id = playerCapability.getFaction().getId();
+                SimUKraftPacketHandler.INSTANCE.sendTo(new SyncPlayerCapability(playerCapability.serializeNBT(),id),
+                    entity.connection.netManager, NetworkDirection.PLAY_TO_CLIENT);
+                }
             );
 
         }

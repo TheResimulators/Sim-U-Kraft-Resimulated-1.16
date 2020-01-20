@@ -1,6 +1,7 @@
 package com.Resimulators.simukraft.handlers;
 
 import com.Resimulators.simukraft.Reference;
+import com.Resimulators.simukraft.packets.OpenJobGuiPacket;
 import com.Resimulators.simukraft.packets.SyncPlayerCapability;
 import net.minecraft.util.ResourceLocation;
 
@@ -28,6 +29,7 @@ public class SimUKraftPacketHandler {
 
     public static void init(){
         INSTANCE.registerMessage(newId(), SyncPlayerCapability.class,SyncPlayerCapability::encode,SyncPlayerCapability::decode,SyncPlayerCapability::handler);
+        INSTANCE.registerMessage(newId(), OpenJobGuiPacket.class,OpenJobGuiPacket::encode,OpenJobGuiPacket::decode,OpenJobGuiPacket::handler);
 
     }
 }

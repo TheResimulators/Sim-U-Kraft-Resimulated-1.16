@@ -26,7 +26,7 @@ displayName="Sim-u-Kraft" #mandatory
 # A text field displayed in the mod UI
 credits="Resimulators" #optional
 # A text field displayed in the mod UI
-authors="Aidie8, Fabbe50, Mcboy" #optional
+authors="Aidie8, Fabbe50, Mcboy, Reprevise" #optional
 # The description text for the mod (multi line!) (#mandatory)
 description='''This mod is a remake of the original simukraft. it was updated to 1.7.10 and now being updated to 1.15'''
 # A dependency - use the . to indicate dependency for a specific modid. Dependencies are optional.
