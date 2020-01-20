@@ -66,20 +66,24 @@ public class Faction {
 
     }
 
-    public void addsim(EntitySim sim){
+    public void addsim(EntitySim sim) {
 
         sims.put(sim.getUniqueID(), new SimInfo(sim.getUniqueID()));
     }
 
-    public void setCredits(double credits){
+    public void removeSim(EntitySim sim) {
+        sims.remove(sim.getUniqueID());
+    }
+
+    public void setCredits(double credits) {
         this.credits = credits;
     }
 
-    public void addCredits(double credits){
-        setCredits(this.credits +credits);
+    public void addCredits(double credits) {
+        setCredits(this.credits + credits);
     }
 
-    public double getCredits(){
+    public double getCredits() {
         return this.credits;
     }
 
@@ -116,15 +120,19 @@ public class Faction {
         return sims.size();
     }
 
+    public HashMap<UUID, SimInfo> getSims() {
+        return sims;
+    }
+
     public ArrayList<UUID> getPlayers() {
         return players;
     }
 
-    public void addPlayer(UUID player){
+    public void addPlayer(UUID player) {
         this.players.add(player);
     }
 
-    public int getId(){
+    public int getId() {
         return id;
     }
 

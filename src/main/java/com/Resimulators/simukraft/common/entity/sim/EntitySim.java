@@ -1,9 +1,11 @@
 package com.Resimulators.simukraft.common.entity.sim;
 
 import com.Resimulators.simukraft.Configs;
+import com.Resimulators.simukraft.common.entity.goals.PickupItemGoal;
 import com.Resimulators.simukraft.common.jobs.JobBuilder;
 import com.Resimulators.simukraft.common.jobs.core.IJob;
-import com.Resimulators.simukraft.common.entity.goals.PickupItemGoal;
+import com.Resimulators.simukraft.common.world.Faction;
+import com.Resimulators.simukraft.common.world.SavedWorldData;
 import com.Resimulators.simukraft.handlers.FoodStats;
 import com.Resimulators.simukraft.init.ModEntities;
 import com.Resimulators.simukraft.utils.Utils;
@@ -15,7 +17,10 @@ import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerModelPart;
 import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.*;
+import net.minecraft.item.ArmorItem;
+import net.minecraft.item.DyeItem;
+import net.minecraft.item.ElytraItem;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.network.datasync.DataParameter;
@@ -34,7 +39,9 @@ import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.Random;
 
 public class EntitySim extends AgeableEntity implements INPC {
     private static final EntitySize SIZE = EntitySize.flexible(0.6f, 1.8f);
@@ -245,6 +252,18 @@ public class EntitySim extends AgeableEntity implements INPC {
     public void onDeath(DamageSource cause) {
         super.onDeath(cause);
         this.dropInventory();
+        removeFromFaction();
+    }
+
+    public void removeFromFaction() {
+        SavedWorldData sWorld = SavedWorldData.get(world);
+        ArrayList<Faction> factions = sWorld.getFactions();
+        for (Faction faction : factions) {
+            if (faction.getSims().containsKey(this.entityUniqueID)) {
+                faction.fireSim(this);
+                faction.removeSim(this);
+            }
+        }
     }
 
     //Inventory
