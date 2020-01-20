@@ -4,6 +4,7 @@ import com.Resimulators.simukraft.common.entity.sim.EntitySim;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.util.Constants;
 
 import java.util.ArrayList;
@@ -127,14 +128,17 @@ public class Faction {
     }
     public ArrayList<UUID> getPlayers() {
         return players;
+    }
+    
+
+    public void addPlayer(UUID player){
+        this.players.add(player);
+    }
 
     public int getId(){
         return id;
     }
 
-    public void addPlayer(UUID player){
-        this.players.add(player);
-    }
     static class SimInfo {
         private UUID sim;
         private boolean hired;
