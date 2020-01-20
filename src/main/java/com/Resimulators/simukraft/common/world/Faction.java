@@ -22,7 +22,8 @@ public class Faction {
     private static Random rand = new Random();
     //TODO: add Housing to this
 
-    public Faction(int id){
+    public Faction(int id)
+    {
         this.id = id;
     }
     public CompoundNBT write(CompoundNBT nbt){
@@ -57,7 +58,7 @@ public class Faction {
         }
         ListNBT sims = nbt.getList("sims",Constants.NBT.TAG_COMPOUND);
 
-        for (INBT sim : players){
+        for (INBT sim : sims){
             CompoundNBT compound = (CompoundNBT) sim;
             UUID id =compound.getUniqueId("sim");
             SimInfo info = new SimInfo(id);
@@ -107,7 +108,8 @@ public class Faction {
         this.hireSim(sim.getUniqueID());
     }
 
-    public void fireSim(UUID id){
+    public void fireSim(UUID id)
+    {
         this.sims.get(id).hired = false;
     }
 
@@ -135,6 +137,7 @@ public class Faction {
 
     public void addPlayer(UUID player){
         this.players.add(player);
+
     }
 
     public int getId(){

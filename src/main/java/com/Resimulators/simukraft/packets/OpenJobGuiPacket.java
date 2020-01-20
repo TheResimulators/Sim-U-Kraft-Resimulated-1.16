@@ -1,19 +1,11 @@
 package com.Resimulators.simukraft.packets;
 
 import com.Resimulators.simukraft.client.gui.BaseJobGui;
-import com.Resimulators.simukraft.common.capabilities.PlayerCapability;
-import com.Resimulators.simukraft.common.world.Faction;
-import com.Resimulators.simukraft.common.world.SavedWorldData;
-import com.Resimulators.simukraft.init.ModCapabilities;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.text.StringTextComponent;
-import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fml.network.NetworkEvent;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.function.Supplier;
 
@@ -33,7 +25,8 @@ public class OpenJobGuiPacket {
 
     public static OpenJobGuiPacket decode(PacketBuffer buffer){
         ArrayList<Integer> ids = new ArrayList<>();
-        for(int i = 0;i<buffer.readInt();i++){
+        int length = buffer.readInt();
+        for(int i = 0;i<length;i++){
             ids.add(buffer.readInt());
         }
         return new OpenJobGuiPacket(ids);
