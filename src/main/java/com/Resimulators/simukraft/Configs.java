@@ -65,7 +65,7 @@ public class Configs {
                     .defineInRange("Spawn Chance", 20, 1, Integer.MAX_VALUE);
             specialSimNames = COMMON_BUILDER.comment("Player usernames that will be assigned to the Sims.", "Skins of these players will also render on the Sims.")
                     .translation(LANG_KEY_SIMS + ".simnames")
-                    .defineList("Special Names", ImmutableList.of("General5001", "Div4Wom4n", "fabbe50", "zakando", "Ellisenator", "jakegalen", "brodydavid1126", "Maiyr_Cordeth", "Korath"), obj -> obj instanceof String);
+                    .defineList("Special Names", ImmutableList.of("General5001", "Div4Wom4n", "fabbe50", "zakando", "Ellisenator", "jakegalen", "brodydavid1126", "Maiyr_Cordeth", "Korath", "SunCrAzy"), obj -> obj instanceof String);
             specialSimGenders = COMMON_BUILDER.comment("Names of skins that use the model with thin arms.")
                     .translation(LANG_KEY_SIMS + ".simgenders")
                     .defineList("Thin model", ImmutableList.of("Div4Wom4n", "fabbe50"), obj -> obj instanceof String);
