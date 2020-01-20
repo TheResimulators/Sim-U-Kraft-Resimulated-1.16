@@ -127,11 +127,6 @@ public class Faction {
     }
     public ArrayList<UUID> getPlayers() {
         return players;
-    }
-
-    public void addPlayer(UUID player){
-        this.players.add(player);
-    }
 
     public int getId(){
         return id;
@@ -140,11 +135,6 @@ public class Faction {
     public void addPlayer(UUID player){
         this.players.add(player);
     }
-
-    public int getId(){
-        return id;
-    }
-
     static class SimInfo {
         private UUID sim;
         private boolean hired;
