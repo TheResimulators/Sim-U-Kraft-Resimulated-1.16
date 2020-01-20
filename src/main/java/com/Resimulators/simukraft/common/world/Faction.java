@@ -137,6 +137,14 @@ public class Faction {
         return id;
     }
 
+    public void addPlayer(UUID player){
+        this.players.add(player);
+    }
+
+    public int getId(){
+        return id;
+    }
+
     static class SimInfo {
         private UUID sim;
         private boolean hired;
