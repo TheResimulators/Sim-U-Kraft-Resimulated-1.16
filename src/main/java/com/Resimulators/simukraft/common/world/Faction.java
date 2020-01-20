@@ -15,10 +15,13 @@ public class Faction {
     private ArrayList<UUID> players = new ArrayList<>();
     private HashMap<UUID,SimInfo> sims = new HashMap<>();
     private double credits = 0d;
+    private int id;
     private static Random rand = new Random();
     //TODO: add Housing to this
 
-
+    public Faction(int id){
+        this.id = id;
+    }
     public CompoundNBT write(CompoundNBT nbt){
         ListNBT list = new ListNBT();
         for(UUID uuid: players){
@@ -39,6 +42,7 @@ public class Faction {
         }
         nbt.put("sims",list);
         nbt.putDouble("credits",credits);
+        nbt.putInt("id",id);
         return nbt;
     }
 
@@ -59,6 +63,7 @@ public class Faction {
 
         }
         this.credits = nbt.getDouble("credits");
+
     }
 
     public void addsim(EntitySim sim){
@@ -113,6 +118,14 @@ public class Faction {
 
     public ArrayList<UUID> getPlayers() {
         return players;
+    }
+
+    public void addPlayer(UUID player){
+        this.players.add(player);
+    }
+
+    public int getId(){
+        return id;
     }
 
     static class SimInfo {
