@@ -70,13 +70,40 @@ public class NewDayEvent implements INBTSerializable<CompoundNBT> {
 
     public void spawnSims(World world) {
         SavedWorldData worldData = SavedWorldData.get(world);
+
+        List<Faction> worldFactions = new ArrayList<Faction>();
+        ArrayList<Integer> factionIDs = worldData.getFactionIds();
+        for (Integer item : factionIDs) {
+            if (worldData.getFaction(item) != null) {
+                worldFactions.add(worldData.getFaction(item));
+            }
+        }
         ArrayList<Faction> factions = worldData.getFactions();
         for (Faction faction : factions) {
             if (faction.getUnemployedSims().isEmpty()) {
                 EntitySim sim = new EntitySim(ModEntities.ENTITY_SIM, world);
-                faction.addsim(sim);
+                SavedWorldData.get(world).addSimToFaction(faction.getId(),sim);
+                //faction.addsim(sim);
                 ArrayList<UUID> players = faction.getPlayers();
                 ServerWorld sWorld = (ServerWorld) world;
+                if (sWorld.getPlayers().size() > 0){
+                PlayerEntity player = sWorld.getPlayers().get(random.nextInt(sWorld.getPlayers().size()));
+                BlockPos pos = player.getPosition();
+                double x = pos.getX();
+                double y = pos.getY();
+                double z = pos.getZ();
+                Log.info("Position: " + pos);
+//                TODO: change spawning system
+                sim.setPosition(x, y + 3, z);
+                sWorld.func_217460_e(sim); // spawn entity
+            } else {
+               Log.info("There are unemployed sims");
+            }
+        }}
+    }
+
+    public static DayOfWeek getDay() {
+        return dayOfWeek;
                 PlayerEntity player = sWorld.getPlayerByUuid(players.get(random.nextInt(players.size())));
                 do {
                     ArrayList<BlockPos> blocks = Lists.newArrayList(getBlocksAroundPlayer(player.getPosition(), radius));

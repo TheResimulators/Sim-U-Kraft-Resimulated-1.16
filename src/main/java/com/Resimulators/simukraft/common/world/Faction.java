@@ -1,9 +1,12 @@
 package com.Resimulators.simukraft.common.world;
 
 import com.Resimulators.simukraft.common.entity.sim.EntitySim;
+import net.minecraft.client.Minecraft;
+import net.minecraft.command.arguments.NBTCompoundTagArgument;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.util.Constants;
 
 import java.util.ArrayList;
@@ -19,7 +22,8 @@ public class Faction {
     private static Random rand = new Random();
     //TODO: add Housing to this
 
-    public Faction(int id){
+    public Faction(int id)
+    {
         this.id = id;
     }
     public CompoundNBT write(CompoundNBT nbt){
@@ -54,7 +58,7 @@ public class Faction {
         }
         ListNBT sims = nbt.getList("sims",Constants.NBT.TAG_COMPOUND);
 
-        for (INBT sim : players){
+        for (INBT sim : sims){
             CompoundNBT compound = (CompoundNBT) sim;
             UUID id =compound.getUniqueId("sim");
             SimInfo info = new SimInfo(id);
@@ -108,7 +112,8 @@ public class Faction {
         this.hireSim(sim.getUniqueID());
     }
 
-    public void fireSim(UUID id){
+    public void fireSim(UUID id)
+    {
         this.sims.get(id).hired = false;
     }
 
@@ -120,16 +125,29 @@ public class Faction {
         return sims.size();
     }
 
+
+
+    public ArrayList<Integer> getSimIds(ServerWorld world){
+        ArrayList<Integer> simids = new ArrayList<>();
+        for (UUID id:sims.keySet()){
+            simids.add(world.getEntityByUuid(id).getEntityId());
+        }
+        return simids;
+    }
+
     public HashMap<UUID, SimInfo> getSims() {
         return sims;
     }
 
+
     public ArrayList<UUID> getPlayers() {
         return players;
     }
+    
 
     public void addPlayer(UUID player) {
         this.players.add(player);
+
     }
 
     public int getId() {
