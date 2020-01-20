@@ -6,7 +6,6 @@ import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.event.world.WorldEvent;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,13 +17,11 @@ public class Faction {
     private HashMap<UUID,SimInfo> sims = new HashMap<>();
     private double credits = 0d;
     private int id;
-    private SavedWorldData data;
     private static Random rand = new Random();
     //TODO: add Housing to this
 
-    public Faction(int id, SavedWorldData data)
+    public Faction(int id)
     {
-        this.data = data;
         this.id = id;
     }
     public CompoundNBT write(CompoundNBT nbt){
@@ -72,12 +69,11 @@ public class Faction {
     }
 
     public void addsim(EntitySim sim){
-        data.markDirty();
+
         sims.put(sim.getUniqueID(), new SimInfo(sim.getUniqueID()));
     }
 
     public void setCredits(double credits){
-        data.markDirty();
         this.credits = credits;
     }
 
@@ -103,23 +99,19 @@ public class Faction {
     }
 
     public void hireSim(UUID id){
-        data.markDirty();
         this.sims.get(id).hired = true;
     }
 
     public void hireSim(EntitySim sim){
-        data.markDirty();
         this.hireSim(sim.getUniqueID());
     }
 
     public void fireSim(UUID id)
     {
-        data.markDirty();
         this.sims.get(id).hired = false;
     }
 
     public void fireSim(EntitySim sim) {
-        data.markDirty();
         this.fireSim(sim.getUniqueID());
     }
 
@@ -142,7 +134,6 @@ public class Faction {
     
 
     public void addPlayer(UUID player){
-        data.markDirty();
         this.players.add(player);
 
     }

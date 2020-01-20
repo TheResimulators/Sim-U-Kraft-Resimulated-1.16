@@ -1,6 +1,8 @@
 package com.Resimulators.simukraft.common.world;
 
 import com.Resimulators.simukraft.Reference;
+import com.Resimulators.simukraft.common.entity.sim.EntitySim;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
@@ -10,11 +12,6 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.DimensionSavedDataManager;
 import net.minecraft.world.storage.WorldSavedData;
 import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.fml.server.ServerLifecycleHooks;
-
-import java.lang.reflect.Array;
 import java.util.*;
 
 public class SavedWorldData extends WorldSavedData {
@@ -48,8 +45,9 @@ public class SavedWorldData extends WorldSavedData {
         ListNBT list = nbt.getList("factions", Constants.NBT.TAG_COMPOUND);
         for (INBT factionNBT:list){
             CompoundNBT compound = (CompoundNBT)factionNBT;
+            compound = compound.getCompound("faction");
             int id = compound.getInt("id");
-            Faction faction = new Faction(id,this);
+            Faction faction = new Faction(id);
             faction.read(compound);
 
             this.factions.put(id,faction);
@@ -83,7 +81,7 @@ public class SavedWorldData extends WorldSavedData {
         while (factions.containsKey(id)) {
             id = rand.nextInt();
         }
-        Faction faction = new Faction(id,this);
+        Faction faction = new Faction(id);
         factions.put(id, faction);
         markDirty();
         return faction;
@@ -121,6 +119,32 @@ public class SavedWorldData extends WorldSavedData {
             }
         }
         return null;
+    }
+
+    public void addSimToFaction(int id, EntitySim sim){
+        factions.get(id).addsim(sim);
+        markDirty();
+    }
+
+    public void addPlayerToFaction(int id, PlayerEntity player){
+        factions.get(id).addPlayer(player.getUniqueID());
+        markDirty();
+    }
+
+    public void removePlayerFromFaction(int id, PlayerEntity player){
+        // TODO add removal of things
+    }
+
+    public void removeSimFromFaction(int id, EntitySim sim){
+        //TODO add removal of sims
+    }
+
+    public void hireSim(int id,EntitySim sim){
+        getFaction(id).hireSim(sim);
+    }
+
+    public void fireSim(int id,EntitySim sim){
+        getFaction(id).fireSim(sim);
     }
 
 }

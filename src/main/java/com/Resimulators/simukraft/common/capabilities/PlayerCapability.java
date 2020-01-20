@@ -2,7 +2,6 @@ package com.Resimulators.simukraft.common.capabilities;
 
 import com.Resimulators.simukraft.Reference;
 import com.Resimulators.simukraft.common.world.Faction;
-import com.Resimulators.simukraft.common.world.SavedWorldData;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.util.Direction;
@@ -12,7 +11,6 @@ import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.minecraftforge.common.capabilities.ICapabilitySerializable;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fml.server.ServerLifecycleHooks;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -32,7 +30,7 @@ public class PlayerCapability implements INBTSerializable<CompoundNBT> {
 
     @Override
     public void deserializeNBT(CompoundNBT nbt) {
-        faction = new Faction(nbt.getInt("id"), SavedWorldData.get(ServerLifecycleHooks.getCurrentServer().getWorlds().iterator().next()));
+        faction = new Faction(nbt.getInt("id"));
         faction.read(nbt.getCompound("faction"));
         factionId = nbt.getInt("id");
     }

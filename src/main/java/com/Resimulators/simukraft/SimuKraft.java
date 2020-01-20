@@ -14,6 +14,7 @@ import com.Resimulators.simukraft.init.ModEntities;
 import com.Resimulators.simukraft.init.ModItems;
 import com.Resimulators.simukraft.init.ModRenders;
 import net.minecraft.block.Block;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScreenManager;
 import net.minecraft.entity.EntityType;
 import net.minecraft.inventory.container.ContainerType;
@@ -78,7 +79,7 @@ public class SimuKraft {
 
     private void setup(final FMLCommonSetupEvent event) {
         MinecraftForge.EVENT_BUS.register(new NewDayEvent());
-        ModCapabilities.init();
+        MinecraftForge.EVENT_BUS.register(new FactionEvents());
         SimUKraftPacketHandler.init();
 
     }
