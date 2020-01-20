@@ -49,7 +49,7 @@ public class SavedWorldData extends WorldSavedData {
         for (INBT factionNBT:list){
             CompoundNBT compound = (CompoundNBT)factionNBT;
             int id = compound.getInt("id");
-            Faction faction = new Faction(id);
+            Faction faction = new Faction(id,this);
             faction.read(compound);
 
             this.factions.put(id,faction);
@@ -61,7 +61,6 @@ public class SavedWorldData extends WorldSavedData {
         ListNBT list = new ListNBT();
         for (int i :factions.keySet()){
             CompoundNBT nbt = new CompoundNBT();
-
             nbt.put("faction",factions.get(i).write(new CompoundNBT()));
             list.add(nbt);
 
@@ -84,17 +83,24 @@ public class SavedWorldData extends WorldSavedData {
         while (factions.containsKey(id)) {
             id = rand.nextInt();
         }
-        Faction faction = new Faction(id);
+        Faction faction = new Faction(id,this);
         factions.put(id, faction);
+        markDirty();
         return faction;
     }
 
     public void deleteFaction(int id){
         factions.remove(id);
+        markDirty();
 
+    }
+    public void addFaction(Faction faction){
+        setFaction(rand.nextInt(),faction);
+        markDirty();
     }
 
     public void setFaction(int id, Faction faction){
+        markDirty();
         this.factions.put(id,faction);
     }
     public Faction getFaction(int id){
@@ -106,6 +112,15 @@ public class SavedWorldData extends WorldSavedData {
         factionIds.addAll(factions.keySet());
         return factionIds;
 
+    }
+
+    public Faction getFactionWithPlayer(UUID id){
+        for (Faction faction:factions.values()){
+            if (faction.getPlayers().contains(id)){
+                return faction;
+            }
+        }
+        return null;
     }
 
 }

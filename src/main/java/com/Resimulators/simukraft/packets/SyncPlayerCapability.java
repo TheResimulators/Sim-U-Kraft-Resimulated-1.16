@@ -41,7 +41,7 @@ public class SyncPlayerCapability {
         PlayerEntity player = Minecraft.getInstance().player;
         ctx.get().enqueueWork(() -> {
             LazyOptional<PlayerCapability> cap = ModCapabilities.get(player);
-            Faction faction = new Faction(message.id);
+            Faction faction = new Faction(message.id,SavedWorldData.get(Minecraft.getInstance().world));
             faction.read(message.nbt);
             SavedWorldData.get(Minecraft.getInstance().world).setFaction(message.id,faction);
             cap.ifPresent(playerCapability -> {

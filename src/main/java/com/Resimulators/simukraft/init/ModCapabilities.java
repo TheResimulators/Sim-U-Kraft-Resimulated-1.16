@@ -6,6 +6,7 @@ import com.Resimulators.simukraft.common.world.Faction;
 import com.Resimulators.simukraft.common.world.SavedWorldData;
 import com.Resimulators.simukraft.handlers.SimUKraftPacketHandler;
 import com.Resimulators.simukraft.packets.SyncPlayerCapability;
+import com.sun.org.apache.bcel.internal.generic.IF_ACMPEQ;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -60,6 +61,7 @@ public class ModCapabilities {
             if (event.getObject() instanceof PlayerEntity) {
                 event.addCapability(PlayerCapability.CAPABILITY_ID, new PlayerCapability.Provider());
 
+
             }
 
         }
@@ -75,11 +77,13 @@ public class ModCapabilities {
             LazyOptional<PlayerCapability> cap = ModCapabilities.get(entity);
             SavedWorldData data = SavedWorldData.get(entity.world);
             cap.ifPresent(playerCapability -> {
+                playerCapability.setFaction(SavedWorldData.get(event.getPlayer().getEntityWorld()).getFactionWithPlayer(event.getEntity().getUniqueID()));
                 if (playerCapability.getFaction() == null) {
                     Faction faction = data.createNewFaction();
                     playerCapability.setFaction(faction);
                     faction.addPlayer(event.getPlayer().getUniqueID());
-                }
+                }else if (data.getFaction(playerCapability.getFactionId()) == null){
+                    data.setFaction(playerCapability.getFaction().getId(),playerCapability.getFaction());}
 
             });
             if (entity.world.isRemote) return;

@@ -30,6 +30,7 @@ public class SimHud extends AbstractGui {
         if (Minecraft.getInstance().currentScreen == null) {
             LazyOptional<PlayerCapability> cap = Minecraft.getInstance().player.getCapability(PlayerCapability.Provider.TEST);
             cap.ifPresent(playerCapability -> {
+
                 num = playerCapability.getFaction().getAmountOfSims();
                 credits = playerCapability.getFaction().getCredits();
             });

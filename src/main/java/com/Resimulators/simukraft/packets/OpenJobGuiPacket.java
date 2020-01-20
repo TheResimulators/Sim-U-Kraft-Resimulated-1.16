@@ -33,7 +33,8 @@ public class OpenJobGuiPacket {
 
     public static OpenJobGuiPacket decode(PacketBuffer buffer){
         ArrayList<Integer> ids = new ArrayList<>();
-        for(int i = 0;i<buffer.readInt();i++){
+        int length = buffer.readInt();
+        for(int i = 0;i<length;i++){
             ids.add(buffer.readInt());
         }
         return new OpenJobGuiPacket(ids);
