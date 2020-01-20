@@ -18,12 +18,13 @@ import javax.annotation.Nullable;
 public class PlayerCapability implements INBTSerializable<CompoundNBT> {
     public static final ResourceLocation CAPABILITY_ID = new ResourceLocation(Reference.MODID, "player_capability");
     private Faction faction;
-
+    private int factionId;
     @Override
     public CompoundNBT serializeNBT() {
         CompoundNBT nbt = new CompoundNBT();
         if (faction != null){
-        nbt.put("faction", faction.write(new CompoundNBT()));}
+            nbt.putInt("id",factionId);
+            nbt.put("faction", faction.write(new CompoundNBT()));}
         return nbt;
     }
 
@@ -31,6 +32,7 @@ public class PlayerCapability implements INBTSerializable<CompoundNBT> {
     public void deserializeNBT(CompoundNBT nbt) {
         faction = new Faction(nbt.getInt("id"));
         faction.read(nbt.getCompound("faction"));
+        factionId = nbt.getInt("id");
     }
 
     public Faction getFaction() {
@@ -38,10 +40,14 @@ public class PlayerCapability implements INBTSerializable<CompoundNBT> {
     }
 
     public void setFaction(Faction faction) {
+        if (faction != null){
+        this.factionId = faction.getId();
         this.faction = faction;
+    }}
+
+    public int getFactionId() {
+        return factionId;
     }
-
-
 
     public static class Provider implements ICapabilitySerializable<INBT> {
         @CapabilityInject(PlayerCapability.class)
