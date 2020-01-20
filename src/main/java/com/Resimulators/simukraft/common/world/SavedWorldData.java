@@ -10,12 +10,10 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.DimensionSavedDataManager;
 import net.minecraft.world.storage.WorldSavedData;
 import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.fml.server.ServerLifecycleHooks;
 
-import java.lang.reflect.Array;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Random;
 
 public class SavedWorldData extends WorldSavedData {
     private static final String DATA_NAME = Reference.MODID + "_SavedWorldData";
@@ -91,21 +89,25 @@ public class SavedWorldData extends WorldSavedData {
 
     public void deleteFaction(int id){
         factions.remove(id);
-
     }
 
     public void setFaction(int id, Faction faction){
         this.factions.put(id,faction);
     }
-    public Faction getFaction(int id){
-            return factions.get(id);
+
+    public Faction getFaction(int id) {
+        return factions.get(id);
     }
 
-    public ArrayList<Integer> getFactionIds(){
+    public ArrayList<Integer> getFactionIds() {
         ArrayList<Integer> factionIds = new ArrayList<>();
         factionIds.addAll(factions.keySet());
         return factionIds;
+    }
 
+    public ArrayList<Faction> getFactions() {
+        ArrayList<Faction> allFactions = new ArrayList<Faction>(factions.values());
+        return allFactions;
     }
 
 }
