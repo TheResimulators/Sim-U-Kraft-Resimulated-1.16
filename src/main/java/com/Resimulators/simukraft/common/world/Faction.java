@@ -122,6 +122,15 @@ public class Faction {
         return sims.size();
     }
 
+
+
+    public ArrayList<Integer> getSimIds(ServerWorld world){
+        ArrayList<Integer> simids = new ArrayList<>();
+        for (UUID id:sims.keySet()){
+            simids.add(world.getEntityByUuid(id).getEntityId());
+        }
+        return simids;
+    }
     static class SimInfo {
         private UUID sim;
         private boolean hired;
