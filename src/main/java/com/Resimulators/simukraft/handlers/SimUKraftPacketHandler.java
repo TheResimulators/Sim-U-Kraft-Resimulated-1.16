@@ -23,6 +23,8 @@ import java.util.function.Supplier;
 
 public class SimUKraftPacketHandler {
 
+
+    public SimUKraftPacketHandler(){}
     private static int ID = 0;
 
     private static int newId(){
