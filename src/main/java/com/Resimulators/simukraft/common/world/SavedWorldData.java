@@ -95,6 +95,8 @@ public class SavedWorldData extends WorldSavedData {
     }
 
     public void deleteFaction(int id){
+        factions.get(id).removeAllSims();
+        factions.get(id).removeAllPlayers();
         factions.remove(id);
         markDirty();
 
