@@ -162,6 +162,8 @@ public class Faction {
         players.iterator().forEachRemaining(PLAYER-> players.remove(PLAYER));
     }
 
+
+
     static class SimInfo {
         private UUID sim;
         private boolean hired;

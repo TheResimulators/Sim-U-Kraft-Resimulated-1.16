@@ -4,37 +4,47 @@ import com.Resimulators.simukraft.client.gui.BaseJobGui;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.network.NetworkEvent;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.function.Supplier;
 
-public class OpenJobGuiPacket {
+public class OpenJobGuiPacket implements IMessage {
     private ArrayList<Integer> ints;
     public OpenJobGuiPacket(ArrayList<Integer> ints){
-    this.ints = ints;
+        super();
+        this.ints = ints;
     }
+    public OpenJobGuiPacket(){}
 
-    public static void encode(OpenJobGuiPacket pkt, PacketBuffer buffer){
-        buffer.writeInt(pkt.ints.size());
-        for(int id:pkt.ints){
-            buffer.writeInt(id);
-        }
+    @Override
+    public void toBytes(PacketBuffer buf) {
+        buf.writeInt(ints.size());
+        for(int id:ints){
+            buf.writeInt(id);
     }
+}
 
-
-    public static OpenJobGuiPacket decode(PacketBuffer buffer){
+    @Override
+    public void fromBytes(PacketBuffer buf) {
         ArrayList<Integer> ids = new ArrayList<>();
-        int length = buffer.readInt();
+        int length = buf.readInt();
         for(int i = 0;i<length;i++){
-            ids.add(buffer.readInt());
+            ids.add(buf.readInt());
         }
-        return new OpenJobGuiPacket(ids);
+        ints =ids;
     }
-    public static void handler(OpenJobGuiPacket message, Supplier<NetworkEvent.Context> ctx) {
 
-        ctx.get().enqueueWork(() -> {
-            Minecraft.getInstance().displayGuiScreen(new BaseJobGui(new StringTextComponent("Base"),message.ints));
-        });
+    @Nullable
+    @Override
+    public LogicalSide getExecutionSide() {
+        return LogicalSide.CLIENT;
+    }
+
+    @Override
+    public void onExecute(NetworkEvent.Context ctxIn, boolean isLogicalServer) {
+        Minecraft.getInstance().displayGuiScreen(new BaseJobGui(new StringTextComponent("Base"),ints));
     }
 }
