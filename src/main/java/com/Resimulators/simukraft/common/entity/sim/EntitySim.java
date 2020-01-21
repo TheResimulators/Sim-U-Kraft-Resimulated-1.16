@@ -260,8 +260,7 @@ public class EntitySim extends AgeableEntity implements INPC {
         ArrayList<Faction> factions = sWorld.getFactions();
         for (Faction faction : factions) {
             if (faction.getSims().containsKey(this.entityUniqueID)) {
-                faction.fireSim(this);
-                faction.removeSim(this);
+                sWorld.removeSimFromFaction(faction.getId(),this);
             }
         }
     }
