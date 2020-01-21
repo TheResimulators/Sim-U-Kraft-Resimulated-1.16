@@ -31,6 +31,7 @@ public class NewDayEvent implements INBTSerializable<CompoundNBT> {
     private double day = 0;
     private double previousDay = 0;
     private int radius = 10;
+    private static final int maxRadius = 50;
 
     @SubscribeEvent
     public void OnNewDayEvent(TickEvent.WorldTickEvent event) {
@@ -71,60 +72,43 @@ public class NewDayEvent implements INBTSerializable<CompoundNBT> {
     public void spawnSims(World world) {
         SavedWorldData worldData = SavedWorldData.get(world);
 
-        List<Faction> worldFactions = new ArrayList<Faction>();
-        ArrayList<Integer> factionIDs = worldData.getFactionIds();
-        for (Integer item : factionIDs) {
-            if (worldData.getFaction(item) != null) {
-                worldFactions.add(worldData.getFaction(item));
-            }
-        }
         ArrayList<Faction> factions = worldData.getFactions();
         for (Faction faction : factions) {
             if (faction.getUnemployedSims().isEmpty()) {
                 EntitySim sim = new EntitySim(ModEntities.ENTITY_SIM, world);
-                SavedWorldData.get(world).addSimToFaction(faction.getId(),sim);
+                SavedWorldData.get(world).addSimToFaction(faction.getId(), sim);
                 //faction.addsim(sim);
                 ArrayList<UUID> players = faction.getPlayers();
                 ServerWorld sWorld = (ServerWorld) world;
-                if (sWorld.getPlayers().size() > 0){
-                PlayerEntity player = sWorld.getPlayers().get(random.nextInt(sWorld.getPlayers().size()));
-                BlockPos pos = player.getPosition();
-                double x = pos.getX();
-                double y = pos.getY();
-                double z = pos.getZ();
-                Log.info("Position: " + pos);
-//                TODO: change spawning system
-                sim.setPosition(x, y + 3, z);
-                sWorld.func_217460_e(sim); // spawn entity
-            } else {
-               Log.info("There are unemployed sims");
-            }
-        }}
-    }
-
-    public static DayOfWeek getDay() {
-        return dayOfWeek;
-                PlayerEntity player = sWorld.getPlayerByUuid(players.get(random.nextInt(players.size())));
-                do {
-                    ArrayList<BlockPos> blocks = Lists.newArrayList(getBlocksAroundPlayer(player.getPosition(), radius));
-                    Log.info(radius);
-                    if (spawn(sWorld, sim, blocks)) {
-                        break;
-                    }
-                    radius += 5;
-                } while (radius <= 50);
-                radius = 10;
+                if (sWorld.getPlayers().size() > 0) {
+                    PlayerEntity player = sWorld.getPlayers().get(random.nextInt(sWorld.getPlayers().size()));
+                    BlockPos pos = player.getPosition();
+                    Log.info("Position: " + pos);
+                    do {
+                        ArrayList<BlockPos> blocks = Lists.newArrayList(getBlocksAroundPlayer(player.getPosition(), radius));
+                        Log.info("Radius: " + radius);
+                        if (spawn(sWorld, sim, blocks)) {
+                            break;
+                        }
+                        radius += 5;
+                    } while (radius <= maxRadius);
+                    radius = 10;
+                }
             } else {
                 Log.info("There are unemployed sims");
             }
         }
     }
 
+    public static DayOfWeek getDay() {
+        return dayOfWeek;
+    }
+
     private ArrayList<BlockPos> getBlocksAroundPlayer(BlockPos pos, int radius) {
-        int x = pos.getX();
-        int y = pos.getY();
-        int z = pos.getZ();
-        Iterable<BlockPos> blocks = BlockPos.getAllInBoxMutable(x - radius, y, z - radius, x + radius, y, z + radius);
+        final int x = pos.getX();
+        final int y = pos.getY();
+        final int z = pos.getZ();
+        final Iterable<BlockPos> blocks = BlockPos.getAllInBoxMutable(x - radius, y, z - radius, x + radius, y, z + radius);
         return Lists.newArrayList(blocks);
     }
 
@@ -191,9 +175,5 @@ public class NewDayEvent implements INBTSerializable<CompoundNBT> {
             }
         }
         return Optional.empty();
-    }
-
-    public static DayOfWeek getDay() {
-        return dayOfWeek;
     }
 }
