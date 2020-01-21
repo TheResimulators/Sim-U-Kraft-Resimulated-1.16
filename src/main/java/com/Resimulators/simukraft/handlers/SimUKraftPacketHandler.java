@@ -2,9 +2,7 @@ package com.Resimulators.simukraft.handlers;
 
 import com.Resimulators.simukraft.Reference;
 import com.Resimulators.simukraft.SimuKraft;
-import com.Resimulators.simukraft.packets.IMessage;
-import com.Resimulators.simukraft.packets.OpenJobGuiPacket;
-import com.Resimulators.simukraft.packets.SyncPlayerCapability;
+import com.Resimulators.simukraft.packets.*;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.ResourceLocation;
@@ -45,6 +43,9 @@ public class SimUKraftPacketHandler {
     public void init() {
         registerMessage(newId(), SyncPlayerCapability.class, SyncPlayerCapability::new);
         registerMessage(newId(), OpenJobGuiPacket.class, OpenJobGuiPacket::new);
+        registerMessage(newId(), SimHireRequest.class, SimHireRequest::new);
+        registerMessage(newId(), SimHirePacket.class, SimHirePacket::new);
+        registerMessage(newId(), UpdateSimPacket.class, UpdateSimPacket::new);
 
     }
 

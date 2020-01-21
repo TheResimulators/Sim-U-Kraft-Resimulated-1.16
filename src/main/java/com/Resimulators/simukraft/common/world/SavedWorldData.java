@@ -136,7 +136,7 @@ public class SavedWorldData extends WorldSavedData {
     }
 
     public void addSimToFaction(int id, EntitySim sim){
-        factions.get(id).addsim(sim);
+        factions.get(id).addSim(sim);
         markDirty();
     }
 

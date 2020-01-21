@@ -1,14 +1,19 @@
 package com.Resimulators.simukraft.common.world;
 
+import com.Resimulators.simukraft.Network;
 import com.Resimulators.simukraft.common.entity.sim.EntitySim;
+import com.Resimulators.simukraft.handlers.SimUKraftPacketHandler;
+import com.Resimulators.simukraft.packets.IMessage;
 import com.google.common.collect.Iterables;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.arguments.NBTCompoundTagArgument;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.fml.server.ServerLifecycleHooks;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -71,9 +76,13 @@ public class Faction {
 
     }
 
-    public void addsim(EntitySim sim) {
+    public void addSim(EntitySim sim) {
 
-        sims.put(sim.getUniqueID(), new SimInfo(sim.getUniqueID()));
+        addSim(sim.getUniqueID());
+    }
+
+    public void addSim(UUID id){
+        sims.put(id, new SimInfo(id));
     }
 
     public void removeSim(EntitySim sim) {
@@ -154,16 +163,27 @@ public class Faction {
 
     }
 
-    public void removeAllSims(){
-        sims.keySet().iterator().forEachRemaining(ID-> sims.remove(ID));
+    public void removeAllSims() {
+        sims.keySet().iterator().forEachRemaining(ID -> sims.remove(ID));
     }
 
-    public void removeAllPlayers(){
-        players.iterator().forEachRemaining(PLAYER-> players.remove(PLAYER));
+    public void removeAllPlayers() {
+        players.iterator().forEachRemaining(PLAYER -> players.remove(PLAYER));
+    }
+
+    public void sendPacketToFaction(IMessage message) {
+        for (UUID id : players) {
+            ServerPlayerEntity player = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayerByUUID(id);
+            if (player != null) {
+                Network.handler.sendToPlayer(message, player);
+            }
+        }
     }
 
 
-
+    public void setSimInfo(UUID id,CompoundNBT nbt){
+        sims.get(id).read(nbt);
+    }
     static class SimInfo {
         private UUID sim;
         private boolean hired;
