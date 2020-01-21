@@ -1,12 +1,16 @@
 package com.Resimulators.simukraft.client.gui;
 
+import com.Resimulators.simukraft.Network;
 import com.Resimulators.simukraft.common.entity.sim.EntitySim;
+import com.Resimulators.simukraft.common.world.SavedWorldData;
+import com.Resimulators.simukraft.packets.SimHireRequest;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.text.ITextComponent;
+import sun.nio.ch.Net;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -17,6 +21,7 @@ public class BaseJobGui extends Screen {
     private Button ShowEmployees;
     private Button Done;
     private Button Back;
+    private Button Confirm;
     private PlayerEntity player;
     private ArrayList<Integer> ids;
     private ArrayList<SimButton> simButtons = new ArrayList<>();
@@ -66,6 +71,15 @@ public class BaseJobGui extends Screen {
 
         })));
         Back.visible = false;
+
+
+        addButton(Confirm = new Button(20,height-30,110,20,"Confirm",Confirm ->{
+            Network.getNetwork().sendToServer(new SimHireRequest(selectedsim.getEntityId(), Minecraft.getInstance().player.getUniqueID()));
+            Minecraft.getInstance().displayGuiScreen(null);
+
+
+        }));
+        Confirm.visible = false;
         if (state == State.HIRE_INFO){
             ShowHiring();
             Hire.visible = false;
@@ -93,6 +107,10 @@ public class BaseJobGui extends Screen {
             //do nothing right now;
         }else if (state == State.HIRE_INFO){
             font.drawString("Hiring",(float)(width/2-font.getStringWidth("Hiring")/2),10, Color.white.getRGB());
+        }else if (state == State.SIM_INFO){
+            font.drawString("Info",(float)(width/2-font.getStringWidth("Info")/2),10, Color.white.getRGB());
+            font.drawString("Name: "+selectedsim.getDisplayName().getFormattedText(),(float)20,50,Color.white.getRGB());
+            font.drawString("Level: WIP",(float)20,70,Color.white.getRGB());
         }
 
     }
@@ -134,14 +152,18 @@ public class BaseJobGui extends Screen {
     }
 
     private void showSimInfo(int id){
+        hideAll();
         EntitySim sim = (EntitySim)player.world.getEntityByID(id);
         selectedsim = sim;
-        state = State.HIRE_INFO;
+        state = State.SIM_INFO;
+        Back.visible = true;
+        Confirm.visible = true;
+
     }
 
 
 
-    class SimButton extends Button{
+    static class SimButton extends Button{
         private int id;
         SimButton(int widthIn, int heightIn, int width, int height, String text,int id,BaseJobGui gui) {
             super(widthIn, heightIn, width, height, text, (Sim ->{
