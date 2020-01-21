@@ -80,7 +80,8 @@ public class SimuKraft {
     private void setup(final FMLCommonSetupEvent event) {
         MinecraftForge.EVENT_BUS.register(new NewDayEvent());
         MinecraftForge.EVENT_BUS.register(new FactionEvents());
-        SimUKraftPacketHandler.init();
+        Network.handler.init();
+
 
     }
 

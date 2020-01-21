@@ -95,6 +95,8 @@ public class SavedWorldData extends WorldSavedData {
     }
 
     public void deleteFaction(int id){
+        factions.get(id).removeAllSims();
+        factions.get(id).removeAllPlayers();
         factions.remove(id);
         markDirty();
 
@@ -148,7 +150,8 @@ public class SavedWorldData extends WorldSavedData {
     }
 
     public void removeSimFromFaction(int id, EntitySim sim){
-        //TODO add removal of sims
+        this.getFaction(id).removeSim(sim);
+        markDirty();
     }
 
     public void hireSim(int id,EntitySim sim){

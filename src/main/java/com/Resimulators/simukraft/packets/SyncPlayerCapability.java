@@ -3,14 +3,13 @@ package com.Resimulators.simukraft.packets;
 import com.Resimulators.simukraft.common.world.Faction;
 import com.Resimulators.simukraft.common.world.SavedWorldData;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.network.NetworkEvent;
+import javax.annotation.Nullable;
 
-import java.util.function.Supplier;
-
-public class SyncPlayerCapability {
+public class SyncPlayerCapability implements IMessage {
     private CompoundNBT nbt;
     private int id;
 
@@ -19,27 +18,32 @@ public class SyncPlayerCapability {
         this.nbt = nbt;
         this.id = id;
     }
+    public SyncPlayerCapability(){}
 
-    public static void encode(SyncPlayerCapability pkt,PacketBuffer buffer){
-        buffer.writeCompoundTag(pkt.nbt);
-        buffer.writeInt(pkt.id);
+
+    @Override
+    public void toBytes(PacketBuffer buf) {
+        buf.writeCompoundTag(nbt);
+        buf.writeInt(id);
+    }
+
+    @Override
+    public void fromBytes(PacketBuffer buf) {
+        this.nbt = buf.readCompoundTag();
+        id = buf.readInt();
 
     }
 
-
-    public static SyncPlayerCapability decode(PacketBuffer buffer){
-        CompoundNBT nbt = buffer.readCompoundTag();
-        int id = buffer.readInt();
-        return new SyncPlayerCapability(nbt,id);
-
+    @Nullable
+    @Override
+    public LogicalSide getExecutionSide() {
+        return null;
     }
-    public static void handler(SyncPlayerCapability message, Supplier<NetworkEvent.Context> ctx){
-        PlayerEntity player = Minecraft.getInstance().player;
-        ctx.get().enqueueWork(() -> {
-            Faction faction = new Faction(message.id);
-            faction.read(message.nbt);
-            SavedWorldData.get(Minecraft.getInstance().world).setFaction(message.id,faction);
-        });
 
+    @Override
+    public void onExecute(NetworkEvent.Context ctxIn, boolean isLogicalServer) {
+        Faction faction = new Faction(id);
+        faction.read(nbt);
+        SavedWorldData.get(Minecraft.getInstance().world).setFaction(id,faction);
     }
 }
