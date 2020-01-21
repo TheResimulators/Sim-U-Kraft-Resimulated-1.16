@@ -148,7 +148,8 @@ public class SavedWorldData extends WorldSavedData {
     }
 
     public void removeSimFromFaction(int id, EntitySim sim){
-        //TODO add removal of sims
+        this.getFaction(id).removeSim(sim);
+        markDirty();
     }
 
     public void hireSim(int id,EntitySim sim){
