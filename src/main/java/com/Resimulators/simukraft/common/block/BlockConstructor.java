@@ -32,7 +32,7 @@ public class BlockConstructor extends BlockBase {
     }
 
     @Override
-    public ActionResultType func_225533_a_(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTrace) {
+    public ActionResultType  onBlockActivated(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTrace) {
         if (!world.isRemote){
             Faction faction = SavedWorldData.get(world).getFactionWithPlayer(player.getUniqueID());
                 ArrayList<Integer> simids = faction.getSimIds((ServerWorld) world);

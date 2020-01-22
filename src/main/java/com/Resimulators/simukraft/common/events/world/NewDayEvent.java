@@ -4,6 +4,7 @@ import com.Resimulators.simukraft.common.entity.sim.EntitySim;
 import com.Resimulators.simukraft.common.world.Faction;
 import com.Resimulators.simukraft.common.world.SavedWorldData;
 import com.Resimulators.simukraft.init.ModEntities;
+import com.Resimulators.simukraft.packets.UpdateSimPacket;
 import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -73,15 +74,15 @@ public class NewDayEvent implements INBTSerializable<CompoundNBT> {
         SavedWorldData worldData = SavedWorldData.get(world);
 
         ArrayList<Faction> factions = worldData.getFactions();
+        ServerWorld sWorld = (ServerWorld) world;
         for (Faction faction : factions) {
-            if (faction.getUnemployedSims().isEmpty()) {
+            if (faction.getUnemployedSims().isEmpty() || true) {
                 ArrayList<EntitySim> simsToSpawn = new ArrayList<EntitySim>();
                 simsToSpawn.add(new EntitySim(ModEntities.ENTITY_SIM, world));
                 simsToSpawn.add(new EntitySim(ModEntities.ENTITY_SIM, world));
                 for (EntitySim sim : simsToSpawn) {
                     worldData.addSimToFaction(faction.getId(), sim);
                     ArrayList<UUID> players = faction.getPlayers();
-                    ServerWorld sWorld = (ServerWorld) world;
                     if (sWorld.getPlayers().size() > 0) {
                         PlayerEntity player = sWorld.getPlayers().get(random.nextInt(sWorld.getPlayers().size()));
                         BlockPos pos = player.getPosition();

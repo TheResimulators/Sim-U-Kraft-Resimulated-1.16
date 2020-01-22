@@ -184,6 +184,9 @@ public class Faction {
     public void setSimInfo(UUID id,CompoundNBT nbt){
         sims.get(id).read(nbt);
     }
+    public CompoundNBT getSimInfo(UUID id){
+        return sims.get(id).write();
+    }
     static class SimInfo {
         private UUID sim;
         private boolean hired;
