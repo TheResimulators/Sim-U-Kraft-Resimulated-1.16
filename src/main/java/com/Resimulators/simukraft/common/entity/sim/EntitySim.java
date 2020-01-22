@@ -292,7 +292,7 @@ public class EntitySim extends AgeableEntity implements INPC {
             return null;
         } else {
             double d0 = this.func_226280_cw_() - (double)0.3F;
-            ItemEntity itementity = new ItemEntity(this.world, this.func_226277_ct_(), d0, this.func_226281_cx_(), droppedItem);
+            ItemEntity itementity = new ItemEntity(this.world, this.getPosX(), d0, this.getPosZ(), droppedItem);
             itementity.setPickupDelay(40);
             if (traceItem) {
                 itementity.setThrowerId(this.getUniqueID());

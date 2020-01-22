@@ -41,9 +41,9 @@ public class EntitySimRender extends LivingRenderer<EntitySim, EntitySimModel> {
     }
 
     @Override
-    public void func_225623_a_(@Nonnull EntitySim entitySim, float entityYaw, float partialTick, @Nonnull MatrixStack matrix, @Nonnull IRenderTypeBuffer renderer, int light) {
+    public void render(@Nonnull EntitySim entitySim, float entityYaw, float partialTick, @Nonnull MatrixStack matrix, @Nonnull IRenderTypeBuffer renderer, int light) {
         this.setModelVisibilities(entitySim);
-        super.func_225623_a_(entitySim, entityYaw, partialTick, matrix, renderer, light);
+        super.render(entitySim, entityYaw, partialTick, matrix, renderer, light);
     }
 
 
@@ -52,7 +52,7 @@ public class EntitySimRender extends LivingRenderer<EntitySim, EntitySimModel> {
         ItemStack itemStack = entitySim.getHeldItemMainhand();
         ItemStack itemStack1 = entitySim.getHeldItemOffhand();
         model.setVisible(true, entitySim.getFemale());
-        model.field_228270_o_ = entitySim.isCrouching();
+        model.isSneak = entitySim.isCrouching();
         BipedModel.ArmPose bipedmodel$armpose = this.getArmpose(entitySim, itemStack, itemStack1, Hand.MAIN_HAND);
         BipedModel.ArmPose bipedmodel$armpose1 = this.getArmpose(entitySim, itemStack, itemStack1, Hand.OFF_HAND);
         if (entitySim.getPrimaryHand() == HandSide.RIGHT) {
@@ -111,14 +111,14 @@ public class EntitySimRender extends LivingRenderer<EntitySim, EntitySimModel> {
     @Override
     protected void func_225629_a_(EntitySim entitySim, String text, MatrixStack matrix, IRenderTypeBuffer renderBuffer, int p_225629_5_) {
         double d = this.renderManager.func_229099_b_(entitySim);
-        matrix.func_227860_a_();
+        matrix.push();
         if (d < 100.0d && !entitySim.getStatus().equals("")) {
             super.func_225629_a_(entitySim, entitySim.getStatus(), matrix, renderBuffer, p_225629_5_);
-            matrix.func_227861_a_(0, (double) (9.0F * 1.15F * 0.025F), 0);
+            matrix.translate(0, (double) (9.0F * 1.15F * 0.025F), 0);
         }
         super.func_225629_a_(entitySim, (Configs.SIMS.coloredNames.get() ? TextFormatting.fromColorIndex(ColorHelper.convertDyeToTF(entitySim.getNameColor())) : TextFormatting.WHITE) + text + TextFormatting.RESET, matrix, renderBuffer, p_225629_5_);
 
-        matrix.func_227865_b_();
+        matrix.pop();
     }
 }
 

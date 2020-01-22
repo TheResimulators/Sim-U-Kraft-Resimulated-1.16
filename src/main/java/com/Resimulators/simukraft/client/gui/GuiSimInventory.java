@@ -99,12 +99,12 @@ public class GuiSimInventory extends DisplayEffectsScreen<SimContainer> {
         RenderSystem.translatef((float)x, (float)y, 1050.0F);
         RenderSystem.scalef(1.0F, 1.0F, -1.0F);
         MatrixStack lvt_8_1_ = new MatrixStack();
-        lvt_8_1_.func_227861_a_(0.0D, 0.0D, 1000.0D);
-        lvt_8_1_.func_227862_a_((float)z, (float)z, (float)z);
+        lvt_8_1_.translate(0.0D, 0.0D, 1000.0D);
+        lvt_8_1_.scale((float)z, (float)z, (float)z);
         Quaternion lvt_9_1_ = Vector3f.field_229183_f_.func_229187_a_(180.0F);
         Quaternion lvt_10_1_ = Vector3f.field_229179_b_.func_229187_a_(lvt_7_1_ * 20.0F);
         lvt_9_1_.multiply(lvt_10_1_);
-        lvt_8_1_.func_227863_a_(lvt_9_1_);
+        lvt_8_1_.rotate(lvt_9_1_);
         float lvt_11_1_ = entity.renderYawOffset;
         float lvt_12_1_ = entity.rotationYaw;
         float lvt_13_1_ = entity.rotationPitch;
@@ -140,10 +140,10 @@ public class GuiSimInventory extends DisplayEffectsScreen<SimContainer> {
             Tessellator tessellator = Tessellator.getInstance();
             BufferBuilder buffer = tessellator.getBuffer();
             buffer.begin(7, DefaultVertexFormats.POSITION_TEX);
-            buffer.func_225582_a_((vertexX), vertexY + intV, 0.0D).func_225583_a_(textureAtlasSprite.getMinU(), textureAtlasSprite.getMaxV()).endVertex();
-            buffer.func_225582_a_(vertexX + intU, vertexY + intV, 0.0D).func_225583_a_(textureAtlasSprite.getMaxU(), textureAtlasSprite.getMaxV()).endVertex();
-            buffer.func_225582_a_(vertexX + intU, (vertexY), 0.0D).func_225583_a_(textureAtlasSprite.getMaxU(), textureAtlasSprite.getMinV()).endVertex();
-            buffer.func_225582_a_((vertexX), (vertexY), 0.0D).func_225583_a_(textureAtlasSprite.getMinU(), textureAtlasSprite.getMinV()).endVertex();
+            buffer.pos((vertexX), vertexY + intV, 0.0D).tex(textureAtlasSprite.getMinU(), textureAtlasSprite.getMaxV()).endVertex();
+            buffer.pos(vertexX + intU, vertexY + intV, 0.0D).tex(textureAtlasSprite.getMaxU(), textureAtlasSprite.getMaxV()).endVertex();
+            buffer.pos(vertexX + intU, (vertexY), 0.0D).tex(textureAtlasSprite.getMaxU(), textureAtlasSprite.getMinV()).endVertex();
+            buffer.pos((vertexX), (vertexY), 0.0D).tex(textureAtlasSprite.getMinU(), textureAtlasSprite.getMinV()).endVertex();
             tessellator.draw();
         } catch (Exception e) {}
     }

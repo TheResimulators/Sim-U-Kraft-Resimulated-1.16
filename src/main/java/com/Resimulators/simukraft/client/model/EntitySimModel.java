@@ -29,43 +29,43 @@ public class EntitySimModel extends BipedModel<EntitySim> {
         this.smallArms = false;
         this.isChild = false;
         this.femaleArmLeft = new ModelRenderer(this, 32, 48);
-        this.femaleArmLeft.func_228301_a_(-1.0F, -2.0F, -2.0F, 3, 12, 4, modelSize);
+        this.femaleArmLeft.addBox(-1.0F, -2.0F, -2.0F, 3, 12, 4, modelSize);
         this.femaleArmLeft.setRotationPoint(5.0F, 2.5F, 0.0F);
         this.femaleArmRight = new ModelRenderer(this, 40, 16);
-        this.femaleArmRight.func_228301_a_(-2.0F, -2.0F, -2.0F, 3, 12, 4, modelSize);
+        this.femaleArmRight.addBox(-2.0F, -2.0F, -2.0F, 3, 12, 4, modelSize);
         this.femaleArmRight.setRotationPoint(-5.0F, 2.5F, 0.0F);
         this.femaleLeftArmwear = new ModelRenderer(this, 48, 48);
-        this.femaleLeftArmwear.func_228301_a_(-1.0F, -2.0F, -2.0F, 3, 12, 4, modelSize + 0.25F);
+        this.femaleLeftArmwear.addBox(-1.0F, -2.0F, -2.0F, 3, 12, 4, modelSize + 0.25F);
         this.femaleLeftArmwear.setRotationPoint(5.0F, 2.5F, 0.0F);
         this.femaleRightArmwear = new ModelRenderer(this, 40, 32);
-        this.femaleRightArmwear.func_228301_a_(-2.0F, -2.0F, -2.0F, 3, 12, 4, modelSize + 0.25F);
+        this.femaleRightArmwear.addBox(-2.0F, -2.0F, -2.0F, 3, 12, 4, modelSize + 0.25F);
         this.femaleRightArmwear.setRotationPoint(-5.0F, 2.5F, 10.0F);
 
         this.maleArmRight = new ModelRenderer(this, 40, 16);
-        this.maleArmRight.func_228301_a_(-3.0F, -2.0F, -2.0F, 4, 12, 4, modelSize);
+        this.maleArmRight.addBox(-3.0F, -2.0F, -2.0F, 4, 12, 4, modelSize);
         this.maleArmRight.setRotationPoint(-5.0F, 2.0F, 0.0F);
         this.maleArmLeft = new ModelRenderer(this, 32, 48);
-        this.maleArmLeft.func_228301_a_(-1.0F, -2.0F, -2.0F, 4, 12, 4, modelSize);
+        this.maleArmLeft.addBox(-1.0F, -2.0F, -2.0F, 4, 12, 4, modelSize);
         this.maleArmLeft.setRotationPoint(5.0F, 2.0F, 0.0F);
         this.maleArmLeft.mirror = true;
         this.bipedLeftArmwear = new ModelRenderer(this, 48, 48);
-        this.bipedLeftArmwear.func_228301_a_(-1.0F, -2.0F, -2.0F, 4, 12, 4, modelSize + 0.25F);
+        this.bipedLeftArmwear.addBox(-1.0F, -2.0F, -2.0F, 4, 12, 4, modelSize + 0.25F);
         this.bipedLeftArmwear.setRotationPoint(5.0F, 2.0F, 0.0F);
         this.bipedRightArmwear = new ModelRenderer(this, 40, 32);
-        this.bipedRightArmwear.func_228301_a_(-3.0F, -2.0F, -2.0F, 4, 12, 4, modelSize + 0.25F);
+        this.bipedRightArmwear.addBox(-3.0F, -2.0F, -2.0F, 4, 12, 4, modelSize + 0.25F);
         this.bipedRightArmwear.setRotationPoint(-5.0F, 2.0F, 10.0F);
 
         this.bipedLeftLeg = new ModelRenderer(this, 16, 48);
-        this.bipedLeftLeg.func_228301_a_(-2.0F, 0.0F, -2.0F, 4, 12, 4, modelSize);
+        this.bipedLeftLeg.addBox(-2.0F, 0.0F, -2.0F, 4, 12, 4, modelSize);
         this.bipedLeftLeg.setRotationPoint(1.9F, 12.0F, 0.0F);
         this.bipedLeftLegwear = new ModelRenderer(this, 0, 48);
-        this.bipedLeftLegwear.func_228301_a_(-2.0F, 0.0F, -2.0F, 4, 12, 4, modelSize + 0.25F);
+        this.bipedLeftLegwear.addBox(-2.0F, 0.0F, -2.0F, 4, 12, 4, modelSize + 0.25F);
         this.bipedLeftLegwear.setRotationPoint(1.9F, 12.0F, 0.0F);
         this.bipedRightLegwear = new ModelRenderer(this, 0, 32);
-        this.bipedRightLegwear.func_228301_a_(-2.0F, 0.0F, -2.0F, 4, 12, 4, modelSize + 0.25F);
+        this.bipedRightLegwear.addBox(-2.0F, 0.0F, -2.0F, 4, 12, 4, modelSize + 0.25F);
         this.bipedRightLegwear.setRotationPoint(-1.9F, 12.0F, 0.0F);
         this.bipedBodyWear = new ModelRenderer(this, 16, 32);
-        this.bipedBodyWear.func_228301_a_(-4.0F, 0.0F, -2.0F, 8, 12, 4, modelSize + 0.25F);
+        this.bipedBodyWear.addBox(-4.0F, 0.0F, -2.0F, 8, 12, 4, modelSize + 0.25F);
         this.bipedBodyWear.setRotationPoint(0.0F, 0.0F, 0.0F);
         setVisible(true,true);
     }
@@ -82,8 +82,8 @@ public class EntitySimModel extends BipedModel<EntitySim> {
     }
 
     @Override
-    public void func_225597_a_(EntitySim entitySim, float v, float v1, float v2, float v3, float v4) {
-        super.func_225597_a_(entitySim, v, v1, v2, v3, v4);
+    public void render(EntitySim entitySim, float v, float v1, float v2, float v3, float v4) {
+        super.render(entitySim, v, v1, v2, v3, v4);
 
         this.bipedLeftLegwear.copyModelAngles(this.bipedLeftLeg);
         this.bipedRightLegwear.copyModelAngles(this.bipedRightLeg);
@@ -126,10 +126,10 @@ public class EntitySimModel extends BipedModel<EntitySim> {
         if (this.smallArms) {
             float f = 0.5F * (float) (side == HandSide.RIGHT ? 1 : -1);
             modelrenderer.rotationPointX += f;
-            modelrenderer.func_228307_a_(matrix);
+            modelrenderer.setAnglesAndRotation(matrix);
             modelrenderer.rotationPointX -= f;
         } else {
-          modelrenderer.func_228307_a_(matrix);
+          modelrenderer.setAnglesAndRotation(matrix);
         }
     }
 
