@@ -74,27 +74,29 @@ public class NewDayEvent implements INBTSerializable<CompoundNBT> {
         SavedWorldData worldData = SavedWorldData.get(world);
 
         ArrayList<Faction> factions = worldData.getFactions();
+        ServerWorld sWorld = (ServerWorld) world;
         for (Faction faction : factions) {
             if (faction.getUnemployedSims().isEmpty() || true) {
-                EntitySim sim = new EntitySim(ModEntities.ENTITY_SIM, world);
-                SavedWorldData.get(world).addSimToFaction(faction.getId(), sim);
-                faction.sendPacketToFaction(new UpdateSimPacket(sim.getUniqueID(),faction.getSimInfo(sim.getUniqueID()),faction.getId()));
-                //faction.addsim(sim);
-                ArrayList<UUID> players = faction.getPlayers();
-                ServerWorld sWorld = (ServerWorld) world;
-                if (sWorld.getPlayers().size() > 0) {
-                    PlayerEntity player = sWorld.getPlayers().get(random.nextInt(sWorld.getPlayers().size()));
-                    BlockPos pos = player.getPosition();
-                    Log.info("Position: " + pos);
-                    do {
-                        ArrayList<BlockPos> blocks = Lists.newArrayList(getBlocksAroundPlayer(player.getPosition(), radius));
-                        Log.info("Radius: " + radius);
-                        if (spawn(sWorld, sim, blocks)) {
-                            break;
-                        }
-                        radius += 5;
-                    } while (radius <= maxRadius);
-                    radius = 10;
+                ArrayList<EntitySim> simsToSpawn = new ArrayList<EntitySim>();
+                simsToSpawn.add(new EntitySim(ModEntities.ENTITY_SIM, world));
+                simsToSpawn.add(new EntitySim(ModEntities.ENTITY_SIM, world));
+                for (EntitySim sim : simsToSpawn) {
+                    worldData.addSimToFaction(faction.getId(), sim);
+                    ArrayList<UUID> players = faction.getPlayers();
+                    if (sWorld.getPlayers().size() > 0) {
+                        PlayerEntity player = sWorld.getPlayers().get(random.nextInt(sWorld.getPlayers().size()));
+                        BlockPos pos = player.getPosition();
+                        Log.info("Position: " + pos);
+                        do {
+                            ArrayList<BlockPos> blocks = Lists.newArrayList(getBlocksAroundPlayer(player.getPosition(), radius));
+                            Log.info("Radius: " + radius);
+                            if (spawn(sWorld, sim, blocks)) {
+                                break;
+                            }
+                            radius += 5;
+                        } while (radius <= maxRadius);
+                        radius = 10;
+                    }
                 }
             } else {
                 Log.info("There are unemployed sims");
