@@ -6,7 +6,7 @@ import net.minecraft.tileentity.TileEntityType;
 
 public class TileConstructor extends TileEntity {
 
-
+    private boolean hired;
     public TileConstructor(TileEntityType<?> tileEntityTypeIn) {
         super(tileEntityTypeIn);
     }
@@ -23,6 +23,7 @@ public class TileConstructor extends TileEntity {
 
     @Override
     public CompoundNBT write(CompoundNBT nbt){
+        nbt.putBoolean("hired",hired);
         return nbt;
     }
 
