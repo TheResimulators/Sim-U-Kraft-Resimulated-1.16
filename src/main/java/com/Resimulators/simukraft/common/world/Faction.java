@@ -1,6 +1,7 @@
 package com.Resimulators.simukraft.common.world;
 
 import com.Resimulators.simukraft.Network;
+import com.Resimulators.simukraft.SimuKraft;
 import com.Resimulators.simukraft.common.entity.sim.EntitySim;
 import com.Resimulators.simukraft.handlers.SimUKraftPacketHandler;
 import com.Resimulators.simukraft.packets.IMessage;
@@ -138,8 +139,11 @@ public class Faction {
     public ArrayList<Integer> getSimIds(ServerWorld world) {
         ArrayList<Integer> simids = new ArrayList<>();
         for (UUID id : sims.keySet()) {
+            if (world.getEntityByUuid(id) != null){
             simids.add(world.getEntityByUuid(id).getEntityId());
-        }
+        }else {
+                SimuKraft.LOGGER().error("Error: Faction Entity Doesn't Exist in the world. Please Contact Author");
+            }}
         return simids;
     }
 
@@ -180,10 +184,13 @@ public class Faction {
         }
     }
 
-
+    public boolean ContainsSim(UUID id){
+        return sims.containsKey(id);
+    }
     public void setSimInfo(UUID id,CompoundNBT nbt){
         sims.get(id).read(nbt);
     }
+
     public CompoundNBT getSimInfo(UUID id){
         return sims.get(id).write();
     }
