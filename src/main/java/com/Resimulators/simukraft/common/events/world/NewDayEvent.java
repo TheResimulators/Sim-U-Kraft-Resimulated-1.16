@@ -76,12 +76,13 @@ public class NewDayEvent implements INBTSerializable<CompoundNBT> {
         ArrayList<Faction> factions = worldData.getFactions();
         ServerWorld sWorld = (ServerWorld) world;
         for (Faction faction : factions) {
-                faction.sendPacketToFaction(new UpdateSimPacket(sim.getUniqueID(),faction.getSimInfo(sim.getUniqueID()),faction.getId()));
+
             if (faction.getUnemployedSims().isEmpty() || true) {
-                ArrayList<EntitySim> simsToSpawn = new ArrayList<EntitySim>();
+                ArrayList<EntitySim> simsToSpawn = new ArrayList<>();
                 simsToSpawn.add(new EntitySim(ModEntities.ENTITY_SIM, world));
                 simsToSpawn.add(new EntitySim(ModEntities.ENTITY_SIM, world));
                 for (EntitySim sim : simsToSpawn) {
+                    faction.sendPacketToFaction(new UpdateSimPacket(sim.getUniqueID(),faction.getSimInfo(sim.getUniqueID()),faction.getId()));
                     worldData.addSimToFaction(faction.getId(), sim);
                     ArrayList<UUID> players = faction.getPlayers();
                     if (sWorld.getPlayers().size() > 0) {
