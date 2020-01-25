@@ -54,8 +54,6 @@ public class SimInformationOverlay {
                 RenderSystem.pushMatrix();
                 saveGLState();
 
-                SimuKraft.LOGGER().debug(minecraft.getMainWindow().getHeight());
-
                 int guiScale = minecraft.gameSettings.guiScale;
                 if (guiScale == 0)
                     guiScale = 4;
@@ -64,14 +62,10 @@ public class SimInformationOverlay {
                 int posX = 0;
                 int posY = (minecraft.getMainWindow().getHeight() / (guiScale)) / 2;
 
-                SimuKraft.LOGGER().debug(scale + " - " + posY);
-
                 if (minecraft.currentScreen instanceof GuiSimInventory) {
                     posX = ((minecraft.getMainWindow().getWidth() / guiScale) / 2) - ((GuiSimInventory) minecraft.currentScreen).getXSize() / 2 - 90;
                     posY = ((minecraft.getMainWindow().getHeight() / (guiScale)) / 2) - ((GuiSimInventory) minecraft.currentScreen).getYSize() / 2;
                     scale = 1;
-
-                    SimuKraft.LOGGER().debug(minecraft.currentScreen.height + " : " + minecraft.currentScreen.width);
                 }
 
                 RenderSystem.scalef(scale, scale, 1);
