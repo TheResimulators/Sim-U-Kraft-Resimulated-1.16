@@ -2,6 +2,7 @@ package com.Resimulators.simukraft.client.gui;
 
 import com.Resimulators.simukraft.Network;
 import com.Resimulators.simukraft.common.entity.sim.EntitySim;
+import com.Resimulators.simukraft.common.tileentity.ITile;
 import com.Resimulators.simukraft.common.world.SavedWorldData;
 import com.Resimulators.simukraft.packets.SimHireRequest;
 import net.minecraft.client.Minecraft;
@@ -9,8 +10,8 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
-import sun.nio.ch.Net;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -27,12 +28,14 @@ public class BaseJobGui extends Screen {
     private ArrayList<SimButton> simButtons = new ArrayList<>();
     private EntitySim selectedsim;
     private State state = State.MAIN;
+    private BlockPos pos;
 
     
-    public BaseJobGui(ITextComponent component,ArrayList<Integer> ids) {
+    public BaseJobGui(ITextComponent component, ArrayList<Integer> ids, BlockPos pos) {
         super(component);
         this.player = Minecraft.getInstance().player;
         this.ids = ids;
+        this.pos = pos;
 
     }
 
@@ -53,7 +56,13 @@ public class BaseJobGui extends Screen {
         })));
         addButton(ShowEmployees = new Button (width-120,height-60,110,20,"Show Employees",(ShowEmployees->{
         })));
+        if (((ITile)Minecraft.getInstance().world.getTileEntity(pos)).getHired()){
+            Fire.active = true;
+            Hire.active = false;
+        }else{
         Fire.active = false;
+        Hire.active = true;
+        }
 
         addButton(Back = new Button(width-120,height-30,110,20,"Back",(Back ->{
             if (state == State.HIRE_INFO){
@@ -74,7 +83,7 @@ public class BaseJobGui extends Screen {
 
 
         addButton(Confirm = new Button(20,height-30,110,20,"Confirm",Confirm ->{
-            Network.getNetwork().sendToServer(new SimHireRequest(selectedsim.getEntityId(), Minecraft.getInstance().player.getUniqueID()));
+            Network.getNetwork().sendToServer(new SimHireRequest(selectedsim.getEntityId(), Minecraft.getInstance().player.getUniqueID(),pos));
             Minecraft.getInstance().displayGuiScreen(null);
 
 
