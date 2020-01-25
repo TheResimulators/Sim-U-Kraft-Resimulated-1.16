@@ -2,6 +2,7 @@ package com.Resimulators.simukraft.common.entity.sim;
 
 import com.Resimulators.simukraft.Configs;
 import com.Resimulators.simukraft.common.entity.goals.PickupItemGoal;
+import com.Resimulators.simukraft.common.entity.goals.TalkingToPlayerGoal;
 import com.Resimulators.simukraft.common.jobs.JobBuilder;
 import com.Resimulators.simukraft.common.jobs.core.IJob;
 import com.Resimulators.simukraft.common.world.Faction;
@@ -56,6 +57,7 @@ public class EntitySim extends AgeableEntity implements INPC {
     private static final DataParameter<Integer> NAME_COLOR = EntityDataManager.createKey(EntitySim.class, DataSerializers.VARINT);
 
     private final SimInventory inventory;
+    private PlayerEntity interactingPlayer;
 
     protected FoodStats foodStats = new FoodStats();
     private IJob job;
@@ -117,6 +119,7 @@ public class EntitySim extends AgeableEntity implements INPC {
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new SwimGoal(this));
+        this.goalSelector.addGoal(7, new TalkingToPlayerGoal(this));
         this.goalSelector.addGoal(8, new PickupItemGoal(this));
 
         //Unimportant "make more alive"-goals
@@ -209,8 +212,10 @@ public class EntitySim extends AgeableEntity implements INPC {
     //Interaction
     @Override
     public boolean processInteract(PlayerEntity player, Hand hand) {
-        if (player.isCrouching())
+        if (player.isCrouching()) {
+            this.setInteractingPlayer(player);
             player.openContainer(inventory);
+        }
 
         if (player.getHeldItem(hand).getItem() instanceof DyeItem) {
             this.setNameColor(((DyeItem) player.getHeldItem(hand).getItem()).getDyeColor().getId());
@@ -472,6 +477,14 @@ public class EntitySim extends AgeableEntity implements INPC {
         } catch (NullPointerException e) {
             return "";
         }
+    }
+
+    public void setInteractingPlayer(PlayerEntity player) {
+        this.interactingPlayer = player;
+    }
+
+    public PlayerEntity getInteractingPlayer() {
+        return this.interactingPlayer;
     }
 
     public void addExhaustion(float exhaustion) {
