@@ -287,10 +287,8 @@ public class EntitySim extends AgeableEntity implements INPC {
     }
 
     @Nullable
-    public ItemEntity dropItem(ItemStack droppedItem, boolean dropAround, boolean traceItem) {
-        if (droppedItem.isEmpty()) {
-            return null;
-        } else {
+    public void dropItem(ItemStack droppedItem, boolean dropAround, boolean traceItem) {
+        if (!droppedItem.isEmpty()) {
             double d0 = this.func_226280_cw_() - (double)0.3F;
             ItemEntity itementity = new ItemEntity(this.world, this.getPosX(), d0, this.getPosZ(), droppedItem);
             itementity.setPickupDelay(40);
@@ -313,7 +311,7 @@ public class EntitySim extends AgeableEntity implements INPC {
                 itementity.setMotion((double)(-f3 * f2 * 0.3F) + Math.cos((double)f5) * (double)f6, (double)(-f8 * 0.3F + 0.1F + (this.rand.nextFloat() - this.rand.nextFloat()) * 0.1F), (double)(f4 * f2 * 0.3F) + Math.sin((double)f5) * (double)f6);
             }
 
-            return itementity;
+            this.world.addEntity(itementity);
         }
     }
 
