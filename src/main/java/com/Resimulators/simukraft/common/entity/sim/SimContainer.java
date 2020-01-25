@@ -15,6 +15,8 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
+import javax.annotation.Nullable;
+
 public class SimContainer extends Container {
     public static final ResourceLocation blocks = new ResourceLocation("textures/atlas/blocks.png");
     public static final ResourceLocation helmet = new ResourceLocation("item/empty_armor_slot_helmet");
@@ -89,37 +91,44 @@ public class SimContainer extends Container {
 
     @Override
     public ItemStack transferStackInSlot(PlayerEntity playerIn, int index) {
-        /*ItemStack itemstack = ItemStack.EMPTY;
-        SimuKraft.LOGGER().debug(index);
+        ItemStack itemstack = ItemStack.EMPTY;
         Slot slot = this.inventorySlots.get(index);
         if (slot != null && slot.getHasStack()) {
             ItemStack itemstack1 = slot.getStack();
             itemstack = itemstack1.copy();
             EquipmentSlotType equipmentslottype = MobEntity.getSlotForItemStack(itemstack);
             if (index == 0) {
-                if (!this.mergeItemStack(itemstack1, 0, 32, true)) {
+                if (!this.mergeItemStack(itemstack1, 31, 67, false)) {
                     return ItemStack.EMPTY;
                 }
 
                 slot.onSlotChange(itemstack1, itemstack);
+            } else if (index < 5) {
+                if (!this.mergeItemStack(itemstack1, 31, 67, false)) {
+                    return ItemStack.EMPTY;
+                }
             } else if (equipmentslottype.getSlotType() == EquipmentSlotType.Group.ARMOR && !this.inventorySlots.get(8 - equipmentslottype.getIndex()).getHasStack()) {
                 int i = 8 - equipmentslottype.getIndex();
                 if (!this.mergeItemStack(itemstack1, i, i + 1, false)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (equipmentslottype == EquipmentSlotType.OFFHAND && !this.inventorySlots.get(31).getHasStack()) {
-                if (!this.mergeItemStack(itemstack1, 31, 32, false)) {
+            } else if (equipmentslottype == EquipmentSlotType.OFFHAND && !this.inventorySlots.get(67).getHasStack()) {
+                if (!this.mergeItemStack(itemstack1, 67, 68, false)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (index >= 1 && index < 27) {
-                if (!this.mergeItemStack(itemstack1, 27, 36, false)) {
+            } else if (index == 67) {
+                if (!this.mergeItemStack(itemstack1, 31, 67, false)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (index >= 27 && index < 36) {
-                if (!this.mergeItemStack(itemstack1, 0, 27, false)) {
+            } else if (index < 31) {
+                if (!this.mergeItemStack(itemstack1, 31, 67, false)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (!this.mergeItemStack(itemstack1, 0, 36, false)) {
+            } else if (index < 67) {
+                if (!this.mergeItemStack(itemstack1, 0, 31, false)) {
+                    return ItemStack.EMPTY;
+                }
+            } else if (!this.mergeItemStack(itemstack1, 31, 67, false)) {
                 return ItemStack.EMPTY;
             }
 
@@ -139,8 +148,7 @@ public class SimContainer extends Container {
             }
         }
 
-        return itemstack;*/
-        return ItemStack.EMPTY;
+        return itemstack;
     }
 
     public EntitySim getSim() {
