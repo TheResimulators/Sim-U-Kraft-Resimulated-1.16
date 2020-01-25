@@ -17,6 +17,7 @@ public class Configs {
     private static final String LANG_KEY_ROOT = "config." + Reference.MODID;
     private static final String LANG_KEY_GENERAL = LANG_KEY_ROOT + "." + CATEGORY_GENERAL;
     private static final String LANG_KEY_SIMS = LANG_KEY_ROOT + ".sims";
+    private static final String LANG_KEY_NAMES = LANG_KEY_ROOT + ".names";
 
     private static final Builder COMMON_BUILDER = new Builder();
     private static final Builder SERVER_BUILDER = new Builder();
@@ -24,6 +25,7 @@ public class Configs {
 
     public static final CategoryGeneral GENERAL = new CategoryGeneral();
     public static final CategorySims SIMS = new CategorySims();
+    public static final CategoryNames NAMES = new CategoryNames();
 
     public static final class CategoryGeneral {
         //Put config variables here:
@@ -74,6 +76,129 @@ public class Configs {
                     .define("Colored Names", true);
 
             //Finishes off the configuration category.
+            CLIENT_BUILDER.pop();
+            COMMON_BUILDER.pop();
+            SERVER_BUILDER.pop();
+        }
+    }
+
+    public static final class CategoryNames {
+        public final ConfigValue<List<? extends String>> femaleNames;
+        public final ConfigValue<List<? extends String>> maleNames;
+
+        private CategoryNames() {
+            SERVER_BUILDER.comment("Sims settings").push("sims");
+            COMMON_BUILDER.comment("Sims settings").push("sims");
+            CLIENT_BUILDER.comment("Sims settings").push("sims");
+
+            femaleNames = COMMON_BUILDER.comment("This holds all female names that gets applied to the Sims")
+                    .translation(LANG_KEY_NAMES + ".femalenames")
+                    .defineList("Female Names", ImmutableList.of(
+                            "Yen",
+                            "Willette",
+                            "Mindi",
+                            "Krystle",
+                            "Natalie",
+                            "Amanda",
+                            "Colene",
+                            "Santana",
+                            "Darlene",
+                            "Nana",
+                            "Yuri",
+                            "Chia",
+                            "Lady",
+                            "Penney",
+                            "Zita",
+                            "Goldie",
+                            "Diedra",
+                            "Dawne",
+                            "Emma",
+                            "Elena",
+                            "Phylis",
+                            "Celestina",
+                            "Mira",
+                            "Sadye",
+                            "Meda",
+                            "Rachael",
+                            "Donnette",
+                            "Katrice",
+                            "Denae",
+                            "Afton",
+                            "Charlotte",
+                            "Bethany",
+                            "Junko",
+                            "Bonita",
+                            "Sandra",
+                            "Barbara",
+                            "Enid",
+                            "Emelina",
+                            "Nanette",
+                            "Sarai",
+                            "Thi",
+                            "Shannan",
+                            "Wilma",
+                            "Raguel",
+                            "Ludie",
+                            "Louisa",
+                            "Lourdes",
+                            "Cristen",
+                            "Bess"),
+                            obj -> obj instanceof String);
+            maleNames = COMMON_BUILDER.comment("This holds all male names that gets applied to the Sims")
+                    .translation(LANG_KEY_NAMES + ".malenames")
+                    .defineList("Male Names", ImmutableList.of(
+                            "Julian",
+                            "Derick",
+                            "Ronnie",
+                            "Jeremy",
+                            "Carson",
+                            "Kim",
+                            "Hank",
+                            "Jospeh",
+                            "Taylor",
+                            "Marshall",
+                            "Cordell",
+                            "Andreas",
+                            "Chase",
+                            "Timothy",
+                            "Lanny",
+                            "Craig",
+                            "William",
+                            "Karl",
+                            "Manual",
+                            "Cletus",
+                            "Agustin",
+                            "Chad",
+                            "Mauro",
+                            "Thurman",
+                            "Jeromy",
+                            "Kareem",
+                            "Jerome",
+                            "Rudolph",
+                            "Theodore",
+                            "Jamel",
+                            "Porter",
+                            "Domingo",
+                            "Thad",
+                            "Elvin",
+                            "Napoleon",
+                            "Oswaldo",
+                            "Randolph",
+                            "Johnnie",
+                            "Jeff",
+                            "Grover",
+                            "Noe",
+                            "Aubrey",
+                            "Corey",
+                            "Romeo",
+                            "Garland",
+                            "Silas",
+                            "Pedro",
+                            "Mario",
+                            "Isreal"
+                            ),
+                            obj -> obj instanceof String);
+
             CLIENT_BUILDER.pop();
             COMMON_BUILDER.pop();
             SERVER_BUILDER.pop();

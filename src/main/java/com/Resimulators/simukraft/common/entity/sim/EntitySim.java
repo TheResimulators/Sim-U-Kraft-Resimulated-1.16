@@ -84,9 +84,6 @@ public class EntitySim extends AgeableEntity implements INPC {
     @Override
     public ILivingEntityData onInitialSpawn(IWorld world, DifficultyInstance difficultyInstance, SpawnReason spawnReason, @Nullable ILivingEntityData livingEntityData, @Nullable CompoundNBT nbt) {
         ILivingEntityData livingData = super.onInitialSpawn(world, difficultyInstance, spawnReason, livingEntityData, nbt);
-
-
-        //TODO: Add configuration for special spawn chance
         this.setSpecial(Utils.randomizeBooleanWithChance(Configs.SIMS.specialSpawnChance.get()));
 
         //TODO: Add professions
@@ -99,20 +96,19 @@ public class EntitySim extends AgeableEntity implements INPC {
             this.setCustomName(new StringTextComponent(name));
             this.setFemale(Configs.SIMS.specialSimGenders.get().contains(name));
         } else {
-            String name = "Sim";
             this.setFemale(Utils.randomizeBoolean());
-            this.setCustomName(new StringTextComponent(name));
             if (this.getFemale()) {
-                //TODO: Add female name database
-
-
+                if (!Configs.NAMES.femaleNames.get().isEmpty())
+                    this.setCustomName(new StringTextComponent(Configs.NAMES.femaleNames.get().get(rand.nextInt(Configs.NAMES.femaleNames.get().size()))));
                 this.setVariation(rand.nextInt(13));
             } else {
-                //TODO: Add male name database
+                if (!Configs.NAMES.maleNames.get().isEmpty())
+                    this.setCustomName(new StringTextComponent(Configs.NAMES.maleNames.get().get(rand.nextInt(Configs.NAMES.maleNames.get().size()))));
                 this.setVariation(rand.nextInt(10));
             }
         }
 
+        this.writeAdditional(this.getPersistentData());
         return livingData;
     }
 
@@ -170,7 +166,7 @@ public class EntitySim extends AgeableEntity implements INPC {
         compound.putString("Status", this.getStatus());
         this.foodStats.write(compound);
         if (job != null){
-           compound.put("job",this.job.writeToNbt(new ListNBT()));
+           compound.put("job", this.job.writeToNbt(new ListNBT()));
         }
     }
 
