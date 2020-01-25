@@ -23,20 +23,3 @@ public class ModTileEntities {
         event.getRegistry().register(CONSTRUCTOR);
 
     }
-
-
-    private static <T extends TileEntity> TileEntityType<T> register(String key, TileEntityType.Builder<T> builder) {
-        Type<?> type = null;
-
-        try {
-            type = DataFixesManager.getDataFixer().getSchema(DataFixUtils.makeKey(SharedConstants.getVersion().getWorldVersion())).getChoiceType(TypeReferences.BLOCK_ENTITY, key);
-        } catch (IllegalArgumentException illegalargumentexception) {
-            SimuKraft.LOGGER().error("No data fixer registered for block entity {}", (Object)key);
-            if (SharedConstants.developmentMode) {
-                throw illegalargumentexception;
-            }
-        }
-
-        return Registry.register(Registry.BLOCK_ENTITY_TYPE, key, builder.build(type));
-    }
-}
