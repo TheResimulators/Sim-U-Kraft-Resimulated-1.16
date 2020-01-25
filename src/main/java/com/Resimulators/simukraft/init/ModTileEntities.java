@@ -1,25 +1,26 @@
 package com.Resimulators.simukraft.init;
 
-import com.Resimulators.simukraft.SimuKraft;
-import com.Resimulators.simukraft.common.block.BlockConstructor;
+import com.Resimulators.simukraft.Reference;
 import com.Resimulators.simukraft.common.tileentity.TileConstructor;
-import com.mojang.datafixers.DataFixUtils;
-import com.mojang.datafixers.types.Type;
-import net.minecraft.block.Blocks;
-import net.minecraft.tileentity.FurnaceTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.SharedConstants;
-import net.minecraft.util.datafix.DataFixesManager;
-import net.minecraft.util.datafix.TypeReferences;
-import net.minecraft.util.registry.Registry;
-import net.minecraftforge.event.RegistryEvent;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ModTileEntities {
-    public static final TileEntityType<TileConstructor> CONSTRUCTOR = register("constructor",TileEntityType.Builder.create(TileConstructor::new, ModBlocks.CONSTRUCTOR_BOX));
+    private static List<TileEntityType> REGISTRY = new ArrayList<>();
 
-    public static void init(final RegistryEvent.Register<TileEntityType<?>> event){
-        CONSTRUCTOR.setRegistryName("constructor");
-        event.getRegistry().register(CONSTRUCTOR);
+    public static final TileEntityType<TileConstructor> CONSTRUCTOR = register(TileEntityType.Builder.create(TileConstructor::new, ModBlocks.CONSTRUCTOR_BOX), "constructor");
 
+    private static <T extends TileEntity> TileEntityType<T> register(TileEntityType.Builder<T> builder, String name) {
+        TileEntityType<T> type = builder.build(null);
+        type.setRegistryName(Reference.MODID, name);
+        REGISTRY.add(type);
+        return type;
     }
+
+    public static List<TileEntityType> getRegistry() {
+        return REGISTRY;
+    }
+}
