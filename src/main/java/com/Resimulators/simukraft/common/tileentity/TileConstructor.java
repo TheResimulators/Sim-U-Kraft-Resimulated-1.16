@@ -1,14 +1,15 @@
 package com.Resimulators.simukraft.common.tileentity;
 
+import com.Resimulators.simukraft.init.ModTileEntities;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
 
-public class TileConstructor extends TileEntity {
+public class TileConstructor extends TileEntity implements ITile {
 
     private boolean hired;
-    public TileConstructor(TileEntityType<?> tileEntityTypeIn) {
-        super(tileEntityTypeIn);
+    public TileConstructor() {
+        super(ModTileEntities.CONSTRUCTOR);
     }
 
     @Override
@@ -31,5 +32,12 @@ public class TileConstructor extends TileEntity {
     public void read(CompoundNBT nbt){
 
     }
-
+    @Override
+    public void setHired(boolean hired){
+        this.hired = hired;
+    }
+    @Override
+    public boolean getHired(){
+        return hired;
+    }
 }
