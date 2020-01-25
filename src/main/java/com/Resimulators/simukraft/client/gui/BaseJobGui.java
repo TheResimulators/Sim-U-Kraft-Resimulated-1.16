@@ -12,7 +12,6 @@ import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
-import sun.nio.ch.Net;
 
 import java.awt.*;
 import java.util.ArrayList;

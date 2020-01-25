@@ -16,9 +16,10 @@ import net.minecraft.util.registry.Registry;
 import net.minecraftforge.event.RegistryEvent;
 
 public class ModTileEntities {
-    public static final TileEntityType<TileConstructor> CONSTRUCTOR = register("Constructor",TileEntityType.Builder.create(TileConstructor::new, ModBlocks.CONSTRUCTOR_BOX));
+    public static final TileEntityType<TileConstructor> CONSTRUCTOR = register("constructor",TileEntityType.Builder.create(TileConstructor::new, ModBlocks.CONSTRUCTOR_BOX));
 
     public static void init(final RegistryEvent.Register<TileEntityType<?>> event){
+        CONSTRUCTOR.setRegistryName("constructor");
         event.getRegistry().register(CONSTRUCTOR);
 
     }
