@@ -65,19 +65,19 @@ public class GuiSimInventory extends DisplayEffectsScreen<SimContainer> {
     }
 
     @Override
-    protected void drawGuiContainerForegroundLayer(int p_146979_1_, int p_146979_2_) {
+    protected void drawGuiContainerForegroundLayer(int x, int y) {
         this.font.drawString(this.title.getFormattedText(), 80f, 8f, 4210752);
         this.minecraft.getTextureManager().bindTexture(GUI_ICONS_LOCATION);
         this.renderStats();
     }
 
     @Override
-    public void render(int p_render_1_, int p_render_2_, float p_render_3_) {
+    public void render(int x, int y, float z) {
         this.renderBackground();
-        super.render(p_render_1_, p_render_2_, p_render_3_);
-        this.renderHoveredToolTip(p_render_1_, p_render_2_);
-        this.oldMouseX = p_render_1_;
-        this.oldMouseY = p_render_2_;
+        super.render(x, y, z);
+        this.renderHoveredToolTip(x, y);
+        this.oldMouseX = x;
+        this.oldMouseY = y;
     }
 
     @Override
@@ -91,42 +91,42 @@ public class GuiSimInventory extends DisplayEffectsScreen<SimContainer> {
             //renderEntity(left + 51, top + 75, 30, (float) (left + 51) - this.oldMouseX, (float) (top + 75 - 50) - this.oldMouseY, this.sim);
     }
 
-    public static void renderEntity(int x, int y, int z, float p_228187_3_, float p_228187_4_, LivingEntity entity) {
-        float lvt_6_1_ = (float)Math.atan((double)(p_228187_3_ / 40.0F));
-        float lvt_7_1_ = (float)Math.atan((double)(p_228187_4_ / 40.0F));
+    public static void renderEntity(int x, int y, int z, float mouseX, float mouseY, LivingEntity entity) {
+        float mx = (float)Math.atan((double)(mouseX / 40.0F));
+        float my = (float)Math.atan((double)(mouseY / 40.0F));
         RenderSystem.pushMatrix();
         RenderSystem.translatef((float)x, (float)y, 1050.0F);
         RenderSystem.scalef(1.0F, 1.0F, -1.0F);
-        MatrixStack lvt_8_1_ = new MatrixStack();
-        lvt_8_1_.translate(0.0D, 0.0D, 1000.0D);
-        lvt_8_1_.scale((float)z, (float)z, (float)z);
-        Quaternion lvt_9_1_ = Vector3f.field_229183_f_.func_229187_a_(180.0F);
-        Quaternion lvt_10_1_ = Vector3f.field_229179_b_.func_229187_a_(lvt_7_1_ * 20.0F);
-        lvt_9_1_.multiply(lvt_10_1_);
-        lvt_8_1_.rotate(lvt_9_1_);
-        float lvt_11_1_ = entity.renderYawOffset;
-        float lvt_12_1_ = entity.rotationYaw;
-        float lvt_13_1_ = entity.rotationPitch;
-        float lvt_14_1_ = entity.prevRotationYawHead;
-        float lvt_15_1_ = entity.rotationYawHead;
-        entity.renderYawOffset = 180.0F + lvt_6_1_ * 20.0F;
-        entity.rotationYaw = 180.0F + lvt_6_1_ * 40.0F;
-        entity.rotationPitch = -lvt_7_1_ * 20.0F;
+        MatrixStack matrix = new MatrixStack();
+        matrix.translate(0.0D, 0.0D, 1000.0D);
+        matrix.scale((float)z, (float)z, (float)z);
+        Quaternion qx = Vector3f.field_229183_f_.func_229187_a_(180.0F);
+        Quaternion qy = Vector3f.field_229179_b_.func_229187_a_(my * 20.0F);
+        qx.multiply(qy);
+        matrix.rotate(qx);
+        float yawOffset = entity.renderYawOffset;
+        float rotYaw = entity.rotationYaw;
+        float rotPitch = entity.rotationPitch;
+        float prevRotYawHead = entity.prevRotationYawHead;
+        float rotYawHead = entity.rotationYawHead;
+        entity.renderYawOffset = 180.0F + mx * 20.0F;
+        entity.rotationYaw = 180.0F + mx * 40.0F;
+        entity.rotationPitch = -my * 20.0F;
         entity.rotationYawHead = entity.rotationYaw;
         entity.prevRotationYawHead = entity.rotationYaw;
-        EntityRendererManager lvt_16_1_ = Minecraft.getInstance().getRenderManager();
-        lvt_10_1_.conjugate();
-        lvt_16_1_.func_229089_a_(lvt_10_1_);
-        lvt_16_1_.setRenderShadow(false);
-        IRenderTypeBuffer.Impl lvt_17_1_ = Minecraft.getInstance().func_228019_au_().func_228487_b_();
-        lvt_16_1_.func_229084_a_(entity, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, lvt_8_1_, lvt_17_1_, 15728880);
-        lvt_17_1_.func_228461_a_();
-        lvt_16_1_.setRenderShadow(true);
-        entity.renderYawOffset = lvt_11_1_;
-        entity.rotationYaw = lvt_12_1_;
-        entity.rotationPitch = lvt_13_1_;
-        entity.prevRotationYawHead = lvt_14_1_;
-        entity.rotationYawHead = lvt_15_1_;
+        EntityRendererManager renderManager = Minecraft.getInstance().getRenderManager();
+        qy.conjugate();
+        renderManager.func_229089_a_(qy);
+        renderManager.setRenderShadow(false);
+        IRenderTypeBuffer.Impl renderTypeBuffer = Minecraft.getInstance().func_228019_au_().func_228487_b_();
+        renderManager.func_229084_a_(entity, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, matrix, renderTypeBuffer, 15728880);
+        renderTypeBuffer.func_228461_a_();
+        renderManager.setRenderShadow(true);
+        entity.renderYawOffset = yawOffset;
+        entity.rotationYaw = rotYaw;
+        entity.rotationPitch = rotPitch;
+        entity.prevRotationYawHead = prevRotYawHead;
+        entity.rotationYawHead = rotYawHead;
         RenderSystem.popMatrix();
     }
 
