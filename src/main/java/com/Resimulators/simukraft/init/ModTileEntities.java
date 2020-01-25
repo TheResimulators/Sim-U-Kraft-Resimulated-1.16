@@ -16,26 +16,10 @@ import net.minecraft.util.registry.Registry;
 import net.minecraftforge.event.RegistryEvent;
 
 public class ModTileEntities {
-    public static final TileEntityType<TileConstructor> CONSTRUCTOR = register("Constructor",TileEntityType.Builder.create(TileConstructor::new, ModBlocks.CONSTRUCTOR_BOX));
+    public static final TileEntityType<TileConstructor> CONSTRUCTOR = register("constructor",TileEntityType.Builder.create(TileConstructor::new, ModBlocks.CONSTRUCTOR_BOX));
 
     public static void init(final RegistryEvent.Register<TileEntityType<?>> event){
+        CONSTRUCTOR.setRegistryName("constructor");
         event.getRegistry().register(CONSTRUCTOR);
 
     }
-
-
-    private static <T extends TileEntity> TileEntityType<T> register(String key, TileEntityType.Builder<T> builder) {
-        Type<?> type = null;
-
-        try {
-            type = DataFixesManager.getDataFixer().getSchema(DataFixUtils.makeKey(SharedConstants.getVersion().getWorldVersion())).getChoiceType(TypeReferences.BLOCK_ENTITY, key);
-        } catch (IllegalArgumentException illegalargumentexception) {
-            SimuKraft.LOGGER().error("No data fixer registered for block entity {}", (Object)key);
-            if (SharedConstants.developmentMode) {
-                throw illegalargumentexception;
-            }
-        }
-
-        return Registry.register(Registry.BLOCK_ENTITY_TYPE, key, builder.build(type));
-    }
-}
