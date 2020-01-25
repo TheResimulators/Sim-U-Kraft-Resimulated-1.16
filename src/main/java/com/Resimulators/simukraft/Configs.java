@@ -87,9 +87,9 @@ public class Configs {
         public final ConfigValue<List<? extends String>> maleNames;
 
         private CategoryNames() {
-            SERVER_BUILDER.comment("Sims settings").push("sims");
-            COMMON_BUILDER.comment("Sims settings").push("sims");
-            CLIENT_BUILDER.comment("Sims settings").push("sims");
+            SERVER_BUILDER.comment("Name settings").push("names");
+            COMMON_BUILDER.comment("Name settings").push("names");
+            CLIENT_BUILDER.comment("Name settings").push("names");
 
             femaleNames = COMMON_BUILDER.comment("This holds all female names that gets applied to the Sims")
                     .translation(LANG_KEY_NAMES + ".femalenames")
