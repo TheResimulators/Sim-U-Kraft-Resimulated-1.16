@@ -17,6 +17,7 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Effects;
@@ -26,6 +27,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 
 import java.util.Random;
+import java.util.UUID;
 
 public class GuiSimInventory extends DisplayEffectsScreen<SimContainer> {
     private static final int HEIGHT = 224;
@@ -38,18 +40,19 @@ public class GuiSimInventory extends DisplayEffectsScreen<SimContainer> {
     private float oldMouseY;
 
     protected int ticks;
-    protected int playerHealth;
-    protected int lastPlayerHealth;
+    protected int simHealth;
+    protected int lastSimHealth;
     protected long lastSystemTime;
     protected long healthUpdateCounter;
     protected int scaledWidth;
     protected int scaledHeight;
 
+    private SimContainer container;
     private EntitySim sim;
 
     public GuiSimInventory(SimContainer container, PlayerInventory playerInventory, ITextComponent name) {
         super(container, playerInventory, name);
-        this.sim = container.getSim();
+        this.container = container;
         xSize = WIDTH;
         ySize = HEIGHT;
         this.passEvents = true;
@@ -58,6 +61,7 @@ public class GuiSimInventory extends DisplayEffectsScreen<SimContainer> {
     @Override
     protected void init() {
         super.init();
+        this.sim = container.getSim();
     }
 
     @Override
@@ -65,9 +69,6 @@ public class GuiSimInventory extends DisplayEffectsScreen<SimContainer> {
         this.font.drawString(this.title.getFormattedText(), 80f, 8f, 4210752);
         this.minecraft.getTextureManager().bindTexture(GUI_ICONS_LOCATION);
         this.renderStats();
-        //this.font.drawString((int)this.sim.getHealth() + "/" + (int)this.sim.getMaxHealth() + " Health", 80f, 18f, 4210752);
-        //this.font.drawString(this.sim.getFoodStats().getFoodLevel() + "/20 Hunger", 80f, 28f, 4210752);
-        //this.font.drawString(this.sim.getTotalArmorValue() + "/20 Armor", 80f, 38f, 4210752);
     }
 
     @Override
@@ -86,10 +87,8 @@ public class GuiSimInventory extends DisplayEffectsScreen<SimContainer> {
         int left = this.guiLeft;
         int top = this.guiTop;
         this.blit(left, top, 0, 0, this.xSize, this.ySize);
-        try {
-            //if (this.sim != null)
-                //renderEntity(left + 51, top + 75, 30, (float) (left + 51) - this.oldMouseX, (float) (top + 75 - 50) - this.oldMouseY, this.sim);
-        } catch (NullPointerException e) {}
+        //if (this.sim != null)
+            //renderEntity(left + 51, top + 75, 30, (float) (left + 51) - this.oldMouseX, (float) (top + 75 - 50) - this.oldMouseY, this.sim);
     }
 
     public static void renderEntity(int x, int y, int z, float p_228187_3_, float p_228187_4_, LivingEntity entity) {
@@ -154,22 +153,22 @@ public class GuiSimInventory extends DisplayEffectsScreen<SimContainer> {
             int i = MathHelper.ceil(entitySim.getHealth());
             boolean flag = this.healthUpdateCounter > (long)this.ticks && (this.healthUpdateCounter - (long)this.ticks) / 3L % 2L == 1L;
             long j = Util.milliTime();
-            if (i < this.playerHealth && entitySim.hurtResistantTime > 0) {
+            if (i < this.simHealth && entitySim.hurtResistantTime > 0) {
                 this.lastSystemTime = j;
                 this.healthUpdateCounter = (long)(this.ticks + 20);
-            } else if (i > this.playerHealth && entitySim.hurtResistantTime > 0) {
+            } else if (i > this.simHealth && entitySim.hurtResistantTime > 0) {
                 this.lastSystemTime = j;
                 this.healthUpdateCounter = (long)(this.ticks + 10);
             }
 
             if (j - this.lastSystemTime > 1000L) {
-                this.playerHealth = i;
-                this.lastPlayerHealth = i;
+                this.simHealth = i;
+                this.lastSimHealth = i;
                 this.lastSystemTime = j;
             }
 
-            this.playerHealth = i;
-            int k = this.lastPlayerHealth;
+            this.simHealth = i;
+            int k = this.lastSimHealth;
             this.rand.setSeed((long)(this.ticks * 312871));
             FoodStats foodstats = entitySim.getFoodStats();
             int l = foodstats.getFoodLevel();
