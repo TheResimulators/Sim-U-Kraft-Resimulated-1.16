@@ -1,13 +1,12 @@
 package com.Resimulators.simukraft.common.events.world;
 
+import com.Resimulators.simukraft.SimuKraft;
 import com.Resimulators.simukraft.common.entity.sim.EntitySim;
 import com.Resimulators.simukraft.common.world.Faction;
 import com.Resimulators.simukraft.common.world.SavedWorldData;
 import com.Resimulators.simukraft.init.ModEntities;
 import com.Resimulators.simukraft.packets.UpdateSimPacket;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.EntitySpawnPlacementRegistry;
+import com.Resimulators.simukraft.utils.BlockUtils;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.BlockPos;
@@ -16,7 +15,6 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import org.jline.utils.Log;
 
 import java.time.DayOfWeek;
 import java.util.ArrayList;
@@ -27,8 +25,6 @@ public class NewDayEvent implements INBTSerializable<CompoundNBT> {
     private static Random random = new Random();
     private double day = 0;
     private double previousDay = 0;
-    private int radius = 10;
-    private static final int maxRadius = 50;
 
     @SubscribeEvent
     public void OnNewDayEvent(TickEvent.WorldTickEvent event) {
@@ -63,7 +59,11 @@ public class NewDayEvent implements INBTSerializable<CompoundNBT> {
 
 
     public void payRent() {
-        Log.info("Paying rent...");
+        SimuKraft.LOGGER().debug("Paying rent...");
+    }
+
+    public static DayOfWeek getDay() {
+        return dayOfWeek;
     }
 
     public void spawnSims(World world) {
@@ -73,46 +73,24 @@ public class NewDayEvent implements INBTSerializable<CompoundNBT> {
         ArrayList<Faction> factions = worldData.getFactions();
         ServerWorld sWorld = (ServerWorld) world;
 
+        if (sWorld.getPlayers().size() == 0) return;
         for (Faction faction : factions) {
             if (faction.getUnemployedSims().isEmpty() || true) {
                 ArrayList<EntitySim> simsToSpawn = new ArrayList<>();
                 simsToSpawn.add(new EntitySim(ModEntities.ENTITY_SIM, world));
                 simsToSpawn.add(new EntitySim(ModEntities.ENTITY_SIM, world));
                 for (EntitySim sim : simsToSpawn) {
-                    if (sWorld.getPlayers().size() > 0) {
-                        PlayerEntity player = sWorld.getPlayers().get(random.nextInt(sWorld.getPlayers().size()));
-                        do {
-                            ArrayList<BlockPos> blocks = getBlocksAroundPosition(player.getPosition(), radius);
-                            Log.info("Radius: " + radius);
-                            if (spawn(sWorld, sim, blocks)) {
-                                worldData.addSimToFaction(faction.getId(), sim);
-                                faction.sendPacketToFaction(new UpdateSimPacket(sim.getUniqueID(), faction.getSimInfo(sim.getUniqueID()), faction.getId()));
-                                break;
-                            }
-                            radius += 5;
-                        } while (radius <= maxRadius);
-                        radius = 10;
+                    PlayerEntity player = sWorld.getPlayers().get(random.nextInt(sWorld.getPlayers().size()));
+                    ArrayList<BlockPos> blocks = BlockUtils.getBlocksAroundPosition(player.getPosition(), 10);
+                    if (spawn(sWorld, sim, blocks)) {
+                        worldData.addSimToFaction(faction.getId(), sim);
+                        faction.sendPacketToFaction(new UpdateSimPacket(sim.getUniqueID(), faction.getSimInfo(sim.getUniqueID()), faction.getId()));
                     }
                 }
             } else {
-                Log.info("There are unemployed sims");
+                SimuKraft.LOGGER().debug("There are unemployed sims");
             }
         }
-    }
-
-    public static DayOfWeek getDay() {
-        return dayOfWeek;
-    }
-
-    private ArrayList<BlockPos> getBlocksAroundPosition(BlockPos pos, int radius) {
-        ArrayList<BlockPos> blocks = new ArrayList<>();
-        for (int x = -radius; x <= radius; x++) {
-            for (int z = -radius; z <= radius; z++) {
-                BlockPos blockPos = pos.add(x, 0, z);
-                blocks.add(blockPos);
-            }
-        }
-        return blocks;
     }
 
     /**
@@ -125,23 +103,27 @@ public class NewDayEvent implements INBTSerializable<CompoundNBT> {
      * @return Whether or not the sim spawned
      */
     private boolean spawn(ServerWorld world, EntitySim sim, ArrayList<BlockPos> blocksAroundPlayer) {
-        Log.info("Blocks size: " + blocksAroundPlayer.size());
         // loop through provided blocks
-        for (BlockPos blockPos : blocksAroundPlayer) {
+        SimuKraft.LOGGER().debug(blocksAroundPlayer.size());
+
+        for (int i = 0; i < blocksAroundPlayer.size(); i++) {
             // if there are no invalid positions, spawn sim and break out of loop
-            BlockPos spawnPos = getSpawnPosition(world, blockPos);
-            if (spawnPos == null) continue;
-            // get x,y,z coords of block
+            BlockPos spawnPos = getSpawnPosition(world, blocksAroundPlayer.get(i), sim);
+            if (spawnPos == null) {
+                SimuKraft.LOGGER().debug("AHHHH NULL " + i);
+                continue;
+            }
+            // get x, y, z coords of block
             double x = spawnPos.getX();
             double y = spawnPos.getY();
             double z = spawnPos.getZ();
             // set the sim's position
             sim.setPosition(x, y, z);
-            if (sim.isNotColliding(world)) {
-                world.func_217460_e(sim); // spawn entity
-                return true;
-            }
+            world.func_217460_e(sim); // spawn entity
+            SimuKraft.LOGGER().debug("entity spawned");
+            return true;
         }
+        SimuKraft.LOGGER().debug("ERROR! CANNOT SPAWN SIM.");
         // error, no valid position
         return false;
     }
@@ -154,32 +136,23 @@ public class NewDayEvent implements INBTSerializable<CompoundNBT> {
      *
      * @param world       The world
      * @param startingPos The starting position
-     * @return The first invalid position, if any
+     * @return A valid position or null if none
      */
-    private BlockPos getSpawnPosition(World world, BlockPos startingPos) {
-        BlockPos groundBlockPos = getGroundBlock(world, startingPos);
-        ArrayList<BlockPos> blocksAroundGroundBlock = getBlocksAroundPosition(groundBlockPos, 1);
-        if (blocksAreValid(world, blocksAroundGroundBlock)) {
+    private BlockPos getSpawnPosition(World world, BlockPos startingPos, EntitySim sim) {
+        BlockPos groundBlockPos = BlockUtils.getGroundBlock(world, startingPos);
+        SimuKraft.LOGGER().debug("ground block pos: " + groundBlockPos);
+        // If the ground block is not valid, can't use it
+        if (!BlockUtils.blockIsValid(world, groundBlockPos, sim)) {
+            SimuKraft.LOGGER().debug("Block is NOT valid");
+            return null;
+        }
+        ArrayList<BlockPos> blocksAroundGroundBlock = BlockUtils.getBlocksAroundPosition(groundBlockPos, 1);
+        // If the ground block is valid and the blocks around it are valid, return the block above
+        if (BlockUtils.blocksAreValid(world, blocksAroundGroundBlock, sim)) {
+            SimuKraft.LOGGER().debug("Block is valid");
             return groundBlockPos.up();
         }
+        SimuKraft.LOGGER().debug("Blocks are NOT valid");
         return null;
-    }
-
-    private BlockPos getGroundBlock(World world, BlockPos startingPos) {
-        BlockState state = world.getBlockState(startingPos);
-        if (state.isSolid()) return startingPos;
-        BlockPos newPos = startingPos;
-        do {
-            newPos = newPos.down();
-            state = world.getBlockState(newPos);
-        } while (state.getBlock() != Blocks.AIR || !state.isSolid());
-        return newPos;
-    }
-
-    private boolean blocksAreValid(World world, ArrayList<BlockPos> blocksPos) {
-        for (BlockPos block : blocksPos)
-            if (!world.getBlockState(block).getBlock().canCreatureSpawn(world.getBlockState(block), world, block, EntitySpawnPlacementRegistry.PlacementType.ON_GROUND, null))
-                return false;
-        return true;
     }
 }
