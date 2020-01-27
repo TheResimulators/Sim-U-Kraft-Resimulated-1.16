@@ -533,6 +533,14 @@ public class EntitySim extends AgeableEntity implements INPC {
         }
     }
 
+    public void setJob(IJob job) {
+        this.job = job;
+    }
+
+    public IJob getJob() {
+        return job;
+    }
+
     @Override
     public void setCustomName(ITextComponent name) {
         super.setCustomName(name);
