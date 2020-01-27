@@ -73,6 +73,7 @@ public class NewDayEvent implements INBTSerializable<CompoundNBT> {
         ArrayList<Faction> factions = worldData.getFactions();
         ServerWorld sWorld = (ServerWorld) world;
 
+
         if (sWorld.getPlayers().size() == 0) return;
         for (Faction faction : factions) {
             if (faction.getUnemployedSims().isEmpty() || true) {
@@ -80,15 +81,11 @@ public class NewDayEvent implements INBTSerializable<CompoundNBT> {
                 simsToSpawn.add(new EntitySim(ModEntities.ENTITY_SIM, world));
                 simsToSpawn.add(new EntitySim(ModEntities.ENTITY_SIM, world));
                 for (EntitySim sim : simsToSpawn) {
-                    ArrayList<UUID> players = faction.getPlayers();
-                    if (sWorld.getPlayers().size() > 0) {
-                        PlayerEntity player = sWorld.getPlayers().get(random.nextInt(sWorld.getPlayers().size()));
-                        ArrayList<BlockPos> blocks = getBlocksAroundPosition(player.getPosition(), radius);
-                        Log.info("Radius: " + radius);
-                        if (spawn(sWorld, sim, blocks)) {
-                            worldData.addSimToFaction(faction.getId(), sim);
-                            faction.sendPacketToFaction(new UpdateSimPacket(sim.getUniqueID(), faction.getSimInfo(sim.getUniqueID()), faction.getId()));
-                        }
+                    PlayerEntity player = sWorld.getPlayers().get(random.nextInt(sWorld.getPlayers().size()));
+                    ArrayList<BlockPos> blocks = BlockUtils.getBlocksAroundPosition(player.getPosition(), 10);
+                    if (spawn(sWorld, sim, blocks)) {
+                        worldData.addSimToFaction(faction.getId(), sim);
+                        faction.sendPacketToFaction(new UpdateSimPacket(sim.getUniqueID(), faction.getSimInfo(sim.getUniqueID()), faction.getId()));
                     }
                 }
             } else {
