@@ -6,7 +6,7 @@ public interface IJob {
 
     EnumJobState state();
 
-
+    String name();
     //interval of ticks between work periods,
     int intervalTime();
     //how many ticks to work for each time they work period

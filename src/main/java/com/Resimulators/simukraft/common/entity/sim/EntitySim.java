@@ -195,11 +195,10 @@ public class EntitySim extends AgeableEntity implements INPC {
             this.inventory.currentItem = compound.getInt("SelectedItemSlot");
         if (compound.contains("NameColor"))
             this.setNameColor(compound.getInt("NameColor"));
-        if (compound.contains("Status")) {
+        if (compound.contains("Status"))
             this.setStatus(compound.getString("Status"));
-        }
         this.foodStats.read(compound);
-        String jobType = compound.getList("job", Constants.NBT.TAG_LIST).getCompound(0).getString("Builder");
+        String jobType = compound.getList("job", Constants.NBT.TAG_LIST).getCompound(0).getString("jobname");
         switch (jobType){
             case "Builder":
                 job = new JobBuilder(this);
