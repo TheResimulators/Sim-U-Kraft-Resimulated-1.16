@@ -2,6 +2,7 @@ package com.Resimulators.simukraft.common.entity.sim;
 
 import com.Resimulators.simukraft.SimuKraft;
 import com.Resimulators.simukraft.init.OHRegistry;
+import com.Resimulators.simukraft.utils.Utils;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.MobEntity;
@@ -107,8 +108,8 @@ public class SimContainer extends Container {
                 if (!this.mergeItemStack(itemstack1, 31, 67, false)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (equipmentslottype.getSlotType() == EquipmentSlotType.Group.ARMOR && !this.inventorySlots.get(8 - equipmentslottype.getIndex()).getHasStack()) {
-                int i = 8 - equipmentslottype.getIndex();
+            } else if (equipmentslottype.getSlotType() == EquipmentSlotType.Group.ARMOR && !this.inventorySlots.get(equipmentslottype.getIndex()).getHasStack()) {
+                int i = Utils.getReversedInt(4, equipmentslottype.getIndex());
                 if (!this.mergeItemStack(itemstack1, i, i + 1, false)) {
                     return ItemStack.EMPTY;
                 }
