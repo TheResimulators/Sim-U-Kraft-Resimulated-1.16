@@ -3,6 +3,7 @@ package com.Resimulators.simukraft.packets;
 import com.Resimulators.simukraft.common.entity.sim.EntitySim;
 import com.Resimulators.simukraft.common.tileentity.ITile;
 import com.Resimulators.simukraft.common.world.SavedWorldData;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.math.BlockPos;
@@ -53,7 +54,8 @@ public class SimHireRequest implements IMessage {
             int id = data.getFactionWithPlayer(player.getUniqueID()).getId();
             data.hireSim(id,(EntitySim) player.world.getEntityByID(simId));
             ((ITile)player.world.getTileEntity(pos)).setHired(true);
-            data.getFaction(id).sendPacketToFaction(new SimHirePacket(id,simId,pos));
+            ((ITile)player.world.getTileEntity(pos)).setSimId(player.world.getEntityByID(simId).getUniqueID());
+            data.getFaction(id).sendPacketToFaction(new SimHirePacket(simId,id,pos));
         }
 
     }
