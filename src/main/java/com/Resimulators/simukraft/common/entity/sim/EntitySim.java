@@ -176,7 +176,6 @@ public class EntitySim extends AgeableEntity implements INPC {
         }
     }
 
-
     @Override
     public void readAdditional(CompoundNBT compound) {
         super.readAdditional(compound);
@@ -262,11 +261,11 @@ public class EntitySim extends AgeableEntity implements INPC {
     }
 
     //Inventory
-
     public void selectSlot(int i) {
         if (0 <= i && i < 27)
             inventory.currentItem = i;
     }
+
     public int getSelectedSlot() {
         return inventory.currentItem;
     }
@@ -397,10 +396,10 @@ public class EntitySim extends AgeableEntity implements INPC {
     }
 
     //Data Manager Interaction
-
     public void setVariation(int variationID) {
         this.dataManager.set(VARIATION, variationID);
     }
+
     public int getVariation() {
         try {
             return Math.max(this.dataManager.get(VARIATION), 0);
