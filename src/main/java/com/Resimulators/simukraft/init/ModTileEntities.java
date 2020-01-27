@@ -16,11 +16,9 @@ import net.minecraft.util.registry.Registry;
 import net.minecraftforge.event.RegistryEvent;
 
 public class ModTileEntities {
-
-public class ModTileEntities {
     public static final TileEntityType<?> CONSTRUCTOR = TileEntityType.Builder.create(TileConstructor::new).build(null);
     public static void init(final RegistryEvent.Register<TileEntityType<?>> event){
         CONSTRUCTOR.setRegistryName("constructor");
         event.getRegistry().register(CONSTRUCTOR);
 
-    }
+    }}

@@ -41,7 +41,7 @@ public class SavedWorldData extends WorldSavedData {
             return clientStorageCopy;
         }
 
-        ServerWorld overworld = world.getServer().getWorld(DimensionType.OVERWORLD);
+        ServerWorld overworld = (ServerWorld) world;
 
         DimensionSavedDataManager storage = overworld.getSavedData();
         return storage.getOrCreate(SavedWorldData::new, DATA_NAME);

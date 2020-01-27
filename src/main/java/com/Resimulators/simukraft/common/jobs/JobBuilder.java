@@ -9,12 +9,14 @@ import net.minecraft.entity.ai.goal.MoveTowardsTargetGoal;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
+import net.minecraft.util.math.BlockPos;
 
 
 public class JobBuilder implements IJob {
     private EntitySim sim;
     private Goal goal1;
     private int periodsworked = 0;
+    private BlockPos workSpace;
 
     public JobBuilder(EntitySim sim) {
         this.sim = sim;
@@ -99,6 +101,18 @@ public class JobBuilder implements IJob {
     public void resetPeriodsWorked() {
         setWorkedPeriods(0);
     }
+
+    @Override
+    public void setWorkSpace(BlockPos pos) {
+        this.workSpace = pos;
+    }
+
+    @Override
+    public BlockPos getWorkSpace() {
+        return workSpace;
+    }
+
+
 
 
 }
