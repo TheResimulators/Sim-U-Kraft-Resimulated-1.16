@@ -45,5 +45,6 @@ public class SimHirePacket implements IMessage{
     public void onExecute(NetworkEvent.Context ctxIn, boolean isLogicalServer) {
         SavedWorldData.get(Minecraft.getInstance().player.world).getFaction(factionId).hireSim(Minecraft.getInstance().world.getEntityByID(simId).getUniqueID());
         ((ITile)Minecraft.getInstance().world.getTileEntity(pos)).setHired(true);
+        ((ITile)Minecraft.getInstance().world.getTileEntity(pos)).setSimId(Minecraft.getInstance().world.getEntityByID(simId).getUniqueID());
     }
 }
