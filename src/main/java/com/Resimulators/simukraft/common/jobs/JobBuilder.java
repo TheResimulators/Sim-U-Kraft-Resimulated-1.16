@@ -24,6 +24,11 @@ public class JobBuilder implements IJob {
     }
 
     @Override
+    public String name() {
+        return "Builder";
+    }
+
+    @Override
     public EnumJobState state() {
         return EnumJobState.NOT_WORKING;
     }
@@ -68,7 +73,7 @@ public class JobBuilder implements IJob {
     @Override
     public ListNBT writeToNbt(ListNBT nbt) {
         CompoundNBT name = new CompoundNBT();
-        name.putString("Builder", "Builder");
+        name.putString("jobname", name());
         nbt.add(name);
         CompoundNBT ints = new CompoundNBT();
         ints.putInt("periodsworked", periodsworked);

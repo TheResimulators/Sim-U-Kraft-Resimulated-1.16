@@ -57,7 +57,7 @@ public class SimInventory implements IInventory, INamedContainerProvider {
         this.inventoryTitle = title;
         this.hasCustomName = customName;
         this.slotsCount = slotCount + 5;
-        this.mainInventory = NonNullList.<ItemStack>withSize(slotCount, ItemStack.EMPTY);
+        this.mainInventory = NonNullList.withSize(slotCount, ItemStack.EMPTY);
         this.allInventories = ImmutableList.of(this.mainInventory, this.armorInventory, this.handInventory);
     }
 
