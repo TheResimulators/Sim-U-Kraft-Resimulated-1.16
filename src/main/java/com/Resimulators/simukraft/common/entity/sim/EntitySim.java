@@ -261,22 +261,12 @@ public class EntitySim extends AgeableEntity implements INPC {
         removeFromFaction();
     }
 
-    public void removeFromFaction() {
-        SavedWorldData sWorld = SavedWorldData.get(world);
-        ArrayList<Faction> factions = sWorld.getFactions();
-        for (Faction faction : factions) {
-            if (faction.getSims().containsKey(this.entityUniqueID)) {
-                sWorld.removeSimFromFaction(faction.getId(),this);
-            }
-        }
-    }
-
     //Inventory
+
     public void selectSlot(int i) {
         if (0 <= i && i < 27)
             inventory.currentItem = i;
     }
-
     public int getSelectedSlot() {
         return inventory.currentItem;
     }
@@ -407,10 +397,10 @@ public class EntitySim extends AgeableEntity implements INPC {
     }
 
     //Data Manager Interaction
+
     public void setVariation(int variationID) {
         this.dataManager.set(VARIATION, variationID);
     }
-
     public int getVariation() {
         try {
             return Math.max(this.dataManager.get(VARIATION), 0);
@@ -498,6 +488,16 @@ public class EntitySim extends AgeableEntity implements INPC {
 
     public FoodStats getFoodStats() {
         return this.foodStats;
+    }
+
+    public void removeFromFaction() {
+        SavedWorldData sWorld = SavedWorldData.get(world);
+        ArrayList<Faction> factions = sWorld.getFactions();
+        for (Faction faction : factions) {
+            if (faction.getSims().containsKey(this.entityUniqueID)) {
+                sWorld.removeSimFromFaction(faction.getId(),this);
+            }
+        }
     }
 
     public boolean canEat(boolean ignoreHunger) {
