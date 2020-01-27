@@ -46,6 +46,8 @@ public class SimUKraftPacketHandler {
         registerMessage(newId(), SimHireRequest.class, SimHireRequest::new);
         registerMessage(newId(), SimHirePacket.class, SimHirePacket::new);
         registerMessage(newId(), UpdateSimPacket.class, UpdateSimPacket::new);
+        registerMessage(newId(),SimFireRequest.class,SimFireRequest::new);
+        registerMessage(newId(),SimFirePacket.class,SimFirePacket::new);
 
     }
 

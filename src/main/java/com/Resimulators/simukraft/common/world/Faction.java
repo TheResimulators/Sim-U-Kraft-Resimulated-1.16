@@ -147,6 +147,18 @@ public class Faction {
         return simids;
     }
 
+    public ArrayList<Integer> getSimUnemployedIds(ServerWorld world) {
+        ArrayList<Integer> simids = new ArrayList<>();
+        for (UUID id : sims.keySet()) {
+            if (world.getEntityByUuid(id) != null){
+                if (!sims.get(id).hired){
+                simids.add(world.getEntityByUuid(id).getEntityId());
+                }
+            }else {
+                SimuKraft.LOGGER().error("Error: Faction Entity Doesn't Exist in the world. Please Contact Author");
+            }}
+        return simids;
+    }
     public HashMap<UUID, SimInfo> getSims() {
         return sims;
     }

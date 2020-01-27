@@ -5,9 +5,12 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
 
+import java.util.UUID;
+
 public class TileConstructor extends TileEntity implements ITile {
 
     private boolean hired;
+    private UUID simID;
     public TileConstructor() {
         super(ModTileEntities.CONSTRUCTOR);
     }
@@ -25,12 +28,14 @@ public class TileConstructor extends TileEntity implements ITile {
     @Override
     public CompoundNBT write(CompoundNBT nbt){
         nbt.putBoolean("hired",hired);
+        nbt.putUniqueId("simid",simID);
         return nbt;
     }
 
     @Override
     public void read(CompoundNBT nbt){
-
+    hired = nbt.getBoolean("hired");
+    simID = nbt.getUniqueId("simid");
     }
     @Override
     public void setHired(boolean hired){
@@ -40,4 +45,15 @@ public class TileConstructor extends TileEntity implements ITile {
     public boolean getHired(){
         return hired;
     }
+
+    @Override
+    public UUID getSimId() {
+        return simID;
+    }
+
+    @Override
+    public void setSimId(UUID id) {
+        this.simID = id;
+    }
+
 }

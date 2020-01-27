@@ -1,6 +1,7 @@
 package com.Resimulators.simukraft.common.jobs.core;
 
 import net.minecraft.nbt.ListNBT;
+import net.minecraft.util.math.BlockPos;
 
 public interface IJob {
 
@@ -34,4 +35,12 @@ public interface IJob {
     void setWorkedPeriods(int periods);
     
     void resetPeriodsWorked();
+
+    void setWorkSpace(BlockPos pos);
+
+    BlockPos getWorkSpace();
+
+
 }
+
+
