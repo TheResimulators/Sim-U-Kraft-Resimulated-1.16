@@ -56,17 +56,20 @@ public class EntitySim extends AgeableEntity implements INPC {
     private static final DataParameter<Byte> MODEL_FLAG = EntityDataManager.createKey(EntitySim.class, DataSerializers.BYTE);
     private static final DataParameter<String> STATUS = EntityDataManager.createKey(EntitySim.class, DataSerializers.STRING);
     private static final DataParameter<Integer> NAME_COLOR = EntityDataManager.createKey(EntitySim.class, DataSerializers.VARINT);
+    public static final DataParameter<Integer> FOOD_LEVEL = EntityDataManager.createKey(EntitySim.class, DataSerializers.VARINT);
+    public static final DataParameter<Float> FOOD_SATURATION_LEVEL = EntityDataManager.createKey(EntitySim.class, DataSerializers.FLOAT);
 
     private final SimInventory inventory;
     private PlayerEntity interactingPlayer;
 
-    protected FoodStats foodStats = new FoodStats();
+    protected FoodStats foodStats;
     private IJob job;
     private Random rand = new Random();
 
     public EntitySim(EntityType<? extends AgeableEntity> type, World worldIn) {
         super(ModEntities.ENTITY_SIM, worldIn);
         this.inventory = new SimInventory(this, "Sim Inventory", false, 27);
+        this.foodStats = new FoodStats(this);
     }
 
     @Override
@@ -80,6 +83,8 @@ public class EntitySim extends AgeableEntity implements INPC {
         this.dataManager.register(MODEL_FLAG, (byte)0);
         this.dataManager.register(STATUS, "");
         this.dataManager.register(NAME_COLOR, 0);
+        this.dataManager.register(FOOD_LEVEL, 20);
+        this.dataManager.register(FOOD_SATURATION_LEVEL, 5f);
     }
 
     @Override
