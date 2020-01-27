@@ -7,6 +7,9 @@ import net.minecraftforge.items.ItemHandlerHelper;
 
 import javax.annotation.Nonnull;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 
 public class Utils {
@@ -43,5 +46,14 @@ public class Utils {
         } catch (NumberFormatException e) {
             return 0;
         }
+    }
+
+    public static int getReversedInt(int size, int index) {
+        List<Integer> temp = new ArrayList<>();
+        for (int i = 0; i < size; i++) {
+            temp.add(i);
+        }
+        Collections.reverse(temp);
+        return temp.get(index);
     }
 }
