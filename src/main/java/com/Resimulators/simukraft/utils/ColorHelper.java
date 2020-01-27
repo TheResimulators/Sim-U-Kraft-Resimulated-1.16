@@ -1,5 +1,6 @@
 package com.Resimulators.simukraft.utils;
 
+import java.awt.*;
 import java.util.Arrays;
 import java.util.Comparator;
 
@@ -12,32 +13,46 @@ public class ColorHelper {
         return Colors.getFromTFColor(i).getDyeColor();
     }
 
+    public static Color getColorFromDye(int i) {
+        return Colors.getFromDyeColor(i).getColor();
+    }
+
+    public static Color getColorFromTF(int i) {
+        return Colors.getFromTFColor(i).getColor();
+    }
+
     private enum Colors {
-        WHITE(0, 15), //White
-        ORANGE(1, 6), //Gold
-        MAGENTA(2, 13), //Light Purple
-        LIGHT_BLUE(3, 11), //Aqua
-        YELLOW(4, 14), //Yellow
-        LIME(5, 10), //Green
-        PINK(6, 12), //Red
-        GRAY(7, 8), //Dark Gray
-        LIGHT_GRAY(8, 7), //Gray
-        CYAN(9, 3), //Dark Aqua
-        PURPLE(10, 5), //Dark Purple
-        BLUE(11, 1), //Dark Blue
-        BROWN(12, 6), //Gold
-        GREEN(13, 2), //Dark Green
-        RED(14, 4), //Dark Red
-        BLACK(15, 0); //Black
+        WHITE(0, 15, Color.WHITE), //White
+        ORANGE(1, 6, new Color(255, 170, 0)), //Gold
+        MAGENTA(2, 13, new Color(255, 85, 255)), //Light Purple
+        LIGHT_BLUE(3, 11, new Color(85, 255, 255)), //Aqua
+        YELLOW(4, 14, new Color(255, 255, 85)), //Yellow
+        LIME(5, 10, new Color(85, 255, 85)), //Green
+        PINK(6, 12, new Color(255, 85, 85)), //Red
+        GRAY(7, 8, new Color(85, 85, 85)), //Dark Gray
+        LIGHT_GRAY(8, 7, new Color(170, 170, 170)), //Gray
+        CYAN(9, 3, new Color(0, 170, 170)), //Dark Aqua
+        PURPLE(10, 5, new Color(170, 0, 170)), //Dark Purple
+        BLUE(11, 1, new Color(0, 0, 170)), //Dark Blue
+        BROWN(12, 6, new Color(255, 170, 10)), //Gold
+        GREEN(13, 2, new Color(0, 170,0)), //Dark Green
+        RED(14, 4, new Color(170, 0, 0)), //Dark Red
+        BLACK(15, 0, Color.BLACK); //Black
 
         private static final Colors[] DYECOLORS = Arrays.stream(values()).sorted(Comparator.comparingInt(Colors::getDyeColor)).toArray(Colors[]::new);
         private static final Colors[] TFCOLORS = Arrays.stream(values()).sorted(Comparator.comparingInt(Colors::getTfColor)).toArray(Colors[]::new);
 
         int dyeColor;
         int tfColor;
-        Colors(int dyeColor, int tfColor) {
+        Color color;
+        Colors(int dyeColor, int tfColor, Color color) {
             this.dyeColor = dyeColor;
             this.tfColor = tfColor;
+            this.color = color;
+        }
+
+        public Color getColor() {
+            return color;
         }
 
         public int getDyeColor() {

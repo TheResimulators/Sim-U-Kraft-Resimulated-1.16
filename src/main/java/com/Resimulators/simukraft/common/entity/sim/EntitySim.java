@@ -2,6 +2,7 @@ package com.Resimulators.simukraft.common.entity.sim;
 
 import com.Resimulators.simukraft.Configs;
 import com.Resimulators.simukraft.common.entity.goals.PickupItemGoal;
+import com.Resimulators.simukraft.common.entity.goals.TalkingToPlayerGoal;
 import com.Resimulators.simukraft.common.jobs.JobBuilder;
 import com.Resimulators.simukraft.common.jobs.core.IJob;
 import com.Resimulators.simukraft.common.world.Faction;
@@ -56,6 +57,7 @@ public class EntitySim extends AgeableEntity implements INPC {
     private static final DataParameter<Integer> NAME_COLOR = EntityDataManager.createKey(EntitySim.class, DataSerializers.VARINT);
 
     private final SimInventory inventory;
+    private PlayerEntity interactingPlayer;
 
     protected FoodStats foodStats = new FoodStats();
     private IJob job;
@@ -82,9 +84,6 @@ public class EntitySim extends AgeableEntity implements INPC {
     @Override
     public ILivingEntityData onInitialSpawn(IWorld world, DifficultyInstance difficultyInstance, SpawnReason spawnReason, @Nullable ILivingEntityData livingEntityData, @Nullable CompoundNBT nbt) {
         ILivingEntityData livingData = super.onInitialSpawn(world, difficultyInstance, spawnReason, livingEntityData, nbt);
-
-
-        //TODO: Add configuration for special spawn chance
         this.setSpecial(Utils.randomizeBooleanWithChance(Configs.SIMS.specialSpawnChance.get()));
 
         //TODO: Add professions
@@ -97,26 +96,26 @@ public class EntitySim extends AgeableEntity implements INPC {
             this.setCustomName(new StringTextComponent(name));
             this.setFemale(Configs.SIMS.specialSimGenders.get().contains(name));
         } else {
-            String name = "Sim";
             this.setFemale(Utils.randomizeBoolean());
-            this.setCustomName(new StringTextComponent(name));
             if (this.getFemale()) {
-                //TODO: Add female name database
-
-
+                if (!Configs.NAMES.femaleNames.get().isEmpty())
+                    this.setCustomName(new StringTextComponent(Configs.NAMES.femaleNames.get().get(rand.nextInt(Configs.NAMES.femaleNames.get().size()))));
                 this.setVariation(rand.nextInt(13));
             } else {
-                //TODO: Add male name database
+                if (!Configs.NAMES.maleNames.get().isEmpty())
+                    this.setCustomName(new StringTextComponent(Configs.NAMES.maleNames.get().get(rand.nextInt(Configs.NAMES.maleNames.get().size()))));
                 this.setVariation(rand.nextInt(10));
             }
         }
 
+        this.writeAdditional(this.getPersistentData());
         return livingData;
     }
 
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new SwimGoal(this));
+        this.goalSelector.addGoal(7, new TalkingToPlayerGoal(this));
         this.goalSelector.addGoal(8, new PickupItemGoal(this));
 
         //Unimportant "make more alive"-goals
@@ -167,7 +166,7 @@ public class EntitySim extends AgeableEntity implements INPC {
         compound.putString("Status", this.getStatus());
         this.foodStats.write(compound);
         if (job != null){
-           compound.put("job",this.job.writeToNbt(new ListNBT()));
+           compound.put("job", this.job.writeToNbt(new ListNBT()));
         }
     }
 
@@ -209,8 +208,10 @@ public class EntitySim extends AgeableEntity implements INPC {
     //Interaction
     @Override
     public boolean processInteract(PlayerEntity player, Hand hand) {
-        if (player.isCrouching())
+        if (player.isCrouching()) {
+            this.setInteractingPlayer(player);
             player.openContainer(inventory);
+        }
 
         if (player.getHeldItem(hand).getItem() instanceof DyeItem) {
             this.setNameColor(((DyeItem) player.getHeldItem(hand).getItem()).getDyeColor().getId());
@@ -287,10 +288,8 @@ public class EntitySim extends AgeableEntity implements INPC {
     }
 
     @Nullable
-    public ItemEntity dropItem(ItemStack droppedItem, boolean dropAround, boolean traceItem) {
-        if (droppedItem.isEmpty()) {
-            return null;
-        } else {
+    public void dropItem(ItemStack droppedItem, boolean dropAround, boolean traceItem) {
+        if (!droppedItem.isEmpty()) {
             double d0 = this.func_226280_cw_() - (double)0.3F;
             ItemEntity itementity = new ItemEntity(this.world, this.getPosX(), d0, this.getPosZ(), droppedItem);
             itementity.setPickupDelay(40);
@@ -313,7 +312,7 @@ public class EntitySim extends AgeableEntity implements INPC {
                 itementity.setMotion((double)(-f3 * f2 * 0.3F) + Math.cos((double)f5) * (double)f6, (double)(-f8 * 0.3F + 0.1F + (this.rand.nextFloat() - this.rand.nextFloat()) * 0.1F), (double)(f4 * f2 * 0.3F) + Math.sin((double)f5) * (double)f6);
             }
 
-            return itementity;
+            this.world.addEntity(itementity);
         }
     }
 
@@ -474,6 +473,14 @@ public class EntitySim extends AgeableEntity implements INPC {
         } catch (NullPointerException e) {
             return "";
         }
+    }
+
+    public void setInteractingPlayer(PlayerEntity player) {
+        this.interactingPlayer = player;
+    }
+
+    public PlayerEntity getInteractingPlayer() {
+        return this.interactingPlayer;
     }
 
     public void addExhaustion(float exhaustion) {

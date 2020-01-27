@@ -6,16 +6,15 @@ import com.Resimulators.simukraft.client.gui.GuiSimInventory;
 import com.Resimulators.simukraft.client.gui.SimHud;
 import com.Resimulators.simukraft.common.entity.sim.EntitySim;
 import com.Resimulators.simukraft.common.entity.sim.SimContainer;
+import com.Resimulators.simukraft.common.entity.sim.SimInformationOverlay;
 import com.Resimulators.simukraft.common.events.world.NewDayEvent;
-import com.Resimulators.simukraft.common.tileentity.TileConstructor;
-import com.Resimulators.simukraft.handlers.SimUKraftPacketHandler;
 import com.Resimulators.simukraft.init.*;
 import com.Resimulators.simukraft.init.ModBlocks;
 import com.Resimulators.simukraft.init.ModEntities;
 import com.Resimulators.simukraft.init.ModItems;
 import com.Resimulators.simukraft.init.ModRenders;
+import com.Resimulators.simukraft.utils.RayTraceHelper;
 import net.minecraft.block.Block;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScreenManager;
 import net.minecraft.entity.EntityType;
 import net.minecraft.inventory.container.ContainerType;
@@ -82,13 +81,12 @@ public class SimuKraft {
         MinecraftForge.EVENT_BUS.register(new NewDayEvent());
         MinecraftForge.EVENT_BUS.register(new FactionEvents());
         Network.handler.init();
-
-
     }
 
     private void doClientStuff(final FMLClientSetupEvent event) {
         // do something that can only be done on the client
-        MinecraftForge.EVENT_BUS.register(new SimHud() );
+        MinecraftForge.EVENT_BUS.register(new SimHud());
+        MinecraftForge.EVENT_BUS.register(new SimInformationOverlay());
         //Registering SkinCache and Special Skins
 
         SkinCacher skinCacher = new SkinCacher();
@@ -129,7 +127,10 @@ public class SimuKraft {
 
         @SubscribeEvent
         public static void onTileEntityRegistry(final RegistryEvent.Register<TileEntityType<?>> event) {
-        ModTileEntities.init(event);
+            new ModTileEntities();
+            for (TileEntityType type : ModTileEntities.getRegistry()) {
+                event.getRegistry().register(type);
+            }
         }
 
         @SubscribeEvent
