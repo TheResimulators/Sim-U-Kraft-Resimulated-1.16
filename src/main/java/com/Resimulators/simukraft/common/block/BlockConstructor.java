@@ -48,6 +48,7 @@ public class BlockConstructor extends BlockBase {
                 } else {
                 SimUKraftPacketHandler.INSTANCE.sendTo(new OpenJobGuiPacket(simids,pos),((ServerPlayerEntity) player).connection.netManager, NetworkDirection.PLAY_TO_CLIENT);
             }
+        }
         return ActionResultType.SUCCESS;
     }
 
