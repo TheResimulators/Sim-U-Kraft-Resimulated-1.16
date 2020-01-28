@@ -15,14 +15,21 @@ import java.util.function.Supplier;
 public class OpenJobGuiPacket implements IMessage {
     private ArrayList<Integer> ints;
     private BlockPos pos;
+    private int id;
     public OpenJobGuiPacket(ArrayList<Integer> ints, BlockPos pos){
         this.pos = pos;
         this.ints = ints;
+    }
+    public OpenJobGuiPacket(ArrayList<Integer> ints, BlockPos pos,int id){
+        this.pos = pos;
+        this.ints = ints;
+        this.id = id;
     }
     public OpenJobGuiPacket(){}
 
     @Override
     public void toBytes(PacketBuffer buf) {
+        buf.writeInt(id);
         buf.writeBlockPos(pos);
         buf.writeInt(ints.size());
         for(int id:ints){
@@ -32,6 +39,7 @@ public class OpenJobGuiPacket implements IMessage {
 
     @Override
     public void fromBytes(PacketBuffer buf) {
+        id = buf.readInt();
         pos = buf.readBlockPos();
         ArrayList<Integer> ids = new ArrayList<>();
         int length = buf.readInt();
@@ -49,6 +57,6 @@ public class OpenJobGuiPacket implements IMessage {
 
     @Override
     public void onExecute(NetworkEvent.Context ctxIn, boolean isLogicalServer) {
-        Minecraft.getInstance().displayGuiScreen(new BaseJobGui(new StringTextComponent("Base"),ints,pos));
+        Minecraft.getInstance().displayGuiScreen(new BaseJobGui(new StringTextComponent("Base"),ints,pos,id));
     }
 }
