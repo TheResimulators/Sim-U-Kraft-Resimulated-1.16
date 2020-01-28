@@ -492,9 +492,14 @@ public class EntitySim extends AgeableEntity implements INPC {
     public void removeFromFaction() {
         SavedWorldData sWorld = SavedWorldData.get(world);
         ArrayList<Faction> factions = sWorld.getFactions();
+
         for (Faction faction : factions) {
             if (faction.getSims().containsKey(this.entityUniqueID)) {
                 sWorld.removeSimFromFaction(faction.getId(),this);
+                if (job.getWorkSpace() != null){ //only temporary until we get the job system done
+                    ((ITile)world.getTileEntity(job.getWorkSpace())).setSimId(null);
+                    ((ITile)world.getTileEntity(job.getWorkSpace())).setHired(false);
+                }
             }
         }
     }
