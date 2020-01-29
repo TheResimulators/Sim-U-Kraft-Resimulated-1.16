@@ -1,5 +1,6 @@
 package com.Resimulators.simukraft.packets;
 
+import com.Resimulators.simukraft.common.entity.sim.EntitySim;
 import com.Resimulators.simukraft.common.tileentity.ITile;
 import com.Resimulators.simukraft.common.world.SavedWorldData;
 import jdk.nashorn.internal.ir.Block;
@@ -45,6 +46,7 @@ public class SimFirePacket implements IMessage {
     @Override
     public void onExecute(NetworkEvent.Context ctxIn, boolean isLogicalServer) {
         SavedWorldData.get(Minecraft.getInstance().player.world).getFaction(factionId).fireSim(Minecraft.getInstance().world.getEntityByID(simId).getUniqueID());
+        ((EntitySim)Minecraft.getInstance().world.getEntityByID(simId)).setJob(null);
         ((ITile) Minecraft.getInstance().world.getTileEntity(pos)).setHired(false);
         ((ITile)Minecraft.getInstance().world.getTileEntity(pos)).setSimId(null);
     }

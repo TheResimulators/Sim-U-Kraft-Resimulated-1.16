@@ -10,6 +10,7 @@ import com.Resimulators.simukraft.common.world.Faction;
 import com.Resimulators.simukraft.common.world.SavedWorldData;
 import com.Resimulators.simukraft.handlers.FoodStats;
 import com.Resimulators.simukraft.init.ModEntities;
+import com.Resimulators.simukraft.init.ModJobs;
 import com.Resimulators.simukraft.utils.Utils;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -199,11 +200,7 @@ public class EntitySim extends AgeableEntity implements INPC {
             this.setStatus(compound.getString("Status"));
         this.foodStats.read(compound);
         String jobType = compound.getList("job", Constants.NBT.TAG_LIST).getCompound(0).getString("jobname");
-        switch (jobType){
-            case "Builder":
-                job = new JobBuilder(this);
-
-        }
+        job = ModJobs.JOB_LOOKUP.get(jobType).apply(this);
 
         if (compound.contains("job"))
             this.job.readFromNbt(compound.getList("job", Constants.NBT.TAG_LIST));
