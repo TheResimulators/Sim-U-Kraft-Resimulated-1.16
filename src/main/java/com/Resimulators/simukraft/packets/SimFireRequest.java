@@ -61,9 +61,12 @@ public class SimFireRequest implements IMessage {
             System.out.println(player.world.getTileEntity(pos));
             data.fireSim(id, (EntitySim) ((ServerWorld)player.world).getEntityByUuid(simId));
             ((ITile) player.world.getTileEntity(pos)).setSimId(null);
-            int simid = ((ServerWorld)player.world).getEntityByUuid(simId).getEntityId();
+            EntitySim sim = (EntitySim) ((ServerWorld)player.world).getEntityByUuid(simId);
+            int simid =sim.getEntityId();
+            sim.setJob(null);
+
             data.getFaction(id).sendPacketToFaction(new SimFirePacket(id, simid, pos));
-            ;
+
         }
     }
 }
