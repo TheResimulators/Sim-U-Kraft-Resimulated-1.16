@@ -2,6 +2,7 @@ package com.Resimulators.simukraft.client.gui;
 
 import com.Resimulators.simukraft.Network;
 import com.Resimulators.simukraft.common.entity.sim.EntitySim;
+import com.Resimulators.simukraft.common.jobs.core.IJob;
 import com.Resimulators.simukraft.common.tileentity.ITile;
 import com.Resimulators.simukraft.common.world.SavedWorldData;
 import com.Resimulators.simukraft.packets.SimFirePacket;
@@ -22,21 +23,21 @@ import java.awt.*;
 import java.util.ArrayList;
 
 public class BaseJobGui extends Screen {
-    private Button Hire;
-    private Button Fire;
-    private Button ShowEmployees;
-    private Button Done;
-    private Button Back;
-    private Button Confirm;
-    private PlayerEntity player;
-    private ArrayList<Integer> ids;
-    private ArrayList<SimButton> simButtons = new ArrayList<>();
-    private EntitySim selectedsim;
-    private State state = State.MAIN;
-    private BlockPos pos;
-    private boolean firing = false;
-    private int hiredId;
-
+    Button Hire;
+    Button Fire;
+    Button ShowEmployees;
+    Button Done;
+    Button Back;
+    Button Confirm;
+    PlayerEntity player;
+    ArrayList<Integer> ids;
+    ArrayList<SimButton> simButtons = new ArrayList<>();
+    EntitySim selectedsim;
+    int state = State.MAIN;
+    BlockPos pos;
+    boolean firing = false;
+    int hiredId;
+    String job;
     
     public BaseJobGui(ITextComponent component, ArrayList<Integer> ids, BlockPos pos,@Nullable int id) {
         super(component);
@@ -44,7 +45,7 @@ public class BaseJobGui extends Screen {
         this.player = Minecraft.getInstance().player;
         this.ids = ids;
         this.pos = pos;
-
+        this.job = "";
     }
 
     @Override
@@ -183,7 +184,7 @@ public class BaseJobGui extends Screen {
         }
 
     }
-    private void hideAll(){
+    protected void hideAll(){
         for(Widget button:buttons){
             button.visible = false;
         }
@@ -220,19 +221,27 @@ public class BaseJobGui extends Screen {
 
     private void sendPackets(){
         if (!firing) {
-            Network.getNetwork().sendToServer(new SimHireRequest(selectedsim.getEntityId(), Minecraft.getInstance().player.getUniqueID(),pos));
+            Network.getNetwork().sendToServer(new SimHireRequest(selectedsim.getEntityId(), Minecraft.getInstance().player.getUniqueID(),pos,job));
         }else{
             Network.getNetwork().sendToServer(new SimFireRequest(Minecraft.getInstance().player.getUniqueID(),((ITile)Minecraft.getInstance().world.getTileEntity(pos)).getSimId(),pos));
         }
         Minecraft.getInstance().displayGuiScreen(null);
     }
 
-    private enum State{
-        MAIN,
-        SIM_INFO,
-        HIRE_INFO,
-        SHOW_EMPLOYEES,
-        Firing
+    protected static class State{
+        protected static int id = 0;
+        protected static int MAIN = nextID();
+        protected static int SIM_INFO = nextID();
+        protected static int HIRE_INFO = nextID();
+        protected static int SHOW_EMPLOYEES = nextID();
+        protected static int Firing = nextID();
+
+
+
+
+        protected static int nextID(){
+            return id++;
+        }
 
 
 
