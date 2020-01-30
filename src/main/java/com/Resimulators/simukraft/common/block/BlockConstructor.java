@@ -1,6 +1,7 @@
 package com.Resimulators.simukraft.common.block;
 
 import com.Resimulators.simukraft.SimuKraft;
+import com.Resimulators.simukraft.client.gui.GuiHandler;
 import com.Resimulators.simukraft.common.capabilities.PlayerCapability;
 import com.Resimulators.simukraft.common.entity.sim.EntitySim;
 import com.Resimulators.simukraft.common.tileentity.ITile;
@@ -44,9 +45,9 @@ public class BlockConstructor extends BlockBase {
             System.out.println(world.getTileEntity(pos));
             if (((ITile)world.getTileEntity(pos)).getHired()){
                 int hiredId = ((ServerWorld) world).getEntityByUuid(((ITile)world.getTileEntity(pos)).getSimId()).getEntityId();
-                SimUKraftPacketHandler.INSTANCE.sendTo(new OpenJobGuiPacket(simids,pos,hiredId),((ServerPlayerEntity) player).connection.netManager, NetworkDirection.PLAY_TO_CLIENT);
+                SimUKraftPacketHandler.INSTANCE.sendTo(new OpenJobGuiPacket(simids,pos,hiredId, GuiHandler.Builder),((ServerPlayerEntity) player).connection.netManager, NetworkDirection.PLAY_TO_CLIENT);
                 } else {
-                SimUKraftPacketHandler.INSTANCE.sendTo(new OpenJobGuiPacket(simids,pos),((ServerPlayerEntity) player).connection.netManager, NetworkDirection.PLAY_TO_CLIENT);
+                SimUKraftPacketHandler.INSTANCE.sendTo(new OpenJobGuiPacket(simids,pos,GuiHandler.Builder),((ServerPlayerEntity) player).connection.netManager, NetworkDirection.PLAY_TO_CLIENT);
             }
         }
         return ActionResultType.SUCCESS;
