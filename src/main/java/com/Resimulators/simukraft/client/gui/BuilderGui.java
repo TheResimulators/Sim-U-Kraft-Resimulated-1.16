@@ -1,6 +1,7 @@
 package com.Resimulators.simukraft.client.gui;
 
 import com.Resimulators.simukraft.Reference;
+import com.Resimulators.simukraft.common.world.Structure;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
@@ -17,6 +18,8 @@ import java.util.ArrayList;
 public class BuilderGui extends BaseJobGui {
     private Button Build;
     private Button CustomBack;
+    private boolean loaded = false;
+    private ArrayList<Structure> structures;
     public BuilderGui(ITextComponent component, ArrayList<Integer> ids, BlockPos pos, @Nullable int id) {
         super(component, ids, pos, id);
         this.job = "builder";
@@ -50,8 +53,16 @@ public class BuilderGui extends BaseJobGui {
 
         )));
     }
+
+
+    public void setStructures(ArrayList<Structure> structures){
+        this.structures = structures;
+        
+    }
+
     @Override
     public void render(int p_render_1_, int p_render_2_, float p_render_3_) {
+
         super.render(p_render_1_,p_render_2_,p_render_3_);
     }
 
@@ -95,6 +106,10 @@ public class BuilderGui extends BaseJobGui {
 
         }
 
+
+
+
+
         @Override
         public int getYImage(boolean hovered){
             int i = 0;
@@ -107,4 +122,6 @@ public class BuilderGui extends BaseJobGui {
             return i;
         }
         }
+
+
     }
