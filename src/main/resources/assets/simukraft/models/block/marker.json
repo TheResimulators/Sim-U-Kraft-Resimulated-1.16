@@ -1,0 +1,30 @@
+{
+	"texture_size": [64, 64],
+	"textures": {
+		"0": "simukraft:block/marker",
+		"particle": "simukraft:block/marker"
+	},
+	"elements": [
+		{
+			"name": "top",
+			"from": [6, 0, 6],
+			"to": [10, 16, 10],
+			"shade": false,
+			"faces": {
+				"north": {"uv": [1, 0, 5, 16], "texture": "#0"},
+				"east": {"uv": [1, 0, 5, 16], "texture": "#0"},
+				"south": {"uv": [6, 0, 10, 16], "texture": "#0"},
+				"west": {"uv": [11, 0, 15, 16], "texture": "#0"},
+				"up": {"uv": [1, 10, 5, 7], "texture": "#0"},
+				"down": {"uv": [1, 7, 5, 10], "texture": "#0"}
+			}
+		}
+	],
+	"groups": [
+		{
+			"name": "bone",
+			"origin": [0, 0, 0],
+			"children": [0]
+		}
+	]
+}
