@@ -60,16 +60,19 @@ public class BlockConstructor extends BlockBase {
 
     @Override
     public void onBlockHarvested(World worldIn, BlockPos pos, BlockState state, PlayerEntity player) {
+        super.onBlockHarvested(worldIn, pos, state, player);
         if (!worldIn.isRemote){
+
             ITile tile = ((ITile) worldIn.getTileEntity(pos));
-            tile.setHired(false);
-            tile.setSimId(null);
+
             EntitySim sim =(EntitySim) ((ServerWorld)worldIn).getEntityByUuid(tile.getSimId());
+            if (sim != null){
             int id = SavedWorldData.get(worldIn).getFactionWithPlayer(player.getUniqueID()).getId();
             SavedWorldData.get(worldIn).fireSim(id,sim);
             SavedWorldData.get(worldIn).getFaction(id).sendPacketToFaction(new SimFirePacket(id,sim.getEntityId(),pos));
+            tile.setHired(false);
+            tile.setSimId(null);}
         }
-        super.onBlockHarvested(worldIn, pos, state, player);
     }
 
 

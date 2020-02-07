@@ -28,14 +28,15 @@ public class TileConstructor extends TileEntity implements ITile {
     @Override
     public CompoundNBT write(CompoundNBT nbt){
         nbt.putBoolean("hired",hired);
-        nbt.putUniqueId("simid",simID);
+        if (simID != null){
+        nbt.putUniqueId("simid",simID);}
         return nbt;
     }
 
     @Override
     public void read(CompoundNBT nbt){
     hired = nbt.getBoolean("hired");
-    simID = nbt.getUniqueId("simid");
+    if (nbt.contains("simid")) simID = nbt.getUniqueId("simid");
     }
     @Override
     public void setHired(boolean hired){
