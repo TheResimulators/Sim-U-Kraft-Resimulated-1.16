@@ -1,7 +1,9 @@
 package com.Resimulators.simukraft.datagen;
 
 import com.Resimulators.simukraft.Reference;
+import com.Resimulators.simukraft.common.entity.sim.EntitySim;
 import com.Resimulators.simukraft.init.ModBlocks;
+import com.Resimulators.simukraft.init.ModEntities;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -11,7 +13,8 @@ import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DirectoryCache;
 import net.minecraft.data.IDataProvider;
 import net.minecraft.data.LootTableProvider;
-import net.minecraft.data.loot.BlockLootTables;
+import net.minecraft.data.loot.*;
+import net.minecraft.entity.EntityType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.storage.loot.*;
 import net.minecraft.world.storage.loot.conditions.SurvivesExplosion;
@@ -28,38 +31,23 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-public class LootTableGen implements IDataProvider {
+public class LootTableGen extends LootTableProvider implements IDataProvider {
     public LootTableGen(DataGenerator dataGeneratorIn) {
-        this.generator = dataGeneratorIn;
+        super(dataGeneratorIn);
+
     }
-    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
-    protected final Map<Block,LootTable.Builder> lootTables = new HashMap<>();
-    private final DataGenerator generator;
+
+    private final List<Pair<Supplier<Consumer<BiConsumer<ResourceLocation, LootTable.Builder>>>, LootParameterSet>> lootTables = ImmutableList.of(
+            Pair.of(ModLootTables::new, LootParameterSets.BLOCK),
+            Pair.of(ModEntityLootTables::new,LootParameterSets.ENTITY)
+
+    );
+
 
     @Override
-    public void act(DirectoryCache cache) throws IOException
-    {
-        Map<ResourceLocation,LootTable> tables = new HashMap<>();
-
-        addTables();
-
-        for(Map.Entry<Block,LootTable.Builder> entry : lootTables.entrySet())
-        {
-            tables.put(entry.getKey().getLootTable(), entry.getValue().setParameterSet(LootParameterSets.BLOCK).build());
-        }
-
-        tables.forEach((key, lootTable) -> {
-            try
-            {
-                IDataProvider.save(GSON, cache, LootTableManager.toJson(lootTable), generator.getOutputFolder().resolve("data/" + key.getNamespace() + "/loot_tables/" + key.getPath() + ".json"));
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
-        });
+    protected List<Pair<Supplier<Consumer<BiConsumer<ResourceLocation, LootTable.Builder>>>, LootParameterSet>> getTables(){
+        return lootTables;
     }
-
     @Override
     public String getName() {
         return "Sim u kraft Block Loot Tables";
@@ -67,29 +55,48 @@ public class LootTableGen implements IDataProvider {
 
 
 
-        protected void addTables(){
-            for (Block block:getKnownBlocks()){
+    @Override
+    protected void validate(Map<ResourceLocation, LootTable> map, ValidationTracker validationtracker) {
+        map.forEach((p_218436_2_, p_218436_3_) -> {
+            LootTableManager.func_227508_a_(validationtracker, p_218436_2_, p_218436_3_);
+        });
+    }
 
-                lootTables.put(block,registerDropSelfLootTable(block));
+
+    private static class ModLootTables extends BlockLootTables {
+
+        @Override
+        protected void addTables(){
+            for (Block block : getKnownBlocks()) {
+                super.registerDropSelfLootTable(block);
             }
 
+        }
+        @Override
+        protected Iterable<Block> getKnownBlocks() {
+            return ForgeRegistries.BLOCKS.getValues()
+                    .stream()
+                    .filter((block) -> block.getRegistryName().getNamespace().equals(Reference.MODID))
+                    .collect(Collectors.toList());
+        }
+    }
+
+    private static class ModEntityLootTables extends EntityLootTables{
+
+
+        @Override
+        protected void addTables(){
+           super.registerLootTable(ModEntities.ENTITY_SIM,LootTable.builder());
 
         }
-    protected final LootTable.Builder registerDropSelfLootTable(Block block)
-    {
-        return LootTable.builder()
-                .addLootPool(LootPool.builder()
-                        .rolls(ConstantRange.of(1))
-                        .addEntry(ItemLootEntry.builder(block))
-                        .acceptCondition(SurvivesExplosion.builder()));
-    }
 
 
-    protected Iterable<Block> getKnownBlocks(){
-        return ForgeRegistries.BLOCKS.getValues()
-                .stream()
-                .filter((block) -> block.getRegistryName().getNamespace().equals(Reference.MODID))
-                .collect(Collectors.toList());
+        @Override
+        protected Iterable<EntityType<?>> getKnownEntities(){
+            return ForgeRegistries.ENTITIES.getValues()
+                    .stream()
+                    .filter((entityType) -> entityType.getRegistryName().getNamespace().equals(Reference.MODID))
+                    .collect(Collectors.toList());
+        }
     }
-
-    }
+}
