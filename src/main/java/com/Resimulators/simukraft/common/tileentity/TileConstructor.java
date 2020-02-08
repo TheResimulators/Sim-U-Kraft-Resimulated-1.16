@@ -33,6 +33,10 @@ public class TileConstructor extends TileEntity implements ITile {
         if (simID != null) {
             nbt.putUniqueId("simid", simID);
         }
+    public CompoundNBT write(CompoundNBT nbt){
+        nbt.putBoolean("hired",hired);
+        if (simID != null){
+        nbt.putUniqueId("simid",simID);}
         return nbt;
     }
 
@@ -42,6 +46,9 @@ public class TileConstructor extends TileEntity implements ITile {
         if (nbt.contains("simid")) {
             simID = nbt.getUniqueId("simid");
         }
+    public void read(CompoundNBT nbt){
+    hired = nbt.getBoolean("hired");
+    if (nbt.contains("simid")) simID = nbt.getUniqueId("simid");
     }
 
     @Override
