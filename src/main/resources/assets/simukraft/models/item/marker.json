@@ -1,0 +1,7 @@
+
+{
+  "parent": "simukraft:block/marker",
+  "textures": {
+    "all": "simukraft:block/marker"
+  }
+}
