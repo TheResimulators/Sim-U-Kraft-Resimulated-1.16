@@ -32,6 +32,7 @@ public class BuilderGui extends BaseJobGui {
     @Override
     public void init(Minecraft minecraft, int width, int height) {
         super.init(minecraft, width, height);
+
         if (loaded) {
             addButton(Build = new LargeButton(width / 2 - 55, height - 55, 110, 42, "Build", (Build -> {
                 super.hideAll();
@@ -70,9 +71,10 @@ public class BuilderGui extends BaseJobGui {
 
     @Override
     public void render(int p_render_1_, int p_render_2_, float p_render_3_) {
+        renderBackground();
         if (loaded) super.render(p_render_1_, p_render_2_, p_render_3_);
         else {
-            font.drawString("Loading", (float) width / 2 - font.getStringWidth("Loading"), (float) height / 2, Color.WHITE.getRGB());
+            font.drawString("Loading", (float) width / 2 - font.getStringWidth("Loading")/2, (float) height / 2, Color.WHITE.getRGB());
         }
 
     }

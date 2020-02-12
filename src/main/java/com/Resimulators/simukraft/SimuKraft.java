@@ -7,6 +7,7 @@ import com.Resimulators.simukraft.client.gui.SimHud;
 import com.Resimulators.simukraft.common.entity.sim.EntitySim;
 import com.Resimulators.simukraft.common.entity.sim.SimContainer;
 import com.Resimulators.simukraft.common.entity.sim.SimInformationOverlay;
+import com.Resimulators.simukraft.common.events.world.MarkerBrokenEvent;
 import com.Resimulators.simukraft.common.events.world.NewDayEvent;
 import com.Resimulators.simukraft.init.*;
 import com.Resimulators.simukraft.init.ModBlocks;
@@ -15,6 +16,7 @@ import com.Resimulators.simukraft.init.ModItems;
 import com.Resimulators.simukraft.init.ModRenders;
 import com.Resimulators.simukraft.utils.RayTraceHelper;
 import net.minecraft.block.Block;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScreenManager;
 import net.minecraft.entity.EntityType;
 import net.minecraft.inventory.container.ContainerType;
@@ -87,6 +89,7 @@ public class SimuKraft {
         // do something that can only be done on the client
         MinecraftForge.EVENT_BUS.register(new SimHud());
         MinecraftForge.EVENT_BUS.register(new SimInformationOverlay());
+        MinecraftForge.EVENT_BUS.register(MarkerBrokenEvent.class);
         //Registering SkinCache and Special Skins
 
         SkinCacher skinCacher = new SkinCacher();
