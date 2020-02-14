@@ -4,6 +4,7 @@ import com.Resimulators.simukraft.client.data.SkinCacher;
 import com.Resimulators.simukraft.client.gui.GuiMod;
 import com.Resimulators.simukraft.client.gui.GuiSimInventory;
 import com.Resimulators.simukraft.client.gui.SimHud;
+import com.Resimulators.simukraft.client.render.MarkerEntityRender;
 import com.Resimulators.simukraft.common.entity.sim.EntitySim;
 import com.Resimulators.simukraft.common.entity.sim.SimContainer;
 import com.Resimulators.simukraft.common.entity.sim.SimInformationOverlay;
@@ -82,6 +83,7 @@ public class SimuKraft {
     private void setup(final FMLCommonSetupEvent event) {
         MinecraftForge.EVENT_BUS.register(new NewDayEvent());
         MinecraftForge.EVENT_BUS.register(new FactionEvents());
+        MinecraftForge.EVENT_BUS.register(MarkerBrokenEvent.class);
         Network.handler.init();
     }
 
@@ -89,7 +91,7 @@ public class SimuKraft {
         // do something that can only be done on the client
         MinecraftForge.EVENT_BUS.register(new SimHud());
         MinecraftForge.EVENT_BUS.register(new SimInformationOverlay());
-        MinecraftForge.EVENT_BUS.register(MarkerBrokenEvent.class);
+        MarkerEntityRender.register();
         //Registering SkinCache and Special Skins
 
         SkinCacher skinCacher = new SkinCacher();

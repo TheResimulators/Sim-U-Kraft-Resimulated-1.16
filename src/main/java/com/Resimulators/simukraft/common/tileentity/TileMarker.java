@@ -2,6 +2,7 @@ package com.Resimulators.simukraft.common.tileentity;
 
 import com.Resimulators.simukraft.init.ModTileEntities;
 
+import net.minecraft.block.Blocks;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SUpdateTileEntityPacket;
@@ -11,43 +12,10 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 
-enum Corner {
-    ORIGIN,
-    BACKLEFT,
-    BACKRIGHT,
-    FRONTRIGHT;
-
-    public static int toNbt(Corner corner){
-        switch(corner){
-            case ORIGIN:
-                return 0;
-            case BACKLEFT:
-                return 1;
-            case BACKRIGHT:
-                return 2;
-            case FRONTRIGHT:
-                return 3;
-            default:
-                return 0;
-        }
-
-    }
-    public static Corner fromNbt(int num){
-        switch (num){
-            case 0:
-                return Corner.ORIGIN;
-            case 1:
-                return Corner.BACKLEFT;
-            case 2:
-                return Corner.BACKRIGHT;
-            case 3:
-                return Corner.FRONTRIGHT;
-        }
-        return null;
-    }
-}
 
 public class TileMarker extends TileEntity {
+
+
     private BlockPos origin;
     private BlockPos backLeft;
     private BlockPos frontRight;
@@ -95,48 +63,81 @@ public class TileMarker extends TileEntity {
         AxisAlignedBB area = new AxisAlignedBB(this.pos);
         if (backRight != null) {
             area = new AxisAlignedBB(this.pos, backRight);
-        }
+            return area;
+        }else
         if (backLeft != null) {
             area = new AxisAlignedBB(this.pos, backLeft);
-        }
+            return area;
+        }else
         if (frontRight != null) {
             area = new AxisAlignedBB(this.pos, frontRight);
+            return area;
         }
         return area;
     }
 
 
     public void onRightClick(Direction dir) {
+        int x = 0;
+        int z = 0;
+        int y = 0;
         if (!used){
-        for (int i = 0; i < range; i++) {
+            used = true;
+            origin = this.pos;
+            y=origin.getY();
+        for (int i = 1; i < range; i++) {
             BlockPos pos = this.pos.offset(dir, i);
             if (this.world.getTileEntity(pos) instanceof TileMarker) {
                 TileMarker marker = (TileMarker) this.world.getTileEntity(pos);
                 marker.used = true;
                 setBackLeft(pos);
-                backRight = backRight.offset(dir, i);
                 marker.setOrigin(this.pos);
                 marker.setCorner(Corner.BACKLEFT);
+                world.setBlockState(backLeft.add(0,2,0), Blocks.COBBLESTONE.getDefaultState() );
+                x = i;
                 break;
             }
 
         }
 
-        for (int i = 0; i < range; i++) {
+        for (int i = 1; i < range; i++) {
             BlockPos pos = this.pos.offset(dir.rotateY(), i);
             if (this.world.getTileEntity(pos) instanceof TileMarker) {
                 TileMarker marker = (TileMarker) this.world.getTileEntity(pos);
                 marker.used = true;
-                setBackLeft(pos);
-                backRight = backRight.offset(dir.rotateY(), i);
+                setFrontRight(pos);
                 marker.setOrigin(this.pos);
                 marker.setCorner(Corner.FRONTRIGHT);
-
+                world.setBlockState(frontRight.add(0,2,0), Blocks.COBBLESTONE.getDefaultState() );
+                z = i;
                 break;
                 }
             }
+        if (x != 0 && z != 0) {backRight = this.pos.add(x,0,z);
+        world.setBlockState(backRight,Blocks.OAK_PLANKS.getDefaultState());}
         markDirty();
+        for (int xpos= 1;xpos<x;xpos++){
+            for (int zpos = 1;zpos<z;zpos++){
+                world.setBlockState(this.pos.offset(dir,xpos).offset(dir.rotateY(),zpos),Blocks.COBBLESTONE.getDefaultState());
+            }
+
         }
+
+        }if (backLeft != null){
+        if (world.getTileEntity(backLeft) != null){
+            TileMarker marker = (TileMarker) world.getTileEntity(backLeft);
+            marker.setFrontRight(frontRight);
+            marker.setBackLeft(backLeft);
+            marker.setBackRight(backRight);
+        }}
+        if (frontRight != null){
+        if (world.getTileEntity(frontRight) != null){
+            TileMarker marker = (TileMarker) world.getTileEntity(frontRight);
+            marker.setFrontRight(frontRight);
+            marker.setBackLeft(backLeft);
+            marker.setBackRight(backRight);
+        }}
+
     }
 
     public void setBackLeft(BlockPos backLeft) {
@@ -163,7 +164,33 @@ public class TileMarker extends TileEntity {
         this.corner = corner;
         markDirty();
     }
+    public BlockPos getOrigin() {
+        return origin;
+    }
 
+    public BlockPos getBackLeft() {
+        return backLeft;
+    }
+
+    public BlockPos getFrontRight() {
+        return frontRight;
+    }
+
+    public BlockPos getBackRight() {
+        return backRight;
+    }
+
+    public boolean isUsed() {
+        return used;
+    }
+
+    public Corner getCorner() {
+        return corner;
+    }
+
+    public int getRange() {
+        return range;
+    }
 
     public Corner rotateCorner(Corner corner) {
         switch (corner) {
@@ -181,20 +208,50 @@ public class TileMarker extends TileEntity {
     }
 
     public void onDestroy(BlockPos pos){
-        if (corner != Corner.ORIGIN){
-            TileMarker marker = (TileMarker) world.getTileEntity(origin);
-            if (pos == marker.backLeft){
-                marker.setBackLeft(null);
-                marker.setBackRight(null);
-            }else if(pos== marker.frontRight){
-                marker.setFrontRight(null);
-                marker.setBackRight(null);
+        if (corner == Corner.ORIGIN) {
+            checkcorners();
+            if (frontRight != null){
+                ((TileMarker)world.getTileEntity(frontRight)).checkcorners();
             }
-        }else{
-            ((TileMarker)world.getTileEntity(frontRight)).setOrigin(null);
-            ((TileMarker)world.getTileEntity(backLeft)).setOrigin(null);
+            if (backLeft != null){
+                if (world.getTileEntity(backLeft) != null) ((TileMarker)world.getTileEntity(backLeft)).checkcorners();
+            }
+        }else if (corner == Corner.BACKLEFT){
+            checkcorners();
+            if(origin != null){
+                ((TileMarker)world.getTileEntity(origin)).checkcorners();
+            }
+            if (frontRight != null){
+                ((TileMarker)world.getTileEntity(frontRight)).checkcorners();
+            }
+        } else if (corner == Corner.FRONTRIGHT){
+            checkcorners();
+            if(origin != null){
+                ((TileMarker)world.getTileEntity(origin)).checkcorners();
+            }
+            if (frontRight != null){
+                ((TileMarker)world.getTileEntity(frontRight)).checkcorners();
+            }
+    }
+    }
 
+    private void checkcorners(){
+        if (frontRight != null){
+            if(world.getTileEntity(frontRight) == null ){
+            setFrontRight(null);}
         }
+        if (backLeft != null){
+        if (world.getTileEntity(backLeft) == null){
+            setBackLeft(null);}
+        }
+        if (origin != null){
+        if (world.getTileEntity(origin) == null){
+           setOrigin(null);
+        }
+        }
+        markDirty();
+
+
 
     }
 
@@ -209,4 +266,39 @@ public class TileMarker extends TileEntity {
     }
 
 
+    public enum Corner {
+        ORIGIN,
+        BACKLEFT,
+        BACKRIGHT,
+        FRONTRIGHT;
+
+        public static int toNbt(Corner corner){
+            switch(corner){
+                case ORIGIN:
+                    return 0;
+                case BACKLEFT:
+                    return 1;
+                case BACKRIGHT:
+                    return 2;
+                case FRONTRIGHT:
+                    return 3;
+                default:
+                    return 0;
+            }
+
+        }
+        public static Corner fromNbt(int num){
+            switch (num){
+                case 0:
+                    return Corner.ORIGIN;
+                case 1:
+                    return Corner.BACKLEFT;
+                case 2:
+                    return Corner.BACKRIGHT;
+                case 3:
+                    return Corner.FRONTRIGHT;
+            }
+            return null;
+        }
+    }
 }
