@@ -21,7 +21,7 @@ public class ModItems {
     private static List<Item> REGISTRY = new ArrayList<>();
 
     public static final Item SIM_EGG = register(ModEntities.registerEntitySpawnegg(ModEntities.ENTITY_SIM, 0x07b351, 0x614500, "sim_egg"), SimUTab.tab);
-    public static final Item TEST_ITEM = register(new ItemTest(new Item.Properties()).setRegistryName(Reference.MODID, "test_item"), SimUTab.tab);
+    //public static final Item TEST_ITEM = register(new ItemTest(new Item.Properties()).setRegistryName(Reference.MODID, "test_item"), SimUTab.tab);
 
     public ModItems() {
         for (Block block : ModBlocks.getRegistry()) {

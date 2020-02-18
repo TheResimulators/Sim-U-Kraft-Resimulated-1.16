@@ -3,7 +3,6 @@ package com.Resimulators.simukraft.utils;
 import com.Resimulators.simukraft.SimuKraft;
 import com.Resimulators.simukraft.common.entity.sim.EntitySim;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -25,7 +24,7 @@ public class BlockUtils {
         for (int y = 0; y <= 3; y++) {
             BlockPos blockAbovePos = startingPos.add(0, y, 0);
             BlockState blockAboveState = world.getBlockState(blockAbovePos);
-            if (blockAboveState.getBlock() != Blocks.AIR) return false;
+            if (blockAboveState.isSolid()) return false;
         }
         return true;
     }

@@ -17,6 +17,7 @@ public class Datageneration {
         gen.addProvider(new BlockStateGeneration(gen, event.getExistingFileHelper()));
         gen.addProvider(new Lang(gen));
         gen.addProvider(new ItemModelGeneration(gen, event.getExistingFileHelper()));
+        gen.addProvider(new LootTableGen(gen));
 
 
         if (event.includeServer()) {

@@ -3,11 +3,8 @@ package com.Resimulators.simukraft.common.world;
 import com.Resimulators.simukraft.Network;
 import com.Resimulators.simukraft.SimuKraft;
 import com.Resimulators.simukraft.common.entity.sim.EntitySim;
-import com.Resimulators.simukraft.handlers.SimUKraftPacketHandler;
 import com.Resimulators.simukraft.packets.IMessage;
-import com.google.common.collect.Iterables;
-import net.minecraft.client.Minecraft;
-import net.minecraft.command.arguments.NBTCompoundTagArgument;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
@@ -39,8 +36,6 @@ public class Faction {
             CompoundNBT compound = new CompoundNBT();
             compound.putUniqueId("player", uuid);
             list.add(compound);
-
-
         }
         nbt.put("players", list);
 
@@ -71,18 +66,15 @@ public class Faction {
             SimInfo info = new SimInfo(id);
             info.read(compound.getCompound("siminfo"));
             this.sims.put(id, info);
-
         }
         this.credits = nbt.getDouble("credits");
-
     }
 
     public void addSim(EntitySim sim) {
-
         addSim(sim.getUniqueID());
     }
 
-    public void addSim(UUID id){
+    public void addSim(UUID id) {
         sims.put(id, new SimInfo(id));
     }
 
@@ -135,48 +127,48 @@ public class Faction {
         return sims.size();
     }
 
-
     public ArrayList<Integer> getSimIds(ServerWorld world) {
         ArrayList<Integer> simids = new ArrayList<>();
         for (UUID id : sims.keySet()) {
-            if (world.getEntityByUuid(id) != null){
-            simids.add(world.getEntityByUuid(id).getEntityId());
-        }else {
-                SimuKraft.LOGGER().error("Error: Faction Entity Doesn't Exist in the world. Please Contact Author");
-            }}
+            Entity entity = world.getEntityByUuid(id);
+            if (entity != null) {
+                simids.add(entity.getEntityId());
+            } else {
+                SimuKraft.LOGGER().error("Error: Entity doesn't exist in faction. Please contact the author.");
+            }
+        }
         return simids;
     }
 
     public ArrayList<Integer> getSimUnemployedIds(ServerWorld world) {
         ArrayList<Integer> simids = new ArrayList<>();
         for (UUID id : sims.keySet()) {
-            if (world.getEntityByUuid(id) != null){
-                if (!sims.get(id).hired){
-                simids.add(world.getEntityByUuid(id).getEntityId());
+            Entity entity = world.getEntityByUuid(id);
+            if (entity != null) {
+                if (!sims.get(id).hired) {
+                    simids.add(entity.getEntityId());
                 }
-            }else {
-                SimuKraft.LOGGER().error("Error: Faction Entity Doesn't Exist in the world. Please Contact Author");
-            }}
+            } else {
+                SimuKraft.LOGGER().error("Error: Unemployed entity doesn't exist in faction. Please contact the author.");
+            }
+        }
         return simids;
     }
+
     public HashMap<UUID, SimInfo> getSims() {
         return sims;
     }
-
 
     public ArrayList<UUID> getPlayers() {
         return players;
     }
 
-
     public void addPlayer(UUID player) {
         this.players.add(player);
-
     }
 
     public int getId() {
         return id;
-
     }
 
     public void removeAllSims() {
@@ -196,16 +188,18 @@ public class Faction {
         }
     }
 
-    public boolean ContainsSim(UUID id){
+    public boolean containsSim(UUID id) {
         return sims.containsKey(id);
     }
-    public void setSimInfo(UUID id,CompoundNBT nbt){
+
+    public void setSimInfo(UUID id, CompoundNBT nbt) {
         sims.get(id).read(nbt);
     }
 
-    public CompoundNBT getSimInfo(UUID id){
+    public CompoundNBT getSimInfo(UUID id) {
         return sims.get(id).write();
     }
+
     static class SimInfo {
         private UUID sim;
         private boolean hired;
