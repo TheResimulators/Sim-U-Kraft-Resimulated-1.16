@@ -1,6 +1,7 @@
 package com.Resimulators.simukraft.client.gui;
 
 import com.Resimulators.simukraft.Reference;
+import com.Resimulators.simukraft.common.jobs.Profession;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
@@ -19,7 +20,7 @@ public class BuilderGui extends BaseJobGui {
     private Button CustomBack;
     public BuilderGui(ITextComponent component, ArrayList<Integer> ids, BlockPos pos, @Nullable int id) {
         super(component, ids, pos, id);
-        this.job = "builder";
+        this.job = Profession.BUILDER.getName();
     }
 
 
