@@ -26,7 +26,7 @@ public class JobMiner implements IJob {
     }
 
     @Override
-    public EnumJobState state() {
+    public EnumJobState getState() {
         return EnumJobState.NOT_WORKING;
     }
 
