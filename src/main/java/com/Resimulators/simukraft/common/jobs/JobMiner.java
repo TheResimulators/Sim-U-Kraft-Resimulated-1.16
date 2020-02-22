@@ -13,6 +13,7 @@ public class JobMiner implements IJob {
     private Goal goal1;
     private int periodsworked = 0;
     private BlockPos workSpace;
+    private EnumJobState state = EnumJobState.NOT_WORKING;
 
     public JobMiner(EntitySim sim) {
         this.sim = sim;
@@ -27,7 +28,12 @@ public class JobMiner implements IJob {
 
     @Override
     public EnumJobState getState() {
-        return EnumJobState.NOT_WORKING;
+        return state;
+    }
+
+    @Override
+    public void setState(EnumJobState state) {
+        this.state = state;
     }
 
     @Override
