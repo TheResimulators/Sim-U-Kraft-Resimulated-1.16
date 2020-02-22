@@ -204,7 +204,9 @@ public class EntitySim extends AgeableEntity implements INPC {
             this.setStatus(compound.getString("Status"));
         this.foodStats.read(compound);
         String jobType = compound.getList("job", Constants.NBT.TAG_LIST).getCompound(0).getString("jobname");
+        if (!jobType.equals("")){
         job = ModJobs.JOB_LOOKUP.get(jobType).apply(this);
+        }
 
         if (compound.contains("job"))
             this.job.readFromNbt(compound.getList("job", Constants.NBT.TAG_LIST));
