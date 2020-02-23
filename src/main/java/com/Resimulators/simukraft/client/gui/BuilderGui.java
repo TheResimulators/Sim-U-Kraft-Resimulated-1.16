@@ -26,6 +26,7 @@ public class BuilderGui extends BaseJobGui {
     public BuilderGui(ITextComponent component, ArrayList<Integer> ids, BlockPos pos, @Nullable int id) {
         super(component, ids, pos, id);
         this.job = "builder";
+        loaded = true;// need to test
     }
 
 

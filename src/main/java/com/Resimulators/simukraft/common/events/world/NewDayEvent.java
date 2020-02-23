@@ -29,6 +29,7 @@ public class NewDayEvent implements INBTSerializable<CompoundNBT> {
     @SubscribeEvent
     public void OnNewDayEvent(TickEvent.WorldTickEvent event) {
         if (event.phase == TickEvent.Phase.END) {
+            if (!event.world.isRemote){
             World world = event.world;
             double time = world.getDayTime();
             day = Math.floor(time / 24000);
@@ -38,6 +39,7 @@ public class NewDayEvent implements INBTSerializable<CompoundNBT> {
                 payRent();
                 spawnSims(world);
                 previousDay = day;
+                }
             }
         }
     }
@@ -120,7 +122,8 @@ public class NewDayEvent implements INBTSerializable<CompoundNBT> {
             double z = spawnPos.getZ();
             // set the sim's position
             sim.setPosition(x, y, z);
-            world.func_217460_e(sim); // spawn entity
+            world.addEntity(sim);// spawn entity
+
             SimuKraft.LOGGER().debug("entity spawned");
             return true;
         }

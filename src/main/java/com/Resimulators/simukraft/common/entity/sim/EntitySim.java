@@ -171,6 +171,7 @@ public class EntitySim extends AgeableEntity implements INPC {
         compound.putInt("SelectedItemSlot", this.inventory.currentItem);
         compound.putInt("NameColor", this.getNameColor());
         compound.putString("Status", this.getStatus());
+        compound.putUniqueId("UUID",this.getUniqueID());
         this.foodStats.write(compound);
         if (job != null){
            compound.put("job", this.job.writeToNbt(new ListNBT()));
@@ -200,10 +201,11 @@ public class EntitySim extends AgeableEntity implements INPC {
             this.setStatus(compound.getString("Status"));
         this.foodStats.read(compound);
         String jobType = compound.getList("job", Constants.NBT.TAG_LIST).getCompound(0).getString("jobname");
-        job = ModJobs.JOB_LOOKUP.get(jobType).apply(this);
+        if (!jobType.equals("")) job = ModJobs.JOB_LOOKUP.get(jobType).apply(this);
 
-        if (compound.contains("job"))
-            this.job.readFromNbt(compound.getList("job", Constants.NBT.TAG_LIST));
+        if (compound.contains("job")) this.job.readFromNbt(compound.getList("job", Constants.NBT.TAG_LIST));
+
+        this.setUniqueId(compound.getUniqueId("UUID"));
     }
 
     //Interaction
