@@ -5,6 +5,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3i;
 
 import java.util.UUID;
 
@@ -91,6 +92,21 @@ public class TileMiner extends TileEntity implements ITile {
             }
         }
     }
+    // gets the distance to the back left. because it shoul be same y and
+    // another axis this should be a single number which is the distance between them
+    public int getWidth(){
+        return marker.manhattanDistance(((TileMarker)this.world.getTileEntity(marker)).getFrontRight());
+    }
+
+    public int getDepth(){
+        return marker.manhattanDistance(((TileMarker)this.world.getTileEntity(marker)).getBackLeft());
+    }
+
+    public int getYpos(){
+        return marker.getY()-1; // most likely not needed just putting it here incase i do actually need it
+    }
+
+
     public Direction getDir(){
         return dir;
     }
