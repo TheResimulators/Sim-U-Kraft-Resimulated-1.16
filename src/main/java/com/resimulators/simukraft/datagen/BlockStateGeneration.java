@@ -22,8 +22,8 @@ public class BlockStateGeneration extends BlockStateProvider {
         ModelFile rainbowLight = cubeAll(ModBlocks.RAINBOW_LIGHT);
         simpleBlock(ModBlocks.RAINBOW_LIGHT,rainbowLight);
 
-        //ModelFile mineBox = cubeAll("mine_box",new ResourceLocation("simukraft:block/mine_box_side"),new ResourceLocation("simukraft:block/mine_box_top"));
-        //simpleBlock(ModBlocks.MINE_BOX,mineBox);
+        ModelFile mineBox = cubeColumn("mine_box",new ResourceLocation("simukraft:block/mine_box_side"),new ResourceLocation("simukraft:block/mine_box_top"));
+        simpleBlock(ModBlocks.MINE_BOX,mineBox);
 
         ModelFile compositeBrick = cubeAll(ModBlocks.COMPOSITE_BRICK);
         simpleBlock(ModBlocks.COMPOSITE_BRICK,compositeBrick);
@@ -32,8 +32,8 @@ public class BlockStateGeneration extends BlockStateProvider {
         simpleBlock(ModBlocks.CHEESE_BLOCK,cheeseBlock);
         for (DyeColor color : DyeColor.values()) {
             if (color.equals(DyeColor.LIGHT_GRAY))continue;
-            //ModelFile coloredBlock = cubeAll("light_" + color.toString(),new ResourceLocation("simukraft:block/light_"+color));
-            //simpleBlock(ModBlocks.LIGHT_BLOCKS.get("light_"+color.toString()),coloredBlock);
+            ModelFile coloredBlock = cubeAll("light_" + color.toString(),new ResourceLocation("simukraft:block/light_"+color));
+            simpleBlock(ModBlocks.LIGHT_BLOCKS.get("light_"+color.toString()),coloredBlock);
 
         }
     }
