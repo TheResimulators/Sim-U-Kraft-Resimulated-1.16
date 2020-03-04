@@ -1,7 +1,7 @@
-package com.Resimulators.simukraft.client.gui;
+package com.resimulators.simukraft.client.gui;
 
-import com.Resimulators.simukraft.Reference;
-import com.Resimulators.simukraft.common.world.Structure;
+import com.resimulators.simukraft.Reference;
+import com.resimulators.simukraft.common.world.Structure;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 

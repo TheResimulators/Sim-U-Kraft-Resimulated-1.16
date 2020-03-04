@@ -1,4 +1,4 @@
-package com.Resimulators.simukraft.common.world;
+package com.resimulators.simukraft.common.world;
 
 import com.Resimulators.simukraft.Network;
 import com.Resimulators.simukraft.Reference;
