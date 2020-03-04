@@ -13,10 +13,7 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 public class Faction {
     private ArrayList<UUID> players = new ArrayList<>();
@@ -142,8 +139,9 @@ public class Faction {
 
     public ArrayList<Integer> getSimUnemployedIds(ServerWorld world) {
         ArrayList<Integer> simids = new ArrayList<>();
+
         for (UUID id : sims.keySet()) {
-            Entity entity = world.getEntityByUuid(id);
+           Entity entity = world.getEntityByUuid(id);
             if (entity != null) {
                 if (!sims.get(id).hired) {
                     simids.add(entity.getEntityId());

@@ -42,6 +42,7 @@ public class SyncPlayerCapability implements IMessage {
 
     @Override
     public void onExecute(NetworkEvent.Context ctxIn, boolean isLogicalServer) {
+        SavedWorldData.get(Minecraft.getInstance().world).clearAll();
         Faction faction = new Faction(id);
         faction.read(nbt);
         SavedWorldData.get(Minecraft.getInstance().world).setFaction(id,faction);

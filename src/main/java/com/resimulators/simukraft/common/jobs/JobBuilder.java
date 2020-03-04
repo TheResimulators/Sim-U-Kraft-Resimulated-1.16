@@ -1,8 +1,8 @@
 package com.resimulators.simukraft.common.jobs;
 
-import com.resimulators.simukraft.common.entity.sim.EntitySim;
 import com.resimulators.simukraft.common.jobs.core.EnumJobState;
 import com.resimulators.simukraft.common.jobs.core.IJob;
+import com.resimulators.simukraft.common.entity.sim.EntitySim;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;

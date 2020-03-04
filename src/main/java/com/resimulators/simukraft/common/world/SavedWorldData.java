@@ -161,4 +161,7 @@ public class SavedWorldData extends WorldSavedData {
         getFaction(id).fireSim(sim);
     }
 
+    public void clearAll(){
+        factions = new HashMap<>();
+    }
 }
