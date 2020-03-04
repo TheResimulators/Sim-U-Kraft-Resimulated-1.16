@@ -59,6 +59,7 @@ public class EntitySim extends AgeableEntity implements INPC {
 
     protected FoodStats foodStats;
     private IJob job;
+    private WorkingController controller = new WorkingController(this);
     private Random rand = new Random();
 
     public EntitySim(EntityType<? extends AgeableEntity> type, World worldIn) {
@@ -75,7 +76,7 @@ public class EntitySim extends AgeableEntity implements INPC {
         this.dataManager.register(FEMALE, false);
         this.dataManager.register(SPECIAL, false);
         this.dataManager.register(LEFTHANDED, false);
-        this.dataManager.register(MODEL_FLAG, (byte)0);
+        this.dataManager.register(MODEL_FLAG, (byte) 0);
         this.dataManager.register(STATUS, "");
         this.dataManager.register(NAME_COLOR, 0);
         this.dataManager.register(FOOD_LEVEL, 20);
@@ -166,8 +167,12 @@ public class EntitySim extends AgeableEntity implements INPC {
         compound.putInt("NameColor", this.getNameColor());
         compound.putString("Status", this.getStatus());
         this.foodStats.write(compound);
-        if (job != null){
-           compound.put("job", this.job.writeToNbt(new ListNBT()));
+        if (job != null) {
+            compound.put("job", this.job.writeToNbt(new ListNBT()));
+        }
+
+        if (controller != null) {
+            compound.put("working controller", controller.serializeNBT());
         }
     }
 
@@ -194,11 +199,18 @@ public class EntitySim extends AgeableEntity implements INPC {
             this.setStatus(compound.getString("Status"));
         this.foodStats.read(compound);
         String jobType = compound.getList("job", Constants.NBT.TAG_LIST).getCompound(0).getString("jobname");
+        if (!jobType.equals("")){
         job = ModJobs.JOB_LOOKUP.get(jobType).apply(this);
+        }
 
         if (compound.contains("job"))
             this.job.readFromNbt(compound.getList("job", Constants.NBT.TAG_LIST));
+        controller = new WorkingController(this);
+        if (compound.contains("working controller")) {
+            controller.deserializeNBT(compound.getCompound("working controller"));
+        }
     }
+
 
     //Interaction
     @Override
@@ -275,7 +287,7 @@ public class EntitySim extends AgeableEntity implements INPC {
     @Nullable
     public void dropItem(ItemStack droppedItem, boolean dropAround, boolean traceItem) {
         if (!droppedItem.isEmpty()) {
-            double d0 = this.func_226280_cw_() - (double)0.3F;
+            double d0 = this.func_226280_cw_() - (double) 0.3F;
             ItemEntity itementity = new ItemEntity(this.world, this.getPosX(), d0, this.getPosZ(), droppedItem);
             itementity.setPickupDelay(40);
             if (traceItem) {
@@ -284,17 +296,17 @@ public class EntitySim extends AgeableEntity implements INPC {
 
             if (dropAround) {
                 float f = this.rand.nextFloat() * 0.5F;
-                float f1 = this.rand.nextFloat() * ((float)Math.PI * 2F);
-                itementity.setMotion((double)(-MathHelper.sin(f1) * f), (double)0.2F, (double)(MathHelper.cos(f1) * f));
+                float f1 = this.rand.nextFloat() * ((float) Math.PI * 2F);
+                itementity.setMotion((double) (-MathHelper.sin(f1) * f), (double) 0.2F, (double) (MathHelper.cos(f1) * f));
             } else {
                 float f7 = 0.3F;
-                float f8 = MathHelper.sin(this.rotationPitch * ((float)Math.PI / 180F));
-                float f2 = MathHelper.cos(this.rotationPitch * ((float)Math.PI / 180F));
-                float f3 = MathHelper.sin(this.rotationYaw * ((float)Math.PI / 180F));
-                float f4 = MathHelper.cos(this.rotationYaw * ((float)Math.PI / 180F));
-                float f5 = this.rand.nextFloat() * ((float)Math.PI * 2F);
+                float f8 = MathHelper.sin(this.rotationPitch * ((float) Math.PI / 180F));
+                float f2 = MathHelper.cos(this.rotationPitch * ((float) Math.PI / 180F));
+                float f3 = MathHelper.sin(this.rotationYaw * ((float) Math.PI / 180F));
+                float f4 = MathHelper.cos(this.rotationYaw * ((float) Math.PI / 180F));
+                float f5 = this.rand.nextFloat() * ((float) Math.PI * 2F);
                 float f6 = 0.02F * this.rand.nextFloat();
-                itementity.setMotion((double)(-f3 * f2 * 0.3F) + Math.cos((double)f5) * (double)f6, (double)(-f8 * 0.3F + 0.1F + (this.rand.nextFloat() - this.rand.nextFloat()) * 0.1F), (double)(f4 * f2 * 0.3F) + Math.sin((double)f5) * (double)f6);
+                itementity.setMotion((double) (-f3 * f2 * 0.3F) + Math.cos((double) f5) * (double) f6, (double) (-f8 * 0.3F + 0.1F + (this.rand.nextFloat() - this.rand.nextFloat()) * 0.1F), (double) (f4 * f2 * 0.3F) + Math.sin((double) f5) * (double) f6);
             }
 
             this.world.addEntity(itementity);
@@ -486,10 +498,10 @@ public class EntitySim extends AgeableEntity implements INPC {
 
         for (Faction faction : factions) {
             if (faction.getSims().containsKey(this.entityUniqueID)) {
-                sWorld.removeSimFromFaction(faction.getId(),this);
-                if (job.getWorkSpace() != null){ //only temporary until we get the job system done
-                    ((ITile)world.getTileEntity(job.getWorkSpace())).setSimId(null);
-                    ((ITile)world.getTileEntity(job.getWorkSpace())).setHired(false);
+                sWorld.removeSimFromFaction(faction.getId(), this);
+                if (job.getWorkSpace() != null) { //only temporary until we get the job system done
+                    ((ITile) world.getTileEntity(job.getWorkSpace())).setSimId(null);
+                    ((ITile) world.getTileEntity(job.getWorkSpace())).setHired(false);
                 }
             }
         }
@@ -546,4 +558,6 @@ public class EntitySim extends AgeableEntity implements INPC {
     public boolean isWearing(PlayerModelPart part) {
         return (this.getDataManager().get(MODEL_FLAG) & part.getPartMask()) == part.getPartMask();
     }
+
+
 }

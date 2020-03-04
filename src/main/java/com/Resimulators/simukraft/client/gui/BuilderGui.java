@@ -4,7 +4,6 @@ import com.resimulators.simukraft.common.world.Structure;
 import com.resimulators.simukraft.Reference;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.widget.button.Button;
@@ -14,15 +13,17 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 
 import javax.annotation.Nullable;
+
 import java.awt.*;
+
 import java.util.ArrayList;
 
 public class BuilderGui extends BaseJobGui {
     private Button Build;
     private Button CustomBack;
+
     private boolean loaded = false;
     private ArrayList<Structure> structures;
-
     public BuilderGui(ITextComponent component, ArrayList<Integer> ids, BlockPos pos, @Nullable int id) {
         super(component, ids, pos, id);
         this.job = "builder";
@@ -33,8 +34,7 @@ public class BuilderGui extends BaseJobGui {
     @Override
     public void init(Minecraft minecraft, int width, int height) {
         super.init(minecraft, width, height);
-
-        if (loaded) {
+      if (loaded) {
             addButton(Build = new LargeButton(width / 2 - 55, height - 55, 110, 42, "Build", (Build -> {
                 super.hideAll();
                 CustomBack.visible = true;
@@ -96,14 +96,17 @@ public class BuilderGui extends BaseJobGui {
     private class LargeButton extends Button {
         final ResourceLocation LARGE_BUTTON = new ResourceLocation(Reference.MODID, "textures/gui/large_button.png");
 
+
         public LargeButton(int widthIn, int heightIn, int width, int height, String text, IPressable onPress) {
             super(widthIn, heightIn, width, height, text, onPress);
 
         }
 
 
+
         @Override
-        public void renderButton(int p_renderButton_1_, int p_renderButton_2_, float p_renderButton_3_) {
+        public void renderButton(int p_renderButton_1_, int p_renderButton_2_, float p_renderButton_3_){
+
             Minecraft minecraft = Minecraft.getInstance();
             FontRenderer fontrenderer = minecraft.fontRenderer;
             minecraft.getTextureManager().bindTexture(LARGE_BUTTON);
@@ -112,6 +115,7 @@ public class BuilderGui extends BaseJobGui {
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
             RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+
             this.blit(this.x, this.y, 0, 1 + i * 42, this.width / 2, this.height);
             this.blit(this.x + this.width / 2, this.y, 200 - this.width / 2, 1 + i * 42, this.width / 2, this.height);
             this.renderBg(minecraft, p_renderButton_1_, p_renderButton_2_);
@@ -123,6 +127,7 @@ public class BuilderGui extends BaseJobGui {
 
         @Override
         public int getYImage(boolean hovered) {
+
             int i = 0;
             if (!this.active) {
                 i = 1;
@@ -132,7 +137,9 @@ public class BuilderGui extends BaseJobGui {
 
             return i;
         }
+
+        }
     }
 
-
+    }
 }
