@@ -1,12 +1,11 @@
 package com.resimulators.simukraft.packets;
 
 
-import com.resimulators.simukraft.common.jobs.Profession;
-import net.minecraft.client.Minecraft;
 import com.resimulators.simukraft.common.entity.sim.EntitySim;
+import com.resimulators.simukraft.common.jobs.*;
+import com.resimulators.simukraft.common.tileentity.ITile;
 import com.resimulators.simukraft.common.world.SavedWorldData;
 import com.resimulators.simukraft.init.ModJobs;
-import com.resimulators.simukraft.common.tileentity.ITile;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.math.BlockPos;
@@ -62,7 +61,7 @@ public class SimHireRequest implements IMessage {
             data.hireSim(id,(EntitySim) player.world.getEntityByID(simId));
             ((ITile)player.world.getTileEntity(pos)).setHired(true);
             EntitySim sim =  ((EntitySim) player.world.getEntityByID(simId));
-            sim.setProfession(Profession.getIDFromName(job));
+            sim.setProfession(com.Resimulators.simukraft.common.jobs.Profession.getIDFromName(job));
             sim.getJob().setWorkSpace(pos);
             ((ITile)player.world.getTileEntity(pos)).setSimId(sim.getUniqueID());
             ((EntitySim) player.world.getEntityByID(simId)).setJob(ModJobs.JOB_LOOKUP.get(job).apply(sim));
