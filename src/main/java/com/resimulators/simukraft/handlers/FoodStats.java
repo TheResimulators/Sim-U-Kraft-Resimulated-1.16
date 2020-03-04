@@ -11,9 +11,6 @@ import net.minecraft.world.GameRules;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
-import static com.resimulators.simukraft.common.entity.sim.EntitySim.FOOD_LEVEL;
-import static com.resimulators.simukraft.common.entity.sim.EntitySim.FOOD_SATURATION_LEVEL;
-
 public class FoodStats {
     private float foodExhaustionLevel;
     private int foodTimer;
@@ -99,15 +96,15 @@ public class FoodStats {
     }
 
     public int getFoodLevel() {
-        return sim.getDataManager().get(FOOD_LEVEL);
+        return sim.getDataManager().get(EntitySim.FOOD_LEVEL);
     }
 
     public boolean needFood() {
-        return sim.getDataManager().get(FOOD_LEVEL) < 20;
+        return sim.getDataManager().get(EntitySim.FOOD_LEVEL) < 20;
     }
 
     public boolean shouldEat() {
-        return sim.getDataManager().get(FOOD_LEVEL) < 15;
+        return sim.getDataManager().get(EntitySim.FOOD_LEVEL) < 15;
     }
 
     public void addExhaustion(float exhaustion) {
@@ -115,15 +112,15 @@ public class FoodStats {
     }
 
     public float getSaturationLevel() {
-        return sim.getDataManager().get(FOOD_SATURATION_LEVEL);
+        return sim.getDataManager().get(EntitySim.FOOD_SATURATION_LEVEL);
     }
 
     public void setFoodLevel(int foodLevel) {
-        sim.getDataManager().set(FOOD_LEVEL, foodLevel);
+        sim.getDataManager().set(EntitySim.FOOD_LEVEL, foodLevel);
     }
 
     @OnlyIn(Dist.CLIENT)
     public void setFoodSaturationLevel(float foodSaturationLevel) {
-        sim.getDataManager().set(FOOD_SATURATION_LEVEL, foodSaturationLevel);
+        sim.getDataManager().set(EntitySim.FOOD_SATURATION_LEVEL, foodSaturationLevel);
     }
 }

@@ -1,23 +1,19 @@
 package com.resimulators.simukraft.common.world;
 
-import com.Resimulators.simukraft.Network;
-import com.Resimulators.simukraft.Reference;
-import com.Resimulators.simukraft.SimuKraft;
-import com.Resimulators.simukraft.common.entity.sim.EntitySim;
-import com.Resimulators.simukraft.packets.IMessage;
+import com.resimulators.simukraft.Network;
+import com.resimulators.simukraft.SimuKraft;
+import com.resimulators.simukraft.common.entity.sim.EntitySim;
+import com.resimulators.simukraft.packets.IMessage;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
-import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
-import org.apache.logging.log4j.core.jmx.Server;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class Faction {
     private ArrayList<UUID> players = new ArrayList<>();

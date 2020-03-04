@@ -1,7 +1,6 @@
 package com.resimulators.simukraft.common.block;
 
 import com.resimulators.simukraft.common.tileentity.TileMarker;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
@@ -26,7 +25,7 @@ public class BlockMarker extends BlockBase {
 
     @Override
     public VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context){
-        return Block.makeCuboidShape(6,0,6,10,14,10);
+        return makeCuboidShape(6,0,6,10,14,10);
     }
     @Override
     public BlockState updatePostPlacement(BlockState stateIn, Direction facing, BlockState facingState, IWorld worldIn, BlockPos currentPos, BlockPos facingPos) {
