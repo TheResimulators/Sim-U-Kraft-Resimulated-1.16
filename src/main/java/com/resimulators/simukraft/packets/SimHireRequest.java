@@ -1,11 +1,12 @@
 package com.resimulators.simukraft.packets;
 
-import com.Resimulators.simukraft.common.entity.sim.EntitySim;
-import com.Resimulators.simukraft.common.jobs.Profession;
-import com.Resimulators.simukraft.common.tileentity.ITile;
-import com.Resimulators.simukraft.common.world.SavedWorldData;
-import com.Resimulators.simukraft.init.ModJobs;
+
+import com.resimulators.simukraft.common.jobs.Profession;
 import net.minecraft.client.Minecraft;
+import com.resimulators.simukraft.common.entity.sim.EntitySim;
+import com.resimulators.simukraft.common.world.SavedWorldData;
+import com.resimulators.simukraft.init.ModJobs;
+import com.resimulators.simukraft.common.tileentity.ITile;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.math.BlockPos;
