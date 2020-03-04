@@ -5,7 +5,10 @@ import net.minecraft.util.math.BlockPos;
 
 public interface IJob {
 
-    EnumJobState state();
+    EnumJobState getState();
+
+    //set the state that the job is in. i.e when the sim starts to work set it to going to work. then the ai can use it to determine what to do when etc.
+    void setState(EnumJobState state);
 
     String name();
     //interval of ticks between work periods,
