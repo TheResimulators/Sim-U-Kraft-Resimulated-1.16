@@ -1,4 +1,4 @@
-package com.Resimulators.simukraft.common.jobs;
+package com.resimulators.simukraft.common.jobs;
 
 
 public enum Profession {

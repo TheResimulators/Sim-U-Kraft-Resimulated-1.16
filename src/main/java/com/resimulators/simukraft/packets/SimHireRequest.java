@@ -1,8 +1,9 @@
 package com.resimulators.simukraft.packets;
 
 
+import com.mojang.datafixers.optics.profunctors.ProfunctorFunctorWrapper;
 import com.resimulators.simukraft.common.entity.sim.EntitySim;
-import com.resimulators.simukraft.common.jobs.*;
+import com.resimulators.simukraft.common.jobs.Profession;
 import com.resimulators.simukraft.common.tileentity.ITile;
 import com.resimulators.simukraft.common.world.SavedWorldData;
 import com.resimulators.simukraft.init.ModJobs;
@@ -61,7 +62,7 @@ public class SimHireRequest implements IMessage {
             data.hireSim(id,(EntitySim) player.world.getEntityByID(simId));
             ((ITile)player.world.getTileEntity(pos)).setHired(true);
             EntitySim sim =  ((EntitySim) player.world.getEntityByID(simId));
-            sim.setProfession(com.Resimulators.simukraft.common.jobs.Profession.getIDFromName(job));
+            sim.setProfession(Profession.getIDFromName(job));
             sim.getJob().setWorkSpace(pos);
             ((ITile)player.world.getTileEntity(pos)).setSimId(sim.getUniqueID());
             ((EntitySim) player.world.getEntityByID(simId)).setJob(ModJobs.JOB_LOOKUP.get(job).apply(sim));

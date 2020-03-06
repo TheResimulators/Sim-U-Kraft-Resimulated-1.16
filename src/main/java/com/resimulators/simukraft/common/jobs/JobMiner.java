@@ -1,6 +1,7 @@
 package com.resimulators.simukraft.common.jobs;
 
 
+import com.resimulators.simukraft.common.entity.goals.MinerGoal;
 import com.resimulators.simukraft.common.jobs.core.EnumJobState;
 import com.resimulators.simukraft.common.jobs.core.IJob;
 import com.resimulators.simukraft.common.entity.sim.EntitySim;

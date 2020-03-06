@@ -1,14 +1,13 @@
-package com.Resimulators.simukraft.common.entity.sim;
+package com.resimulators.simukraft.common.entity.sim;
 
-import com.Resimulators.simukraft.common.entity.sim.EntitySim;
-import com.Resimulators.simukraft.common.jobs.core.EnumJobState;
-import com.Resimulators.simukraft.common.jobs.core.IJob;
+
+import com.resimulators.simukraft.common.jobs.core.EnumJobState;
+import com.resimulators.simukraft.common.jobs.core.IJob;
 import net.minecraft.client.renderer.texture.ITickable;
-import net.minecraft.entity.MoverType;
+
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraftforge.common.util.INBTSerializable;
+
 
 public class WorkingController implements ITickable {
     private EntitySim sim;
