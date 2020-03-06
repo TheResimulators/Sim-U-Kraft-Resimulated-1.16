@@ -1,6 +1,6 @@
 package com.resimulators.simukraft.common.tileentity;
 
-import com.Resimulators.simukraft.init.ModTileEntities;
+import com.resimulators.simukraft.init.ModTileEntities;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;

@@ -1,7 +1,7 @@
-package com.Resimulators.simukraft.client.gui;
+package com.resimulators.simukraft.client.gui;
 
-import com.Resimulators.simukraft.common.jobs.Profession;
-import com.Resimulators.simukraft.common.tileentity.TileMiner;
+import com.resimulators.simukraft.common.jobs.Profession;
+import com.resimulators.simukraft.common.tileentity.TileMiner;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.util.math.BlockPos;

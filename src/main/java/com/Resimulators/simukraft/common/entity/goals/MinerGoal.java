@@ -1,10 +1,10 @@
-package com.Resimulators.simukraft.common.entity.goals;
+package com.resimulators.simukraft.common.entity.goals;
 
-import com.Resimulators.simukraft.common.entity.sim.EntitySim;
-import com.Resimulators.simukraft.common.jobs.JobMiner;
-import com.Resimulators.simukraft.common.jobs.core.EnumJobState;
-import com.Resimulators.simukraft.common.jobs.core.IJob;
-import com.Resimulators.simukraft.common.tileentity.TileMiner;
+import com.resimulators.simukraft.common.entity.sim.EntitySim;
+import com.resimulators.simukraft.common.jobs.JobMiner;
+import com.resimulators.simukraft.common.jobs.core.EnumJobState;
+import com.resimulators.simukraft.common.jobs.core.IJob;
+import com.resimulators.simukraft.common.tileentity.TileMiner;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.util.Direction;
