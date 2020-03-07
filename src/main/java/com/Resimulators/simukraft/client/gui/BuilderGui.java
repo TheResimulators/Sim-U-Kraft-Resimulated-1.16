@@ -55,7 +55,11 @@ public class BuilderGui extends BaseJobGui {
             }
 
 
+
             )));
+            if (!isHired()){
+                Build.active = false;
+            }
         }
     }
 

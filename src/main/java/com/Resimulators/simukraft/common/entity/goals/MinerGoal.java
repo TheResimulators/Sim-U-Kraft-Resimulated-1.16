@@ -30,9 +30,15 @@ public class MinerGoal extends Goal {
 
     @Override
     public boolean shouldExecute() {
-        if (true)return true;
-        IJob job = sim.getJob();
+
+        job = sim.getJob();
+        if (job == null) return false;
+        if (job.getWorkSpace() == null)return false;
+        if ( ((TileMiner)sim.world.getTileEntity(job.getWorkSpace())).getMarker() == null) return false;
+        if (!((TileMiner) sim.world.getTileEntity(job.getWorkSpace())).CheckValidity()) return false;
+        if (job.getWorkSpace() == null)return false;
         if (sim.world.getTileEntity(job.getWorkSpace()) == null) return false;
+        if (true)return true;
         if (job.getState() == EnumJobState.GOING_TO_WORK){
             if (sim.getPosition().withinDistance(new Vec3i(job.getWorkSpace().getX(),job.getWorkSpace().getY(),job.getWorkSpace().getZ()),5)){
                 job.setState(EnumJobState.WORKING);
@@ -53,12 +59,13 @@ public class MinerGoal extends Goal {
         markerPos = miner.getMarker();
         dir =  miner.getDir();
         offset = BlockPos.ZERO.offset(dir).offset(dir.rotateY());
-        width = miner.getWidth();
-        depth = miner.getDepth();
+        width = miner.getWidth()-1;
+        depth = miner.getDepth()-1;
         for (int x = 0;x< width;x++){
             for (int z = 0;z<depth;z++){
-                sim.world.setBlockState(markerPos.add(offset.getX(),offset.getY()+3,offset.getZ()).offset(dir,depth).offset(dir.rotateY(),width), Blocks.COBBLESTONE.getDefaultState());
-
+                sim.world.setBlockState(markerPos.add(offset.getX(),offset.getY()+4,offset.getZ()).offset(dir,z).offset(dir.rotateY(),x), Blocks.COBBLESTONE.getDefaultState());
+                BlockPos pos = markerPos.add(offset.getX(),offset.getY()+4,offset.getZ()).offset(dir,z).offset(dir.rotateY(),x);
+                System.out.println(pos);
             }
         }
     }
@@ -67,12 +74,14 @@ public class MinerGoal extends Goal {
     public void tick() {
         tick++;
 
+
     }
 
 
 
     @Override
     public boolean shouldContinueExecuting(){
+        if (sim.getJob() != null){
         if (sim.getJob().getState() == EnumJobState.FORCE_STOP){
             ((JobMiner)job).setProgress(progress);
             return false;
@@ -82,10 +91,11 @@ public class MinerGoal extends Goal {
         }else{
             sim.getJob().finishedWorkPeriod();
             sim.getJob().setState(EnumJobState.NOT_WORKING);
-        }
+        }}
         ((JobMiner)job).setProgress(progress);
         return false;
     }
+
 }
 
 
