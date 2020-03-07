@@ -1,8 +1,8 @@
 package com.resimulators.simukraft.packets;
 
 import com.resimulators.simukraft.common.entity.sim.EntitySim;
-import com.resimulators.simukraft.common.tileentity.ITile;
 import com.resimulators.simukraft.common.world.SavedWorldData;
+import com.resimulators.simukraft.common.tileentity.ITile;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.math.BlockPos;
@@ -60,7 +60,9 @@ public class SimFireRequest implements IMessage {
             ((ITile) player.world.getTileEntity(pos)).setSimId(null);
             EntitySim sim = (EntitySim) ((ServerWorld)player.world).getEntityByUuid(simId);
             int simid =sim.getEntityId();
+            sim.getJob().removeJobAi();
             sim.setJob(null);
+
 
             data.getFaction(id).sendPacketToFaction(new SimFirePacket(id, simid, pos));
 

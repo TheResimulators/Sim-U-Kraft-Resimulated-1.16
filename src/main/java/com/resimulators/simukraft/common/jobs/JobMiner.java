@@ -1,8 +1,10 @@
 package com.resimulators.simukraft.common.jobs;
 
-import com.resimulators.simukraft.common.entity.sim.EntitySim;
+
+import com.resimulators.simukraft.common.entity.goals.MinerGoal;
 import com.resimulators.simukraft.common.jobs.core.EnumJobState;
 import com.resimulators.simukraft.common.jobs.core.IJob;
+import com.resimulators.simukraft.common.entity.sim.EntitySim;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
@@ -13,9 +15,15 @@ public class JobMiner implements IJob {
     private Goal goal1;
     private int periodsworked = 0;
     private BlockPos workSpace;
+    private EnumJobState state = EnumJobState.NOT_WORKING;
 
+
+    //specific to the miner
+    private int progress;
     public JobMiner(EntitySim sim) {
         this.sim = sim;
+        goal1 =  new MinerGoal(sim);
+        addJobAi();
 
     }
 
@@ -26,8 +34,13 @@ public class JobMiner implements IJob {
     }
 
     @Override
-    public EnumJobState state() {
-        return EnumJobState.NOT_WORKING;
+    public EnumJobState getState() {
+        return state;
+    }
+
+    @Override
+    public void setState(EnumJobState state) {
+        this.state = state;
     }
 
     @Override
@@ -75,7 +88,9 @@ public class JobMiner implements IJob {
         CompoundNBT ints = new CompoundNBT();
         ints.putInt("periodsworked", periodsworked);
         nbt.add(ints);
-
+        CompoundNBT other = new CompoundNBT(); // other info that is unique to the miner
+        other.putInt("progress",progress);
+        nbt.add(other);
         return nbt;
     }
 
@@ -85,6 +100,11 @@ public class JobMiner implements IJob {
             CompoundNBT list = nbt.getCompound(i);
             if (list.contains("periodsworked")) {
                 periodsworked = list.getInt("periodsworked");
+            }
+            if (list.contains("other")){
+                setProgress(list.getInt("progress"));
+            }else{
+                setProgress(0);
             }
         }
     }
@@ -114,7 +134,11 @@ public class JobMiner implements IJob {
         return workSpace;
     }
 
+    public void setProgress(int progress) {
+        this.progress = progress;
+    }
 
-
-
+    public int getProgress() {
+        return progress;
+    }
 }

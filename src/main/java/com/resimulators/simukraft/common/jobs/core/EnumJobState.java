@@ -6,8 +6,8 @@ public enum EnumJobState {
         WORKING,
         RETURNING,
         NOT_WORKING,
-        GOTO_WORK,
-
+        GOING_TO_WORK,
+        FORCE_STOP //use force stop for anything that should make the work stop work immediately
 
 
     }

@@ -1,12 +1,12 @@
 package com.resimulators.simukraft.common.block;
 
+import com.resimulators.simukraft.common.world.Faction;
+import com.resimulators.simukraft.common.world.SavedWorldData;
 import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.client.gui.GuiHandler;
 import com.resimulators.simukraft.common.entity.sim.EntitySim;
 import com.resimulators.simukraft.common.tileentity.ITile;
 import com.resimulators.simukraft.common.tileentity.TileConstructor;
-import com.resimulators.simukraft.common.world.Faction;
-import com.resimulators.simukraft.common.world.SavedWorldData;
 import com.resimulators.simukraft.handlers.SimUKraftPacketHandler;
 import com.resimulators.simukraft.packets.OpenJobGuiPacket;
 import com.resimulators.simukraft.packets.SimFirePacket;
@@ -44,9 +44,9 @@ public class BlockConstructor extends BlockBase {
             System.out.println(world.getTileEntity(pos));
             if (((ITile)world.getTileEntity(pos)).getHired()){
                 int hiredId = ((ServerWorld) world).getEntityByUuid(((ITile)world.getTileEntity(pos)).getSimId()).getEntityId();
-                SimUKraftPacketHandler.INSTANCE.sendTo(new OpenJobGuiPacket(simids,pos,hiredId, GuiHandler.Builder),((ServerPlayerEntity) player).connection.netManager, NetworkDirection.PLAY_TO_CLIENT);
-                } else {
-                SimUKraftPacketHandler.INSTANCE.sendTo(new OpenJobGuiPacket(simids,pos,GuiHandler.Builder),((ServerPlayerEntity) player).connection.netManager, NetworkDirection.PLAY_TO_CLIENT);
+                SimUKraftPacketHandler.INSTANCE.sendTo(new OpenJobGuiPacket(simids,pos,hiredId, GuiHandler.Builder),((ServerPlayerEntity) player).connection.netManager, NetworkDirection.PLAY_TO_CLIENT);// used when there is a sim hired
+            } else {
+                SimUKraftPacketHandler.INSTANCE.sendTo(new OpenJobGuiPacket(simids,pos,GuiHandler.Builder),((ServerPlayerEntity) player).connection.netManager, NetworkDirection.PLAY_TO_CLIENT);//used when there is no sim employed at this block
             }
         }
         return ActionResultType.SUCCESS;

@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 public class GuiHandler {
     public static final int Builder = 1;
-
+    public static final int Miner = 2;
 
 
 
@@ -17,6 +17,8 @@ public class GuiHandler {
             case Builder:
                 Minecraft.getInstance().displayGuiScreen(new BuilderGui(new StringTextComponent("Builder"),ints,pos,id));
                 break;
+            case Miner:
+                Minecraft.getInstance().displayGuiScreen(new MinerGui(new StringTextComponent("Miner"),ints,pos,id));
         }
     }
 }

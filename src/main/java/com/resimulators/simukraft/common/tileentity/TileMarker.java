@@ -36,24 +36,24 @@ public class TileMarker extends TileEntity {
 
     @Override
     public void read(CompoundNBT nbt) {
-        origin = BlockPos.fromLong(nbt.getLong("origin"));
-        backLeft = BlockPos.fromLong(nbt.getLong("backleft"));
-        frontRight = BlockPos.fromLong(nbt.getLong("frontright"));
-        backRight = BlockPos.fromLong(nbt.getLong("backright"));
-        used = nbt.getBoolean("used");
-        range = nbt.getInt("range");
-        corner = Corner.fromNbt(nbt.getInt("corner"));
+        if (nbt.contains("origin")) origin = BlockPos.fromLong(nbt.getLong("origin"));
+        if (nbt.contains("backleft")) backLeft = BlockPos.fromLong(nbt.getLong("backleft"));
+        if (nbt.contains("frontright")) frontRight = BlockPos.fromLong(nbt.getLong("frontright"));
+        if (nbt.contains("backright")) backRight = BlockPos.fromLong(nbt.getLong("backright"));
+        if (nbt.contains("used")) used = nbt.getBoolean("used");
+        if (nbt.contains("range")) range = nbt.getInt("range");
+        if (nbt.contains("corner")) corner = Corner.fromNbt(nbt.getInt("corner"));
     }
 
     @Override
     public CompoundNBT write(CompoundNBT nbt) {
-        nbt.putLong("origin",origin.toLong());
-        nbt.putLong("backleft", backLeft.toLong());
-        nbt.putLong("frontright",frontRight.toLong());
-        nbt.putLong("backright",backRight.toLong());
+        if (origin != null) nbt.putLong("origin",origin.toLong());
+        if (backLeft != null) nbt.putLong("backleft", backLeft.toLong());
+        if (frontRight != null) nbt.putLong("frontright",frontRight.toLong());
+        if (backRight != null) nbt.putLong("backright",backRight.toLong());
         nbt.putBoolean("used",used);
         nbt.putInt("range",range);
-        nbt.putInt("corner",Corner.toNbt(corner));
+        if (corner != null) nbt.putInt("corner",Corner.toNbt(corner));
         return nbt;
     }
 
