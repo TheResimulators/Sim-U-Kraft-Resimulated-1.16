@@ -665,6 +665,26 @@ public class SimInventory implements IInventory, INamedContainerProvider {
         return false;
     }
 
+    public ItemStack getFood() {
+        label23:
+        for(List<ItemStack> list : this.allInventories) {
+            Iterator iterator = list.iterator();
+
+            while(true) {
+                if (!iterator.hasNext()) {
+                    continue label23;
+                }
+
+                ItemStack itemstack = (ItemStack)iterator.next();
+                if (!itemstack.isEmpty() && itemstack.getItem().isFood()) {
+                    return itemstack;
+                }
+            }
+        }
+
+        return ItemStack.EMPTY;
+    }
+
     @OnlyIn(Dist.CLIENT)
     public boolean hasTag(Tag<Item> itemTag) {
         label23:
