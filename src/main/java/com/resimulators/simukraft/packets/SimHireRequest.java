@@ -63,9 +63,9 @@ public class SimHireRequest implements IMessage {
             ((ITile)player.world.getTileEntity(pos)).setHired(true);
             EntitySim sim =  ((EntitySim) player.world.getEntityByID(simId));
             sim.setProfession(Profession.getIDFromName(job));
-            sim.getJob().setWorkSpace(pos);
             ((ITile)player.world.getTileEntity(pos)).setSimId(sim.getUniqueID());
             ((EntitySim) player.world.getEntityByID(simId)).setJob(ModJobs.JOB_LOOKUP.get(job).apply(sim));
+            sim.getJob().setWorkSpace(pos);
             data.getFaction(id).sendPacketToFaction(new SimHirePacket(simId,id,pos,job));
         }
 

@@ -18,9 +18,10 @@ public class TileMiner extends TileEntity implements ITile {
 
     @Override
     public void read(CompoundNBT compound) {
+
         dir = Direction.byIndex(compound.getInt("dir"));
         if (compound.contains("sim id")){
-            simID = compound.getUniqueId("sim id");
+            simID = UUID.fromString(compound.getString("sim id"));
         }
         hired = compound.getBoolean("hired");
         super.read(compound);
@@ -28,9 +29,11 @@ public class TileMiner extends TileEntity implements ITile {
 
     @Override
     public CompoundNBT write(CompoundNBT compound) {
+        if (dir != null){
         compound.putInt("dir",dir.getIndex());
+        }
         if (simID != null){
-            compound.putUniqueId("sim id",simID);
+            compound.putString("sim id",simID.toString());
         }
         compound.putBoolean("hired",hired);
         return super.write(compound);
@@ -118,6 +121,10 @@ public class TileMiner extends TileEntity implements ITile {
     @Override
     public void handleUpdateTag(CompoundNBT nbt) {
         read(nbt);
+    }
+
+    public boolean CheckValidity(){
+        return ((TileMarker)this.world.getTileEntity(marker)).getFrontRight() != null && ((TileMarker)this.world.getTileEntity(marker)).getBackLeft() != null;
     }
 
 

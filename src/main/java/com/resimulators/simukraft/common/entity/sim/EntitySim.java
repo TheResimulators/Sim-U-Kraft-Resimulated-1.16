@@ -21,6 +21,7 @@ import net.minecraft.entity.player.PlayerModelPart;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.*;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
@@ -174,6 +175,7 @@ public class EntitySim extends AgeableEntity implements INPC {
         if (controller != null) {
             compound.put("working controller", controller.serializeNBT());
         }
+        compound.putUniqueId("uuid",getUniqueID());
     }
 
     @Override
@@ -198,16 +200,22 @@ public class EntitySim extends AgeableEntity implements INPC {
         if (compound.contains("Status"))
             this.setStatus(compound.getString("Status"));
         this.foodStats.read(compound);
-        String jobType = compound.getList("job", Constants.NBT.TAG_LIST).getCompound(0).getString("jobname");
+        CompoundNBT nbt = compound.getList("job", Constants.NBT.TAG_LIST).getCompound(0);
+        INBT nbts = compound.get("job");
+        String jobType = ((ListNBT)nbts).getCompound(0).getString("jobname");
         if (!jobType.equals("")){
         job = ModJobs.JOB_LOOKUP.get(jobType).apply(this);
         }
 
-        if (compound.contains("job"))
-            this.job.readFromNbt(compound.getList("job", Constants.NBT.TAG_LIST));
+        if (compound.contains("job") && !jobType.equals("")){
+            this.job.readFromNbt((ListNBT) compound.get("job"));
+        }
         controller = new WorkingController(this);
         if (compound.contains("working controller")) {
             controller.deserializeNBT(compound.getCompound("working controller"));
+        }
+        if (compound.hasUniqueId("uuid")){
+            this.entityUniqueID = compound.getUniqueId("uuid");
         }
     }
 
