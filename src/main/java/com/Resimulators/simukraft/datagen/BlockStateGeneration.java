@@ -5,6 +5,7 @@ import com.resimulators.simukraft.Reference;
 import com.resimulators.simukraft.init.ModBlocks;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.item.DyeColor;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.model.generators.BlockStateProvider;
 import net.minecraftforge.client.model.generators.ExistingFileHelper;
 import net.minecraftforge.client.model.generators.ModelFile;

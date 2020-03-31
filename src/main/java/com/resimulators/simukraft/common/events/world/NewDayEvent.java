@@ -1,11 +1,11 @@
 package com.resimulators.simukraft.common.events.world;
 
-import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.common.entity.sim.EntitySim;
 import com.resimulators.simukraft.common.world.Faction;
 import com.resimulators.simukraft.common.world.SavedWorldData;
-import com.resimulators.simukraft.init.ModEntities;
 import com.resimulators.simukraft.packets.UpdateSimPacket;
+import com.resimulators.simukraft.SimuKraft;
+import com.resimulators.simukraft.init.ModEntities;
 import com.resimulators.simukraft.utils.BlockUtils;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;

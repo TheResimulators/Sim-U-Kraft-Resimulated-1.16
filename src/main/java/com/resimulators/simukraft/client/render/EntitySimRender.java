@@ -1,9 +1,9 @@
 package com.resimulators.simukraft.client.render;
 
+import com.resimulators.simukraft.client.model.EntitySimModel;
 import com.resimulators.simukraft.Configs;
 import com.resimulators.simukraft.Reference;
 import com.resimulators.simukraft.client.data.SkinCacher;
-import com.resimulators.simukraft.client.model.EntitySimModel;
 import com.resimulators.simukraft.common.entity.sim.EntitySim;
 import com.resimulators.simukraft.utils.ColorHelper;
 import com.mojang.blaze3d.matrix.MatrixStack;
