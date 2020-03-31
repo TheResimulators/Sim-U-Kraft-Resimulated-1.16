@@ -1,14 +1,14 @@
 package com.resimulators.simukraft.common.entity.sim;
 
-import com.resimulators.simukraft.Configs;
 import com.resimulators.simukraft.common.jobs.core.IJob;
+import com.resimulators.simukraft.common.tileentity.ITile;
 import com.resimulators.simukraft.common.world.Faction;
 import com.resimulators.simukraft.common.world.SavedWorldData;
+import com.resimulators.simukraft.handlers.FoodStats;
+import com.resimulators.simukraft.Configs;
 import com.resimulators.simukraft.utils.Utils;
 import com.resimulators.simukraft.common.entity.goals.PickupItemGoal;
 import com.resimulators.simukraft.common.entity.goals.TalkingToPlayerGoal;
-import com.resimulators.simukraft.common.tileentity.ITile;
-import com.resimulators.simukraft.handlers.FoodStats;
 import com.resimulators.simukraft.init.ModEntities;
 import com.resimulators.simukraft.init.ModJobs;
 import com.google.common.collect.ImmutableMap;
