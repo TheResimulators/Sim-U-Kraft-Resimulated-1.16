@@ -1,9 +1,9 @@
 package com.resimulators.simukraft.common.world;
 
+import com.resimulators.simukraft.packets.IMessage;
 import com.resimulators.simukraft.Network;
 import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.common.entity.sim.EntitySim;
-import com.resimulators.simukraft.packets.IMessage;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;

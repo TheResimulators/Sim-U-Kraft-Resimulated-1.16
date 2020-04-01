@@ -5,7 +5,6 @@ import com.resimulators.simukraft.common.entity.goals.MinerGoal;
 import com.resimulators.simukraft.common.jobs.core.EnumJobState;
 import com.resimulators.simukraft.common.jobs.core.IJob;
 import com.resimulators.simukraft.common.entity.sim.EntitySim;
-import jdk.nashorn.internal.ir.Block;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;

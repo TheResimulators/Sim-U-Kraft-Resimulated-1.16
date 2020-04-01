@@ -1,7 +1,6 @@
 package com.resimulators.simukraft.packets;
 
 
-import com.mojang.datafixers.optics.profunctors.ProfunctorFunctorWrapper;
 import com.resimulators.simukraft.common.entity.sim.EntitySim;
 import com.resimulators.simukraft.common.jobs.Profession;
 import com.resimulators.simukraft.common.tileentity.ITile;

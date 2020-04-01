@@ -2,7 +2,6 @@ package com.resimulators.simukraft.common.tileentity;
 
 import com.resimulators.simukraft.init.ModTileEntities;
 
-import net.minecraft.block.Blocks;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SUpdateTileEntityPacket;
