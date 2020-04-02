@@ -1,14 +1,14 @@
 package com.resimulators.simukraft.common.entity.sim;
 
-import com.resimulators.simukraft.Configs;
 import com.resimulators.simukraft.common.jobs.core.IJob;
+import com.resimulators.simukraft.common.tileentity.ITile;
 import com.resimulators.simukraft.common.world.Faction;
 import com.resimulators.simukraft.common.world.SavedWorldData;
+import com.resimulators.simukraft.handlers.FoodStats;
+import com.resimulators.simukraft.Configs;
 import com.resimulators.simukraft.utils.Utils;
 import com.resimulators.simukraft.common.entity.goals.PickupItemGoal;
 import com.resimulators.simukraft.common.entity.goals.TalkingToPlayerGoal;
-import com.resimulators.simukraft.common.tileentity.ITile;
-import com.resimulators.simukraft.handlers.FoodStats;
 import com.resimulators.simukraft.init.ModEntities;
 import com.resimulators.simukraft.init.ModJobs;
 import com.google.common.collect.ImmutableMap;
@@ -239,7 +239,7 @@ public class EntitySim extends AgeableEntity implements INPC {
     public void tick() {
         super.tick();
         if (!world.isRemote()) {
-            foodStats.tick(this);
+            this.foodStats.tick(this);
         }
     }
 
@@ -253,6 +253,18 @@ public class EntitySim extends AgeableEntity implements INPC {
 
             if (this.foodStats.needFood() && this.ticksExisted % 10 == 0) {
                 this.foodStats.setFoodLevel(this.foodStats.getFoodLevel() + 1);
+            }
+        } else {
+            if (this.foodStats.shouldEat()) {
+                if (this.canEat(false)) {
+                    this.setActiveHand(this.getActiveHand());
+                    this.selectSlot(this.inventory.getSlotFor(this.inventory.getFood()));
+                    ItemStack stack = this.getHeldItemMainhand();
+                    Food food = stack.getItem().getFood();
+                    if (food != null) {
+                        this.foodStats.consume(stack.getItem(), stack);
+                    }
+                }
             }
         }
         this.inventory.tick();

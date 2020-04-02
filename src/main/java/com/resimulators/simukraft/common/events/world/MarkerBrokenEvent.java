@@ -1,7 +1,7 @@
 package com.resimulators.simukraft.common.events.world;
 
-import com.resimulators.simukraft.Reference;
 import com.resimulators.simukraft.common.tileentity.TileMarker;
+import com.resimulators.simukraft.Reference;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;

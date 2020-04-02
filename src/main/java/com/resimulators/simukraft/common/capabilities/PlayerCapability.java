@@ -1,7 +1,7 @@
 package com.resimulators.simukraft.common.capabilities;
 
-import com.resimulators.simukraft.Reference;
 import com.resimulators.simukraft.common.world.Faction;
+import com.resimulators.simukraft.Reference;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.util.Direction;
