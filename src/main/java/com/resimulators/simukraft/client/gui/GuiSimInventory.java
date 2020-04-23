@@ -90,8 +90,8 @@ public class GuiSimInventory extends DisplayEffectsScreen<SimContainer> {
         MatrixStack matrix = new MatrixStack();
         matrix.translate(0.0D, 0.0D, 1000.0D);
         matrix.scale((float)z, (float)z, (float)z);
-        Quaternion qx = Vector3f.field_229183_f_.func_229187_a_(180.0F);
-        Quaternion qy = Vector3f.field_229179_b_.func_229187_a_(my * 20.0F);
+        Quaternion qx = Vector3f.ZP.rotationDegrees(180.0F);
+        Quaternion qy = Vector3f.XP.rotationDegrees(my * 20.0F);
         qx.multiply(qy);
         matrix.rotate(qx);
         float yawOffset = entity.renderYawOffset;
@@ -106,11 +106,11 @@ public class GuiSimInventory extends DisplayEffectsScreen<SimContainer> {
         entity.prevRotationYawHead = entity.rotationYaw;
         EntityRendererManager renderManager = Minecraft.getInstance().getRenderManager();
         qy.conjugate();
-        renderManager.func_229089_a_(qy);
+        renderManager.setCameraOrientation(qy);
         renderManager.setRenderShadow(false);
-        IRenderTypeBuffer.Impl renderTypeBuffer = Minecraft.getInstance().func_228019_au_().func_228487_b_();
-        renderManager.func_229084_a_(entity, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, matrix, renderTypeBuffer, 15728880);
-        renderTypeBuffer.func_228461_a_();
+        IRenderTypeBuffer.Impl renderTypeBuffer = Minecraft.getInstance().getRenderTypeBuffers().getBufferSource();
+        renderManager.renderEntityStatic(entity, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, matrix, renderTypeBuffer, 15728880);
+        renderTypeBuffer.finish();
         renderManager.setRenderShadow(true);
         entity.renderYawOffset = yawOffset;
         entity.rotationYaw = rotYaw;

@@ -310,7 +310,7 @@ public class EntitySim extends AgeableEntity implements INPC {
     @Nullable
     public void dropItem(ItemStack droppedItem, boolean dropAround, boolean traceItem) {
         if (!droppedItem.isEmpty()) {
-            double d0 = this.func_226280_cw_() - (double) 0.3F;
+            double d0 = this.getPosYEye() - (double) 0.3F;
             ItemEntity itementity = new ItemEntity(this.world, this.getPosX(), d0, this.getPosZ(), droppedItem);
             itementity.setPickupDelay(40);
             if (traceItem) {
