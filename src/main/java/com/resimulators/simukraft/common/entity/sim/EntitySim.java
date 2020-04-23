@@ -1,5 +1,6 @@
 package com.resimulators.simukraft.common.entity.sim;
 
+import com.resimulators.simukraft.common.entity.goals.GoToWorkGoal;
 import com.resimulators.simukraft.common.jobs.core.IJob;
 import com.resimulators.simukraft.common.tileentity.ITile;
 import com.resimulators.simukraft.common.world.Faction;
@@ -127,6 +128,8 @@ public class EntitySim extends AgeableEntity implements INPC {
         this.goalSelector.addGoal(11, new WaterAvoidingRandomWalkingGoal(this, 0.6d));
         this.goalSelector.addGoal(12, new LookAtGoal(this, PlayerEntity.class, 8f));
         this.goalSelector.addGoal(13, new LookRandomlyGoal(this));
+        //Job Important Goals
+        this.goalSelector.addGoal(14, new GoToWorkGoal(this));
     }
 
     @Override
@@ -519,9 +522,11 @@ public class EntitySim extends AgeableEntity implements INPC {
         for (Faction faction : factions) {
             if (faction.getSims().containsKey(this.entityUniqueID)) {
                 sWorld.removeSimFromFaction(faction.getId(), this);
+                if (job != null){
                 if (job.getWorkSpace() != null) { //only temporary until we get the job system done
                     ((ITile) world.getTileEntity(job.getWorkSpace())).setSimId(null);
                     ((ITile) world.getTileEntity(job.getWorkSpace())).setHired(false);
+                    }
                 }
             }
         }

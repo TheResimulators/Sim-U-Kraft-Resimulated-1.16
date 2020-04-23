@@ -150,4 +150,8 @@ public class JobMiner implements IJob {
     public int getProgress() {
         return progress;
     }
+
+    public void addProgress(){
+        progress++;
+    }
 }

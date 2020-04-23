@@ -12,6 +12,9 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.text.ITargetedTextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextComponentUtils;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.IWorldReader;
@@ -47,6 +50,7 @@ public class BlockMarker extends BlockBase {
     public ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult p_225533_6_) {
 
         ((TileMarker)worldIn.getTileEntity(pos)).onRightClick(player.getAdjustedHorizontalFacing());
+        player.sendStatusMessage(new StringTextComponent(String.format("Right Clicked Marker Scanned Markers Back Left: %s, Front Right: %s, Back Right: %s ", ((TileMarker)worldIn.getTileEntity(pos)).getBackLeft(), ((TileMarker)worldIn.getTileEntity(pos)).getFrontRight(), ((TileMarker)worldIn.getTileEntity(pos)).getBackRight() )),true);
         return ActionResultType.SUCCESS;
     }
 
