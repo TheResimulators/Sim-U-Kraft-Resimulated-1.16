@@ -17,6 +17,7 @@ import net.minecraft.item.ToolItem;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
@@ -26,6 +27,7 @@ import net.minecraft.world.storage.loot.LootParameters;
 import net.minecraft.world.storage.loot.LootTable;
 import sun.security.ssl.Debug;
 
+import java.util.EnumSet;
 import java.util.List;
 
 public class MinerGoal extends Goal {
@@ -47,6 +49,7 @@ public class MinerGoal extends Goal {
     public MinerGoal(EntitySim sim) {
         job = sim.getJob();
         this.sim = sim;
+        this.setMutexFlags(EnumSet.of(Flag.JUMP, Flag.MOVE));
     }
 
     @Override
@@ -96,9 +99,7 @@ public class MinerGoal extends Goal {
 
             }
         }
-        int column = 0;
-        int row = 0;
-        int layer = 0;
+
         System.out.println("blockadde");
         System.out.println("blockadde");
         System.out.println("blockadde");
@@ -166,9 +167,11 @@ public class MinerGoal extends Goal {
             minepos = minepos.offset(Direction.DOWN,layer);
 
             World world = sim.getEntityWorld();
-            SimuKraft.LOGGER().debug(minepos.toString());
+            SimuKraft.LOGGER().debug(sim.getNavigator().getPath());
             sim.getNavigator().tryMoveToXYZ(minepos.getX(),minepos.getY()+1,minepos.getZ(),sim.getAIMoveSpeed());
             if (sim.getPosition().withinDistance(new Vec3i(minepos.getX(),minepos.getY(),minepos.getZ()), 10)){
+                sim.getLookController().setLookPosition(new Vec3d(minepos));
+
             Block block = sim.getEntityWorld().getBlockState(minepos).getBlock();
             if (block == Blocks.AIR){
                 sim.world.setBlockState(minepos,Blocks.COBBLESTONE.getDefaultState(),2);
@@ -179,7 +182,7 @@ public class MinerGoal extends Goal {
                 sim.getJob().setState(EnumJobState.FORCE_STOP);
                 return;
             }
-            sim.world.setBlockState(minepos.add(0,5,0),Blocks.COBBLESTONE.getDefaultState(),2);
+            //sim.world.setBlockState(minepos.add(0,5,0),Blocks.COBBLESTONE.getDefaultState(),2);
             LootContext.Builder builder = new LootContext.Builder((ServerWorld) sim.getEntityWorld())
                     .withRandom(world.rand)
                     .withParameter(LootParameters.POSITION, minepos)
@@ -191,8 +194,8 @@ public class MinerGoal extends Goal {
             }
         ((JobMiner) sim.getJob()).addProgress();
                 column++;}
-            sim.getNavigator().tryMoveToXYZ(minepos.getX(),minepos.getY()+1,minepos.getZ(),sim.getAIMoveSpeed());
-        delay = 5;
+           // sim.getNavigator().tryMoveToXYZ(minepos.getX(),minepos.getY()+1,minepos.getZ(),sim.getAIMoveSpeed());
+        delay = 10;
 
         }else{
             delay--;
@@ -206,6 +209,7 @@ public class MinerGoal extends Goal {
         if (sim.getJob() != null) {
             if (sim.getJob().getState() == EnumJobState.FORCE_STOP) {
                 ((JobMiner) job).setProgress(progress);
+                sim.getJob().finishedWorkPeriod();
                 return false;
             }
             if (tick < sim.getJob().workTime()) {
@@ -216,7 +220,7 @@ public class MinerGoal extends Goal {
             }
         }
         ((JobMiner) job).setProgress(progress);
-        return false;
+        return shouldExecute();
     }
 
 }

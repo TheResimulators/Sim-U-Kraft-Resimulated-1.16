@@ -72,7 +72,7 @@ public class JobMiner implements IJob {
 
     @Override
     public void addJobAi() {
-        sim.goalSelector.addGoal(4, goal1);
+        sim.goalSelector.addGoal(0, goal1);
     }
 
     @Override
