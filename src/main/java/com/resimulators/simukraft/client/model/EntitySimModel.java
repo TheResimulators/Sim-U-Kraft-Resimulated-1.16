@@ -1,5 +1,6 @@
 package com.resimulators.simukraft.client.model;
 
+import com.mojang.blaze3d.vertex.IVertexBuilder;
 import com.resimulators.simukraft.common.entity.sim.EntitySim;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
@@ -71,8 +72,8 @@ public class EntitySimModel extends BipedModel<EntitySim> {
     }
 
     @Override
-    protected Iterable<ModelRenderer> func_225600_b_() {
-        return Iterables.concat(super.func_225600_b_(), ImmutableList.of(this.bipedLeftLegwear, this.bipedRightLegwear, this.bipedLeftArmwear, this.bipedRightArmwear, this.bipedBodyWear));
+    protected Iterable<ModelRenderer> getBodyParts() {
+        return Iterables.concat(super.getBodyParts(), ImmutableList.of(this.bipedLeftLegwear, this.bipedRightLegwear, this.bipedLeftArmwear, this.bipedRightArmwear, this.bipedBodyWear));
     }
 
     private void copyModelAnglesWithoutPoints(ModelRenderer source, ModelRenderer dest) {
@@ -82,8 +83,8 @@ public class EntitySimModel extends BipedModel<EntitySim> {
     }
 
     @Override
-    public void render(EntitySim entitySim, float v, float v1, float v2, float v3, float v4) {
-        super.render(entitySim, v, v1, v2, v3, v4);
+    public void render(MatrixStack matrixStackIn, IVertexBuilder bufferIn, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float alpha) {
+        super.render(matrixStackIn, bufferIn,  packedLightIn, packedOverlayIn,  red, green,  blue,  alpha);
 
         this.bipedLeftLegwear.copyModelAngles(this.bipedLeftLeg);
         this.bipedRightLegwear.copyModelAngles(this.bipedRightLeg);
@@ -91,6 +92,7 @@ public class EntitySimModel extends BipedModel<EntitySim> {
         this.bipedRightArmwear.copyModelAngles(this.bipedRightArm);
         this.bipedBodyWear.copyModelAngles(this.bipedBody);
     }
+
 
     public void setVisible(boolean visible, boolean female) {
         setVisible(visible);
@@ -121,15 +123,15 @@ public class EntitySimModel extends BipedModel<EntitySim> {
     }
 
     @Override
-    public void func_225599_a_(HandSide side, MatrixStack matrix) {
+    public void translateHand(HandSide side, MatrixStack matrix) {
         ModelRenderer modelrenderer = this.getArmForSide(side);
         if (this.smallArms) {
             float f = 0.5F * (float) (side == HandSide.RIGHT ? 1 : -1);
             modelrenderer.rotationPointX += f;
-            modelrenderer.setAnglesAndRotation(matrix);
+            modelrenderer.translateRotate(matrix);
             modelrenderer.rotationPointX -= f;
         } else {
-          modelrenderer.setAnglesAndRotation(matrix);
+          modelrenderer.translateRotate(matrix);
         }
     }
 

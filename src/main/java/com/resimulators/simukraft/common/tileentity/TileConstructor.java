@@ -46,6 +46,7 @@ public class TileConstructor extends TileEntity implements ITile {
     @Override
     public void setHired(boolean hired) {
         this.hired = hired;
+        markDirty();
     }
 
     @Override
@@ -61,6 +62,7 @@ public class TileConstructor extends TileEntity implements ITile {
     @Override
     public void setSimId(UUID id) {
         this.simID = id;
+        markDirty();
     }
 
 }

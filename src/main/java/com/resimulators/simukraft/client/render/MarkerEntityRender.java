@@ -27,7 +27,7 @@ public class MarkerEntityRender extends TileEntityRenderer<TileMarker> {
 
     @Override
     public void render(TileMarker marker, float p_225616_2_, MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay) {
-        TextureAtlasSprite sprite = Minecraft.getInstance().getTextureGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(new ResourceLocation("minecraft","oak_log"));
+        TextureAtlasSprite sprite = Minecraft.getInstance().getAtlasSpriteGetter(AtlasTexture.LOCATION_BLOCKS_TEXTURE).apply(new ResourceLocation("minecraft","oak_log"));
         if (marker.getCorner() == TileMarker.Corner.ORIGIN){
         if (marker.getOrigin() != null && marker.getBackLeft() != null){
             if (marker.getOrigin().getZ() == marker.getBackLeft().getZ()) {
@@ -40,7 +40,7 @@ public class MarkerEntityRender extends TileEntityRenderer<TileMarker> {
                 float dx2 = (marker.getBackLeft().getX() + xoffset - width / 2);
                 float dy2 = (marker.getBackLeft().getY() + (yoffset - 2 / 16));
                 float dz2 = (marker.getBackLeft().getZ() + (zoffset + depth / 2));
-                IVertexBuilder builder = buffer.getBuffer(RenderType.solid());
+                IVertexBuilder builder = buffer.getBuffer(RenderType.getSolid());
                 matrixStack.translate(dx1,dy1,dz1);
                 add(builder, matrixStack, dx1, dy1, dz1, sprite.getMinU(), sprite.getMinV());
                 add(builder, matrixStack, dx1, dy1 - 2 / 16, dz1, sprite.getMinU(), sprite.getMinV());
@@ -58,11 +58,11 @@ public class MarkerEntityRender extends TileEntityRenderer<TileMarker> {
     }
 }
     private void add(IVertexBuilder renderer, MatrixStack stack, float x, float y, float z, float u, float v) {
-        renderer.pos(stack.getLast().getPositionMatrix(), x, y, z)
+        renderer.pos(stack.getLast().getMatrix(), x, y, z)
                 .color(1.0f, 1.0f, 1.0f, 1.0f)
                 .tex(u, v)
                 .lightmap(0, 240)
-                .func_225584_a_(1, 0, 0)
+                .normal(1, 0, 0)
                 .endVertex();
     }
 

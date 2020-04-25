@@ -1,9 +1,8 @@
 package com.resimulators.simukraft.common.entity.goals;
 
-import com.resimulators.simukraft.common.entity.sim.EntitySim;
 import com.resimulators.simukraft.common.jobs.core.EnumJobState;
+import com.resimulators.simukraft.common.entity.sim.EntitySim;
 import com.resimulators.simukraft.common.jobs.core.IJob;
-import net.minecraft.entity.ai.goal.BreakBlockGoal;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.util.math.Vec3i;
 
@@ -35,7 +34,7 @@ public class BuilderGoal extends Goal {
     public void startExecuting(){
     //done the condition checking for it starting just need the rest done
     //TODO the Builder AI
-
+    //FABBE50
 
     }
 

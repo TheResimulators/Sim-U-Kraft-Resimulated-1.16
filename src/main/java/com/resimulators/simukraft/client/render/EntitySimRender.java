@@ -1,9 +1,9 @@
 package com.resimulators.simukraft.client.render;
 
+import com.resimulators.simukraft.client.model.EntitySimModel;
 import com.resimulators.simukraft.Configs;
 import com.resimulators.simukraft.Reference;
 import com.resimulators.simukraft.client.data.SkinCacher;
-import com.resimulators.simukraft.client.model.EntitySimModel;
 import com.resimulators.simukraft.common.entity.sim.EntitySim;
 import com.resimulators.simukraft.utils.ColorHelper;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -104,14 +104,14 @@ public class EntitySimRender extends LivingRenderer<EntitySim, EntitySimModel> {
     }
 
     @Override
-    protected void func_225629_a_(EntitySim entitySim, String text, MatrixStack matrix, IRenderTypeBuffer renderBuffer, int light) {
-        double d = this.renderManager.func_229099_b_(entitySim);
+    protected void renderName(EntitySim entitySim, String text, MatrixStack matrix, IRenderTypeBuffer renderBuffer, int light) {
+        double d = this.renderManager.squareDistanceTo(entitySim);
         matrix.push();
         if (d < 100.0d && !entitySim.getStatus().equals("")) {
-            super.func_225629_a_(entitySim, entitySim.getStatus(), matrix, renderBuffer, light);
+            super.renderName(entitySim, entitySim.getStatus(), matrix, renderBuffer, light);
             matrix.translate(0, (double) (9.0F * 1.15F * 0.025F), 0);
         }
-        super.func_225629_a_(entitySim, (Configs.SIMS.coloredNames.get() ? TextFormatting.fromColorIndex(ColorHelper.convertDyeToTF(entitySim.getNameColor())) : TextFormatting.WHITE) + text + TextFormatting.RESET, matrix, renderBuffer, light);
+        super.renderName(entitySim, (Configs.SIMS.coloredNames.get() ? TextFormatting.fromColorIndex(ColorHelper.convertDyeToTF(entitySim.getNameColor())) : TextFormatting.WHITE) + text + TextFormatting.RESET, matrix, renderBuffer, light);
 
         matrix.pop();
     }

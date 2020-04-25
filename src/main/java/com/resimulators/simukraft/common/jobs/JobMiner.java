@@ -30,7 +30,7 @@ public class JobMiner implements IJob {
 
     @Override
     public String name() {
-        return "Builder";
+        return "miner";
     }
 
     @Override
@@ -72,7 +72,7 @@ public class JobMiner implements IJob {
 
     @Override
     public void addJobAi() {
-        sim.goalSelector.addGoal(4, goal1);
+        sim.goalSelector.addGoal(0, goal1);
     }
 
     @Override
@@ -90,7 +90,10 @@ public class JobMiner implements IJob {
         nbt.add(ints);
         CompoundNBT other = new CompoundNBT(); // other info that is unique to the miner
         other.putInt("progress",progress);
+        if (workSpace != null){
+        other.putLong("jobpos",workSpace.toLong());}
         nbt.add(other);
+
         return nbt;
     }
 
@@ -101,13 +104,19 @@ public class JobMiner implements IJob {
             if (list.contains("periodsworked")) {
                 periodsworked = list.getInt("periodsworked");
             }
-            if (list.contains("other")){
+
+            if (list.contains("progress"))
+            {
                 setProgress(list.getInt("progress"));
-            }else{
+            }
+            else {
                 setProgress(0);
             }
+            if (list.contains("jobpos")){
+                setWorkSpace(BlockPos.fromLong(list.getLong("jobpos")));}
+
+            }
         }
-    }
 
     @Override
     public void finishedWorkPeriod() {
@@ -140,5 +149,9 @@ public class JobMiner implements IJob {
 
     public int getProgress() {
         return progress;
+    }
+
+    public void addProgress(){
+        progress++;
     }
 }

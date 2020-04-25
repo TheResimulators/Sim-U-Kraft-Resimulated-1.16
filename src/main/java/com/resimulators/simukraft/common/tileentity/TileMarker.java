@@ -2,7 +2,6 @@ package com.resimulators.simukraft.common.tileentity;
 
 import com.resimulators.simukraft.init.ModTileEntities;
 
-import net.minecraft.block.Blocks;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SUpdateTileEntityPacket;
@@ -36,6 +35,7 @@ public class TileMarker extends TileEntity {
 
     @Override
     public void read(CompoundNBT nbt) {
+        super.read(nbt);
         if (nbt.contains("origin")) origin = BlockPos.fromLong(nbt.getLong("origin"));
         if (nbt.contains("backleft")) backLeft = BlockPos.fromLong(nbt.getLong("backleft"));
         if (nbt.contains("frontright")) frontRight = BlockPos.fromLong(nbt.getLong("frontright"));
@@ -54,7 +54,7 @@ public class TileMarker extends TileEntity {
         nbt.putBoolean("used",used);
         nbt.putInt("range",range);
         if (corner != null) nbt.putInt("corner",Corner.toNbt(corner));
-        return nbt;
+        return super.write(nbt);
     }
 
 
@@ -93,7 +93,6 @@ public class TileMarker extends TileEntity {
                 setBackLeft(pos);
                 marker.setOrigin(this.pos);
                 marker.setCorner(Corner.BACKLEFT);
-                world.setBlockState(backLeft.add(0,2,0), Blocks.COBBLESTONE.getDefaultState() );
                 x = i;
                 break;
             }
@@ -108,20 +107,16 @@ public class TileMarker extends TileEntity {
                 setFrontRight(pos);
                 marker.setOrigin(this.pos);
                 marker.setCorner(Corner.FRONTRIGHT);
-                world.setBlockState(frontRight.add(0,2,0), Blocks.COBBLESTONE.getDefaultState() );
+
                 z = i;
                 break;
                 }
             }
         if (x != 0 && z != 0) {backRight = this.pos.add(x,0,z);
-        world.setBlockState(backRight,Blocks.OAK_PLANKS.getDefaultState());}
-        markDirty();
-        for (int xpos= 1;xpos<x;xpos++){
-            for (int zpos = 1;zpos<z;zpos++){
-                world.setBlockState(this.pos.offset(dir,xpos).offset(dir.rotateY(),zpos),Blocks.COBBLESTONE.getDefaultState());
-            }
 
         }
+        markDirty();
+
 
         }if (backLeft != null){
         if (world.getTileEntity(backLeft) != null){

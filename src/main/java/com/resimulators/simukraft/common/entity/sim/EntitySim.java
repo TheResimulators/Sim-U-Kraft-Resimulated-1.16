@@ -1,14 +1,15 @@
 package com.resimulators.simukraft.common.entity.sim;
 
-import com.resimulators.simukraft.Configs;
+import com.resimulators.simukraft.common.entity.goals.GoToWorkGoal;
 import com.resimulators.simukraft.common.jobs.core.IJob;
+import com.resimulators.simukraft.common.tileentity.ITile;
 import com.resimulators.simukraft.common.world.Faction;
 import com.resimulators.simukraft.common.world.SavedWorldData;
+import com.resimulators.simukraft.handlers.FoodStats;
+import com.resimulators.simukraft.Configs;
 import com.resimulators.simukraft.utils.Utils;
 import com.resimulators.simukraft.common.entity.goals.PickupItemGoal;
 import com.resimulators.simukraft.common.entity.goals.TalkingToPlayerGoal;
-import com.resimulators.simukraft.common.tileentity.ITile;
-import com.resimulators.simukraft.handlers.FoodStats;
 import com.resimulators.simukraft.init.ModEntities;
 import com.resimulators.simukraft.init.ModJobs;
 import com.google.common.collect.ImmutableMap;
@@ -21,6 +22,7 @@ import net.minecraft.entity.player.PlayerModelPart;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.*;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
@@ -126,6 +128,8 @@ public class EntitySim extends AgeableEntity implements INPC {
         this.goalSelector.addGoal(11, new WaterAvoidingRandomWalkingGoal(this, 0.6d));
         this.goalSelector.addGoal(12, new LookAtGoal(this, PlayerEntity.class, 8f));
         this.goalSelector.addGoal(13, new LookRandomlyGoal(this));
+        //Job Important Goals
+        this.goalSelector.addGoal(14, new GoToWorkGoal(this));
     }
 
     @Override
@@ -174,6 +178,7 @@ public class EntitySim extends AgeableEntity implements INPC {
         if (controller != null) {
             compound.put("working controller", controller.serializeNBT());
         }
+        compound.putUniqueId("uuid",getUniqueID());
     }
 
     @Override
@@ -198,16 +203,22 @@ public class EntitySim extends AgeableEntity implements INPC {
         if (compound.contains("Status"))
             this.setStatus(compound.getString("Status"));
         this.foodStats.read(compound);
-        String jobType = compound.getList("job", Constants.NBT.TAG_LIST).getCompound(0).getString("jobname");
+        CompoundNBT nbt = compound.getList("job", Constants.NBT.TAG_LIST).getCompound(0);
+        INBT nbts = compound.get("job");
+        String jobType = ((ListNBT)nbts).getCompound(0).getString("jobname");
         if (!jobType.equals("")){
         job = ModJobs.JOB_LOOKUP.get(jobType).apply(this);
         }
 
-        if (compound.contains("job"))
-            this.job.readFromNbt(compound.getList("job", Constants.NBT.TAG_LIST));
+        if (compound.contains("job") && !jobType.equals("")){
+            this.job.readFromNbt((ListNBT) compound.get("job"));
+        }
         controller = new WorkingController(this);
         if (compound.contains("working controller")) {
             controller.deserializeNBT(compound.getCompound("working controller"));
+        }
+        if (compound.hasUniqueId("uuid")){
+            this.entityUniqueID = compound.getUniqueId("uuid");
         }
     }
 
@@ -299,7 +310,7 @@ public class EntitySim extends AgeableEntity implements INPC {
     @Nullable
     public void dropItem(ItemStack droppedItem, boolean dropAround, boolean traceItem) {
         if (!droppedItem.isEmpty()) {
-            double d0 = this.func_226280_cw_() - (double) 0.3F;
+            double d0 = this.getPosYEye() - (double) 0.3F;
             ItemEntity itementity = new ItemEntity(this.world, this.getPosX(), d0, this.getPosZ(), droppedItem);
             itementity.setPickupDelay(40);
             if (traceItem) {
@@ -511,9 +522,11 @@ public class EntitySim extends AgeableEntity implements INPC {
         for (Faction faction : factions) {
             if (faction.getSims().containsKey(this.entityUniqueID)) {
                 sWorld.removeSimFromFaction(faction.getId(), this);
+                if (job != null){
                 if (job.getWorkSpace() != null) { //only temporary until we get the job system done
                     ((ITile) world.getTileEntity(job.getWorkSpace())).setSimId(null);
                     ((ITile) world.getTileEntity(job.getWorkSpace())).setHired(false);
+                    }
                 }
             }
         }

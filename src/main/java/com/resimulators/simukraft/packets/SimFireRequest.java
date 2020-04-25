@@ -4,7 +4,9 @@ import com.resimulators.simukraft.common.entity.sim.EntitySim;
 import com.resimulators.simukraft.common.world.SavedWorldData;
 import com.resimulators.simukraft.common.tileentity.ITile;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.fml.LogicalSide;
@@ -60,8 +62,11 @@ public class SimFireRequest implements IMessage {
             ((ITile) player.world.getTileEntity(pos)).setSimId(null);
             EntitySim sim = (EntitySim) ((ServerWorld)player.world).getEntityByUuid(simId);
             int simid =sim.getEntityId();
+            if (sim.getJob() != null){
             sim.getJob().removeJobAi();
             sim.setJob(null);
+            sim.setHeldItem(Hand.MAIN_HAND, ItemStack.EMPTY);
+            }
 
 
             data.getFaction(id).sendPacketToFaction(new SimFirePacket(id, simid, pos));

@@ -1,7 +1,7 @@
 package com.resimulators.simukraft.common.entity.sim;
 
-import com.resimulators.simukraft.Configs;
 import com.resimulators.simukraft.client.gui.GuiSimInventory;
+import com.resimulators.simukraft.Configs;
 import com.resimulators.simukraft.utils.ColorHelper;
 import com.resimulators.simukraft.utils.Icons;
 import com.resimulators.simukraft.utils.RayTraceHelper;
