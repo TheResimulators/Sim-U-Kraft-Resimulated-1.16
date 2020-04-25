@@ -10,6 +10,7 @@ import com.resimulators.simukraft.common.entity.sim.SimInformationOverlay;
 import com.resimulators.simukraft.common.entity.sim.EntitySim;
 import com.resimulators.simukraft.common.events.world.MarkerBrokenEvent;
 import com.resimulators.simukraft.common.events.world.NewDayEvent;
+import com.resimulators.simukraft.handlers.StructureHandler;
 import com.resimulators.simukraft.init.*;
 import com.resimulators.simukraft.init.ModBlocks;
 import com.resimulators.simukraft.init.ModEntities;
@@ -40,6 +41,8 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.IForgeRegistry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.io.File;
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(Reference.MODID)
@@ -112,7 +115,7 @@ public class SimuKraft {
     // You can use SubscribeEvent and let the Event Bus discover methods to call
     @SubscribeEvent
     public void onServerStarting(FMLServerStartingEvent event) {
-        // do something when the server starts
+        StructureHandler.createTemplateManager(event.getServer(), event.getServer().getDataDirectory());
     }
 
 
