@@ -10,6 +10,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.data.LootTableProvider;
 import net.minecraft.entity.ai.goal.Goal;
+import net.minecraft.entity.ai.goal.MoveToBlockGoal;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -19,6 +20,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
+import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.loot.LootContext;
@@ -30,7 +32,7 @@ import sun.security.ssl.Debug;
 import java.util.EnumSet;
 import java.util.List;
 
-public class MinerGoal extends Goal {
+public class MinerGoal extends MoveToBlockGoal {
     private EntitySim sim;
     private int tick;
     private IJob job;
@@ -47,14 +49,15 @@ public class MinerGoal extends Goal {
     private int row = 0;
     private int layer = 0;
     public MinerGoal(EntitySim sim) {
+        super(sim,sim.getAIMoveSpeed()*2,20);
         job = sim.getJob();
         this.sim = sim;
-        this.setMutexFlags(EnumSet.of(Flag.JUMP, Flag.MOVE));
+
     }
 
     @Override
     public boolean shouldExecute() {
-
+        super.shouldExecute();
         job = sim.getJob();
         if (job == null) return false;
         if (job.getWorkSpace() == null) return false;
@@ -81,6 +84,7 @@ public class MinerGoal extends Goal {
 
     @Override
     public void startExecuting() {
+        super.startExecuting();
         TileMiner miner = ((TileMiner) sim.world.getTileEntity(job.getWorkSpace()));
         progress = ((JobMiner) sim.getJob()).getProgress();
         markerPos = miner.getMarker();
@@ -136,6 +140,7 @@ public class MinerGoal extends Goal {
 
     @Override
     public void tick() {
+        super.tick();
         if (delay <= 0) {
 
             progress = ((JobMiner) sim.getJob()).getProgress();
@@ -168,8 +173,9 @@ public class MinerGoal extends Goal {
 
             World world = sim.getEntityWorld();
             SimuKraft.LOGGER().debug(sim.getNavigator().getPath());
-            sim.getNavigator().tryMoveToXYZ(minepos.getX(),minepos.getY()+1,minepos.getZ(),sim.getAIMoveSpeed());
-            if (sim.getPosition().withinDistance(new Vec3i(minepos.getX(),minepos.getY(),minepos.getZ()), 10)){
+
+           shouldMoveTo(sim.world,minepos);
+            if (!shouldMoveTo(sim.world,minepos)){
                 sim.getLookController().setLookPosition(new Vec3d(minepos));
 
             Block block = sim.getEntityWorld().getBlockState(minepos).getBlock();
@@ -195,12 +201,19 @@ public class MinerGoal extends Goal {
         ((JobMiner) sim.getJob()).addProgress();
                 column++;}
            // sim.getNavigator().tryMoveToXYZ(minepos.getX(),minepos.getY()+1,minepos.getZ(),sim.getAIMoveSpeed());
-        delay = 10;
+        delay = 5;
 
         }else{
             delay--;
         }
         tick++;
+    }
+
+    @Override
+    protected boolean shouldMoveTo(IWorldReader worldIn, BlockPos minepos) {
+        this.destinationBlock = minepos;
+        //sim.getNavigator().tryMoveToXYZ(minepos.getX(),minepos.getY()+1,minepos.getZ(),sim.getAIMoveSpeed());
+        return !sim.getPosition().withinDistance(new Vec3i(minepos.getX(),minepos.getY(),minepos.getZ()), 5);
     }
 
 
@@ -221,6 +234,11 @@ public class MinerGoal extends Goal {
         }
         ((JobMiner) job).setProgress(progress);
         return shouldExecute();
+    }
+
+    @Override
+    public double getTargetDistanceSq() {
+        return 5.0d;
     }
 
 }
