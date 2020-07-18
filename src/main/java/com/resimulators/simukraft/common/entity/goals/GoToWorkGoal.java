@@ -1,6 +1,6 @@
 package com.resimulators.simukraft.common.entity.goals;
 
-import com.resimulators.simukraft.common.entity.sim.EntitySim;
+import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.jobs.core.EnumJobState;
 import com.resimulators.simukraft.common.jobs.core.IJob;
 import net.minecraft.entity.ai.goal.Goal;
@@ -8,10 +8,10 @@ import net.minecraft.util.math.BlockPos;
 
 public class GoToWorkGoal extends Goal {
 
-    EntitySim sim;
+    SimEntity sim;
      IJob job;
 
-    public GoToWorkGoal(EntitySim sim){
+    public GoToWorkGoal(SimEntity sim){
         this.sim = sim;
 
     }

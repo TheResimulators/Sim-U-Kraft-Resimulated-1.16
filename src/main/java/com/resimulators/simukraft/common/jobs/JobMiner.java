@@ -4,14 +4,14 @@ package com.resimulators.simukraft.common.jobs;
 import com.resimulators.simukraft.common.entity.goals.MinerGoal;
 import com.resimulators.simukraft.common.jobs.core.EnumJobState;
 import com.resimulators.simukraft.common.jobs.core.IJob;
-import com.resimulators.simukraft.common.entity.sim.EntitySim;
+import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.math.BlockPos;
 
 public class JobMiner implements IJob {
-    private EntitySim sim;
+    private SimEntity sim;
     private Goal goal1;
     private int periodsworked = 0;
     private BlockPos workSpace;
@@ -20,7 +20,7 @@ public class JobMiner implements IJob {
 
     //specific to the miner
     private int progress;
-    public JobMiner(EntitySim sim) {
+    public JobMiner(SimEntity sim) {
         this.sim = sim;
         goal1 =  new MinerGoal(sim);
         addJobAi();

@@ -1,37 +1,30 @@
 package com.resimulators.simukraft.common.entity.goals;
 
 import com.resimulators.simukraft.SimuKraft;
-import com.resimulators.simukraft.common.entity.sim.EntitySim;
+import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.jobs.JobMiner;
 import com.resimulators.simukraft.common.jobs.core.EnumJobState;
 import com.resimulators.simukraft.common.jobs.core.IJob;
 import com.resimulators.simukraft.common.tileentity.TileMiner;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
-import net.minecraft.data.LootTableProvider;
 import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.item.ToolItem;
+import net.minecraft.loot.LootContext;
+import net.minecraft.loot.LootParameters;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.storage.loot.LootContext;
-import net.minecraft.world.storage.loot.LootParameterSet;
-import net.minecraft.world.storage.loot.LootParameters;
-import net.minecraft.world.storage.loot.LootTable;
-import sun.security.ssl.Debug;
 
 import java.util.EnumSet;
 import java.util.List;
 
 public class MinerGoal extends Goal {
-    private EntitySim sim;
+    private SimEntity sim;
     private int tick;
     private IJob job;
     private BlockPos markerPos;
@@ -46,7 +39,7 @@ public class MinerGoal extends Goal {
     private int column = 0;
     private int row = 0;
     private int layer = 0;
-    public MinerGoal(EntitySim sim) {
+    public MinerGoal(SimEntity sim) {
         job = sim.getJob();
         this.sim = sim;
         this.setMutexFlags(EnumSet.of(Flag.JUMP, Flag.MOVE));
@@ -65,7 +58,7 @@ public class MinerGoal extends Goal {
         if (sim.world.getTileEntity(job.getWorkSpace()) == null) return false;
         if (true) return true;
         if (job.getState() == EnumJobState.GOING_TO_WORK) {
-            if (sim.getPosition().withinDistance(new Vec3i(job.getWorkSpace().getX(), job.getWorkSpace().getY(), job.getWorkSpace().getZ()), 5)) {
+            if (sim.func_233580_cy_().withinDistance(new Vector3d(job.getWorkSpace().getX(), job.getWorkSpace().getY(), job.getWorkSpace().getZ()), 5)) {
                 job.setState(EnumJobState.WORKING);
                 return true;
             }else {
@@ -169,8 +162,8 @@ public class MinerGoal extends Goal {
             World world = sim.getEntityWorld();
             SimuKraft.LOGGER().debug(sim.getNavigator().getPath());
             sim.getNavigator().tryMoveToXYZ(minepos.getX(),minepos.getY()+1,minepos.getZ(),sim.getAIMoveSpeed());
-            if (sim.getPosition().withinDistance(new Vec3i(minepos.getX(),minepos.getY(),minepos.getZ()), 10)){
-                sim.getLookController().setLookPosition(new Vec3d(minepos));
+            if (sim.func_233580_cy_().withinDistance(new Vector3d(minepos.getX(),minepos.getY(),minepos.getZ()), 10)){
+                sim.getLookController().setLookPosition(new Vector3d(minepos.getX(), minepos.getY(), minepos.getZ()));
 
             Block block = sim.getEntityWorld().getBlockState(minepos).getBlock();
             if (block == Blocks.AIR){

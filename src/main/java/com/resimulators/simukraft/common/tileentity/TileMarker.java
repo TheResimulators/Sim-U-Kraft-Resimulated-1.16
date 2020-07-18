@@ -2,6 +2,7 @@ package com.resimulators.simukraft.common.tileentity;
 
 import com.resimulators.simukraft.init.ModTileEntities;
 
+import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SUpdateTileEntityPacket;
@@ -34,8 +35,8 @@ public class TileMarker extends TileEntity {
     }
 
     @Override
-    public void read(CompoundNBT nbt) {
-        super.read(nbt);
+    public void func_230337_a_(BlockState state, CompoundNBT nbt) {
+        super.func_230337_a_(state, nbt);
         if (nbt.contains("origin")) origin = BlockPos.fromLong(nbt.getLong("origin"));
         if (nbt.contains("backleft")) backLeft = BlockPos.fromLong(nbt.getLong("backleft"));
         if (nbt.contains("frontright")) frontRight = BlockPos.fromLong(nbt.getLong("frontright"));
@@ -245,21 +246,7 @@ public class TileMarker extends TileEntity {
         }
         }
         markDirty();
-
-
-
     }
-
-    @Override
-    public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
-        read(pkt.getNbtCompound());
-    }
-
-    @Override
-    public void handleUpdateTag(CompoundNBT tag) {
-            write(tag);
-    }
-
 
     public enum Corner {
         ORIGIN,

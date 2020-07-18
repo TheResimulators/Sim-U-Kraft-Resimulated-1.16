@@ -1,6 +1,7 @@
 package com.resimulators.simukraft.common.tileentity;
 
 import com.resimulators.simukraft.init.ModTileEntities;
+import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
@@ -16,14 +17,14 @@ public class TileMiner extends TileEntity implements ITile {
     private BlockPos marker;
 
     @Override
-    public void read(CompoundNBT compound) {
+    public void func_230337_a_(BlockState state, CompoundNBT compound) {
 
         dir = Direction.byIndex(compound.getInt("dir"));
         if (compound.contains("sim id")){
             simID = UUID.fromString(compound.getString("sim id"));
         }
         hired = compound.getBoolean("hired");
-        super.read(compound);
+        super.func_230337_a_(state, compound);
     }
 
     @Override
@@ -115,11 +116,6 @@ public class TileMiner extends TileEntity implements ITile {
     @Override
     public CompoundNBT getUpdateTag() {
         return write(new CompoundNBT());
-    }
-
-    @Override
-    public void handleUpdateTag(CompoundNBT nbt) {
-        read(nbt);
     }
 
     public boolean CheckValidity(){

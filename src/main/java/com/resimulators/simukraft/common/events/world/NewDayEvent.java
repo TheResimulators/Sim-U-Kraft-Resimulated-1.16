@@ -1,6 +1,6 @@
 package com.resimulators.simukraft.common.events.world;
 
-import com.resimulators.simukraft.common.entity.sim.EntitySim;
+import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.world.Faction;
 import com.resimulators.simukraft.common.world.SavedWorldData;
 import com.resimulators.simukraft.packets.UpdateSimPacket;
@@ -79,12 +79,12 @@ public class NewDayEvent implements INBTSerializable<CompoundNBT> {
         if (sWorld.getPlayers().size() == 0) return;
         for (Faction faction : factions) {
             if (faction.getUnemployedSims().isEmpty() || true) {
-                ArrayList<EntitySim> simsToSpawn = new ArrayList<>();
-                simsToSpawn.add(new EntitySim(ModEntities.ENTITY_SIM, world));
-                simsToSpawn.add(new EntitySim(ModEntities.ENTITY_SIM, world));
-                for (EntitySim sim : simsToSpawn) {
+                ArrayList<SimEntity> simsToSpawn = new ArrayList<>();
+                simsToSpawn.add(new SimEntity(ModEntities.ENTITY_SIM, world));
+                simsToSpawn.add(new SimEntity(ModEntities.ENTITY_SIM, world));
+                for (SimEntity sim : simsToSpawn) {
                     PlayerEntity player = sWorld.getPlayers().get(random.nextInt(sWorld.getPlayers().size()));
-                    ArrayList<BlockPos> blocks = BlockUtils.getBlocksAroundPosition(player.getPosition(), 10);
+                    ArrayList<BlockPos> blocks = BlockUtils.getBlocksAroundPosition(player.func_233580_cy_(), 10);
                     if (spawn(sWorld, sim, blocks)) {
                         worldData.addSimToFaction(faction.getId(), sim);
                         faction.sendPacketToFaction(new UpdateSimPacket(sim.getUniqueID(), faction.getSimInfo(sim.getUniqueID()), faction.getId()));
@@ -105,7 +105,7 @@ public class NewDayEvent implements INBTSerializable<CompoundNBT> {
      * @param blocksAroundPlayer The blocks around the player
      * @return Whether or not the sim spawned
      */
-    private boolean spawn(ServerWorld world, EntitySim sim, ArrayList<BlockPos> blocksAroundPlayer) {
+    private boolean spawn(ServerWorld world, SimEntity sim, ArrayList<BlockPos> blocksAroundPlayer) {
         // loop through provided blocks
         SimuKraft.LOGGER().debug(blocksAroundPlayer.size());
 
@@ -142,7 +142,7 @@ public class NewDayEvent implements INBTSerializable<CompoundNBT> {
      * @param startingPos The starting position
      * @return A valid position or null if none
      */
-    private BlockPos getSpawnPosition(World world, BlockPos startingPos, EntitySim sim) {
+    private BlockPos getSpawnPosition(World world, BlockPos startingPos, SimEntity sim) {
         BlockPos groundBlockPos = BlockUtils.getGroundBlock(world, startingPos);
         SimuKraft.LOGGER().debug("ground block pos: " + groundBlockPos);
         // If the ground block is not valid, can't use it

@@ -1,7 +1,8 @@
 package com.resimulators.simukraft.common.entity.sim;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
+import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.client.gui.GuiSimInventory;
-import com.resimulators.simukraft.Configs;
 import com.resimulators.simukraft.utils.ColorHelper;
 import com.resimulators.simukraft.utils.Icons;
 import com.resimulators.simukraft.utils.RayTraceHelper;
@@ -41,8 +42,8 @@ public class SimInformationOverlay {
         RayTraceHelper.INSTANCE.ray();
         if (RayTraceHelper.INSTANCE.getTarget() != null && (minecraft.currentScreen == null || minecraft.currentScreen instanceof ChatScreen || minecraft.currentScreen instanceof GuiSimInventory)) {
             Entity entity = RayTraceHelper.INSTANCE.getTargetEntity();
-            if (entity instanceof EntitySim) {
-                EntitySim sim = (EntitySim) entity;
+            if (entity instanceof SimEntity) {
+                SimEntity sim = (SimEntity) entity;
 
                 RenderSystem.pushMatrix();
                 saveGLState();
@@ -148,7 +149,7 @@ public class SimInformationOverlay {
                 loadGLState();
                 RenderSystem.enableDepthTest();
 
-                minecraft.fontRenderer.drawString((Configs.SIMS.coloredNames.get() ? TextFormatting.fromColorIndex(ColorHelper.convertDyeToTF(sim.getNameColor())) : TextFormatting.WHITE) + sim.getName().getFormattedText(), posX + 5, posY + 5, Color.WHITE.getRGB());
+                minecraft.fontRenderer.func_238421_b_(new MatrixStack(), (SimuKraft.config.getSims().coloredNames.get() ? TextFormatting.fromColorIndex(ColorHelper.convertDyeToTF(sim.getNameColor())) : TextFormatting.WHITE) + sim.getName().getString(), posX + 5, posY + 5, Color.WHITE.getRGB());
 
                 RenderSystem.popMatrix();
             }
@@ -253,7 +254,7 @@ public class SimInformationOverlay {
 
     public static void renderIcon(int x, int y, int sx, int sy, Icons icon) {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        Minecraft.getInstance().getTextureManager().bindTexture(AbstractGui.GUI_ICONS_LOCATION);
+        Minecraft.getInstance().getTextureManager().bindTexture(AbstractGui.field_230665_h_);
 
         if (icon == null)
             return;

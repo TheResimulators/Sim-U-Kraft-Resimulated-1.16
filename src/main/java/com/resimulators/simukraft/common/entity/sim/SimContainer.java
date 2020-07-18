@@ -1,6 +1,6 @@
 package com.resimulators.simukraft.common.entity.sim;
 
-import com.resimulators.simukraft.init.OHRegistry;
+import com.resimulators.simukraft.init.ModContainers;
 import com.resimulators.simukraft.utils.Utils;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -11,7 +11,11 @@ import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.IIntArray;
+import net.minecraft.util.IntReferenceHolder;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -25,13 +29,14 @@ public class SimContainer extends Container {
     private static final ResourceLocation[] ARMOR_SLOT_TEXTURES = new ResourceLocation[]{boots, leggings, chestplate, helmet};
     private static final EquipmentSlotType[] VALID_EQUIPMENT_SLOTS = new EquipmentSlotType[]{EquipmentSlotType.HEAD, EquipmentSlotType.CHEST, EquipmentSlotType.LEGS, EquipmentSlotType.FEET};
     public final boolean isLocalWorld;
-    private final EntitySim sim;
+    private final SimEntity sim;
     private final PlayerEntity player;
+    SimInventory inventory;
 
-    public SimContainer(int windowID, boolean localWorld, EntitySim sim, PlayerInventory playerInventory) {
-        super(OHRegistry.simContainer, windowID);
+    public SimContainer(int windowID, boolean localWorld, SimEntity sim, PlayerInventory playerInventory) {
+        super(ModContainers.SIM_CONTAINER.get(), windowID);
         this.isLocalWorld = localWorld;
-        SimInventory inventory = sim.getInventory();
+        inventory = sim.getInventory();
         this.sim = sim;
         this.player = playerInventory.player;
 
@@ -149,7 +154,7 @@ public class SimContainer extends Container {
         return itemstack;
     }
 
-    public EntitySim getSim() {
+    public SimEntity getSim() {
         return sim;
     }
 }

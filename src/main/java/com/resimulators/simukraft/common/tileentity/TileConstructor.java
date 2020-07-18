@@ -1,6 +1,7 @@
 package com.resimulators.simukraft.common.tileentity;
 
 import com.resimulators.simukraft.init.ModTileEntities;
+import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 
@@ -21,12 +22,6 @@ public class TileConstructor extends TileEntity implements ITile {
     }
 
     @Override
-    public void handleUpdateTag(CompoundNBT nbt) {
-        read(nbt);
-    }
-
-
-    @Override
     public CompoundNBT write(CompoundNBT nbt) {
         nbt.putBoolean("hired", hired);
         if (simID != null) {
@@ -36,7 +31,7 @@ public class TileConstructor extends TileEntity implements ITile {
     }
 
     @Override
-    public void read(CompoundNBT nbt) {
+    public void func_230337_a_(BlockState state, CompoundNBT nbt) {
         hired = nbt.getBoolean("hired");
         if (nbt.contains("simid")) {
             simID = nbt.getUniqueId("simid");

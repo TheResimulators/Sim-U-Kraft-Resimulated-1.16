@@ -1,7 +1,7 @@
 package com.resimulators.simukraft.packets;
 
 
-import com.resimulators.simukraft.common.entity.sim.EntitySim;
+import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.jobs.Profession;
 import com.resimulators.simukraft.common.tileentity.ITile;
 import com.resimulators.simukraft.common.world.SavedWorldData;
@@ -58,12 +58,12 @@ public class SimHireRequest implements IMessage {
             PlayerEntity player = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayerByUUID(playerId);
             SavedWorldData data = SavedWorldData.get(player.world);
             int id = data.getFactionWithPlayer(player.getUniqueID()).getId();
-            data.hireSim(id,(EntitySim) player.world.getEntityByID(simId));
+            data.hireSim(id,(SimEntity) player.world.getEntityByID(simId));
             ((ITile)player.world.getTileEntity(pos)).setHired(true);
-            EntitySim sim =  ((EntitySim) player.world.getEntityByID(simId));
+            SimEntity sim =  ((SimEntity) player.world.getEntityByID(simId));
             sim.setProfession(Profession.getIDFromName(job));
             ((ITile)player.world.getTileEntity(pos)).setSimId(sim.getUniqueID());
-            ((EntitySim) player.world.getEntityByID(simId)).setJob(ModJobs.JOB_LOOKUP.get(job).apply(sim));
+            ((SimEntity) player.world.getEntityByID(simId)).setJob(ModJobs.JOB_LOOKUP.get(job).apply(sim));
             sim.getJob().setWorkSpace(pos);
             data.getFaction(id).sendPacketToFaction(new SimHirePacket(simId,id,pos,job));
         }

@@ -1,6 +1,6 @@
 package com.resimulators.simukraft.packets;
 
-import com.resimulators.simukraft.common.entity.sim.EntitySim;
+import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.world.SavedWorldData;
 import com.resimulators.simukraft.init.ModJobs;
 import com.resimulators.simukraft.common.tileentity.ITile;
@@ -49,7 +49,7 @@ public class SimHirePacket implements IMessage{
 
     @Override
     public void onExecute(NetworkEvent.Context ctxIn, boolean isLogicalServer) {
-        EntitySim sim = (EntitySim) Minecraft.getInstance().world.getEntityByID(simId);
+        SimEntity sim = (SimEntity) Minecraft.getInstance().world.getEntityByID(simId);
         SavedWorldData.get(Minecraft.getInstance().player.world).getFaction(factionId).hireSim(sim.getUniqueID());
         ((ITile)Minecraft.getInstance().world.getTileEntity(pos)).setHired(true);
         ((ITile)Minecraft.getInstance().world.getTileEntity(pos)).setSimId(sim.getUniqueID());

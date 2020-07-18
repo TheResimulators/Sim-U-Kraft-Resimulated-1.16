@@ -5,10 +5,10 @@ import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.packets.*;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
-
+import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.dimension.DimensionType;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.network.NetworkEvent;
 import net.minecraftforge.fml.network.NetworkRegistry;
@@ -16,7 +16,7 @@ import net.minecraftforge.fml.network.PacketDistributor;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
 
 
-
+import java.util.Optional;
 import java.util.function.Supplier;
 
 public class SimUKraftPacketHandler {
@@ -30,7 +30,7 @@ public class SimUKraftPacketHandler {
     }
 
 
-    private static final String PROTOCOL_VERSION = "1";
+    public static final String PROTOCOL_VERSION = "1";
     public static final SimpleChannel INSTANCE = NetworkRegistry.newSimpleChannel(
             new ResourceLocation(Reference.MODID, "main"),
             () -> PROTOCOL_VERSION,
@@ -46,9 +46,8 @@ public class SimUKraftPacketHandler {
         registerMessage(newId(), SimHireRequest.class, SimHireRequest::new);
         registerMessage(newId(), SimHirePacket.class, SimHirePacket::new);
         registerMessage(newId(), UpdateSimPacket.class, UpdateSimPacket::new);
-        registerMessage(newId(),SimFireRequest.class,SimFireRequest::new);
-        registerMessage(newId(),SimFirePacket.class,SimFirePacket::new);
-
+        registerMessage(newId(), SimFireRequest.class, SimFireRequest::new);
+        registerMessage(newId(), SimFirePacket.class, SimFirePacket::new);
     }
 
     /**
@@ -125,9 +124,11 @@ public class SimUKraftPacketHandler {
      * @param msg message to send
      * @param dim target dimension
      */
-    public void sendToDimension(final IMessage msg, final DimensionType dim)
+    public void sendToDimension(final IMessage msg, final RegistryKey<World> dim)
     {
-        INSTANCE.send(PacketDistributor.DIMENSION.with(() -> dim), msg);
+        INSTANCE.send(PacketDistributor.DIMENSION.with(() -> {
+            return dim;
+        }), msg);
     }
 
     /**

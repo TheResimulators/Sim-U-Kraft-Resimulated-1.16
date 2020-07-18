@@ -1,11 +1,11 @@
 package com.resimulators.simukraft.common.block;
 
 import com.resimulators.simukraft.client.gui.GuiHandler;
+import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.handlers.SimUKraftPacketHandler;
 import com.resimulators.simukraft.packets.OpenJobGuiPacket;
 import com.resimulators.simukraft.packets.SimFirePacket;
 import com.resimulators.simukraft.SimuKraft;
-import com.resimulators.simukraft.common.entity.sim.EntitySim;
 import com.resimulators.simukraft.common.tileentity.ITile;
 import com.resimulators.simukraft.common.tileentity.TileMiner;
 import com.resimulators.simukraft.common.world.Faction;
@@ -71,7 +71,7 @@ public class BlockMineBox extends BlockBase {
 
             ITile tile = ((ITile) worldIn.getTileEntity(pos));
 
-            EntitySim sim =(EntitySim) ((ServerWorld)worldIn).getEntityByUuid(tile.getSimId());
+            SimEntity sim =(SimEntity) ((ServerWorld)worldIn).getEntityByUuid(tile.getSimId());
             if (sim != null){
                 int id = SavedWorldData.get(worldIn).getFactionWithPlayer(player.getUniqueID()).getId();
                 SavedWorldData.get(worldIn).fireSim(id,sim);

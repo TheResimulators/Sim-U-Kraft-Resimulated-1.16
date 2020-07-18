@@ -10,6 +10,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.template.PlacementSettings;
 import net.minecraft.world.gen.feature.template.Template;
 import net.minecraft.world.gen.feature.template.TemplateManager;
+import net.minecraft.world.storage.SaveFormat;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -18,8 +19,15 @@ import java.util.List;
 public class StructureHandler {
     private static TemplateManager templateManager;
 
-    public static void createTemplateManager(MinecraftServer server, File file) {
-        templateManager = new TemplateManager(server, file, server.getDataFixer());
+    public static void createTemplateManager(MinecraftServer server) {
+        try {
+            Field field = server.getClass().getDeclaredField("anvilConverterForAnvilFile");
+            field.setAccessible(true);
+            SaveFormat.LevelSave levelSave = (SaveFormat.LevelSave) field.get(server);
+            field.setAccessible(false);
+            templateManager = new TemplateManager(server.getDataPackRegistries().func_240970_h_(), levelSave, server.getDataFixer());
+        } catch (IllegalAccessException | NoSuchFieldException ignored) {}
+
     }
 
     public static TemplateManager getTemplateManager() {
@@ -45,14 +53,14 @@ public class StructureHandler {
             field.setAccessible(true);
             List<List<Template.BlockInfo>> blockInfos = (List<List<Template.BlockInfo>>)field.get(template);
             field.setAccessible(false);
-            return Template.processBlockInfos(template, world, pos, new PlacementSettings().setRotation(rotation).setMirror(mirror), blockInfos.get(0));
+            return Template.processBlockInfos(world, pos, pos, new PlacementSettings().setRotation(rotation).setMirror(mirror), blockInfos.get(0), template);
         } catch (NoSuchFieldException | IllegalAccessException e) {
             try {
                 Field field = template.getClass().getDeclaredField("field_199719_a"); //TODO (fabbe50): Check if this is the correct field name.
                 field.setAccessible(true);
                 List<List<Template.BlockInfo>> blockInfos = (List<List<Template.BlockInfo>>)field.get(template);
                 field.setAccessible(false);
-                return Template.processBlockInfos(template, world, pos, new PlacementSettings().setRotation(rotation).setMirror(mirror), blockInfos.get(0));
+                return Template.processBlockInfos(world, pos, pos, new PlacementSettings().setRotation(rotation).setMirror(mirror), blockInfos.get(0), template);
             } catch (NoSuchFieldException | IllegalAccessException e1) {
                 e1.printStackTrace();
             }

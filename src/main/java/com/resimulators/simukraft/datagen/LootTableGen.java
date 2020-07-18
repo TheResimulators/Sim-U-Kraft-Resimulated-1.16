@@ -11,7 +11,7 @@ import net.minecraft.data.LootTableProvider;
 import net.minecraft.data.loot.*;
 import net.minecraft.entity.EntityType;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.storage.loot.*;
+import net.minecraft.loot.*;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.List;

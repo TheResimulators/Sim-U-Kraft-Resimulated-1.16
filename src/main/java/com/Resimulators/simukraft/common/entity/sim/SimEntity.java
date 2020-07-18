@@ -1,20 +1,21 @@
 package com.resimulators.simukraft.common.entity.sim;
 
+import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.common.entity.goals.GoToWorkGoal;
 import com.resimulators.simukraft.common.jobs.core.IJob;
 import com.resimulators.simukraft.common.tileentity.ITile;
 import com.resimulators.simukraft.common.world.Faction;
 import com.resimulators.simukraft.common.world.SavedWorldData;
 import com.resimulators.simukraft.handlers.FoodStats;
-import com.resimulators.simukraft.Configs;
 import com.resimulators.simukraft.utils.Utils;
 import com.resimulators.simukraft.common.entity.goals.PickupItemGoal;
 import com.resimulators.simukraft.common.entity.goals.TalkingToPlayerGoal;
 import com.resimulators.simukraft.init.ModEntities;
-import com.resimulators.simukraft.init.ModJobs;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import net.minecraft.entity.*;
+import net.minecraft.entity.ai.attributes.AttributeModifierMap;
+import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -22,14 +23,13 @@ import net.minecraft.entity.player.PlayerModelPart;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.*;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
@@ -42,19 +42,19 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 
-public class EntitySim extends AgeableEntity implements INPC {
+public class SimEntity extends AgeableEntity implements INPC {
     private static final EntitySize SIZE = EntitySize.flexible(0.6f, 1.8f);
     private static final Map<Pose, EntitySize> SIZE_BY_POSE = ImmutableMap.<Pose, EntitySize>builder().put(Pose.STANDING, SIZE).put(Pose.SLEEPING, SLEEPING_SIZE).put(Pose.CROUCHING, EntitySize.flexible(0.6F, 1.5F)).put(Pose.DYING, EntitySize.fixed(0.2F, 0.2F)).build();
-    private static final DataParameter<Integer> VARIATION = EntityDataManager.createKey(EntitySim.class, DataSerializers.VARINT);
-    private static final DataParameter<Integer> PROFESSION = EntityDataManager.createKey(EntitySim.class, DataSerializers.VARINT);
-    private static final DataParameter<Boolean> FEMALE = EntityDataManager.createKey(EntitySim.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> SPECIAL = EntityDataManager.createKey(EntitySim.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Boolean> LEFTHANDED = EntityDataManager.createKey(EntitySim.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Byte> MODEL_FLAG = EntityDataManager.createKey(EntitySim.class, DataSerializers.BYTE);
-    private static final DataParameter<String> STATUS = EntityDataManager.createKey(EntitySim.class, DataSerializers.STRING);
-    private static final DataParameter<Integer> NAME_COLOR = EntityDataManager.createKey(EntitySim.class, DataSerializers.VARINT);
-    public static final DataParameter<Integer> FOOD_LEVEL = EntityDataManager.createKey(EntitySim.class, DataSerializers.VARINT);
-    public static final DataParameter<Float> FOOD_SATURATION_LEVEL = EntityDataManager.createKey(EntitySim.class, DataSerializers.FLOAT);
+    private static final DataParameter<Integer> VARIATION = EntityDataManager.createKey(SimEntity.class, DataSerializers.VARINT);
+    private static final DataParameter<Integer> PROFESSION = EntityDataManager.createKey(SimEntity.class, DataSerializers.VARINT);
+    private static final DataParameter<Boolean> FEMALE = EntityDataManager.createKey(SimEntity.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> SPECIAL = EntityDataManager.createKey(SimEntity.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> LEFTHANDED = EntityDataManager.createKey(SimEntity.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Byte> MODEL_FLAG = EntityDataManager.createKey(SimEntity.class, DataSerializers.BYTE);
+    private static final DataParameter<String> STATUS = EntityDataManager.createKey(SimEntity.class, DataSerializers.STRING);
+    private static final DataParameter<Integer> NAME_COLOR = EntityDataManager.createKey(SimEntity.class, DataSerializers.VARINT);
+    public static final DataParameter<Integer> FOOD_LEVEL = EntityDataManager.createKey(SimEntity.class, DataSerializers.VARINT);
+    public static final DataParameter<Float> FOOD_SATURATION_LEVEL = EntityDataManager.createKey(SimEntity.class, DataSerializers.FLOAT);
 
     private final SimInventory inventory;
     private PlayerEntity interactingPlayer;
@@ -64,8 +64,12 @@ public class EntitySim extends AgeableEntity implements INPC {
     private WorkingController controller = new WorkingController(this);
     private Random rand = new Random();
 
-    public EntitySim(EntityType<? extends AgeableEntity> type, World worldIn) {
-        super(ModEntities.ENTITY_SIM, worldIn);
+    public SimEntity(World worldIn) {
+        this(ModEntities.ENTITY_SIM, worldIn);
+    }
+
+    public SimEntity(EntityType<? extends SimEntity> type, World world) {
+        super(type, world);
         this.inventory = new SimInventory(this, "Sim Inventory", false, 27);
         this.foodStats = new FoodStats(this);
     }
@@ -88,7 +92,7 @@ public class EntitySim extends AgeableEntity implements INPC {
     @Override
     public ILivingEntityData onInitialSpawn(IWorld world, DifficultyInstance difficultyInstance, SpawnReason spawnReason, @Nullable ILivingEntityData livingEntityData, @Nullable CompoundNBT nbt) {
         ILivingEntityData livingData = super.onInitialSpawn(world, difficultyInstance, spawnReason, livingEntityData, nbt);
-        this.setSpecial(Utils.randomizeBooleanWithChance(Configs.SIMS.specialSpawnChance.get()));
+        this.setSpecial(Utils.randomizeBooleanWithChance(SimuKraft.config.getSims().specialSpawnChance.get()));
 
         //TODO: Add professions
         //this.setProfession(rand.nextInt(/*Amount of professions*/));
@@ -96,18 +100,18 @@ public class EntitySim extends AgeableEntity implements INPC {
         this.setLefthanded(Utils.randomizeBooleanWithChance(10));
 
         if (this.getSpecial()) {
-            String name = Configs.SIMS.specialSimNames.get().get(rand.nextInt(Configs.SIMS.specialSimNames.get().size()));
+            String name = SimuKraft.config.getSims().specialSimNames.get().get(rand.nextInt(SimuKraft.config.getSims().specialSimNames.get().size()));
             this.setCustomName(new StringTextComponent(name));
-            this.setFemale(Configs.SIMS.specialSimGenders.get().contains(name));
+            this.setFemale(SimuKraft.config.getSims().specialSimGenders.get().contains(name));
         } else {
             this.setFemale(Utils.randomizeBoolean());
             if (this.getFemale()) {
-                if (!Configs.NAMES.femaleNames.get().isEmpty())
-                    this.setCustomName(new StringTextComponent(Configs.NAMES.femaleNames.get().get(rand.nextInt(Configs.NAMES.femaleNames.get().size()))));
+                if (!SimuKraft.config.getNames().femaleNames.get().isEmpty())
+                    this.setCustomName(new StringTextComponent(SimuKraft.config.getNames().femaleNames.get().get(rand.nextInt(SimuKraft.config.getNames().femaleNames.get().size()))));
                 this.setVariation(rand.nextInt(13));
             } else {
-                if (!Configs.NAMES.maleNames.get().isEmpty())
-                    this.setCustomName(new StringTextComponent(Configs.NAMES.maleNames.get().get(rand.nextInt(Configs.NAMES.maleNames.get().size()))));
+                if (!SimuKraft.config.getNames().maleNames.get().isEmpty())
+                    this.setCustomName(new StringTextComponent(SimuKraft.config.getNames().maleNames.get().get(rand.nextInt(SimuKraft.config.getNames().maleNames.get().size()))));
                 this.setVariation(rand.nextInt(10));
             }
         }
@@ -132,19 +136,18 @@ public class EntitySim extends AgeableEntity implements INPC {
         this.goalSelector.addGoal(14, new GoToWorkGoal(this));
     }
 
-    @Override
-    protected void registerAttributes() {
-        super.registerAttributes();
-        this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.5D);
-        this.getAttributes().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(1);
+    public static AttributeModifierMap.MutableAttribute getAttributes() {
+        return MobEntity.func_233666_p_().func_233815_a_(Attributes.field_233821_d_, 0.5D) //Movement Speed
+                .func_233815_a_(Attributes.field_233818_a_, 20.0D) //Health
+                .func_233815_a_(Attributes.field_233823_f_, 1.0D); //Base Attack Damage
     }
 
     @Nullable
     @Override
     public AgeableEntity createChild(AgeableEntity ageable) {
-        EntitySim entitySim = new EntitySim(ModEntities.ENTITY_SIM, world);
-        entitySim.onInitialSpawn(this.world, this.world.getDifficultyForLocation(new BlockPos(entitySim)), SpawnReason.BREEDING, new AgeableData(), null);
-        return entitySim;
+        SimEntity simEntity = new SimEntity(world);
+        simEntity.onInitialSpawn(this.world, this.world.getDifficultyForLocation(simEntity.func_233580_cy_()), SpawnReason.BREEDING, new AgeableData(), null);
+        return simEntity;
     }
 
     //Logic
@@ -204,6 +207,7 @@ public class EntitySim extends AgeableEntity implements INPC {
             this.setStatus(compound.getString("Status"));
         this.foodStats.read(compound);
         CompoundNBT nbt = compound.getList("job", Constants.NBT.TAG_LIST).getCompound(0);
+        /* FIXME: This is causing Sims not to load on world load.
         INBT nbts = compound.get("job");
         String jobType = ((ListNBT)nbts).getCompound(0).getString("jobname");
         if (!jobType.equals("")){
@@ -212,7 +216,7 @@ public class EntitySim extends AgeableEntity implements INPC {
 
         if (compound.contains("job") && !jobType.equals("")){
             this.job.readFromNbt((ListNBT) compound.get("job"));
-        }
+        }*/
         controller = new WorkingController(this);
         if (compound.contains("working controller")) {
             controller.deserializeNBT(compound.getCompound("working controller"));
@@ -225,7 +229,7 @@ public class EntitySim extends AgeableEntity implements INPC {
 
     //Interaction
     @Override
-    public boolean processInteract(PlayerEntity player, Hand hand) {
+    public ActionResultType func_230254_b_(PlayerEntity player, Hand hand) {
         if (player.isCrouching()) {
             this.setInteractingPlayer(player);
             player.openContainer(inventory);
@@ -234,7 +238,7 @@ public class EntitySim extends AgeableEntity implements INPC {
         if (player.getHeldItem(hand).getItem() instanceof DyeItem) {
             this.setNameColor(((DyeItem) player.getHeldItem(hand).getItem()).getDyeColor().getId());
         }
-        return super.processInteract(player, hand);
+        return super.func_230254_b_(player, hand);
     }
 
     //Updates
@@ -576,7 +580,7 @@ public class EntitySim extends AgeableEntity implements INPC {
     @Override
     public void setCustomName(ITextComponent name) {
         super.setCustomName(name);
-        this.inventory.setCustomName(name.getFormattedText());
+        this.inventory.setCustomName(name.getString());
     }
 
     @OnlyIn(Dist.CLIENT)

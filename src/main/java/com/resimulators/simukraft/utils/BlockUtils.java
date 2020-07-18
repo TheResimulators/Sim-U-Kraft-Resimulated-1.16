@@ -1,7 +1,7 @@
 package com.resimulators.simukraft.utils;
 
 import com.resimulators.simukraft.SimuKraft;
-import com.resimulators.simukraft.common.entity.sim.EntitySim;
+import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -61,13 +61,13 @@ public class BlockUtils {
         return world.getBlockState(pos.down()).isSolid();
     }
 
-    public static boolean blocksAreValid(World world, ArrayList<BlockPos> blocksPos, EntitySim sim) {
+    public static boolean blocksAreValid(World world, ArrayList<BlockPos> blocksPos, SimEntity sim) {
         for (BlockPos blockPos : blocksPos)
             if (!BlockUtils.blockIsValid(world, blockPos, sim)) return false;
         return true;
     }
 
-    public static boolean blockIsValid(World world, BlockPos blockPos, EntitySim sim) {
+    public static boolean blockIsValid(World world, BlockPos blockPos, SimEntity sim) {
         if (!aboveBlocksValid(world, blockPos)) {
             SimuKraft.LOGGER().debug("Above blocks not valid");
             return false;
