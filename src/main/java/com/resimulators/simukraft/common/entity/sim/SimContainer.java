@@ -85,6 +85,41 @@ public class SimContainer extends Container {
                 return Pair.of(SimContainer.blocks, SimContainer.shield);
             }
         });
+
+        trackIntArray(new IIntArray() {
+            @Override
+            public int get(int index) {
+                switch (index) {
+                    case 0:
+                        return getSim().getSpecial() ? 1 : 0;
+                    case 1:
+                        return getSim().getFemale() ? 1 : 0;
+                    case 2:
+                        return getSim().getVariation();
+                }
+                return 0;
+            }
+
+            @Override
+            public void set(int index, int value) {
+                switch (index) {
+                    case 0:
+                        getSim().setSpecial(value == 1);
+                        break;
+                    case 1:
+                        getSim().setFemale(value == 1);
+                        break;
+                    case 2:
+                        getSim().setVariation(value);
+                        break;
+                }
+            }
+
+            @Override
+            public int size() {
+                return 3;
+            }
+        });
     }
 
     @Override

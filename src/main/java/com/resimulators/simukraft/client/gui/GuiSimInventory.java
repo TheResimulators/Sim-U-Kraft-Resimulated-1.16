@@ -58,6 +58,7 @@ public class GuiSimInventory extends DisplayEffectsScreen<SimContainer> {
     protected void func_231160_c_() {
         super.func_231160_c_();
         this.sim = container.getSim();
+        this.sim.setCustomName(new StringTextComponent(this.field_230704_d_.getString()));
     }
 
     @Override
@@ -80,9 +81,10 @@ public class GuiSimInventory extends DisplayEffectsScreen<SimContainer> {
         this.field_230706_i_.getTextureManager().bindTexture(TEXTURE);
         int left = this.guiLeft;
         int top = this.guiTop;
-        //if (this.sim != null)
-            //renderEntity(left + 51, top + 75, 30, (float) (left + 51) - this.oldMouseX, (float) (top + 75 - 50) - this.oldMouseY, this.sim);
         this.func_238474_b_(stack, left, top, 0, 0, this.xSize, this.ySize);
+        //SimuKraft.LOGGER().debug(this.sim.getName().getString());
+        if (this.sim != null)
+            renderEntity(left + 51, top + 75, 30, (float) (left + 51) - this.oldMouseX, (float) (top + 75 - 50) - this.oldMouseY, this.sim);
     }
 
     public static void renderEntity(int x, int y, int z, float mouseX, float mouseY, LivingEntity entity) {
@@ -113,7 +115,7 @@ public class GuiSimInventory extends DisplayEffectsScreen<SimContainer> {
         renderManager.setCameraOrientation(qy);
         renderManager.setRenderShadow(false);
         IRenderTypeBuffer.Impl renderTypeBuffer = Minecraft.getInstance().getRenderTypeBuffers().getBufferSource();
-        renderManager.renderEntityStatic(entity, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, matrix, renderTypeBuffer, 15728880);
+        RenderSystem.runAsFancy(() -> renderManager.renderEntityStatic(entity, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, matrix, renderTypeBuffer, 15728880));
         renderTypeBuffer.finish();
         renderManager.setRenderShadow(true);
         entity.renderYawOffset = yawOffset;

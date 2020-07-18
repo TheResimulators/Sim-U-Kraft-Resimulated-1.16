@@ -9,6 +9,7 @@ import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
+import com.resimulators.simukraft.SimuKraft;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.entity.player.PlayerEntity;
@@ -30,7 +31,7 @@ public class SkinCacher {
     private static Map<String, ResourceLocation> playerSkinMap = new HashMap<>();
 
     public void registerSpecialSkins() {
-        for (String s : Configs.SIMS.specialSimNames.get()) {
+        for (String s : SimuKraft.config.getSims().specialSimNames.get()) {
             playerSkinMap.put(s, getPlayerSkin(s));
         }
     }
