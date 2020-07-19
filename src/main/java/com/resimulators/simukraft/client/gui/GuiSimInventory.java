@@ -1,8 +1,9 @@
 package com.resimulators.simukraft.client.gui;
 
+import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.common.entity.sim.SimContainer;
 import com.resimulators.simukraft.Reference;
-import com.resimulators.simukraft.common.entity.sim.EntitySim;
+import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
@@ -17,7 +18,10 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.vector.Quaternion;
+import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 
 import java.util.Random;
 
@@ -40,45 +44,47 @@ public class GuiSimInventory extends DisplayEffectsScreen<SimContainer> {
     protected int scaledHeight;
 
     private SimContainer container;
-    private EntitySim sim;
+    private SimEntity sim;
 
     public GuiSimInventory(SimContainer container, PlayerInventory playerInventory, ITextComponent name) {
         super(container, playerInventory, name);
         this.container = container;
         xSize = WIDTH;
         ySize = HEIGHT;
-        this.passEvents = true;
+        this.field_230711_n_ = true;
     }
 
     @Override
-    protected void init() {
-        super.init();
+    protected void func_231160_c_() {
+        super.func_231160_c_();
         this.sim = container.getSim();
+        this.sim.setCustomName(new StringTextComponent(this.field_230704_d_.getString()));
     }
 
     @Override
-    protected void drawGuiContainerForegroundLayer(int x, int y) {
-        this.font.drawString(this.title.getFormattedText(), 80f, 8f, 4210752);
+    protected void func_230451_b_(MatrixStack stack, int x, int y) {
+        this.field_230712_o_.func_238421_b_(stack, this.field_230704_d_.getString(), 80f, 8f, 4210752);
     }
 
     @Override
-    public void render(int x, int y, float z) {
-        this.renderBackground();
-        super.render(x, y, z);
-        this.renderHoveredToolTip(x, y);
+    public void func_230430_a_(MatrixStack stack, int x, int y, float z) {
+        this.func_230446_a_(stack);
+        super.func_230430_a_(stack, x, y, z);
+        this.func_230459_a_(stack, x, y);
         this.oldMouseX = x;
         this.oldMouseY = y;
     }
 
     @Override
-    protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
+    protected void func_230450_a_(MatrixStack stack, float partialTicks, int mouseX, int mouseY) {
         RenderSystem.color4f(1, 1,1, 1);
-        this.minecraft.getTextureManager().bindTexture(TEXTURE);
+        this.field_230706_i_.getTextureManager().bindTexture(TEXTURE);
         int left = this.guiLeft;
         int top = this.guiTop;
-        this.blit(left, top, 0, 0, this.xSize, this.ySize);
-        //if (this.sim != null)
-            //renderEntity(left + 51, top + 75, 30, (float) (left + 51) - this.oldMouseX, (float) (top + 75 - 50) - this.oldMouseY, this.sim);
+        this.func_238474_b_(stack, left, top, 0, 0, this.xSize, this.ySize);
+        //SimuKraft.LOGGER().debug(this.sim.getName().getString());
+        if (this.sim != null)
+            renderEntity(left + 51, top + 75, 30, (float) (left + 51) - this.oldMouseX, (float) (top + 75 - 50) - this.oldMouseY, this.sim);
     }
 
     public static void renderEntity(int x, int y, int z, float mouseX, float mouseY, LivingEntity entity) {
@@ -109,7 +115,7 @@ public class GuiSimInventory extends DisplayEffectsScreen<SimContainer> {
         renderManager.setCameraOrientation(qy);
         renderManager.setRenderShadow(false);
         IRenderTypeBuffer.Impl renderTypeBuffer = Minecraft.getInstance().getRenderTypeBuffers().getBufferSource();
-        renderManager.renderEntityStatic(entity, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, matrix, renderTypeBuffer, 15728880);
+        RenderSystem.runAsFancy(() -> renderManager.renderEntityStatic(entity, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, matrix, renderTypeBuffer, 15728880));
         renderTypeBuffer.finish();
         renderManager.setRenderShadow(true);
         entity.renderYawOffset = yawOffset;
@@ -138,8 +144,8 @@ public class GuiSimInventory extends DisplayEffectsScreen<SimContainer> {
     }
 
     @Override
-    public void tick() {
+    public void func_231023_e_() {
         this.ticks++;
-        super.tick();
+        super.func_231023_e_();
     }
 }

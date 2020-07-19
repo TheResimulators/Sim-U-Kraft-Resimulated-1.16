@@ -1,7 +1,8 @@
 package com.resimulators.simukraft.client.gui;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.resimulators.simukraft.Network;
-import com.resimulators.simukraft.common.entity.sim.EntitySim;
+import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.tileentity.ITile;
 import com.resimulators.simukraft.packets.SimFireRequest;
 import com.resimulators.simukraft.packets.SimHireRequest;
@@ -12,6 +13,7 @@ import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 
 import javax.annotation.Nullable;
 import java.awt.*;
@@ -27,14 +29,14 @@ public class BaseJobGui extends Screen {
     PlayerEntity player;
     ArrayList<Integer> ids;
     ArrayList<SimButton> simButtons = new ArrayList<>();
-    EntitySim selectedsim;
+    SimEntity selectedsim;
     int state = State.MAIN;
     BlockPos pos;
     boolean firing = false;
     int hiredId;
     String job;
-    
-    public BaseJobGui(ITextComponent component, ArrayList<Integer> ids, BlockPos pos,@Nullable int id) {
+
+    public BaseJobGui(ITextComponent component, ArrayList<Integer> ids, BlockPos pos, @Nullable int id) {
         super(component);
         this.hiredId = id;
         this.player = Minecraft.getInstance().player;
@@ -44,134 +46,119 @@ public class BaseJobGui extends Screen {
     }
 
     @Override
-    public void init(Minecraft minecraft, int width, int height){
-        super.init(minecraft,width,height);
-       addButton(Done = new Button(width-120,height-30,110,20,"Done",(Done)->{
-            minecraft.displayGuiScreen(null);
-        }));
+    public void func_231158_b_(Minecraft minecraft, int width, int height) {
+        super.func_231158_b_(minecraft, width, height);
+        func_230480_a_(Done = new Button(width - 120, height - 30, 110, 20, new StringTextComponent("Done"), (Done) -> minecraft.displayGuiScreen(null)));
 
-        addButton(Hire = new Button (20,height-60,110,20,"Hire",(Hire->{
-          ShowHiring();
-          state = State.HIRE_INFO;//hire_info is used to select a sim for hiring
+        func_230480_a_(Hire = new Button(20, height - 60, 110, 20, new StringTextComponent("Hire"), (Hire -> {
+            ShowHiring();
+            state = State.HIRE_INFO;//hire_info is used to select a sim for hiring
         })));
 
-        addButton(Fire =new Button (20,height-30,110,20,"Fire",(Fire->{
+        func_230480_a_(Fire = new Button(20, height - 30, 110, 20, new StringTextComponent("Fire"), (Fire -> {
             firing = true;
             showFiring();
-
         })));
-        addButton(ShowEmployees = new Button (width-120,height-60,110,20,"Show Employees",(ShowEmployees->{
+        func_230480_a_(ShowEmployees = new Button(width - 120, height - 60, 110, 20, new StringTextComponent("Show Employees"), (ShowEmployees -> {
         })));
         Minecraft.getInstance().world.getTileEntity(pos);
-        if (((ITile)Minecraft.getInstance().world.getTileEntity(pos)).getHired()){
-            Fire.active = true;
-            Hire.active = false;
-        }else{
-        Fire.active = false;
-        Hire.active = true;
+        if (((ITile) Minecraft.getInstance().world.getTileEntity(pos)).getHired()) {
+            Fire.field_230693_o_ = true;
+            Hire.field_230693_o_ = false;
+        } else {
+            Fire.field_230693_o_ = false;
+            Hire.field_230693_o_ = true;
         }
 
-        addButton(Back = new Button(width-120,height-30,110,20,"Back",(Back ->{
-            if (state == State.HIRE_INFO){
+        func_230480_a_(Back = new Button(width - 120, height - 30, 110, 20, new StringTextComponent("Back"), (Back -> {
+            if (state == State.HIRE_INFO) {
                 state = State.MAIN;
                 showMainMenu();
             }
-            if (state == State.SHOW_EMPLOYEES){
+            if (state == State.SHOW_EMPLOYEES) {
                 state = State.MAIN;
                 showMainMenu();
             }
-            if (state == State.SIM_INFO){
-                state= State.HIRE_INFO;
+            if (state == State.SIM_INFO) {
+                state = State.HIRE_INFO;
                 ShowHiring();
             }
-            if (state == State.Firing){
+            if (state == State.Firing) {
                 state = State.MAIN;
                 showMainMenu();
             }
 
         })));
-        Back.visible = false;
+        Back.field_230694_p_ = false;
 
 
-        addButton(Confirm = new Button(20,height-30,110,20,"Confirm",Confirm ->{
-           sendPackets();
-
-
-        }));
-        Confirm.visible = false;
-        if (state == State.HIRE_INFO){
+        func_230480_a_(Confirm = new Button(20, height - 30, 110, 20, new StringTextComponent("Confirm"), Confirm -> sendPackets()));
+        Confirm.field_230694_p_ = false;
+        if (state == State.HIRE_INFO) {
             ShowHiring();
-            Hire.visible = false;
-            Fire.visible = false;
-            ShowEmployees.visible = false;
+            Hire.field_230694_p_ = false;
+            Fire.field_230694_p_ = false;
+            ShowEmployees.field_230694_p_ = false;
         }
 
 
     }
 
-    public void showMainMenu(){
+    public void showMainMenu() {
         hideAll();
-        Hire.visible = true;
-        Fire.visible = true;
-        ShowEmployees.visible = true;
-        Done.visible = true;
+        Hire.field_230694_p_ = true;
+        Fire.field_230694_p_ = true;
+        ShowEmployees.field_230694_p_ = true;
+        Done.field_230694_p_ = true;
+    }
 
+    private void showFiring() {
+        hideAll();
+        Confirm.field_230694_p_ = true;
+        Back.field_230694_p_ = true;
 
     }
-    private void showFiring(){
-        hideAll();
-        Confirm.visible = true;
-        Back.visible = true;
 
-    }
     @Override
-    public void render(int p_render_1_, int p_render_2_, float p_render_3_) {
-        renderBackground();
-        super.render(p_render_1_,p_render_2_,p_render_3_);
-        if (state == State.MAIN){
-            if (isHired()){
-                font.drawString("Level: WIP",(float)20,70,Color.white.getRGB());
-                if (hiredId != 0){
-                font.drawString("Name: "+ Minecraft.getInstance().world.getEntityByID(hiredId).getDisplayName().getFormattedText(),(float)20,50,Color.white.getRGB());}
+    public void func_230430_a_(MatrixStack stack, int p_render_1_, int p_render_2_, float p_render_3_) {
+        func_230446_a_(stack); //Render Background
+        super.func_230430_a_(stack, p_render_1_, p_render_2_, p_render_3_);
+        if (state == State.MAIN) {
+            if (isHired()) {
+                field_230712_o_.func_238421_b_(stack, "Level: WIP", (float) 20, 70, Color.white.getRGB());
+                if (hiredId != 0) {
+                    field_230712_o_.func_238421_b_(stack, "Name: " + Minecraft.getInstance().world.getEntityByID(hiredId).getDisplayName(), (float) 20, 50, Color.white.getRGB());
+                }
             }
-        }else if (state == State.HIRE_INFO){
-            font.drawString("Hiring",(float)(width/2-font.getStringWidth("Hiring")/2),10, Color.white.getRGB());
-        }else if (state == State.SIM_INFO){
-            font.drawString("Info",(float)(width/2-font.getStringWidth("Info")/2),10, Color.white.getRGB());
-            font.drawString("Name: "+selectedsim.getDisplayName().getFormattedText(),(float)20,50,Color.white.getRGB());
-            font.drawString("Level: WIP",(float)20,70,Color.white.getRGB());
+        } else if (state == State.HIRE_INFO) {
+            field_230712_o_.func_238421_b_(stack, "Hiring", (float) (field_230708_k_ / 2 - field_230712_o_.getStringWidth("Hiring") / 2), 10, Color.white.getRGB());
+        } else if (state == State.SIM_INFO) {
+            field_230712_o_.func_238421_b_(stack, "Info", (float) (field_230708_k_ / 2 - field_230712_o_.getStringWidth("Info") / 2), 10, Color.white.getRGB());
+            field_230712_o_.func_238421_b_(stack, "Name: " + selectedsim.getDisplayName(), (float) 20, 50, Color.white.getRGB());
+            field_230712_o_.func_238421_b_(stack, "Level: WIP", (float) 20, 70, Color.white.getRGB());
         }
-        if (state == State.Firing){
-            font.drawString("Level: WIP",(float)20,70,Color.white.getRGB());
-            if (hiredId != 0){
-                font.drawString("Name: "+ Minecraft.getInstance().world.getEntityByID(hiredId).getDisplayName().getFormattedText(),(float)20,50,Color.white.getRGB());}
+        if (state == State.Firing) {
+            field_230712_o_.func_238421_b_(stack, "Level: WIP", (float) 20, 70, Color.white.getRGB());
+            if (hiredId != 0) {
+                field_230712_o_.func_238421_b_(stack, "Name: " + Minecraft.getInstance().world.getEntityByID(hiredId).getDisplayName(), (float) 20, 50, Color.white.getRGB());
+            }
         }
 
     }
 
-    @Override
-    public void renderBackground(){
-        super.renderBackground();
-    }
-
-    @Override
-    public boolean isPauseScreen(){
-        return false;
-    }
-
-    private void ShowHiring(){
+    private void ShowHiring() {
         hideAll();
 
-        Back.visible = true;
+        Back.field_230694_p_ = true;
         int x = 0;
         int y = 0;
-        int ConstantXSpacing = (width/5)*2;
-        int ConstantYSpacing = height/4;
-        for (int i = 0;i<ids.size();i++){
-            EntitySim sim = (EntitySim)player.getEntityWorld().getEntityByID(ids.get(i));
-            simButtons.add(addButton(new SimButton(20 + x*ConstantXSpacing,40 + y*ConstantYSpacing,100,20,sim.getName().getFormattedText(),ids.get(i),this)));
+        int ConstantXSpacing = (field_230708_k_ / 5) * 2;
+        int ConstantYSpacing = field_230709_l_ / 4;
+        for (int i = 0; i < ids.size(); i++) {
+            SimEntity sim = (SimEntity) player.getEntityWorld().getEntityByID(ids.get(i));
+            simButtons.add(func_230480_a_(new SimButton(20 + x * ConstantXSpacing, 40 + y * ConstantYSpacing, 100, 20, sim.getName(), ids.get(i), this)));
             x++;
-            if (x >4){
+            if (x > 4) {
                 x = 0;
                 y++;
             }
@@ -179,28 +166,29 @@ public class BaseJobGui extends Screen {
         }
 
     }
-    protected void hideAll(){
-        for(Widget button:buttons){
-            button.visible = false;
+
+    protected void hideAll() {
+        for (Widget button : field_230710_m_) {
+            button.field_230694_p_ = false;
         }
     }
 
-    private void showSimInfo(int id){
+    private void showSimInfo(int id) {
         hideAll();
-        EntitySim sim = (EntitySim)player.world.getEntityByID(id);
+        SimEntity sim = (SimEntity) player.world.getEntityByID(id);
         selectedsim = sim;
         state = State.SIM_INFO;
-        Back.visible = true;
-        Confirm.visible = true;
+        Back.field_230694_p_ = true;
+        Confirm.field_230694_p_ = true;
 
     }
 
 
-
-    static class SimButton extends Button{
+    static class SimButton extends Button {
         private int id;
-        SimButton(int widthIn, int heightIn, int width, int height, String text,int id,BaseJobGui gui) {
-            super(widthIn, heightIn, width, height, text, (Sim ->{
+
+        SimButton(int widthIn, int heightIn, int width, int height, ITextComponent text, int id, BaseJobGui gui) {
+            super(widthIn, heightIn, width, height, text, (Sim -> {
                 gui.showSimInfo(id);
 
 
@@ -210,20 +198,21 @@ public class BaseJobGui extends Screen {
 
 
     }
-    public boolean isHired(){
-        return ((ITile)Minecraft.getInstance().world.getTileEntity(pos)).getSimId() != null;
+
+    public boolean isHired() {
+        return ((ITile) Minecraft.getInstance().world.getTileEntity(pos)).getSimId() != null;
     }
 
-    private void sendPackets(){
+    private void sendPackets() {
         if (!firing) {
-            Network.getNetwork().sendToServer(new SimHireRequest(selectedsim.getEntityId(), Minecraft.getInstance().player.getUniqueID(),pos,job));
-        }else{
-            Network.getNetwork().sendToServer(new SimFireRequest(Minecraft.getInstance().player.getUniqueID(),((ITile)Minecraft.getInstance().world.getTileEntity(pos)).getSimId(),pos));
+            Network.getNetwork().sendToServer(new SimHireRequest(selectedsim.getEntityId(), Minecraft.getInstance().player.getUniqueID(), pos, job));
+        } else {
+            Network.getNetwork().sendToServer(new SimFireRequest(Minecraft.getInstance().player.getUniqueID(), ((ITile) Minecraft.getInstance().world.getTileEntity(pos)).getSimId(), pos));
         }
         Minecraft.getInstance().displayGuiScreen(null);
     }
 
-    protected static class State{
+    protected static class State {
         protected static int id = 0;
         protected static int MAIN = nextID();
         protected static int SIM_INFO = nextID();
@@ -232,16 +221,9 @@ public class BaseJobGui extends Screen {
         protected static int Firing = nextID();
 
 
-
-
-        protected static int nextID(){
+        protected static int nextID() {
             return id++;
         }
-
-
-
-
-
 
 
     }

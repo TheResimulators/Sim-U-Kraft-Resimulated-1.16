@@ -1,10 +1,10 @@
 package com.resimulators.simukraft.client.render;
 
+import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.client.model.EntitySimModel;
-import com.resimulators.simukraft.Configs;
 import com.resimulators.simukraft.Reference;
 import com.resimulators.simukraft.client.data.SkinCacher;
-import com.resimulators.simukraft.common.entity.sim.EntitySim;
+import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.utils.ColorHelper;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.renderer.*;
@@ -21,11 +21,13 @@ import net.minecraft.item.UseAction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 
 import javax.annotation.Nonnull;
 
-public class EntitySimRender extends LivingRenderer<EntitySim, EntitySimModel> {
+public class EntitySimRender extends LivingRenderer<SimEntity, EntitySimModel> {
     String DIR = "textures/entity/sim/";
 
     public EntitySimRender(EntityRendererManager manager) {
@@ -36,21 +38,22 @@ public class EntitySimRender extends LivingRenderer<EntitySim, EntitySimModel> {
     }
 
     @Override
-    public void render(@Nonnull EntitySim entitySim, float entityYaw, float partialTick, @Nonnull MatrixStack matrix, @Nonnull IRenderTypeBuffer renderer, int light) {
-        this.setModelVisibilities(entitySim);
-        super.render(entitySim, entityYaw, partialTick, matrix, renderer, light);
+    public void render(@Nonnull SimEntity simEntity, float entityYaw, float partialTick, @Nonnull MatrixStack matrix, @Nonnull IRenderTypeBuffer renderer, int light) {
+        this.setModelVisibilities(simEntity);
+        super.render(simEntity, entityYaw, partialTick, matrix, renderer, light);
     }
 
 
-    private void setModelVisibilities(EntitySim entitySim) {
+    private void setModelVisibilities(SimEntity simEntity) {
         EntitySimModel model = this.getEntityModel();
-        ItemStack itemStack = entitySim.getHeldItemMainhand();
-        ItemStack itemStack1 = entitySim.getHeldItemOffhand();
-        model.setVisible(true, entitySim.getFemale());
-        model.isSneak = entitySim.isCrouching();
-        BipedModel.ArmPose bipedmodel$armpose = this.getArmpose(entitySim, itemStack, itemStack1, Hand.MAIN_HAND);
-        BipedModel.ArmPose bipedmodel$armpose1 = this.getArmpose(entitySim, itemStack, itemStack1, Hand.OFF_HAND);
-        if (entitySim.getPrimaryHand() == HandSide.RIGHT) {
+        model.setVisible(true, simEntity.getFemale());
+        model.isSneak = simEntity.isCrouching();
+        BipedModel.ArmPose bipedmodel$armpose = this.getArmpose(simEntity, Hand.MAIN_HAND);
+        BipedModel.ArmPose bipedmodel$armpose1 = this.getArmpose(simEntity, Hand.OFF_HAND);
+        if (bipedmodel$armpose.func_241657_a_())
+            bipedmodel$armpose1 = simEntity.getHeldItemOffhand().isEmpty() ? BipedModel.ArmPose.EMPTY : BipedModel.ArmPose.ITEM;
+
+        if (simEntity.getPrimaryHand() == HandSide.RIGHT) {
             model.rightArmPose = bipedmodel$armpose;
             model.leftArmPose = bipedmodel$armpose1;
         } else {
@@ -59,59 +62,59 @@ public class EntitySimRender extends LivingRenderer<EntitySim, EntitySimModel> {
         }
     }
     @Override
-    protected boolean canRenderName(EntitySim entity){
+    protected boolean canRenderName(SimEntity entity){
         return true;
     }
 
-    private BipedModel.ArmPose getArmpose(EntitySim entitySim, ItemStack primary, ItemStack secondary, Hand hand) {
-        BipedModel.ArmPose bipedmodel$armpose = BipedModel.ArmPose.EMPTY;
-        ItemStack itemStack = hand == Hand.MAIN_HAND ? primary : secondary;
-        if (!itemStack.isEmpty()) {
-            bipedmodel$armpose = BipedModel.ArmPose.ITEM;
-            if (entitySim.getItemInUseCount() > 0) {
-                UseAction useAction = itemStack.getUseAction();
-                if (useAction == UseAction.BLOCK) {
-                    bipedmodel$armpose = BipedModel.ArmPose.BLOCK;
-                } else if (useAction == UseAction.BOW) {
-                    bipedmodel$armpose = BipedModel.ArmPose.BOW_AND_ARROW;
-                } else if (useAction == UseAction.SPEAR) {
-                    bipedmodel$armpose = BipedModel.ArmPose.THROW_SPEAR;
-                } else if (useAction == UseAction.CROSSBOW && hand == entitySim.getActiveHand()) {
-                    bipedmodel$armpose = BipedModel.ArmPose.CROSSBOW_CHARGE;
+    private BipedModel.ArmPose getArmpose(SimEntity simEntity, Hand hand) {
+        ItemStack itemstack = simEntity.getHeldItem(hand);
+        if (itemstack.isEmpty()) {
+            return BipedModel.ArmPose.EMPTY;
+        } else {
+            if (simEntity.getActiveHand() == hand && simEntity.getItemInUseCount() > 0) {
+                UseAction useaction = itemstack.getUseAction();
+                if (useaction == UseAction.BLOCK) {
+                    return BipedModel.ArmPose.BLOCK;
                 }
-            } else {
-                boolean flag = primary.getItem() == Items.CROSSBOW;
-                boolean flag1 = CrossbowItem.isCharged(primary);
-                boolean flag2 = secondary.getItem() == Items.CROSSBOW;
-                boolean flag3 = CrossbowItem.isCharged(secondary);
-                if (flag && flag1) {
-                    bipedmodel$armpose = BipedModel.ArmPose.CROSSBOW_HOLD;
+
+                if (useaction == UseAction.BOW) {
+                    return BipedModel.ArmPose.BOW_AND_ARROW;
                 }
-                if (flag2 && flag3 && primary.getItem().getUseAction(primary) == UseAction.NONE) {
-                    bipedmodel$armpose = BipedModel.ArmPose.CROSSBOW_HOLD;
+
+                if (useaction == UseAction.SPEAR) {
+                    return BipedModel.ArmPose.THROW_SPEAR;
                 }
+
+                if (useaction == UseAction.CROSSBOW && hand == simEntity.getActiveHand()) {
+                    return BipedModel.ArmPose.CROSSBOW_CHARGE;
+                }
+            } else if (!simEntity.isSwingInProgress && itemstack.getItem() == Items.CROSSBOW && CrossbowItem.isCharged(itemstack)) {
+                return BipedModel.ArmPose.CROSSBOW_HOLD;
             }
+
+            return BipedModel.ArmPose.ITEM;
         }
-        return bipedmodel$armpose;
     }
 
     @Override
-    public ResourceLocation getEntityTexture(EntitySim entitySim) {
-        ResourceLocation location = SkinCacher.getSkinForSim(entitySim.getName().getFormattedText());
-        if (location == null || !entitySim.getSpecial())
-            location = new ResourceLocation(Reference.MODID, DIR + (entitySim.getFemale() ? "female/" : "male/") + "entity_sim" + entitySim.getVariation() + ".png");
+    public ResourceLocation getEntityTexture(SimEntity simEntity) {
+        ResourceLocation location = new ResourceLocation(Reference.MODID, DIR + (simEntity.getFemale() ? "female/" : "male/") + "entity_sim" + simEntity.getVariation() + ".png");
+        if (simEntity.getSpecial())
+            location = SkinCacher.getSkinForSim(simEntity.getName().getString());
+        if (location == null)
+            location = new ResourceLocation("textures/entity/steve.png");
         return location;
     }
 
     @Override
-    protected void renderName(EntitySim entitySim, String text, MatrixStack matrix, IRenderTypeBuffer renderBuffer, int light) {
-        double d = this.renderManager.squareDistanceTo(entitySim);
+    protected void renderName(SimEntity simEntity, ITextComponent text, MatrixStack matrix, IRenderTypeBuffer renderBuffer, int light) {
+        double d = this.renderManager.squareDistanceTo(simEntity);
         matrix.push();
-        if (d < 100.0d && !entitySim.getStatus().equals("")) {
-            super.renderName(entitySim, entitySim.getStatus(), matrix, renderBuffer, light);
+        if (d < 100.0d && !simEntity.getStatus().equals("")) {
+            super.renderName(simEntity, new StringTextComponent(simEntity.getStatus()), matrix, renderBuffer, light);
             matrix.translate(0, (double) (9.0F * 1.15F * 0.025F), 0);
         }
-        super.renderName(entitySim, (Configs.SIMS.coloredNames.get() ? TextFormatting.fromColorIndex(ColorHelper.convertDyeToTF(entitySim.getNameColor())) : TextFormatting.WHITE) + text + TextFormatting.RESET, matrix, renderBuffer, light);
+        super.renderName(simEntity, new StringTextComponent((SimuKraft.config.getSims().coloredNames.get() ? TextFormatting.fromColorIndex(ColorHelper.convertDyeToTF(simEntity.getNameColor())) : TextFormatting.WHITE) + text.getString() + TextFormatting.RESET), matrix, renderBuffer, light);
 
         matrix.pop();
     }

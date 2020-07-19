@@ -1,15 +1,15 @@
 package com.resimulators.simukraft.common.entity.goals;
 
-import com.resimulators.simukraft.common.entity.sim.EntitySim;
+import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.player.PlayerEntity;
 
 import java.util.EnumSet;
 
 public class TalkingToPlayerGoal extends Goal {
-    private final EntitySim sim;
+    private final SimEntity sim;
 
-    public TalkingToPlayerGoal(EntitySim sim) {
+    public TalkingToPlayerGoal(SimEntity sim) {
         this.sim = sim;
         this.setMutexFlags(EnumSet.of(Flag.JUMP, Flag.MOVE));
     }
@@ -19,7 +19,7 @@ public class TalkingToPlayerGoal extends Goal {
             return false;
         } else if (this.sim.isInWater()) {
             return false;
-        } else if (!this.sim.onGround) {
+        } else if (!this.sim.func_233570_aj_()) {
             return false;
         } else if (this.sim.velocityChanged) {
             return false;

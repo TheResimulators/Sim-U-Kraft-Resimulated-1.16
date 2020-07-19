@@ -1,6 +1,6 @@
 package com.resimulators.simukraft.common.entity.goals;
 
-import com.resimulators.simukraft.common.entity.sim.EntitySim;
+import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.utils.Utils;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.item.ItemEntity;
@@ -11,11 +11,11 @@ import net.minecraftforge.items.ItemHandlerHelper;
 import java.util.List;
 
 public class PickupItemGoal extends Goal {
-    private final EntitySim sim;
+    private final SimEntity sim;
     private PathNavigator navigator;
     private ItemEntity item;
 
-    public PickupItemGoal(EntitySim sim) {
+    public PickupItemGoal(SimEntity sim) {
         this.sim = sim;
         this.navigator = sim.getNavigator();
     }
@@ -30,7 +30,7 @@ public class PickupItemGoal extends Goal {
             ItemEntity closest = null;
             double closestDistance = Double.MAX_VALUE;
             for (ItemEntity item : items) {
-                if (item.isAlive() && item.onGround) {
+                if (item.isAlive() && item.func_233570_aj_()) {
                     double distance = item.getDistance(sim);
                     if (distance < closestDistance && sim.canPickupStack(item.getItem()) && !item.isInWater() && !item.isInLava()) {
                         closest = item;
@@ -60,7 +60,7 @@ public class PickupItemGoal extends Goal {
     @Override
     public void startExecuting() {
         if (this.item != null) {
-            navigator.tryMoveToXYZ(this.item.getPosition().getX(), this.item.getPosition().getY(), this.item.getPosition().getZ(), 0.6f);
+            navigator.tryMoveToXYZ(this.item.func_233580_cy_().getX(), this.item.func_233580_cy_().getY(), this.item.func_233580_cy_().getZ(), 0.6f);
         }
     }
 

@@ -1,9 +1,9 @@
 package com.resimulators.simukraft.common.world;
 
+import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.packets.IMessage;
 import com.resimulators.simukraft.Network;
 import com.resimulators.simukraft.SimuKraft;
-import com.resimulators.simukraft.common.entity.sim.EntitySim;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
@@ -67,7 +67,7 @@ public class Faction {
         this.credits = nbt.getDouble("credits");
     }
 
-    public void addSim(EntitySim sim) {
+    public void addSim(SimEntity sim) {
         addSim(sim.getUniqueID());
     }
 
@@ -75,7 +75,7 @@ public class Faction {
         sims.put(id, new SimInfo(id));
     }
 
-    public void removeSim(EntitySim sim) {
+    public void removeSim(SimEntity sim) {
         sims.remove(sim.getUniqueID());
     }
 
@@ -108,7 +108,7 @@ public class Faction {
         this.sims.get(id).hired = true;
     }
 
-    public void hireSim(EntitySim sim) {
+    public void hireSim(SimEntity sim) {
         this.hireSim(sim.getUniqueID());
     }
 
@@ -116,7 +116,7 @@ public class Faction {
         this.sims.get(id).hired = false;
     }
 
-    public void fireSim(EntitySim sim) {
+    public void fireSim(SimEntity sim) {
         this.fireSim(sim.getUniqueID());
     }
 

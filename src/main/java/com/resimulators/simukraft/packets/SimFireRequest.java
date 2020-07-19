@@ -1,6 +1,6 @@
 package com.resimulators.simukraft.packets;
 
-import com.resimulators.simukraft.common.entity.sim.EntitySim;
+import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.world.SavedWorldData;
 import com.resimulators.simukraft.common.tileentity.ITile;
 import net.minecraft.entity.player.PlayerEntity;
@@ -58,9 +58,9 @@ public class SimFireRequest implements IMessage {
             int id = data.getFactionWithPlayer(player.getUniqueID()).getId();
             ((ITile)player.world.getTileEntity(pos)).setHired(false);
             System.out.println(player.world.getTileEntity(pos));
-            data.fireSim(id, (EntitySim) ((ServerWorld)player.world).getEntityByUuid(simId));
+            data.fireSim(id, (SimEntity) ((ServerWorld)player.world).getEntityByUuid(simId));
             ((ITile) player.world.getTileEntity(pos)).setSimId(null);
-            EntitySim sim = (EntitySim) ((ServerWorld)player.world).getEntityByUuid(simId);
+            SimEntity sim = (SimEntity) ((ServerWorld)player.world).getEntityByUuid(simId);
             int simid =sim.getEntityId();
             if (sim.getJob() != null){
             sim.getJob().removeJobAi();

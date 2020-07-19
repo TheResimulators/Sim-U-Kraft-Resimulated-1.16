@@ -1,7 +1,6 @@
 package com.resimulators.simukraft.client.model;
 
-import com.mojang.blaze3d.vertex.IVertexBuilder;
-import com.resimulators.simukraft.common.entity.sim.EntitySim;
+import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -9,7 +8,7 @@ import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.util.HandSide;
 
-public class EntitySimModel extends BipedModel<EntitySim> {
+public class EntitySimModel extends BipedModel<SimEntity> {
     private boolean smallArms;
 
     public ModelRenderer bipedLeftArmwear;
@@ -23,7 +22,7 @@ public class EntitySimModel extends BipedModel<EntitySim> {
     public ModelRenderer femaleArmRight;
     public ModelRenderer maleArmLeft;
     public ModelRenderer maleArmRight;
-    private EntitySim sim;
+    private SimEntity sim;
 
     public EntitySimModel(float modelSize) {
         super(modelSize, 0.0F, 64, 64);
@@ -76,23 +75,15 @@ public class EntitySimModel extends BipedModel<EntitySim> {
         return Iterables.concat(super.getBodyParts(), ImmutableList.of(this.bipedLeftLegwear, this.bipedRightLegwear, this.bipedLeftArmwear, this.bipedRightArmwear, this.bipedBodyWear));
     }
 
-    private void copyModelAnglesWithoutPoints(ModelRenderer source, ModelRenderer dest) {
-        dest.rotateAngleX = source.rotateAngleX;
-        dest.rotateAngleY = source.rotateAngleY;
-        dest.rotateAngleZ = source.rotateAngleZ;
-    }
-
     @Override
-    public void render(MatrixStack matrixStackIn, IVertexBuilder bufferIn, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float alpha) {
-        super.render(matrixStackIn, bufferIn,  packedLightIn, packedOverlayIn,  red, green,  blue,  alpha);
-
+    public void setRotationAngles(SimEntity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
+        super.setRotationAngles(entityIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
         this.bipedLeftLegwear.copyModelAngles(this.bipedLeftLeg);
         this.bipedRightLegwear.copyModelAngles(this.bipedRightLeg);
         this.bipedLeftArmwear.copyModelAngles(this.bipedLeftArm);
         this.bipedRightArmwear.copyModelAngles(this.bipedRightArm);
         this.bipedBodyWear.copyModelAngles(this.bipedBody);
     }
-
 
     public void setVisible(boolean visible, boolean female) {
         setVisible(visible);
@@ -134,8 +125,4 @@ public class EntitySimModel extends BipedModel<EntitySim> {
           modelrenderer.translateRotate(matrix);
         }
     }
-
-
-
-
 }

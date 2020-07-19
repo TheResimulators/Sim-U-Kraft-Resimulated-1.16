@@ -1,20 +1,20 @@
 package com.resimulators.simukraft.common.entity.goals;
 
 import com.resimulators.simukraft.SimuKraft;
-import com.resimulators.simukraft.common.entity.sim.EntitySim;
+import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.jobs.JobMiner;
 import com.resimulators.simukraft.common.jobs.core.EnumJobState;
 import com.resimulators.simukraft.common.jobs.core.IJob;
 import com.resimulators.simukraft.common.tileentity.TileMiner;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
-import net.minecraft.data.LootTableProvider;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.ai.goal.MoveToBlockGoal;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.item.ToolItem;
+import net.minecraft.loot.LootContext;
+import net.minecraft.loot.LootParameters;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
@@ -23,11 +23,6 @@ import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.storage.loot.LootContext;
-import net.minecraft.world.storage.loot.LootParameterSet;
-import net.minecraft.world.storage.loot.LootParameters;
-import net.minecraft.world.storage.loot.LootTable;
-import sun.security.ssl.Debug;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -68,7 +63,7 @@ public class MinerGoal extends MoveToBlockGoal {
         if (sim.world.getTileEntity(job.getWorkSpace()) == null) return false;
         if (true) return true;
         if (job.getState() == EnumJobState.GOING_TO_WORK) {
-            if (sim.getPosition().withinDistance(new Vec3i(job.getWorkSpace().getX(), job.getWorkSpace().getY(), job.getWorkSpace().getZ()), 5)) {
+            if (sim.func_233580_cy_().withinDistance(new Vector3d(job.getWorkSpace().getX(), job.getWorkSpace().getY(), job.getWorkSpace().getZ()), 5)) {
                 job.setState(EnumJobState.WORKING);
                 return true;
             }else {

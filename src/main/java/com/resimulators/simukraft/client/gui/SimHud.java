@@ -1,5 +1,6 @@
 package com.resimulators.simukraft.client.gui;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.resimulators.simukraft.common.world.SavedWorldData;
 import com.resimulators.simukraft.common.events.world.NewDayEvent;
 import net.minecraft.client.Minecraft;
@@ -16,13 +17,13 @@ public class SimHud extends AbstractGui {
     @SubscribeEvent
     public void render(RenderGameOverlayEvent.Text event){
         if (Minecraft.getInstance().currentScreen == null) {
-           SavedWorldData data = SavedWorldData.get(Minecraft.getInstance().world);
+            SavedWorldData data = SavedWorldData.get(Minecraft.getInstance().world);
             num = data.getFactionWithPlayer(Minecraft.getInstance().player.getUniqueID()).getAmountOfSims();
             credits = data.getFactionWithPlayer(Minecraft.getInstance().player.getUniqueID()).getCredits();
             String day = NewDayEvent.getDay().getDisplayName(TextStyle.FULL, Locale.ENGLISH);
-            Minecraft.getInstance().fontRenderer.drawString("Sims: " + num, 10, 10, 16777215);
-            Minecraft.getInstance().fontRenderer.drawString("Credits: " + String.format("%.2f", credits), 10, 30, 16777215);
-            Minecraft.getInstance().fontRenderer.drawString("Day: " + day, 60, 10, 16777215);
+            Minecraft.getInstance().fontRenderer.func_238421_b_(new MatrixStack(), "Sims: " + num, 10, 10, 16777215);
+            Minecraft.getInstance().fontRenderer.func_238421_b_(new MatrixStack(), "Credits: " + String.format("%.2f", credits), 10, 30, 16777215);
+            Minecraft.getInstance().fontRenderer.func_238421_b_(new MatrixStack(), "Day: " + day, 60, 10, 16777215);
 
         }
     }

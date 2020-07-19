@@ -40,7 +40,7 @@ public class SimInventory implements IInventory, INamedContainerProvider {
     public final NonNullList<ItemStack> armorInventory = NonNullList.withSize(4, ItemStack.EMPTY);
     public final NonNullList<ItemStack> handInventory = NonNullList.withSize(1, ItemStack.EMPTY);
     private final List<NonNullList<ItemStack>> allInventories;
-    private final EntitySim sim;
+    private final SimEntity sim;
     public int currentItem;
     private ItemStack itemStack = ItemStack.EMPTY;
     private int timesChanged;
@@ -50,7 +50,7 @@ public class SimInventory implements IInventory, INamedContainerProvider {
     private boolean hasCustomName;
     private IItemHandlerModifiable handler;
 
-    public SimInventory(EntitySim sim, String title, boolean customName, int slotCount) {
+    public SimInventory(SimEntity sim, String title, boolean customName, int slotCount) {
         this.sim = sim;
         this.inventoryTitle = title;
         this.hasCustomName = customName;
@@ -697,7 +697,7 @@ public class SimInventory implements IInventory, INamedContainerProvider {
                 }
 
                 ItemStack itemstack = (ItemStack)iterator.next();
-                if (!itemstack.isEmpty() && itemTag.contains(itemstack.getItem())) {
+                if (!itemstack.isEmpty() && itemTag.func_230235_a_(itemstack.getItem())) {
                     break;
                 }
             }
@@ -737,13 +737,13 @@ public class SimInventory implements IInventory, INamedContainerProvider {
         return handler;
     }
 
-    public EntitySim getSim() {
+    public SimEntity getSim() {
         return sim;
     }
 
     @Override
     public ITextComponent getDisplayName() {
-        if (this.hasCustomName)
+        if (!inventoryTitle.isEmpty())
             return new StringTextComponent(inventoryTitle);
         else return new StringTextComponent("Sim");
     }

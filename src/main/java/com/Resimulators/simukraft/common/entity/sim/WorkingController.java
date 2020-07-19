@@ -10,10 +10,10 @@ import net.minecraft.util.math.BlockPos;
 
 
 public class WorkingController implements ITickable {
-    private EntitySim sim;
+    private SimEntity sim;
     private int tick;
 
-    public WorkingController(EntitySim sim) {
+    public WorkingController(SimEntity sim) {
         this.sim = sim;
     }
 

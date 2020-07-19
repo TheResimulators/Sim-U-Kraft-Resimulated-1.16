@@ -1,7 +1,7 @@
 package com.resimulators.simukraft.common.world;
 
 import com.resimulators.simukraft.Reference;
-import com.resimulators.simukraft.common.entity.sim.EntitySim;
+import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
@@ -134,7 +134,7 @@ public class SavedWorldData extends WorldSavedData {
         return null;
     }
 
-    public void addSimToFaction(int id, EntitySim sim){
+    public void addSimToFaction(int id, SimEntity sim){
         factions.get(id).addSim(sim);
         markDirty();
     }
@@ -148,16 +148,16 @@ public class SavedWorldData extends WorldSavedData {
         // TODO add removal of things
     }
 
-    public void removeSimFromFaction(int id, EntitySim sim){
+    public void removeSimFromFaction(int id, SimEntity sim){
         this.getFaction(id).removeSim(sim);
         markDirty();
     }
 
-    public void hireSim(int id,EntitySim sim){
+    public void hireSim(int id, SimEntity sim){
         getFaction(id).hireSim(sim);
     }
 
-    public void fireSim(int id,EntitySim sim){
+    public void fireSim(int id, SimEntity sim){
         getFaction(id).fireSim(sim);
     }
 
