@@ -1,6 +1,6 @@
 package com.resimulators.simukraft.client.gui;
 
-import com.resimulators.simukraft.SimuKraft;
+
 import com.resimulators.simukraft.common.entity.sim.SimContainer;
 import com.resimulators.simukraft.Reference;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
@@ -82,7 +82,6 @@ public class GuiSimInventory extends DisplayEffectsScreen<SimContainer> {
         int left = this.guiLeft;
         int top = this.guiTop;
         this.func_238474_b_(stack, left, top, 0, 0, this.xSize, this.ySize);
-        //SimuKraft.LOGGER().debug(this.sim.getName().getString());
         if (this.sim != null)
             renderEntity(left + 51, top + 75, 30, (float) (left + 51) - this.oldMouseX, (float) (top + 75 - 50) - this.oldMouseY, this.sim);
     }

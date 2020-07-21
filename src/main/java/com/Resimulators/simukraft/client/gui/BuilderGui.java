@@ -62,6 +62,7 @@ public class BuilderGui extends BaseJobGui {
             if (!isHired()) {
                 Build.field_230693_o_ = false;
             }
+            CustomBack.field_230694_p_ = false;
         }
     }
 

@@ -7,6 +7,7 @@ import com.resimulators.simukraft.common.tileentity.ITile;
 import com.resimulators.simukraft.common.world.Faction;
 import com.resimulators.simukraft.common.world.SavedWorldData;
 import com.resimulators.simukraft.handlers.FoodStats;
+import com.resimulators.simukraft.init.ModJobs;
 import com.resimulators.simukraft.utils.Utils;
 import com.resimulators.simukraft.common.entity.goals.PickupItemGoal;
 import com.resimulators.simukraft.common.entity.goals.TalkingToPlayerGoal;
@@ -23,6 +24,7 @@ import net.minecraft.entity.player.PlayerModelPart;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.*;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
@@ -206,17 +208,17 @@ public class SimEntity extends AgeableEntity implements INPC {
         if (compound.contains("Status"))
             this.setStatus(compound.getString("Status"));
         this.foodStats.read(compound);
-        CompoundNBT nbt = compound.getList("job", Constants.NBT.TAG_LIST).getCompound(0);
-        /* FIXME: This is causing Sims not to load on world load.
-        INBT nbts = compound.get("job");
-        String jobType = ((ListNBT)nbts).getCompound(0).getString("jobname");
+       ListNBT nbt = compound.getList("job", Constants.NBT.TAG_COMPOUND);
+        /* FIXME: This is causing Sims not to load on world load.*/
+
+        String jobType = nbt.getCompound(0).getString("jobname");
         if (!jobType.equals("")){
         job = ModJobs.JOB_LOOKUP.get(jobType).apply(this);
         }
 
         if (compound.contains("job") && !jobType.equals("")){
             this.job.readFromNbt((ListNBT) compound.get("job"));
-        }*/
+        }
         controller = new WorkingController(this);
         if (compound.contains("working controller")) {
             controller.deserializeNBT(compound.getCompound("working controller"));

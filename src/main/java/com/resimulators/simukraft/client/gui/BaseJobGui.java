@@ -60,6 +60,7 @@ public class BaseJobGui extends Screen {
             showFiring();
         })));
         func_230480_a_(ShowEmployees = new Button(width - 120, height - 60, 110, 20, new StringTextComponent("Show Employees"), (ShowEmployees -> {
+            //TODO: Implement show employes system to show all employees that have a job
         })));
         Minecraft.getInstance().world.getTileEntity(pos);
         if (((ITile) Minecraft.getInstance().world.getTileEntity(pos)).getHired()) {
@@ -114,8 +115,10 @@ public class BaseJobGui extends Screen {
 
     private void showFiring() {
         hideAll();
+        state = State.Firing;
         Confirm.field_230694_p_ = true;
         Back.field_230694_p_ = true;
+
 
     }
 

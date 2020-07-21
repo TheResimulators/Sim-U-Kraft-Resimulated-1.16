@@ -18,8 +18,8 @@ import net.minecraft.loot.LootParameters;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
@@ -28,7 +28,7 @@ import java.util.EnumSet;
 import java.util.List;
 
 public class MinerGoal extends MoveToBlockGoal {
-    private EntitySim sim;
+    private SimEntity sim;
     private int tick;
     private IJob job;
     private BlockPos markerPos;
@@ -43,7 +43,7 @@ public class MinerGoal extends MoveToBlockGoal {
     private int column = 0;
     private int row = 0;
     private int layer = 0;
-    public MinerGoal(EntitySim sim) {
+    public MinerGoal(SimEntity sim) {
         super(sim,sim.getAIMoveSpeed()*2,20);
         job = sim.getJob();
         this.sim = sim;
@@ -171,7 +171,7 @@ public class MinerGoal extends MoveToBlockGoal {
 
            shouldMoveTo(sim.world,minepos);
             if (!shouldMoveTo(sim.world,minepos)){
-                sim.getLookController().setLookPosition(new Vec3d(minepos));
+                sim.getLookController().setLookPosition(new Vector3d(minepos.getX(),minepos.getY(),minepos.getZ()));
 
             Block block = sim.getEntityWorld().getBlockState(minepos).getBlock();
             if (block == Blocks.AIR){
@@ -208,7 +208,7 @@ public class MinerGoal extends MoveToBlockGoal {
     protected boolean shouldMoveTo(IWorldReader worldIn, BlockPos minepos) {
         this.destinationBlock = minepos;
         //sim.getNavigator().tryMoveToXYZ(minepos.getX(),minepos.getY()+1,minepos.getZ(),sim.getAIMoveSpeed());
-        return !sim.getPosition().withinDistance(new Vec3i(minepos.getX(),minepos.getY(),minepos.getZ()), 5);
+        return !(sim.getPositionVec().distanceTo(new Vector3d(minepos.getX(),minepos.getY(),minepos.getZ())) < 5);
     }
 
 
