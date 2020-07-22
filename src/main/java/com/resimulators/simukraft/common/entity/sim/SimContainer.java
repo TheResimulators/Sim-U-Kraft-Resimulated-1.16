@@ -1,5 +1,6 @@
 package com.resimulators.simukraft.common.entity.sim;
 
+import com.resimulators.simukraft.common.enums.JobEnum;
 import com.resimulators.simukraft.init.ModContainers;
 import com.resimulators.simukraft.utils.Utils;
 import com.mojang.datafixers.util.Pair;
@@ -31,6 +32,7 @@ public class SimContainer extends Container {
     public final boolean isLocalWorld;
     private final SimEntity sim;
     private final PlayerEntity player;
+    public String job;
     SimInventory inventory;
 
     public SimContainer(int windowID, boolean localWorld, SimEntity sim, PlayerInventory playerInventory) {
@@ -75,7 +77,7 @@ public class SimContainer extends Container {
             }
         }
 
-        for(int i1 = 0; i1 < 9; ++i1) {
+        for (int i1 = 0; i1 < 9; ++i1) {
             this.addSlot(new Slot(playerInventory, i1, 8 + i1 * 18, 200));
         }
 
@@ -120,7 +122,24 @@ public class SimContainer extends Container {
                 return 3;
             }
         });
+
+        trackInt(new IntReferenceHolder() {
+            @Override
+            public int get() {
+                if (sim.getJob() != null){
+                    return JobEnum.BUILDER.id;
+                }else {
+                    return JobEnum.UNEMPLOYED.id;
+                }
+            }
+
+            @Override
+            public void set(int id) {
+                job = JobEnum.getEnumById(id).name;
+            }
+        });
     }
+
 
     @Override
     public boolean canInteractWith(PlayerEntity playerIn) {

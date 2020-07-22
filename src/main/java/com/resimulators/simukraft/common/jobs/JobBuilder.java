@@ -1,6 +1,7 @@
 package com.resimulators.simukraft.common.jobs;
 
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
+import com.resimulators.simukraft.common.enums.JobEnum;
 import com.resimulators.simukraft.common.jobs.core.EnumJobState;
 import com.resimulators.simukraft.common.jobs.core.IJob;
 import net.minecraft.entity.ai.goal.Goal;
@@ -23,8 +24,8 @@ public class JobBuilder implements IJob {
 
 
     @Override
-    public String name() {
-        return "builder";
+    public JobEnum jobType() {
+        return JobEnum.BUILDER;
     }
 
     @Override
@@ -76,9 +77,6 @@ public class JobBuilder implements IJob {
 
     @Override
     public ListNBT writeToNbt(ListNBT nbt) {
-        CompoundNBT name = new CompoundNBT();
-        name.putString("jobname", name());
-        nbt.add(name);
         CompoundNBT ints = new CompoundNBT();
         ints.putInt("periodsworked", periodsworked);
         nbt.add(ints);

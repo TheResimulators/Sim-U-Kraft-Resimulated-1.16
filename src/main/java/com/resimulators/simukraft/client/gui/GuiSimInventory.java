@@ -59,11 +59,15 @@ public class GuiSimInventory extends DisplayEffectsScreen<SimContainer> {
         super.func_231160_c_();
         this.sim = container.getSim();
         this.sim.setCustomName(new StringTextComponent(this.field_230704_d_.getString()));
+
     }
 
     @Override
     protected void func_230451_b_(MatrixStack stack, int x, int y) {
+        String name = container.job;
+
         this.field_230712_o_.func_238421_b_(stack, this.field_230704_d_.getString(), 80f, 8f, 4210752);
+        this.field_230712_o_.func_238421_b_(stack,"Job: " + name,80f, 30f, 4210752);
     }
 
     @Override

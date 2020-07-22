@@ -1,5 +1,6 @@
 package com.resimulators.simukraft.common.jobs.core;
 
+import com.resimulators.simukraft.common.enums.JobEnum;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.math.BlockPos;
 
@@ -10,7 +11,7 @@ public interface IJob {
     //set the state that the job is in. i.e when the sim starts to work set it to going to work. then the ai can use it to determine what to do when etc.
     void setState(EnumJobState state);
 
-    String name();
+    JobEnum jobType();
     //interval of ticks between work periods,
     int intervalTime();
     //how many ticks to work for each time they work period

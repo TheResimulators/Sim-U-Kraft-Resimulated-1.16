@@ -573,6 +573,7 @@ public class SimEntity extends AgeableEntity implements INPC {
 
     public void setJob(IJob job) {
         this.job = job;
+        getJob();
     }
 
     public IJob getJob() {
