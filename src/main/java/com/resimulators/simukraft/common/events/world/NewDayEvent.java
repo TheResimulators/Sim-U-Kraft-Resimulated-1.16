@@ -81,7 +81,6 @@ public class NewDayEvent implements INBTSerializable<CompoundNBT> {
             if (faction.getUnemployedSims().isEmpty() || true) {
                 ArrayList<SimEntity> simsToSpawn = new ArrayList<>();
                 simsToSpawn.add(new SimEntity(ModEntities.ENTITY_SIM, world));
-                simsToSpawn.add(new SimEntity(ModEntities.ENTITY_SIM, world));
                 for (SimEntity sim : simsToSpawn) {
                     PlayerEntity player = sWorld.getPlayers().get(random.nextInt(sWorld.getPlayers().size()));
                     ArrayList<BlockPos> blocks = BlockUtils.getBlocksAroundPosition(player.func_233580_cy_(), 10);
