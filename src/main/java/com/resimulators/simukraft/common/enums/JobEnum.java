@@ -3,9 +3,9 @@ package com.resimulators.simukraft.common.enums;
 
 public enum JobEnum {
 
-    UNEMPLOYED("Unemployed",0),
-    BUILDER("Builder",1),
-    MINER("Miner", 2);
+    UNEMPLOYED("Unemployed",1),
+    BUILDER("Builder",2),
+    MINER("Miner", 3);
 
 
     public String name;
