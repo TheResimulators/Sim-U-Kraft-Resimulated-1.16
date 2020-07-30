@@ -6,6 +6,7 @@ import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.tileentity.ITile;
 import com.resimulators.simukraft.packets.SimFireRequest;
 import com.resimulators.simukraft.packets.SimHireRequest;
+import com.sun.java.accessibility.util.java.awt.TextComponentTranslator;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.Widget;
@@ -130,7 +131,7 @@ public class BaseJobGui extends Screen {
             if (isHired()) {
                 field_230712_o_.func_238421_b_(stack, "Level: WIP", (float) 20, 70, Color.white.getRGB());
                 if (hiredId != 0) {
-                    field_230712_o_.func_238421_b_(stack, "Name: " + Minecraft.getInstance().world.getEntityByID(hiredId).getDisplayName(), (float) 20, 50, Color.white.getRGB());
+                    field_230712_o_.func_238421_b_(stack, "Name: " + Minecraft.getInstance().world.getEntityByID(hiredId).getDisplayName().getString(), (float) 20, 50, Color.white.getRGB());
                 }
             }
         } else if (state == State.HIRE_INFO) {
@@ -143,7 +144,7 @@ public class BaseJobGui extends Screen {
         if (state == State.Firing) {
             field_230712_o_.func_238421_b_(stack, "Level: WIP", (float) 20, 70, Color.white.getRGB());
             if (hiredId != 0) {
-                field_230712_o_.func_238421_b_(stack, "Name: " + Minecraft.getInstance().world.getEntityByID(hiredId).getDisplayName(), (float) 20, 50, Color.white.getRGB());
+                field_230712_o_.func_238421_b_(stack, "Name: " + Minecraft.getInstance().world.getEntityByID(hiredId).getDisplayName().getString(), (float) 20, 50, Color.white.getRGB());
             }
         }
 
