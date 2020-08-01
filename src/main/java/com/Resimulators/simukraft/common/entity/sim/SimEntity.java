@@ -209,7 +209,6 @@ public class SimEntity extends AgeableEntity implements INPC {
             this.setStatus(compound.getString("Status"));
         this.foodStats.read(compound);
        ListNBT nbt = compound.getList("job", Constants.NBT.TAG_COMPOUND);
-        /* FIXME: This is causing Sims not to load on world load.*/
 
         String jobType = nbt.getCompound(0).getString("jobname");
         if (!jobType.equals("")){
