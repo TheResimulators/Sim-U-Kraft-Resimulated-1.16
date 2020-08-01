@@ -138,7 +138,7 @@ public class BaseJobGui extends Screen {
             field_230712_o_.func_238421_b_(stack, "Hiring", (float) (field_230708_k_ / 2 - field_230712_o_.getStringWidth("Hiring") / 2), 10, Color.white.getRGB());
         } else if (state == State.SIM_INFO) {
             field_230712_o_.func_238421_b_(stack, "Info", (float) (field_230708_k_ / 2 - field_230712_o_.getStringWidth("Info") / 2), 10, Color.white.getRGB());
-            field_230712_o_.func_238421_b_(stack, "Name: " + selectedsim.getDisplayName(), (float) 20, 50, Color.white.getRGB());
+            field_230712_o_.func_238421_b_(stack, "Name: " + selectedsim.getDisplayName().getString(), (float) 20, 50, Color.white.getRGB());
             field_230712_o_.func_238421_b_(stack, "Level: WIP", (float) 20, 70, Color.white.getRGB());
         }
         if (state == State.Firing) {
