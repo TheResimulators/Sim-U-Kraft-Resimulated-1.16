@@ -7,6 +7,7 @@ import com.resimulators.simukraft.client.render.MarkerEntityRender;
 import com.resimulators.simukraft.common.entity.sim.SimInformationOverlay;
 import com.resimulators.simukraft.common.events.world.MarkerBrokenEvent;
 import com.resimulators.simukraft.common.events.world.NewDayEvent;
+import com.resimulators.simukraft.common.events.world.SimDeathEvent;
 import com.resimulators.simukraft.handlers.StructureHandler;
 import com.resimulators.simukraft.init.*;
 import com.resimulators.simukraft.init.ModBlocks;
@@ -16,6 +17,7 @@ import com.resimulators.simukraft.proxy.ClientProxy;
 import com.resimulators.simukraft.proxy.IProxy;
 import com.resimulators.simukraft.proxy.ServerProxy;
 import net.minecraft.block.Block;
+import net.minecraft.client.Minecraft;
 import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraftforge.api.distmarker.Dist;
@@ -63,6 +65,7 @@ public class SimuKraft {
         ModEntities.registerAttributes();
         MinecraftForge.EVENT_BUS.register(new NewDayEvent());
         MinecraftForge.EVENT_BUS.register(new FactionEvents());
+        MinecraftForge.EVENT_BUS.register(new SimDeathEvent());
         MinecraftForge.EVENT_BUS.register(MarkerBrokenEvent.class);
         Network.handler.init();
     }

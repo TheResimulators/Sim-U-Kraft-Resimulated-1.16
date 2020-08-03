@@ -147,7 +147,7 @@ public class Faction {
                     simids.add(entity.getEntityId());
                 }
             } else {
-                SimuKraft.LOGGER().error("Error: Unemployed entity doesn't exist in faction. Please contact the author.");
+                SimuKraft.LOGGER().error("Error: Unemployed entity doesn't exist in faction while trying to get Unemployed Sims. Please contact the author.");
             }
         }
         return simids;

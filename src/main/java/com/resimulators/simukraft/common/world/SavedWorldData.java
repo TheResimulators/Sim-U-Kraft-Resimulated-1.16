@@ -121,8 +121,8 @@ public class SavedWorldData extends WorldSavedData {
     }
 
     public ArrayList<Faction> getFactions() {
-        ArrayList<Faction> allFactions = new ArrayList<Faction>(factions.values());
-        return allFactions;
+        return new ArrayList<>(factions.values());
+
     }
 
     public Faction getFactionWithPlayer(UUID id){
@@ -134,6 +134,15 @@ public class SavedWorldData extends WorldSavedData {
         return null;
     }
 
+    public Faction getFactionWithSim(UUID id){
+        for(Faction faction: factions.values()){
+            if(faction.containsSim(id)){
+                return faction;
+            }
+        }
+        return null;
+
+    }
     public void addSimToFaction(int id, SimEntity sim){
         factions.get(id).addSim(sim);
         markDirty();

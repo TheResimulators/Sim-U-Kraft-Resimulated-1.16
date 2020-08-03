@@ -47,7 +47,7 @@ public class SimFirePacket implements IMessage {
         SavedWorldData.get(Minecraft.getInstance().player.world).getFaction(factionId).fireSim(Minecraft.getInstance().world.getEntityByID(simId).getUniqueID());
         ((SimEntity)Minecraft.getInstance().world.getEntityByID(simId)).setJob(null);
         if ( Minecraft.getInstance().world.getTileEntity(pos) != null){
-        ((ITile) Minecraft.getInstance().world.getTileEntity(pos)).setHired(false);
+        ((ITile)Minecraft.getInstance().world.getTileEntity(pos)).setHired(false);
         ((ITile)Minecraft.getInstance().world.getTileEntity(pos)).setSimId(null);
     }}
 }
