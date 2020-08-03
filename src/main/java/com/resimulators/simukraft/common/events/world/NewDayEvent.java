@@ -7,9 +7,11 @@ import com.resimulators.simukraft.packets.UpdateSimPacket;
 import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.init.ModEntities;
 import com.resimulators.simukraft.utils.BlockUtils;
+import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.util.INBTSerializable;
@@ -122,7 +124,7 @@ public class NewDayEvent implements INBTSerializable<CompoundNBT> {
             // set the sim's position
             sim.setPosition(x, y, z);
             world.addEntity(sim);// spawn entity
-
+            sim.onInitialSpawn(world, world.getDifficultyForLocation(spawnPos), SpawnReason.TRIGGERED, null, null);
             SimuKraft.LOGGER().debug("entity spawned");
             return true;
         }
