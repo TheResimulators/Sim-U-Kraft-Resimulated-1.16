@@ -6,25 +6,22 @@ import com.resimulators.simukraft.common.tileentity.TileMarker;
 import com.resimulators.simukraft.common.tileentity.TileMiner;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
+import net.minecraftforge.fml.RegistryObject;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ModTileEntities {
-    private static List<TileEntityType> REGISTRY = new ArrayList<>();
+    private static final DeferredRegister<TileEntityType<?>> REGISTRY = DeferredRegister.create(ForgeRegistries.TILE_ENTITIES, Reference.MODID);
 
-    public static final TileEntityType<TileConstructor> CONSTRUCTOR = register(TileEntityType.Builder.create(TileConstructor::new, ModBlocks.CONSTRUCTOR_BOX), "constructor");
-    public static final TileEntityType<TileMarker> MARKER = register(TileEntityType.Builder.create(TileMarker::new, ModBlocks.MARKER), "marker");
-    public static final TileEntityType<TileMiner> MINER = register(TileEntityType.Builder.create(TileMiner::new, ModBlocks.MINE_BOX), "miner");
-  
-    private static <T extends TileEntity> TileEntityType<T> register(TileEntityType.Builder<T> builder, String name) {
-        TileEntityType<T> type = builder.build(null);
-        type.setRegistryName(Reference.MODID, name);
-        REGISTRY.add(type);
-        return type;
+    public ModTileEntities() {
+        REGISTRY.register(FMLJavaModLoadingContext.get().getModEventBus());
     }
 
-    public static List<TileEntityType> getRegistry() {
-        return REGISTRY;
-    }
+    public static final RegistryObject<TileEntityType<TileConstructor>> CONSTRUCTOR = REGISTRY.register("constructor", () -> TileEntityType.Builder.create(TileConstructor::new, ModBlocks.CONSTRUCTOR_BOX.get()).build(null));
+    public static final RegistryObject<TileEntityType<TileMarker>> MARKER = REGISTRY.register("marker", () -> TileEntityType.Builder.create(TileMarker::new, ModBlocks.MARKER.get()).build(null));
+    public static final RegistryObject<TileEntityType<TileMiner>> MINER = REGISTRY.register("miner", () -> TileEntityType.Builder.create(TileMiner::new, ModBlocks.MINE_BOX.get()).build(null));
 }

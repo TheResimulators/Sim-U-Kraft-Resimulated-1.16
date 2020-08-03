@@ -40,7 +40,7 @@ public class TileMiner extends TileEntity implements ITile {
     }
 
     public TileMiner() {
-        super(ModTileEntities.MINER);
+        super(ModTileEntities.MINER.get());
     }
 
     @Override

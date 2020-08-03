@@ -14,17 +14,28 @@ public class Lang extends LanguageProvider {
 
     @Override
     protected void addTranslations() {
-        add(ModBlocks.CONSTRUCTOR_BOX, "Constructor Box");
-        add(ModBlocks.CONTROL_BOX, "Control Box");
-        add(ModBlocks.FARM_BOX, "Farm Box");
-        for (DyeColor color : DyeColor.values()) {
-            if (color.equals(DyeColor.LIGHT_GRAY)) continue;
-            add(ModBlocks.LIGHT_BLOCKS.get("light_" + color.toString()), color.toString() + " Light");
-        }
-        add(ModBlocks.MINE_BOX, "Mine Box");
-        add(ModBlocks.CHEESE_BLOCK, "Cheese Block");
-        add(ModBlocks.COMPOSITE_BRICK, "Composite Brick");
-        add(ModBlocks.RAINBOW_LIGHT, "Rainbow Light");
+        add(ModBlocks.CONSTRUCTOR_BOX.get(), "Constructor Box");
+        add(ModBlocks.CONTROL_BOX.get(), "Control Box");
+        add(ModBlocks.FARM_BOX.get(), "Farm Box");
+        add(ModBlocks.MINE_BOX.get(), "Mine Box");
+        add(ModBlocks.CHEESE_BLOCK.get(), "Cheese Block");
+        add(ModBlocks.COMPOSITE_BRICK.get(), "Composite Brick");
+        add(ModBlocks.RAINBOW_LIGHT.get(), "Rainbow Light");
+        add(ModBlocks.LIGHT_WHITE.get(), "White Light");
+        add(ModBlocks.LIGHT_ORANGE.get(), "Orange Light");
+        add(ModBlocks.LIGHT_MAGENTA.get(), "Magenta Light");
+        add(ModBlocks.LIGHT_LIGHT_BLUE.get(), "Light Blue Light");
+        add(ModBlocks.LIGHT_YELLOW.get(), "Yellow Light");
+        add(ModBlocks.LIGHT_LIME.get(), "Lime Light");
+        add(ModBlocks.LIGHT_PINK.get(), "Pink Light");
+        add(ModBlocks.LIGHT_GRAY.get(), "Gray Light");
+        add(ModBlocks.LIGHT_CYAN.get(), "Cyan Light");
+        add(ModBlocks.LIGHT_PURPLE.get(), "Purple Light");
+        add(ModBlocks.LIGHT_BLUE.get(), "Blue Light");
+        add(ModBlocks.LIGHT_BROWN.get(), "Brown Light");
+        add(ModBlocks.LIGHT_GREEN.get(), "Green Light");
+        add(ModBlocks.LIGHT_RED.get(), "Red Light");
+        add(ModBlocks.LIGHT_BLACK.get(), "Black Light");
         add(SimUTab.tab.getTranslationKey(), "Sim-U-Kraft");
 
 

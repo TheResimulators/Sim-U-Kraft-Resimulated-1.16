@@ -22,6 +22,7 @@ import net.minecraftforge.fml.common.Mod;
 
 import java.util.List;
 
+//TODO: fabbe50: update to deferred registry !lowprio
 @Mod.EventBusSubscriber(modid = Reference.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ModEntities {
     private static List<EntityType> entities = Lists.newArrayList();

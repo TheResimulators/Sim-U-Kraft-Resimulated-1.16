@@ -13,7 +13,7 @@ public class TileConstructor extends TileEntity implements ITile {
     private UUID simID;
 
     public TileConstructor() {
-        super(ModTileEntities.CONSTRUCTOR);
+        super(ModTileEntities.CONSTRUCTOR.get());
     }
 
     @Override

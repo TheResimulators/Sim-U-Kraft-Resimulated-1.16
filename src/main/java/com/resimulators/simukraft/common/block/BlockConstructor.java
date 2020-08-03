@@ -26,8 +26,8 @@ import net.minecraftforge.fml.network.NetworkDirection;
 import java.util.ArrayList;
 
 public class BlockConstructor extends BlockBase {
-    public BlockConstructor(final Properties properties, String name) {
-        super(properties, name);
+    public BlockConstructor(final Properties properties) {
+        super(properties);
     }
 
     @Override

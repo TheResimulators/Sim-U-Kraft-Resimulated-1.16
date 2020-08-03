@@ -28,8 +28,8 @@ import java.util.ArrayList;
 public class BlockMineBox extends BlockBase {
 
 
-    public BlockMineBox(Properties properties, String name) {
-        super(properties, name);
+    public BlockMineBox(Properties properties) {
+        super(properties);
     }
 
 

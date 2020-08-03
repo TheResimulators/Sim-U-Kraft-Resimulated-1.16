@@ -26,7 +26,7 @@ public class TileMarker extends TileEntity {
 
 
     public TileMarker() {
-        super(ModTileEntities.MARKER);
+        super(ModTileEntities.MARKER.get());
     }
 
     @Override

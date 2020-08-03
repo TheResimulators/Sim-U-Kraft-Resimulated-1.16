@@ -1,47 +1,59 @@
 package com.resimulators.simukraft.init;
+import com.resimulators.simukraft.Reference;
 import com.resimulators.simukraft.SimUTab;
 import com.resimulators.simukraft.SimuKraft;
+import com.resimulators.simukraft.common.block.BlockLight;
+import com.resimulators.simukraft.common.item.ItemStructureTest;
+import com.resimulators.simukraft.handlers.SimUKraftPacketHandler;
+import com.sun.org.apache.regexp.internal.RE;
 import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.item.BlockItem;
+import net.minecraft.item.DyeColor;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
+import net.minecraftforge.fml.RegistryObject;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ModItems {
-    private static List<Item> REGISTRY = new ArrayList<>();
-
-    //public static final Item TEST_ITEM = register(new ItemTest(new Item.Properties()).setRegistryName(Reference.MODID, "test_item"), SimUTab.tab);
+    private static final DeferredRegister<Item> REGISTRY = DeferredRegister.create(ForgeRegistries.ITEMS, Reference.MODID);
 
     public ModItems() {
-        for (Block block : ModBlocks.getRegistry()) {
-            register(block, SimUTab.tab);
-        }
+        REGISTRY.register(FMLJavaModLoadingContext.get().getModEventBus());
     }
 
-    private static Item register(Block block, ItemGroup group) {
-        if (block != null && block.getRegistryName() != null) {
-            BlockItem temp = new BlockItem(block, new Item.Properties().group(group));
-            REGISTRY.add(temp.setRegistryName(block.getRegistryName()));
-            SimuKraft.LOGGER().info("Registered item: " + temp.getRegistryName());
-            return temp;
-        } else
-            SimuKraft.LOGGER().error("Tried registering a item-block without a registry name. Skipping.");
-        return null;
-    }
+    //Item Blocks
+    public static final RegistryObject<Item> LIGHT_WHITE = REGISTRY.register("light_white", () -> new BlockItem(ModBlocks.LIGHT_WHITE.get(), new Item.Properties().group(SimUTab.tab)));
+    public static final RegistryObject<Item> LIGHT_ORANGE = REGISTRY.register("light_orange", () -> new BlockItem(ModBlocks.LIGHT_ORANGE.get(), new Item.Properties().group(SimUTab.tab)));
+    public static final RegistryObject<Item> LIGHT_MAGENTA = REGISTRY.register("light_magenta", () -> new BlockItem(ModBlocks.LIGHT_MAGENTA.get(), new Item.Properties().group(SimUTab.tab)));
+    public static final RegistryObject<Item> LIGHT_LIGHT_BLUE = REGISTRY.register("light_light_blue", () -> new BlockItem(ModBlocks.LIGHT_LIGHT_BLUE.get(), new Item.Properties().group(SimUTab.tab)));
+    public static final RegistryObject<Item> LIGHT_YELLOW = REGISTRY.register("light_yellow", () -> new BlockItem(ModBlocks.LIGHT_YELLOW.get(), new Item.Properties().group(SimUTab.tab)));
+    public static final RegistryObject<Item> LIGHT_LIME = REGISTRY.register("light_lime", () -> new BlockItem(ModBlocks.LIGHT_LIME.get(), new Item.Properties().group(SimUTab.tab)));
+    public static final RegistryObject<Item> LIGHT_PINK = REGISTRY.register("light_pink", () -> new BlockItem(ModBlocks.LIGHT_PINK.get(), new Item.Properties().group(SimUTab.tab)));
+    public static final RegistryObject<Item> LIGHT_GRAY = REGISTRY.register("light_gray", () -> new BlockItem(ModBlocks.LIGHT_GRAY.get(), new Item.Properties().group(SimUTab.tab)));
+    public static final RegistryObject<Item> LIGHT_CYAN = REGISTRY.register("light_cyan", () -> new BlockItem(ModBlocks.LIGHT_CYAN.get(), new Item.Properties().group(SimUTab.tab)));
+    public static final RegistryObject<Item> LIGHT_PURPLE = REGISTRY.register("light_purple", () -> new BlockItem(ModBlocks.LIGHT_PURPLE.get(), new Item.Properties().group(SimUTab.tab)));
+    public static final RegistryObject<Item> LIGHT_BLUE = REGISTRY.register("light_blue", () -> new BlockItem(ModBlocks.LIGHT_BLUE.get(), new Item.Properties().group(SimUTab.tab)));
+    public static final RegistryObject<Item> LIGHT_BROWN = REGISTRY.register("light_brown", () -> new BlockItem(ModBlocks.LIGHT_BROWN.get(), new Item.Properties().group(SimUTab.tab)));
+    public static final RegistryObject<Item> LIGHT_GREEN = REGISTRY.register("light_green", () -> new BlockItem(ModBlocks.LIGHT_GREEN.get(), new Item.Properties().group(SimUTab.tab)));
+    public static final RegistryObject<Item> LIGHT_RED = REGISTRY.register("light_red", () -> new BlockItem(ModBlocks.LIGHT_RED.get(), new Item.Properties().group(SimUTab.tab)));
+    public static final RegistryObject<Item> LIGHT_BLACK = REGISTRY.register("light_black", () -> new BlockItem(ModBlocks.LIGHT_BLACK.get(), new Item.Properties().group(SimUTab.tab)));
+    public static final RegistryObject<Item> COMPOSITE_BRICK = REGISTRY.register("composite_brick", () -> new BlockItem(ModBlocks.COMPOSITE_BRICK.get(), new Item.Properties().group(SimUTab.tab)));
+    public static final RegistryObject<Item> CHEESE_BLOCK = REGISTRY.register("cheese_block", () -> new BlockItem(ModBlocks.CHEESE_BLOCK.get(), new Item.Properties().group(SimUTab.tab)));
+    public static final RegistryObject<Item> CONSTRUCTOR_BOX = REGISTRY.register("constructor_box", () -> new BlockItem(ModBlocks.CONSTRUCTOR_BOX.get(), new Item.Properties().group(SimUTab.tab)));
+    public static final RegistryObject<Item> CONTROL_BOX = REGISTRY.register("control_box", () -> new BlockItem(ModBlocks.CONTROL_BOX.get(), new Item.Properties().group(SimUTab.tab)));
+    public static final RegistryObject<Item> FARM_BOX = REGISTRY.register("farm_box", () -> new BlockItem(ModBlocks.FARM_BOX.get(), new Item.Properties().group(SimUTab.tab)));
+    public static final RegistryObject<Item> RAINBOW_LIGHT = REGISTRY.register("rainbow_light", () -> new BlockItem(ModBlocks.RAINBOW_LIGHT.get(), new Item.Properties().group(SimUTab.tab)));
+    public static final RegistryObject<Item> MINE_BOX = REGISTRY.register("mine_box", () -> new BlockItem(ModBlocks.MINE_BOX.get(), new Item.Properties().group(SimUTab.tab)));
+    public static final RegistryObject<Item> MARKER = REGISTRY.register("marker", () -> new BlockItem(ModBlocks.MARKER.get(), new Item.Properties().group(SimUTab.tab)));
 
-    public static Item register(Item item, ItemGroup group) {
-        if (item.getRegistryName() != null) {
-            REGISTRY.add(item);
-            SimuKraft.LOGGER().info("Registered block: " + item.getRegistryName().toString());
-            return item;
-        } else
-            SimuKraft.LOGGER().error("Tried registering a item without a registry name. Skipping.");
-        return null;
-    }
-
-    public static List<Item> getRegistry() {
-        return REGISTRY;
-    }
+    //Items
+    //public static final Item TEST_ITEM = register(new ItemTest(new Item.Properties()).setRegistryName(Reference.MODID, "test_item"), SimUTab.tab);
 }

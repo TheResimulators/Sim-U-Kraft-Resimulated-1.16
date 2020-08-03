@@ -89,32 +89,5 @@ public class SimuKraft {
     public void onServerStarting(FMLServerStartingEvent event) {
         StructureHandler.createTemplateManager(event.getServer());
     }
-
-    @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
-    public static class RegistryEvents {
-        @SubscribeEvent
-        public static void onBlocksRegistry(final RegistryEvent.Register<Block> event) {
-            new ModBlocks();
-            for (Block block : ModBlocks.getRegistry()) {
-                event.getRegistry().register(block);
-            }
-        }
-
-        @SubscribeEvent
-        public static void onTileEntityRegistry(final RegistryEvent.Register<TileEntityType<?>> event) {
-            new ModTileEntities();
-            for (TileEntityType type : ModTileEntities.getRegistry()) {
-                event.getRegistry().register(type);
-            }
-        }
-
-        @SubscribeEvent
-        public static void OnItemEntityRegistry(final RegistryEvent.Register<Item> event) {
-            new ModItems();
-            for (Item item : ModItems.getRegistry()) {
-                event.getRegistry().register(item);
-            }
-        }
-    }
 }
 

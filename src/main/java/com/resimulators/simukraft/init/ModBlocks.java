@@ -8,6 +8,10 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.material.MaterialColor;
 import net.minecraft.item.DyeColor;
 import net.minecraftforge.common.ToolType;
+import net.minecraftforge.fml.RegistryObject;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.ObjectHolder;
 
 import java.util.ArrayList;
@@ -15,44 +19,39 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@ObjectHolder(Reference.MODID)
 public final class ModBlocks {
-    private static List<Block> REGISTRY = new ArrayList<>();
-    //Basic Blocks
-    public static final Block COMPOSITE_BRICK = register(new BlockBase(Block.Properties.create(Material.ROCK,MaterialColor.STONE),"composite_brick"));
-    public static final Block CHEESE_BLOCK = register(new BlockBase(Block.Properties.create(Material.SPONGE,MaterialColor.YELLOW),"cheese_block"));
-
-    //Sim-u-kraft Structure Blocks
-    public static Map<String, Block> LIGHT_BLOCKS = new HashMap<>();
-    public static final Block CONSTRUCTOR_BOX = register(new BlockConstructor(Block.Properties.create(Material.WOOD, MaterialColor.BROWN).harvestTool(ToolType.AXE),"constructor_box"));
-    public static final Block CONTROL_BOX = register(new BlockControlBox(Block.Properties.create(Material.ROCK,MaterialColor.GRAY).harvestTool(ToolType.PICKAXE),"control_box"));
-    public static final Block FARM_BOX = register(new BlockFarmBox(Block.Properties.create(Material.ROCK,MaterialColor.GRAY),"farm_box"));
-    public static final Block RAINBOW_LIGHT = register(new BlockLight(Block.Properties.create(Material.WOOL),"rainbow_light"));
-    public static final Block MINE_BOX = register(new BlockMineBox(Block.Properties.create(Material.WOOD),"mine_box"));
-
-    //special blocks
-    public static final Block MARKER = register(new BlockMarker(Block.Properties.create(Material.WOOD).harvestTool(ToolType.AXE).harvestLevel(1),"marker"));
+    private static final DeferredRegister<Block> REGISTRY = DeferredRegister.create(ForgeRegistries.BLOCKS, Reference.MODID);
 
     public ModBlocks() {
-        for (DyeColor color : DyeColor.values()) {
-            if (color.equals(DyeColor.LIGHT_GRAY))continue;
-            BlockLight LIGHT = new BlockLight(Block.Properties.create(Material.WOOL),"light_"+color.toString());
-            LIGHT_BLOCKS.put("light_"+color.toString(),LIGHT);
-            register(LIGHT);
-        }
+        REGISTRY.register(FMLJavaModLoadingContext.get().getModEventBus());
     }
 
-    private static Block register(Block block) {
-        if (block.getRegistryName() != null) {
-            REGISTRY.add(block);
-            SimuKraft.LOGGER().info("Registered block: " + block.getRegistryName().toString());
-            return block;
-        } else
-            SimuKraft.LOGGER().error("Tried registering a block without a registry name. Skipping.");
-        return null;
-    }
+    //Basic Blocks
+    public static final RegistryObject<Block> COMPOSITE_BRICK = REGISTRY.register("composite_brick", () -> new BlockBase(Block.Properties.create(Material.ROCK, MaterialColor.STONE)));
+    public static final RegistryObject<Block> CHEESE_BLOCK = REGISTRY.register("cheese_block", () -> new BlockBase(Block.Properties.create(Material.SPONGE,MaterialColor.YELLOW)));
 
-    public static List<Block> getRegistry() {
-        return REGISTRY;
-    }
+    //Sim-u-kraft Structure Blocks
+    public static final RegistryObject<Block> LIGHT_WHITE = REGISTRY.register("light_white", () -> new BlockLight(Block.Properties.create(Material.WOOL)));
+    public static final RegistryObject<Block> LIGHT_ORANGE = REGISTRY.register("light_orange", () -> new BlockLight(Block.Properties.create(Material.WOOL)));
+    public static final RegistryObject<Block> LIGHT_MAGENTA = REGISTRY.register("light_magenta", () -> new BlockLight(Block.Properties.create(Material.WOOL)));
+    public static final RegistryObject<Block> LIGHT_LIGHT_BLUE = REGISTRY.register("light_light_blue", () -> new BlockLight(Block.Properties.create(Material.WOOL)));
+    public static final RegistryObject<Block> LIGHT_YELLOW = REGISTRY.register("light_yellow", () -> new BlockLight(Block.Properties.create(Material.WOOL)));
+    public static final RegistryObject<Block> LIGHT_LIME = REGISTRY.register("light_lime", () -> new BlockLight(Block.Properties.create(Material.WOOL)));
+    public static final RegistryObject<Block> LIGHT_PINK = REGISTRY.register("light_pink", () -> new BlockLight(Block.Properties.create(Material.WOOL)));
+    public static final RegistryObject<Block> LIGHT_GRAY = REGISTRY.register("light_gray", () -> new BlockLight(Block.Properties.create(Material.WOOL)));
+    public static final RegistryObject<Block> LIGHT_CYAN = REGISTRY.register("light_cyan", () -> new BlockLight(Block.Properties.create(Material.WOOL)));
+    public static final RegistryObject<Block> LIGHT_PURPLE = REGISTRY.register("light_purple", () -> new BlockLight(Block.Properties.create(Material.WOOL)));
+    public static final RegistryObject<Block> LIGHT_BLUE = REGISTRY.register("light_blue", () -> new BlockLight(Block.Properties.create(Material.WOOL)));
+    public static final RegistryObject<Block> LIGHT_BROWN = REGISTRY.register("light_brown", () -> new BlockLight(Block.Properties.create(Material.WOOL)));
+    public static final RegistryObject<Block> LIGHT_GREEN = REGISTRY.register("light_green", () -> new BlockLight(Block.Properties.create(Material.WOOL)));
+    public static final RegistryObject<Block> LIGHT_RED = REGISTRY.register("light_red", () -> new BlockLight(Block.Properties.create(Material.WOOL)));
+    public static final RegistryObject<Block> LIGHT_BLACK = REGISTRY.register("light_black", () -> new BlockLight(Block.Properties.create(Material.WOOL)));
+    public static final RegistryObject<Block> CONSTRUCTOR_BOX = REGISTRY.register("constructor_box", () -> new BlockConstructor(Block.Properties.create(Material.WOOD, MaterialColor.BROWN).harvestTool(ToolType.AXE)));
+    public static final RegistryObject<Block> CONTROL_BOX = REGISTRY.register("control_box", () -> new BlockControlBox(Block.Properties.create(Material.ROCK,MaterialColor.GRAY).harvestTool(ToolType.PICKAXE)));
+    public static final RegistryObject<Block> FARM_BOX = REGISTRY.register("farm_box", () -> new BlockFarmBox(Block.Properties.create(Material.ROCK,MaterialColor.GRAY)));
+    public static final RegistryObject<Block> RAINBOW_LIGHT = REGISTRY.register("rainbow_light", () -> new BlockLight(Block.Properties.create(Material.WOOL)));
+    public static final RegistryObject<Block> MINE_BOX = REGISTRY.register("mine_box", () -> new BlockMineBox(Block.Properties.create(Material.WOOD)));
+
+    //special blocks
+    public static final RegistryObject<Block> MARKER = REGISTRY.register("marker", () -> new BlockMarker(Block.Properties.create(Material.WOOD).harvestTool(ToolType.AXE).harvestLevel(1)));
 }

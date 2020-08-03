@@ -21,8 +21,8 @@ import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 
 public class BlockMarker extends BlockBase {
-    public BlockMarker(Properties properties, String name) {
-        super(properties, name);
+    public BlockMarker(Properties properties) {
+        super(properties);
     }
 
 

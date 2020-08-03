@@ -67,7 +67,7 @@ public class MarkerEntityRender extends TileEntityRenderer<TileMarker> {
     }
 
     public static void register() {
-        ClientRegistry.bindTileEntityRenderer(ModTileEntities.MARKER, MarkerEntityRender::new);
+        ClientRegistry.bindTileEntityRenderer(ModTileEntities.MARKER.get(), MarkerEntityRender::new);
     }
 
 }
