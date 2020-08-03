@@ -1,6 +1,6 @@
 package com.resimulators.simukraft.common.entity.sim;
 
-import com.resimulators.simukraft.common.enums.JobEnum;
+import com.resimulators.simukraft.common.jobs.Profession;
 import com.resimulators.simukraft.init.ModContainers;
 import com.resimulators.simukraft.utils.Utils;
 import com.mojang.datafixers.util.Pair;
@@ -15,8 +15,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.IIntArray;
 import net.minecraft.util.IntReferenceHolder;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -32,7 +30,7 @@ public class SimContainer extends Container {
     public final boolean isLocalWorld;
     private final SimEntity sim;
     private final PlayerEntity player;
-    public String job;
+    public String job = Profession.UNEMPLOYED.getName();
     SimInventory inventory;
 
     public SimContainer(int windowID, boolean localWorld, SimEntity sim, PlayerInventory playerInventory) {
@@ -127,15 +125,15 @@ public class SimContainer extends Container {
             @Override
             public int get() {
                 if (sim.getJob() != null){
-                    return JobEnum.BUILDER.id;
+                    return sim.getProfession();
                 }else {
-                    return JobEnum.UNEMPLOYED.id;
+                    return Profession.UNEMPLOYED.getId();
                 }
             }
 
             @Override
             public void set(int id) {
-                job = JobEnum.getEnumById(id).name;
+                job = Profession.getNameFromID(id);
             }
         });
     }

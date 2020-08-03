@@ -2,7 +2,6 @@ package com.resimulators.simukraft.common.jobs;
 
 
 import com.resimulators.simukraft.common.entity.goals.MinerGoal;
-import com.resimulators.simukraft.common.enums.JobEnum;
 import com.resimulators.simukraft.common.jobs.core.EnumJobState;
 import com.resimulators.simukraft.common.jobs.core.IJob;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
@@ -30,8 +29,8 @@ public class JobMiner implements IJob {
 
 
     @Override
-    public JobEnum jobType() {
-        return JobEnum.MINER;
+    public Profession jobType() {
+        return Profession.MINER;
     }
 
     @Override

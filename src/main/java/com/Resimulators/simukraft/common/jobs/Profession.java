@@ -3,13 +3,14 @@ package com.resimulators.simukraft.common.jobs;
 
 public enum Profession {
 
-    UNEMPLOYED("unemployed",Profession.nextID()),
-    BUILDER("builder",Profession.nextID()),
-    MINER("miner",Profession.nextID()),
-    COW_FARMER("cow farmer",Profession.nextID()),
-    SHEEP_FARMER("sheep farmer",Profession.nextID()),
-    PIG_FARMER("cow farmer", Profession.nextID()),
-    FARMER("farmer",Profession.nextID());
+    UNEMPLOYED("unemployed",0),
+    BUILDER("builder",1),
+    MINER("miner",2),
+    COW_FARMER("cow farmer",3),
+    SHEEP_FARMER("sheep farmer",4),
+    PIG_FARMER("cow farmer", 5),
+    FARMER("farmer",6),
+    GLASS_FACTORY("glass maker", 7);
 
     Profession(String name, int i) {
         this.name = name;
@@ -17,7 +18,6 @@ public enum Profession {
     }
     String name;
     int id;
-    private static int ID;
 
     public int getId() {
         return id;
@@ -34,10 +34,6 @@ public enum Profession {
             }
         }
         return null;
-    }
-
-    private static int nextID(){
-        return ID++;
     }
 
     public static int getIDFromName(String name){

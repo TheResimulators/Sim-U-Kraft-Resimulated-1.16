@@ -1,7 +1,6 @@
 package com.resimulators.simukraft.common.jobs;
 
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
-import com.resimulators.simukraft.common.enums.JobEnum;
 import com.resimulators.simukraft.common.jobs.core.EnumJobState;
 import com.resimulators.simukraft.common.jobs.core.IJob;
 import net.minecraft.entity.ai.goal.Goal;
@@ -24,8 +23,8 @@ public class JobBuilder implements IJob {
 
 
     @Override
-    public JobEnum jobType() {
-        return JobEnum.BUILDER;
+    public Profession jobType() {
+        return Profession.BUILDER;
     }
 
     @Override
