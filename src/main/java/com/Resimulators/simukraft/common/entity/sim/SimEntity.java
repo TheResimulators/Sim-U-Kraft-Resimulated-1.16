@@ -8,6 +8,7 @@ import com.resimulators.simukraft.common.world.Faction;
 import com.resimulators.simukraft.common.world.SavedWorldData;
 import com.resimulators.simukraft.handlers.FoodStats;
 import com.resimulators.simukraft.init.ModJobs;
+import com.resimulators.simukraft.packets.SimFirePacket;
 import com.resimulators.simukraft.utils.Utils;
 import com.resimulators.simukraft.common.entity.goals.PickupItemGoal;
 import com.resimulators.simukraft.common.entity.goals.TalkingToPlayerGoal;
@@ -32,6 +33,7 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
@@ -589,6 +591,32 @@ public class SimEntity extends AgeableEntity implements INPC {
     public boolean isWearing(PlayerModelPart part) {
         return (this.getDataManager().get(MODEL_FLAG) & part.getPartMask()) == part.getPartMask();
     }
+
+
+    public void fireSim(SimEntity sim, int id,boolean dying){
+        if (sim.getJob() != null) {
+            if (sim.getJob().getWorkSpace() != null){
+                SavedWorldData.get(world).fireSim(id, sim);
+                SavedWorldData.get(world).getFaction(id).sendPacketToFaction(new SimFirePacket(id, sim.getEntityId(), sim.getJob().getWorkSpace()));
+                BlockPos jobPos = sim.getJob().getWorkSpace();
+                ITile tile = (ITile) sim.world.getTileEntity(jobPos);
+                tile.setHired(false);
+                tile.setSimId(null);
+
+            }
+            if (!dying){
+                sim.getJob().removeJobAi();
+                sim.setJob(null);
+                sim.setProfession(0);
+            }else{
+                SavedWorldData.get(world).getFaction(id).removeSim(sim);
+            }
+        }
+
+
+
+    }
+
 
 
 }

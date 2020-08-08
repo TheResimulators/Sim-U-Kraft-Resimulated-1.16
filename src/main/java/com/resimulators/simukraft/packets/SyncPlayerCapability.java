@@ -37,7 +37,7 @@ public class SyncPlayerCapability implements IMessage {
     @Nullable
     @Override
     public LogicalSide getExecutionSide() {
-        return null;
+        return LogicalSide.CLIENT;
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.resimulators.simukraft.init;
 
 
+import com.resimulators.simukraft.Network;
 import com.resimulators.simukraft.common.world.Faction;
 import com.resimulators.simukraft.common.world.SavedWorldData;
 import com.resimulators.simukraft.handlers.SimUKraftPacketHandler;
@@ -25,7 +26,7 @@ public class FactionEvents {
                 faction = data.createNewFaction();
                 data.addPlayerToFaction(faction.getId(),event.getPlayer());
             }
-            SimUKraftPacketHandler.INSTANCE.sendTo(new SyncPlayerCapability(faction.write(new CompoundNBT()),faction.getId()),((ServerPlayerEntity) event.getPlayer()).connection.netManager, NetworkDirection.PLAY_TO_CLIENT);
+            Network.getNetwork().sendToPlayer(new SyncPlayerCapability(faction.write(new CompoundNBT()),faction.getId()),((ServerPlayerEntity) event.getPlayer()));
 
         }
     }

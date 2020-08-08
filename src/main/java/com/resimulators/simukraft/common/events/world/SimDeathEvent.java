@@ -22,23 +22,7 @@ public class SimDeathEvent {
                 SimEntity sim = (SimEntity) entity;
 
                 int id = SavedWorldData.get(sim.world).getFactionWithSim(sim.getUniqueID()).getId();
-
-
-                if (sim.getJob() != null) {
-                    if (sim.getJob().getWorkSpace() != null){
-                    SavedWorldData.get(world).fireSim(id, sim);
-                    SavedWorldData.get(world).getFaction(id).sendPacketToFaction(new SimFirePacket(id, sim.getEntityId(), sim.getJob().getWorkSpace()));
-                    BlockPos jobPos = sim.getJob().getWorkSpace();
-                    ITile tile = (ITile) sim.world.getTileEntity(jobPos);
-                    sim.getJob().removeJobAi();
-                    sim.setJob(null);
-                    sim.setProfession(0);
-                    tile.setHired(false);
-                    tile.setSimId(null);
-
-                    }
-                }
-                SavedWorldData.get(world).getFaction(id).removeSim(sim);
+                sim.fireSim(sim,id,true);
             }
         }
     }

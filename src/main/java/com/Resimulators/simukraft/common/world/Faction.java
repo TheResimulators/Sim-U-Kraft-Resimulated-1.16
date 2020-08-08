@@ -5,10 +5,14 @@ import com.resimulators.simukraft.packets.IMessage;
 import com.resimulators.simukraft.Network;
 import com.resimulators.simukraft.SimuKraft;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
@@ -198,6 +202,18 @@ public class Faction {
         return sims.get(id).write();
     }
 
+
+    public void sendFactionChatMessage(String string, World world){
+        for (UUID id: getPlayers()){
+            PlayerEntity entity = world.getPlayerByUuid(id);
+            if (entity != null){
+                entity.sendMessage(new StringTextComponent(string),id);
+
+            }
+
+        }
+
+    }
     static class SimInfo {
         private UUID sim;
         private boolean hired;

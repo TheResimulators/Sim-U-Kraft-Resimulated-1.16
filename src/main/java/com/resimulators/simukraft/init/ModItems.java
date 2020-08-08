@@ -1,26 +1,14 @@
 package com.resimulators.simukraft.init;
 import com.resimulators.simukraft.Reference;
 import com.resimulators.simukraft.SimUTab;
-import com.resimulators.simukraft.SimuKraft;
-import com.resimulators.simukraft.common.block.BlockLight;
-import com.resimulators.simukraft.common.item.ItemStructureTest;
-import com.resimulators.simukraft.handlers.SimUKraftPacketHandler;
-import com.sun.org.apache.regexp.internal.RE;
-import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
 import net.minecraft.item.BlockItem;
-import net.minecraft.item.DyeColor;
+
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
+
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class ModItems {
     private static final DeferredRegister<Item> REGISTRY = DeferredRegister.create(ForgeRegistries.ITEMS, Reference.MODID);
