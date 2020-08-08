@@ -39,6 +39,7 @@ public final class ModBlocks {
     public static final RegistryObject<Block> LIGHT_LIME = REGISTRY.register("light_lime", () -> new BlockLight(Block.Properties.create(Material.WOOL)));
     public static final RegistryObject<Block> LIGHT_PINK = REGISTRY.register("light_pink", () -> new BlockLight(Block.Properties.create(Material.WOOL)));
     public static final RegistryObject<Block> LIGHT_GRAY = REGISTRY.register("light_gray", () -> new BlockLight(Block.Properties.create(Material.WOOL)));
+//    public static final RegistryObject<Block> LIGHT_LIGHT_GRAY = REGISTRY.register("light_light_gray", () -> new BlockLight(Block.Properties.create(Material.WOOL))); //This should be a thing
     public static final RegistryObject<Block> LIGHT_CYAN = REGISTRY.register("light_cyan", () -> new BlockLight(Block.Properties.create(Material.WOOL)));
     public static final RegistryObject<Block> LIGHT_PURPLE = REGISTRY.register("light_purple", () -> new BlockLight(Block.Properties.create(Material.WOOL)));
     public static final RegistryObject<Block> LIGHT_BLUE = REGISTRY.register("light_blue", () -> new BlockLight(Block.Properties.create(Material.WOOL)));

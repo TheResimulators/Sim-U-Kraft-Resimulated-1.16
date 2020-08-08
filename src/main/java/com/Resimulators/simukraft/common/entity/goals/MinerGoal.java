@@ -1,6 +1,5 @@
 package com.resimulators.simukraft.common.entity.goals;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.jobs.JobMiner;
@@ -12,32 +11,31 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.HorizontalBlock;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.ai.goal.MoveToBlockGoal;
-import net.minecraft.inventory.ItemStackHelper;
-import net.minecraft.item.*;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.item.ToolItem;
 import net.minecraft.loot.LootContext;
 import net.minecraft.loot.LootParameters;
+import net.minecraft.state.DirectionProperty;
 import net.minecraft.state.EnumProperty;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.state.properties.SlabType;
 import net.minecraft.tileentity.ChestTileEntity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.*;
+import net.minecraft.util.Direction;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
-import net.minecraft.state.DirectionProperty;
+
 import java.util.List;
-import java.util.Set;
-import java.util.SortedSet;
 
 public class MinerGoal extends MoveToBlockGoal {
-    private SimEntity sim;
+    private final SimEntity sim;
     private int tick;
     private IJob job;
     private BlockPos markerPos;
@@ -51,8 +49,8 @@ public class MinerGoal extends MoveToBlockGoal {
     private int side = 0;
     private Direction dir;
     private int delay = 20;
-    private static DirectionProperty FACING = HorizontalBlock.HORIZONTAL_FACING;
-    private EnumProperty<SlabType> TYPE = BlockStateProperties.SLAB_TYPE;
+    private static final DirectionProperty FACING = HorizontalBlock.HORIZONTAL_FACING;
+    private final EnumProperty<SlabType> TYPE = BlockStateProperties.SLAB_TYPE;
     private int progress;
     private int column = 0; // used as X
     private int row = 0; // used as y
@@ -116,6 +114,7 @@ public class MinerGoal extends MoveToBlockGoal {
     @Override
     public void tick() {
         super.tick();
+        World world = sim.getEntityWorld();
         if (job.getState() == EnumJobState.WORKING) {
             if (currentTask == Task.TRAVLELING) {
                 minepos = offset;
@@ -145,7 +144,6 @@ public class MinerGoal extends MoveToBlockGoal {
                 ItemStack tool = sim.getHeldItemMainhand();
 
 
-                World world = sim.getEntityWorld();
 
 
                 if (sim.getPositionVec().distanceTo(new Vector3d(minepos.getX(), minepos.getY(), minepos.getZ())) < 6) {
@@ -156,8 +154,6 @@ public class MinerGoal extends MoveToBlockGoal {
                     } else {
                         currentTask = Task.TRAVLELING;
                     }
-
-                    world.getPlayerByUuid(SavedWorldData.get(sim.world).getFactionWithSim(sim.getUniqueID()).getPlayers().get(0)).sendStatusMessage(new StringTextComponent("Working at: " + minepos + "; and navigator set at: " + sim.getNavigator().getTargetPos() + "; inventory state: " + (sim.getInventory().getFirstEmptyStack() == -1 ? "Full" : "Not Full")), true);
 
                     if (!block.isAir(state, world, minepos)) {
                         this.sim.getLookController().setLookPosition(new Vector3d(minepos.getX(), minepos.getY(), minepos.getZ()));
@@ -214,6 +210,7 @@ public class MinerGoal extends MoveToBlockGoal {
                 currentTask = Task.TRAVLELING;
             }
         }
+        world.getPlayerByUuid(SavedWorldData.get(sim.world).getFactionWithSim(sim.getUniqueID()).getPlayers().get(0)).sendStatusMessage(new StringTextComponent("Working at: " + minepos + "; and navigator set at: " + sim.getNavigator().getTargetPos() + "; inventory state: " + (sim.getInventory().getFirstEmptyStack() == -1 ? "Full" : "Not Full")), true);
     }
 
     @Override

@@ -7,5 +7,6 @@ public class RegistryHandler {
         new ModItems();
         new ModTileEntities();
         new ModContainers();
+        new ModEntities();
     }
 }

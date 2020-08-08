@@ -29,6 +29,7 @@ public class Lang extends LanguageProvider {
         add(ModBlocks.LIGHT_LIME.get(), "Lime Light");
         add(ModBlocks.LIGHT_PINK.get(), "Pink Light");
         add(ModBlocks.LIGHT_GRAY.get(), "Gray Light");
+//        add(ModBlocks.LIGHT_LIGHT_GRAY.get(), "Light Gray Light");
         add(ModBlocks.LIGHT_CYAN.get(), "Cyan Light");
         add(ModBlocks.LIGHT_PURPLE.get(), "Purple Light");
         add(ModBlocks.LIGHT_BLUE.get(), "Blue Light");
