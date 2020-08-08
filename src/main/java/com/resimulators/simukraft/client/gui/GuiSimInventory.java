@@ -22,6 +22,7 @@ import net.minecraft.util.math.vector.Quaternion;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import org.codehaus.plexus.util.StringUtils;
 
 import java.util.Random;
 
@@ -67,7 +68,7 @@ public class GuiSimInventory extends DisplayEffectsScreen<SimContainer> {
         String name = container.job;
 
         this.field_230712_o_.func_238421_b_(stack, this.field_230704_d_.getString(), 80f, 8f, 4210752);
-        this.field_230712_o_.func_238421_b_(stack,"Job: " + name,80f, 30f, 4210752);
+        this.field_230712_o_.func_238421_b_(stack,"Job: " + StringUtils.capitalizeFirstLetter(name),80f, 30f, 4210752);
     }
 
     @Override

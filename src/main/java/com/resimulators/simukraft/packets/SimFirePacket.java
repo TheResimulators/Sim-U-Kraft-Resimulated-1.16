@@ -1,11 +1,12 @@
 package com.resimulators.simukraft.packets;
 
+import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.world.SavedWorldData;
 import com.resimulators.simukraft.common.tileentity.ITile;
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.network.NetworkEvent;
 
@@ -44,10 +45,14 @@ public class SimFirePacket implements IMessage {
 
     @Override
     public void onExecute(NetworkEvent.Context ctxIn, boolean isLogicalServer) {
-        SavedWorldData.get(Minecraft.getInstance().player.world).getFaction(factionId).fireSim(Minecraft.getInstance().world.getEntityByID(simId).getUniqueID());
-        ((SimEntity)Minecraft.getInstance().world.getEntityByID(simId)).setJob(null);
-        if ( Minecraft.getInstance().world.getTileEntity(pos) != null){
-        ((ITile)Minecraft.getInstance().world.getTileEntity(pos)).setHired(false);
-        ((ITile)Minecraft.getInstance().world.getTileEntity(pos)).setSimId(null);
-    }}
+        World world = SimuKraft.proxy.getClientWorld();
+        if (world != null) {
+            SavedWorldData.get(world).getFaction(factionId).fireSim(world.getEntityByID(simId).getUniqueID());
+            ((SimEntity) world.getEntityByID(simId)).setJob(null);
+            if (world.getTileEntity(pos) != null) {
+                ((ITile) world.getTileEntity(pos)).setHired(false);
+                ((ITile) world.getTileEntity(pos)).setSimId(null);
+            }
+        }
+    }
 }

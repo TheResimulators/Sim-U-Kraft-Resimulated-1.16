@@ -1,10 +1,11 @@
 package com.resimulators.simukraft.packets;
 
+import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.common.world.Faction;
 import com.resimulators.simukraft.common.world.SavedWorldData;
-import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.world.World;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.network.NetworkEvent;
 import javax.annotation.Nullable;
@@ -42,9 +43,12 @@ public class SyncPlayerCapability implements IMessage {
 
     @Override
     public void onExecute(NetworkEvent.Context ctxIn, boolean isLogicalServer) {
-        SavedWorldData.get(Minecraft.getInstance().world).clearAll();
-        Faction faction = new Faction(id);
-        faction.read(nbt);
-        SavedWorldData.get(Minecraft.getInstance().world).setFaction(id,faction);
+        World world = SimuKraft.proxy.getClientWorld();
+        if (world != null) {
+            SavedWorldData.get(world).clearAll();
+            Faction faction = new Faction(id);
+            faction.read(nbt);
+            SavedWorldData.get(world).setFaction(id, faction);
+        }
     }
 }

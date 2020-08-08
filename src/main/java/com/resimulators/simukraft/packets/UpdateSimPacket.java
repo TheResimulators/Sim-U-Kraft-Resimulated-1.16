@@ -1,9 +1,10 @@
 package com.resimulators.simukraft.packets;
 
+import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.common.world.SavedWorldData;
-import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.world.World;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.network.NetworkEvent;
 
@@ -42,8 +43,11 @@ public class UpdateSimPacket implements IMessage {
 
     @Override
     public void onExecute(NetworkEvent.Context ctxIn, boolean isLogicalServer) {
-        SavedWorldData data = SavedWorldData.get(Minecraft.getInstance().world);
-        data.getFaction(id).addSim(uuid);
-        data.getFaction(id).setSimInfo(uuid,nbt);
+        World world = SimuKraft.proxy.getClientWorld();
+        if (world != null) {
+            SavedWorldData data = SavedWorldData.get(world);
+            data.getFaction(id).addSim(uuid);
+            data.getFaction(id).setSimInfo(uuid, nbt);
+        }
     }
 }

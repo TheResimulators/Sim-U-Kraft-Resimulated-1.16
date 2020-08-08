@@ -21,21 +21,22 @@ public class SimHireRequest implements IMessage {
     private UUID playerId;
     private int simId;
     private BlockPos pos;
-    private String job;
+    private int job;
     public SimHireRequest(){}
 
-    public SimHireRequest(int simId, UUID playerId, BlockPos pos,String job){
+    public SimHireRequest(int simId, UUID playerId, BlockPos pos, int job){
         this.pos = pos;
         this.playerId = playerId;
         this.simId = simId;
         this.job = job;
     }
+
     @Override
     public void toBytes(PacketBuffer buf) {
         buf.writeBlockPos(pos);
         buf.writeInt(simId);
         buf.writeUniqueId(playerId);
-        buf.writeString(job);
+        buf.writeInt(job);
     }
 
     @Override
@@ -43,7 +44,7 @@ public class SimHireRequest implements IMessage {
         this.pos = buf.readBlockPos();
         this.simId = buf.readInt();
         this.playerId = buf.readUniqueId();
-        this.job = buf.readString();
+        this.job = buf.readInt();
     }
 
     @Nullable
@@ -61,7 +62,7 @@ public class SimHireRequest implements IMessage {
             data.hireSim(id,(SimEntity) player.world.getEntityByID(simId));
             ((ITile)player.world.getTileEntity(pos)).setHired(true);
             SimEntity sim =  ((SimEntity) player.world.getEntityByID(simId));
-            sim.setProfession(Profession.getIDFromName(job));
+            sim.setProfession(job);
             ((ITile)player.world.getTileEntity(pos)).setSimId(sim.getUniqueID());
             ((SimEntity) player.world.getEntityByID(simId)).setJob(ModJobs.JOB_LOOKUP.get(job).apply(sim));
             sim.getJob().setWorkSpace(pos);
