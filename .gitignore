@@ -53,3 +53,5 @@ CREDITS.txt
 src/generated/resources/data/
 
 src/generated/
+.floo
+.flooignore

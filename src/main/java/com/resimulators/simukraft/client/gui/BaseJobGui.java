@@ -156,7 +156,7 @@ public class BaseJobGui extends Screen {
         Back.field_230694_p_ = true;
         int x = 0;
         int y = 0;
-        int ConstantXSpacing = (field_230708_k_ / 5) * 2;
+        int ConstantXSpacing = (field_230708_k_ / 5);
         int ConstantYSpacing = field_230709_l_ / 4;
         for (int i = 0; i < ids.size(); i++) {
             SimEntity sim = (SimEntity) player.getEntityWorld().getEntityByID(ids.get(i));

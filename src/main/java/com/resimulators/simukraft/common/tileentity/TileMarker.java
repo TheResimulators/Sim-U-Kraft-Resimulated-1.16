@@ -256,8 +256,6 @@ public class TileMarker extends TileEntity {
 
         public static int toNbt(Corner corner){
             switch(corner){
-                case ORIGIN:
-                    return 0;
                 case BACKLEFT:
                     return 1;
                 case BACKRIGHT:

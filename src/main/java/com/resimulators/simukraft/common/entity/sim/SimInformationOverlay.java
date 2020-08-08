@@ -37,11 +37,19 @@ public class SimInformationOverlay {
     protected static boolean depthMask;
     protected static int depthFunc;
 
+    private Entity pastEntity;
+
     @SubscribeEvent
     public void renderSimOverlay(TickEvent.RenderTickEvent event) {
         RayTraceHelper.INSTANCE.ray();
-        if (RayTraceHelper.INSTANCE.getTarget() != null && (minecraft.currentScreen == null || minecraft.currentScreen instanceof ChatScreen || minecraft.currentScreen instanceof GuiSimInventory)) {
-            Entity entity = RayTraceHelper.INSTANCE.getTargetEntity();
+        if (RayTraceHelper.INSTANCE.getTarget() != null && (minecraft.currentScreen == null || minecraft.currentScreen instanceof ChatScreen) || minecraft.currentScreen instanceof GuiSimInventory) {
+            Entity entity = null;
+            if (minecraft.currentScreen instanceof GuiSimInventory)
+                entity = pastEntity;
+            if (entity == null)
+                entity = RayTraceHelper.INSTANCE.getTargetEntity();
+            pastEntity = entity;
+
             if (entity instanceof SimEntity) {
                 SimEntity sim = (SimEntity) entity;
 

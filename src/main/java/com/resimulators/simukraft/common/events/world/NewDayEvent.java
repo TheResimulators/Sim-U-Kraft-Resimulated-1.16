@@ -21,6 +21,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import java.time.DayOfWeek;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.UUID;
 
 public class NewDayEvent implements INBTSerializable<CompoundNBT> {
     private static DayOfWeek dayOfWeek;
@@ -38,6 +39,7 @@ public class NewDayEvent implements INBTSerializable<CompoundNBT> {
             dayOfWeek = DayOfWeek.of((int) (1 + (day % 7)));
 
             if (day != previousDay) {
+
                 payRent();
                 spawnSims(world);
                 previousDay = day;
@@ -84,11 +86,14 @@ public class NewDayEvent implements INBTSerializable<CompoundNBT> {
                 ArrayList<SimEntity> simsToSpawn = new ArrayList<>();
                 simsToSpawn.add(new SimEntity(ModEntities.ENTITY_SIM, world));
                 for (SimEntity sim : simsToSpawn) {
-                    PlayerEntity player = sWorld.getPlayers().get(random.nextInt(sWorld.getPlayers().size()));
-                    ArrayList<BlockPos> blocks = BlockUtils.getBlocksAroundPosition(player.func_233580_cy_(), 10);
-                    if (spawn(sWorld, sim, blocks)) {
-                        worldData.addSimToFaction(faction.getId(), sim);
-                        faction.sendPacketToFaction(new UpdateSimPacket(sim.getUniqueID(), faction.getSimInfo(sim.getUniqueID()), faction.getId()));
+                    UUID id = faction.getPlayers().get(random.nextInt(faction.getPlayers().size()));
+                    PlayerEntity player = world.getPlayerByUuid(id);
+                    if (player != null) {
+                        ArrayList<BlockPos> blocks = BlockUtils.getBlocksAroundPosition(player.func_233580_cy_(), 10);
+                        if (spawn(sWorld, sim, blocks)) {
+                            worldData.addSimToFaction(faction.getId(), sim);
+                            faction.sendPacketToFaction(new UpdateSimPacket(sim.getUniqueID(), faction.getSimInfo(sim.getUniqueID()), faction.getId()));
+                        }
                     }
                 }
             } else {
@@ -110,13 +115,12 @@ public class NewDayEvent implements INBTSerializable<CompoundNBT> {
         // loop through provided blocks
         SimuKraft.LOGGER().debug(blocksAroundPlayer.size());
 
-        for (int i = 0; i < blocksAroundPlayer.size(); i++) {
+            int i = random.nextInt(blocksAroundPlayer.size());
             // if there are no invalid positions, spawn sim and break out of loop
             BlockPos spawnPos = getSpawnPosition(world, blocksAroundPlayer.get(i), sim);
             if (spawnPos == null) {
                 SimuKraft.LOGGER().debug("AHHHH NULL " + i);
-                continue;
-            }
+            }else{
             // get x, y, z coords of block
             double x = spawnPos.getX();
             double y = spawnPos.getY();

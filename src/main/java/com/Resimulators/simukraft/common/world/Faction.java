@@ -1,5 +1,6 @@
 package com.resimulators.simukraft.common.world;
 
+import com.google.common.collect.Lists;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.packets.IMessage;
 import com.resimulators.simukraft.Network;
@@ -72,6 +73,7 @@ public class Faction {
     }
 
     public void addSim(SimEntity sim) {
+        validateSims((ServerWorld) sim.world);
         addSim(sim.getUniqueID());
     }
 
@@ -143,7 +145,6 @@ public class Faction {
 
     public ArrayList<Integer> getSimUnemployedIds(ServerWorld world) {
         ArrayList<Integer> simids = new ArrayList<>();
-
         for (UUID id : sims.keySet()) {
            Entity entity = world.getEntityByUuid(id);
             if (entity != null) {
@@ -155,6 +156,18 @@ public class Faction {
             }
         }
         return simids;
+    }
+
+    public void validateSims(ServerWorld world) {
+        List<UUID> temp = Lists.newArrayList();
+        for (UUID id : sims.keySet()) {
+            Entity entity = world.getEntityByUuid(id);
+            if (entity == null)
+                temp.add(id);
+        }
+        for (UUID id : temp) {
+            sims.remove(id);
+        }
     }
 
     public HashMap<UUID, SimInfo> getSims() {

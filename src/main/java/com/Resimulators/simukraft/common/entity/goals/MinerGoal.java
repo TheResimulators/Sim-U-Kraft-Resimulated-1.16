@@ -116,27 +116,7 @@ public class MinerGoal extends MoveToBlockGoal {
         super.tick();
         World world = sim.getEntityWorld();
         if (job.getState() == EnumJobState.WORKING) {
-            if (currentTask == Task.TRAVLELING) {
-                minepos = offset;
-                minepos = minepos.add(markerPos.getX(), markerPos.getY(), markerPos.getZ());
 
-
-                if (column >= width) {
-                    column = 0;
-                    row++;
-                }
-                if (row >= depth) {
-                    row = 0;
-                    layer++;
-                }
-
-                minepos = minepos.offset(dir, row);
-                minepos = minepos.offset(dir.rotateY(), column);
-                minepos = minepos.offset(Direction.DOWN, layer);
-                if (!shouldMoveTo(sim.world, minepos)){
-                    currentTask = Task.MINING;
-                }
-            }
             if (delay <= 0 && currentTask == Task.MINING) {
 
                 progress = ((JobMiner) sim.getJob()).getProgress();
@@ -189,10 +169,37 @@ public class MinerGoal extends MoveToBlockGoal {
                 if (delay < 0) {
                     delay = 0;
                 }
+
+
+                    }
+            if (currentTask == Task.TRAVLELING) {
+                minepos = offset;
+                minepos = minepos.add(markerPos.getX(), markerPos.getY(), markerPos.getZ());
+
+
+                if (column >= width) {
+                    column = 0;
+                    row++;
+                }
+                if (row >= depth) {
+                    row = 0;
+                    layer++;
+                }
+
+                minepos = minepos.offset(dir, row);
+                minepos = minepos.offset(dir.rotateY(), column);
+                minepos = minepos.offset(Direction.DOWN, layer);
+                if (sim.getDistanceSq(minepos.getX(),minepos.getY(),minepos.getZ()) <= 5){
+                    currentTask = Task.MINING;
+                }else {
+                    destinationBlock = minepos;
+                }
             }
+
             tick++;
             if (currentTask == Task.RETURNING) {
-                if (!shouldMoveTo(sim.world, sim.getJob().getWorkSpace())) {
+                BlockPos pos = sim.getJob().getWorkSpace();
+                if ((sim.getDistanceSq(pos.getX(),pos.getY(),pos.getZ()) <= 5)) {
                     if (getInventoryAroundPos(sim.getJob().getWorkSpace()) != null) {
                         if (addSimInventoryToChest(getInventoryAroundPos(sim.getJob().getWorkSpace()))) {
                             sim.getJob().setState(EnumJobState.NOT_WORKING);
@@ -205,6 +212,8 @@ public class MinerGoal extends MoveToBlockGoal {
                         }
                     }
                 }
+            }else{
+                destinationBlock = sim.getJob().getWorkSpace();
             }
             if (currentTask == Task.NONE) {
                 currentTask = Task.TRAVLELING;
@@ -215,8 +224,6 @@ public class MinerGoal extends MoveToBlockGoal {
 
     @Override
     protected boolean shouldMoveTo(IWorldReader worldIn, BlockPos minepos) {
-        this.destinationBlock = minepos;
-
         //sim.getNavigator().tryMoveToXYZ(minepos.getX(),minepos.getY()+1,minepos.getZ(),sim.getAIMoveSpeed());
         return !(sim.getPositionVec().distanceTo(new Vector3d(minepos.getX(),minepos.getY(),minepos.getZ())) < getTargetDistanceSq());
     }

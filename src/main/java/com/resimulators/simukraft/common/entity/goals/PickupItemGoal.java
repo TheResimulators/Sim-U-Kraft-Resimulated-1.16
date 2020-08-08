@@ -68,7 +68,7 @@ public class PickupItemGoal extends Goal {
     public void tick() {
         super.tick();
         if (!sim.world.isRemote) {
-            if (this.item != null && sim.getDistance(this.item) < 1.0) {
+            if (this.item != null && sim.getDistance(this.item) < 1.5) {
                 final ItemStack toPickup = this.item.getItem();
                 final ItemStack rest = ItemHandlerHelper.insertItem(sim.getInventory().getHandler(), toPickup, false);
                 if (rest.getCount() < toPickup.getCount()) {
