@@ -119,7 +119,6 @@ public class FoodStats {
         sim.getDataManager().set(SimEntity.FOOD_LEVEL, foodLevel);
     }
 
-    @OnlyIn(Dist.CLIENT)
     public void setFoodSaturationLevel(float foodSaturationLevel) {
         sim.getDataManager().set(SimEntity.FOOD_SATURATION_LEVEL, foodSaturationLevel);
     }

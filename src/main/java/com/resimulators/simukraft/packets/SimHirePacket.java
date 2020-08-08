@@ -16,10 +16,10 @@ public class SimHirePacket implements IMessage{
     private int factionId;
     private int simId;
     private BlockPos pos;
-    private String job;
+    private int job;
     public SimHirePacket(){}
 
-    public SimHirePacket(int simId, int factionId, BlockPos pos,String job){
+    public SimHirePacket(int simId, int factionId, BlockPos pos,int job){
         this.pos = pos;
         this.factionId = factionId;
         this.simId = simId;
@@ -30,7 +30,7 @@ public class SimHirePacket implements IMessage{
         buf.writeBlockPos(pos);
         buf.writeInt(factionId);
         buf.writeInt(simId);
-        buf.writeString(job);
+        buf.writeInt(job);
     }
 
     @Override
@@ -38,7 +38,7 @@ public class SimHirePacket implements IMessage{
         this.pos = buf.readBlockPos();
         this.factionId = buf.readInt();
         this.simId = buf.readInt();
-        this.job = buf.readString();
+        this.job = buf.readInt();
     }
 
     @Nullable

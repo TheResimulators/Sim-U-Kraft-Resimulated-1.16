@@ -10,9 +10,9 @@ import java.util.Map;
 import java.util.function.Function;
 
 public class ModJobs {
-    public static final Map<String, Function<SimEntity, IJob>> JOB_LOOKUP =new ImmutableMap.Builder<String, Function<SimEntity, IJob>>()
-            .put("builder", JobBuilder::new)
-            .put("miner", JobMiner::new)
+    public static final Map<Integer, Function<SimEntity, IJob>> JOB_LOOKUP = new ImmutableMap.Builder<Integer, Function<SimEntity, IJob>>()
+            .put(1, JobBuilder::new)
+            .put(2, JobMiner::new)
 
 
             .build();

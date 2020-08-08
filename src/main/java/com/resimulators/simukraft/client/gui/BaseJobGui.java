@@ -35,15 +35,15 @@ public class BaseJobGui extends Screen {
     BlockPos pos;
     boolean firing = false;
     int hiredId;
-    String job;
+    int job;
 
-    public BaseJobGui(ITextComponent component, ArrayList<Integer> ids, BlockPos pos, @Nullable int id) {
+    public BaseJobGui(ITextComponent component, ArrayList<Integer> ids, BlockPos pos, int id, int job) {
         super(component);
         this.hiredId = id;
         this.player = Minecraft.getInstance().player;
         this.ids = ids;
         this.pos = pos;
-        this.job = "";
+        this.job = job;
     }
 
     @Override

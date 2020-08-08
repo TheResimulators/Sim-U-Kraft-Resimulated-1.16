@@ -1,6 +1,7 @@
 package com.resimulators.simukraft.client.gui;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
+import com.resimulators.simukraft.common.jobs.Profession;
 import com.resimulators.simukraft.common.world.Structure;
 import com.resimulators.simukraft.Reference;
 import com.mojang.blaze3d.platform.GlStateManager;
@@ -28,8 +29,7 @@ public class BuilderGui extends BaseJobGui {
     private ArrayList<Structure> structures;
 
     public BuilderGui(ITextComponent component, ArrayList<Integer> ids, BlockPos pos, @Nullable int id) {
-        super(component, ids, pos, id);
-        this.job = "builder";
+        super(component, ids, pos, id, Profession.BUILDER.getId());
         loaded = true;// need to test
     }
 
