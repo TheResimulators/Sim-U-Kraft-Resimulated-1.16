@@ -83,10 +83,13 @@ public class EntitySimModel extends BipedModel<SimEntity> {
         this.bipedLeftArmwear.copyModelAngles(this.bipedLeftArm);
         this.bipedRightArmwear.copyModelAngles(this.bipedRightArm);
         this.bipedBodyWear.copyModelAngles(this.bipedBody);
+        this.femaleArmLeft.copyModelAngles(this.bipedLeftArm);
+        this.femaleArmRight.copyModelAngles(this.bipedRightArm);
+        this.maleArmLeft.copyModelAngles(this.bipedLeftArm);
+        this.maleArmRight.copyModelAngles(this.bipedRightArm);
     }
 
     public void setVisible(boolean visible, boolean female) {
-        setVisible(visible);
         if (female) {
             this.bipedLeftArm = this.femaleArmLeft;
             this.bipedRightArm = this.femaleArmRight;
@@ -108,6 +111,7 @@ public class EntitySimModel extends BipedModel<SimEntity> {
             this.bipedRightArmwear.showModel = visible;
             this.smallArms = false;
         }
+        setVisible(visible);
         this.bipedLeftLegwear.showModel = visible;
         this.bipedRightLegwear.showModel = visible;
         this.bipedBodyWear.showModel = visible;

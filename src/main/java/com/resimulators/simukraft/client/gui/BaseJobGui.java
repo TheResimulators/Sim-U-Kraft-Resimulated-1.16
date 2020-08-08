@@ -160,13 +160,14 @@ public class BaseJobGui extends Screen {
         int ConstantYSpacing = field_230709_l_ / 4;
         for (int i = 0; i < ids.size(); i++) {
             SimEntity sim = (SimEntity) player.getEntityWorld().getEntityByID(ids.get(i));
-            simButtons.add(func_230480_a_(new SimButton(20 + x * ConstantXSpacing, 40 + y * ConstantYSpacing, 100, 20, sim.getName(), ids.get(i), this)));
-            x++;
-            if (x > 4) {
-                x = 0;
-                y++;
+            if (sim != null) {
+                simButtons.add(func_230480_a_(new SimButton(20 + x * ConstantXSpacing, 40 + y * ConstantYSpacing, 100, 20, sim.getName(), ids.get(i), this)));
+                x++;
+                if (x > 4) {
+                    x = 0;
+                    y++;
+                }
             }
-
         }
 
     }

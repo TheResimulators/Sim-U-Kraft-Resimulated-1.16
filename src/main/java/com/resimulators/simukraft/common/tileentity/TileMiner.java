@@ -119,7 +119,15 @@ public class TileMiner extends TileEntity implements ITile {
     }
 
     public boolean CheckValidity(){
-        return ((TileMarker)this.world.getTileEntity(marker)).getFrontRight() != null && ((TileMarker)this.world.getTileEntity(marker)).getBackLeft() != null;
+        if (this.world != null) {
+            TileEntity mark = this.world.getTileEntity(marker);
+            if (mark instanceof TileMarker) {
+                BlockPos frontRight = ((TileMarker)mark).getFrontRight();
+                BlockPos backLeft = ((TileMarker)mark).getBackLeft();
+                return frontRight != null && backLeft != null;
+            }
+        }
+        return false;
     }
 
 

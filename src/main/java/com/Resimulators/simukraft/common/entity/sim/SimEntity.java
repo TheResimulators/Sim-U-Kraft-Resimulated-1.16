@@ -127,8 +127,8 @@ public class SimEntity extends AgeableEntity implements INPC {
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new SwimGoal(this));
-        this.goalSelector.addGoal(7, new TalkingToPlayerGoal(this));
-        this.goalSelector.addGoal(8, new PickupItemGoal(this));
+        this.goalSelector.addGoal(1, new TalkingToPlayerGoal(this));
+        this.goalSelector.addGoal(2, new PickupItemGoal(this));
 
         //Unimportant "make more alive"-goals
         this.goalSelector.addGoal(9, new OpenDoorGoal(this, true));

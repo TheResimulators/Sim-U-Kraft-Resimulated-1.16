@@ -1,6 +1,7 @@
 package com.resimulators.simukraft.init;
 import com.resimulators.simukraft.Reference;
 import com.resimulators.simukraft.SimUTab;
+import com.resimulators.simukraft.common.item.ItemStructureTest;
 import net.minecraft.item.BlockItem;
 
 import net.minecraft.item.Item;
@@ -44,4 +45,5 @@ public class ModItems {
 
     //Items
     //public static final Item TEST_ITEM = register(new ItemTest(new Item.Properties()).setRegistryName(Reference.MODID, "test_item"), SimUTab.tab);
+    public static final RegistryObject<Item> STRUCTURE_TEST = REGISTRY.register("structure_test", () -> new ItemStructureTest(new Item.Properties().group(SimUTab.tab)));
 }

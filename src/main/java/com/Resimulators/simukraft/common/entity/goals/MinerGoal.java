@@ -1,5 +1,6 @@
 package com.resimulators.simukraft.common.entity.goals;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.jobs.JobMiner;
@@ -8,13 +9,13 @@ import com.resimulators.simukraft.common.jobs.core.IJob;
 import com.resimulators.simukraft.common.tileentity.TileMiner;
 import com.resimulators.simukraft.common.world.SavedWorldData;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.HorizontalBlock;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.ai.goal.MoveToBlockGoal;
-import net.minecraft.item.AirItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.item.ToolItem;
+import net.minecraft.inventory.ItemStackHelper;
+import net.minecraft.item.*;
 import net.minecraft.loot.LootContext;
 import net.minecraft.loot.LootParameters;
 import net.minecraft.state.EnumProperty;
@@ -25,11 +26,15 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.math.vector.Vector3i;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.state.DirectionProperty;
 import java.util.List;
+import java.util.Set;
+import java.util.SortedSet;
 
 public class MinerGoal extends MoveToBlockGoal {
     private SimEntity sim;
@@ -66,7 +71,7 @@ public class MinerGoal extends MoveToBlockGoal {
         job = sim.getJob();
         if (job == null) return false;
         if (job.getWorkSpace() == null) return false;
-        if (sim.world.getTileEntity(job.getWorkSpace()) == null )return false;
+        if (sim.world.getTileEntity(job.getWorkSpace()) == null) return false;
         if (((TileMiner) sim.world.getTileEntity(job.getWorkSpace())).getMarker() == null) return false;
         if (!((TileMiner) sim.world.getTileEntity(job.getWorkSpace())).CheckValidity()) return false;
         if (job.getWorkSpace() == null) return false;
@@ -78,9 +83,9 @@ public class MinerGoal extends MoveToBlockGoal {
                 job.setState(EnumJobState.WORKING);
                 currentTask = Task.TRAVLELING;
                 return true;
-            }else {
+            } else {
 
-                sim.getNavigator().tryMoveToXYZ(job.getWorkSpace().getX(), job.getWorkSpace().getY(), job.getWorkSpace().getZ(),sim.getAIMoveSpeed());
+                sim.getNavigator().tryMoveToXYZ(job.getWorkSpace().getX(), job.getWorkSpace().getY(), job.getWorkSpace().getZ(), sim.getAIMoveSpeed());
             }
         }
 
@@ -91,7 +96,9 @@ public class MinerGoal extends MoveToBlockGoal {
 
     @Override
     public void startExecuting() {
-        super.startExecuting();
+        this.sim.getNavigator().clearPath();
+        this.func_220725_g();
+        this.timeoutCounter = 0;
         TileMiner miner = ((TileMiner) sim.world.getTileEntity(job.getWorkSpace()));
         progress = ((JobMiner) sim.getJob()).getProgress();
         markerPos = miner.getMarker();
@@ -102,62 +109,66 @@ public class MinerGoal extends MoveToBlockGoal {
         height = miner.getYpos() - 1; // height from bedrock / y = 0
         stair_num = progress % (width*depth);
         stair_pos = findCurrentStairProgress();
-
+        if (!sim.getInventory().hasItemStack(new ItemStack(Items.DIAMOND_PICKAXE)))
+            sim.addItemStackToInventory(new ItemStack(Items.DIAMOND_PICKAXE));
     }
 
     @Override
     public void tick() {
         super.tick();
         if (job.getState() == EnumJobState.WORKING) {
-            if (currentTask == Task.TRAVLELING){
-            minepos = offset;
-            minepos = minepos.add(markerPos.getX(), markerPos.getY(), markerPos.getZ());
+            if (currentTask == Task.TRAVLELING) {
+                minepos = offset;
+                minepos = minepos.add(markerPos.getX(), markerPos.getY(), markerPos.getZ());
 
 
-            if (column >= width) {
-                column = 0;
-                row++;
-            }
-            if (row >= depth) {
-                row = 0;
-                layer++;
-            }
+                if (column >= width) {
+                    column = 0;
+                    row++;
+                }
+                if (row >= depth) {
+                    row = 0;
+                    layer++;
+                }
 
-            minepos = minepos.offset(dir, row);
-            minepos = minepos.offset(dir.rotateY(), column);
-            minepos = minepos.offset(Direction.DOWN, layer);
-            if (!shouldMoveTo(sim.world, minepos)){
-                currentTask = Task.MINING;
-            }else{
-                currentTask = Task.TRAVLELING;
-
-            }
+                minepos = minepos.offset(dir, row);
+                minepos = minepos.offset(dir.rotateY(), column);
+                minepos = minepos.offset(Direction.DOWN, layer);
+                if (!shouldMoveTo(sim.world, minepos)){
+                    currentTask = Task.MINING;
+                }
             }
             if (delay <= 0 && currentTask == Task.MINING) {
 
                 progress = ((JobMiner) sim.getJob()).getProgress();
 
                 ItemStack tool = sim.getHeldItemMainhand();
-                if (!tool.equals(new ItemStack(Items.DIAMOND_PICKAXE))) {
-                    tool = new ItemStack(Items.DIAMOND_PICKAXE);
-                    sim.setHeldItem(Hand.MAIN_HAND, tool);
-                }
 
 
                 World world = sim.getEntityWorld();
 
 
-                if (sim.getPositionVec().distanceTo(new Vector3d(minepos.getX(), minepos.getY(), minepos.getZ())) < 5) {
-                    sim.getLookController().setLookPosition(new Vector3d(minepos.getX(), minepos.getY(), minepos.getZ()));
-                    Block block = sim.getEntityWorld().getBlockState(minepos).getBlock();
-                    sim.world.setBlockState(minepos, Blocks.AIR.getDefaultState(), 2);
-                    sim.world.playSound(minepos.getX(),minepos.getY(),minepos.getZ(),block.getSoundType(block.getDefaultState()).getBreakSound(), SoundCategory.BLOCKS,1f,0.4f,true);
+                if (sim.getPositionVec().distanceTo(new Vector3d(minepos.getX(), minepos.getY(), minepos.getZ())) < 6) {
+                    BlockState state = sim.getEntityWorld().getBlockState(minepos);
+                    Block block = state.getBlock();
                     if (block == Blocks.BEDROCK || minepos.getY() <= 1) {
                         currentTask = Task.RETURNING;
-                    }else {
+                    } else {
                         currentTask = Task.TRAVLELING;
                     }
+
+                    world.getPlayerByUuid(SavedWorldData.get(sim.world).getFactionWithSim(sim.getUniqueID()).getPlayers().get(0)).sendStatusMessage(new StringTextComponent("Working at: " + minepos + "; and navigator set at: " + sim.getNavigator().getTargetPos() + "; inventory state: " + (sim.getInventory().getFirstEmptyStack() == -1 ? "Full" : "Not Full")), true);
+
+                    if (!block.isAir(state, world, minepos)) {
+                        this.sim.getLookController().setLookPosition(new Vector3d(minepos.getX(), minepos.getY(), minepos.getZ()));
+                        world.playEvent(2001, minepos, Block.getStateId(state));
+//                        Block.spawnDrops(world.getBlockState(minepos), world, minepos);
+                        world.setBlockState(minepos, Blocks.AIR.getDefaultState(), 3);
+                        this.sim.swingArm(Hand.MAIN_HAND);
+                    }
+
                     placeStairs(minepos); // runs placing stairs code
+
                     //added mined block to inventory
                     LootContext.Builder builder = new LootContext.Builder((ServerWorld) sim.getEntityWorld())
                             .withRandom(world.rand)
@@ -172,7 +183,6 @@ public class MinerGoal extends MoveToBlockGoal {
 
                     ((JobMiner) sim.getJob()).addProgress();
                     column++;
-                    destinationBlock = BlockPos.ZERO;
 
                 }
 
@@ -180,39 +190,44 @@ public class MinerGoal extends MoveToBlockGoal {
 
             } else {
                 delay--;
-                if (delay < 0){
+                if (delay < 0) {
                     delay = 0;
                 }
             }
             tick++;
-        if (currentTask == Task.RETURNING){
-            if (!shouldMoveTo(sim.world,sim.getJob().getWorkSpace())){
-                if (getInventoryAroundPos(sim.getJob().getWorkSpace()) != null){
-                if(addSimInventoryToChest(getInventoryAroundPos(sim.getJob().getWorkSpace()))){
-                    sim.getJob().setState(EnumJobState.NOT_WORKING);
-                    currentTask = Task.NONE;
-                    int id = SavedWorldData.get(sim.world).getFactionWithSim(sim.getUniqueID()).getId();
-                    sim.fireSim(sim, id, false);
-                    } else{
-                    SimuKraft.LOGGER().debug("Unable to move Items into chest");
-                    SavedWorldData.get(sim.world).getFactionWithSim(sim.getUniqueID()).sendFactionChatMessage(String.format("Sim %s in unable to empty its invetory into a chest at %s",sim.getDisplayName().getString(),sim.getJob().getWorkSpace().toString()),sim.world);
+            if (currentTask == Task.RETURNING) {
+                if (!shouldMoveTo(sim.world, sim.getJob().getWorkSpace())) {
+                    if (getInventoryAroundPos(sim.getJob().getWorkSpace()) != null) {
+                        if (addSimInventoryToChest(getInventoryAroundPos(sim.getJob().getWorkSpace()))) {
+                            sim.getJob().setState(EnumJobState.NOT_WORKING);
+                            currentTask = Task.NONE;
+                            int id = SavedWorldData.get(sim.world).getFactionWithSim(sim.getUniqueID()).getId();
+                            sim.fireSim(sim, id, false);
+                        } else {
+                            SimuKraft.LOGGER().debug("Unable to move Items into chest");
+                            SavedWorldData.get(sim.world).getFactionWithSim(sim.getUniqueID()).sendFactionChatMessage(String.format("Sim %s in unable to empty its invetory into a chest at %s", sim.getDisplayName().getString(), sim.getJob().getWorkSpace().toString()), sim.world);
                         }
                     }
                 }
             }
-        if (currentTask == Task.NONE){
-            currentTask = Task.TRAVLELING;
-        }
+            if (currentTask == Task.NONE) {
+                currentTask = Task.TRAVLELING;
+            }
         }
     }
 
     @Override
     protected boolean shouldMoveTo(IWorldReader worldIn, BlockPos minepos) {
         this.destinationBlock = minepos;
+
         //sim.getNavigator().tryMoveToXYZ(minepos.getX(),minepos.getY()+1,minepos.getZ(),sim.getAIMoveSpeed());
         return !(sim.getPositionVec().distanceTo(new Vector3d(minepos.getX(),minepos.getY(),minepos.getZ())) < getTargetDistanceSq());
     }
 
+    @Override
+    public boolean shouldMove() {
+        return true;
+    }
 
     @Override
     public boolean shouldContinueExecuting() {
@@ -235,7 +250,7 @@ public class MinerGoal extends MoveToBlockGoal {
 
     @Override
     public double getTargetDistanceSq() {
-        return 5.0d;
+        return 3.0d;
     }
 
     /** Used to check where the next stair needs to be placed and places it. does not handle rotation
