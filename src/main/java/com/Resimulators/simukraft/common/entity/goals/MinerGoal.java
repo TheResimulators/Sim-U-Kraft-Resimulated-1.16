@@ -237,19 +237,21 @@ public class MinerGoal extends MoveToBlockGoal {
     public boolean shouldContinueExecuting() {
         if (sim.getJob() != null) {
             if (sim.getJob().getState() == EnumJobState.FORCE_STOP) {
-                ((JobMiner) job).setProgress(progress);
-                sim.getJob().finishedWorkPeriod();
                 return false;
             }
             if (tick < sim.getJob().workTime()) {
                 return true;
-            } else {
-                sim.getJob().finishedWorkPeriod();
-                sim.getJob().setState(EnumJobState.NOT_WORKING);
             }
         }
         ((JobMiner) job).setProgress(progress);
         return shouldExecute();
+    }
+
+    @Override
+    public void resetTask() {
+        ((JobMiner) job).setProgress(progress);
+        sim.getJob().finishedWorkPeriod();
+        sim.getJob().setState(EnumJobState.NOT_WORKING);
     }
 
     @Override

@@ -1,13 +1,14 @@
 package com.resimulators.simukraft.common.tileentity;
 
+import com.resimulators.simukraft.init.ModTileEntities;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
 
 import java.util.UUID;
 
 public class TileGlassFactory extends TileEntity implements ITile {
-    public TileGlassFactory(TileEntityType<?> tileEntityTypeIn) {
-        super(tileEntityTypeIn);
+    public TileGlassFactory() {
+        super(ModTileEntities.GLASS_FACTORY.get());
     }
 
     @Override

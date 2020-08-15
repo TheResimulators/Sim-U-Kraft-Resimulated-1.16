@@ -26,8 +26,10 @@ public class StructureHandler {
             SaveFormat.LevelSave levelSave = (SaveFormat.LevelSave) field.get(server);
             field.setAccessible(false);
             templateManager = new TemplateManager(server.getDataPackRegistries().func_240970_h_(), levelSave, server.getDataFixer());
-        } catch (IllegalAccessException | NoSuchFieldException ignored) {}
-
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            //FIXME fabbe50: Make own instance of TemplateManager
+            templateManager = server.func_241755_D_().getStructureTemplateManager();
+        }
     }
 
     public static TemplateManager getTemplateManager() {
@@ -35,16 +37,22 @@ public class StructureHandler {
     }
 
     public static void saveStructure(World world, BlockPos origin, BlockPos size, String name, String author) {
-        Template template = templateManager.getTemplate(new ResourceLocation(Reference.MODID, name));
-        if (template == null)
-            template = new Template();
-        template.takeBlocksFromWorld(world, origin, size, false, null);
-        template.setAuthor(author);
-        templateManager.writeToFile(new ResourceLocation(Reference.MODID, name));
+        if (templateManager == null && world.getServer() != null)
+            templateManager = world.getServer().func_241755_D_().getStructureTemplateManager();
+
+        if (templateManager != null) {
+            Template template = templateManager.getTemplateDefaulted(new ResourceLocation(Reference.MODID, name));
+            template.takeBlocksFromWorld(world, origin, size, false, null);
+            template.setAuthor(author);
+            templateManager.writeToFile(new ResourceLocation(Reference.MODID, name));
+        }
     }
 
     public static Template loadStructure(String name) {
-        return templateManager.getTemplate(new ResourceLocation(Reference.MODID, name));
+        if (templateManager != null) {
+            return templateManager.getTemplate(new ResourceLocation(Reference.MODID, name));
+        }
+        return null;
     }
 
     public static List<Template.BlockInfo> modifyAndConvertTemplate(Template template, World world, BlockPos pos, Rotation rotation, Mirror mirror) {

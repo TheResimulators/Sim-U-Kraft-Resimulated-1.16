@@ -42,7 +42,6 @@ public class BlockMineBox extends BlockBase {
     @Override
     public ActionResultType onBlockActivated(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTrace) {
         if (!world.isRemote) {
-            SimuKraft.LOGGER().debug("Tile Entity At Pos = " + world.getTileEntity(pos));
             Faction faction = SavedWorldData.get(world).getFactionWithPlayer(player.getUniqueID());
             ArrayList<Integer> simids = faction.getSimUnemployedIds((ServerWorld) world);
             System.out.println(world.getTileEntity(pos));

@@ -4,6 +4,7 @@ import com.resimulators.simukraft.client.data.SkinCacher;
 import com.resimulators.simukraft.client.gui.GuiMod;
 import com.resimulators.simukraft.client.gui.SimHud;
 import com.resimulators.simukraft.client.render.MarkerEntityRender;
+import com.resimulators.simukraft.common.commands.CommandStructure;
 import com.resimulators.simukraft.common.entity.sim.SimInformationOverlay;
 import com.resimulators.simukraft.common.events.world.MarkerBrokenEvent;
 import com.resimulators.simukraft.common.events.world.NewDayEvent;
@@ -31,6 +32,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.server.FMLServerStartedEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
@@ -87,6 +89,11 @@ public class SimuKraft {
 
     @SubscribeEvent
     public void onServerStarting(FMLServerStartingEvent event) {
+        CommandStructure.register(event.getCommandDispatcher());
+    }
+
+    @SubscribeEvent
+    public void onServerStarted(FMLServerStartedEvent event) {
         StructureHandler.createTemplateManager(event.getServer());
     }
 }
