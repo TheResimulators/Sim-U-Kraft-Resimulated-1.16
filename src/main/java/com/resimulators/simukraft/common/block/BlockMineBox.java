@@ -44,8 +44,7 @@ public class BlockMineBox extends BlockBase {
         if (!world.isRemote) {
             Faction faction = SavedWorldData.get(world).getFactionWithPlayer(player.getUniqueID());
             ArrayList<Integer> simids = faction.getSimUnemployedIds((ServerWorld) world);
-            System.out.println(world.getTileEntity(pos));
-            ( (TileMiner)world.getTileEntity(pos)).onOpenGui(player.getAdjustedHorizontalFacing());
+            ((TileMiner)world.getTileEntity(pos)).onOpenGui(player.getAdjustedHorizontalFacing());
             if (((ITile)world.getTileEntity(pos)).getHired()){
                 int hiredId = ((ServerWorld) world).getEntityByUuid(((ITile)world.getTileEntity(pos)).getSimId()).getEntityId();
                 SimUKraftPacketHandler.INSTANCE.sendTo(new OpenJobGuiPacket(simids,pos,hiredId, GuiHandler.Miner),((ServerPlayerEntity) player).connection.netManager, NetworkDirection.PLAY_TO_CLIENT);// used when there is a sim hired
@@ -66,21 +65,6 @@ public class BlockMineBox extends BlockBase {
     @Override
     public void onBlockHarvested(World worldIn, BlockPos pos, BlockState state, PlayerEntity player) {
         super.onBlockHarvested(worldIn, pos, state, player);
-        if (!worldIn.isRemote){
-
-            ITile tile = ((ITile) worldIn.getTileEntity(pos));
-
-            SimEntity sim =(SimEntity) ((ServerWorld)worldIn).getEntityByUuid(tile.getSimId());
-            if (sim != null){
-                int id = SavedWorldData.get(worldIn).getFactionWithPlayer(player.getUniqueID()).getId();
-                SavedWorldData.get(worldIn).fireSim(id,sim);
-                SavedWorldData.get(worldIn).getFaction(id).sendPacketToFaction(new SimFirePacket(id,sim.getEntityId(),pos));
-                sim.getJob().removeJobAi();
-                sim.setJob(null);
-                sim.setProfession(0);
-                tile.setHired(false);
-                tile.setSimId(null);}
-        }
     }
 
 }

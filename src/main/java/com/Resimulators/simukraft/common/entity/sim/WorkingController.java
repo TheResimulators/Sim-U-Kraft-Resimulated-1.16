@@ -7,9 +7,10 @@ import com.resimulators.simukraft.common.jobs.core.IJob;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
 
 
-public class WorkingController implements ITickableTileEntity {
+public class WorkingController {
     private SimEntity sim;
     private int tick;
 
@@ -17,9 +18,10 @@ public class WorkingController implements ITickableTileEntity {
         this.sim = sim;
     }
 
-    @Override
+
     public void tick() {
         IJob job = sim.getJob();
+        if (job != null){
         if (job.getState() == EnumJobState.NOT_WORKING) {// only runs this if the sim is not working at all
             if (tick >= job.intervalTime()) { //interval time makes it so it checks every x seconds to see if it can work
                 tick = 0;
@@ -30,11 +32,15 @@ public class WorkingController implements ITickableTileEntity {
                         if (job.getWorkSpace() != null) {
                             job.setState(EnumJobState.GOING_TO_WORK);
                             BlockPos pos = new BlockPos(job.getWorkSpace());
-                            sim.getMoveHelper().setMoveTo(pos.getX(), pos.getY(), pos.getZ(), sim.getAIMoveSpeed());
+                            sim.getNavigator().tryMoveToXYZ(pos.getX(), pos.getY(), pos.getZ(), sim.getAIMoveSpeed()*2);
+                            }
                         }
                     }
                 }
-            }
+            } else if (job.getState() == EnumJobState.GOING_TO_WORK){
+            BlockPos pos = new BlockPos(job.getWorkSpace());
+            sim.getNavigator().tryMoveToXYZ(pos.getX(), pos.getY(), pos.getZ(), sim.getAIMoveSpeed()*2);
+        }
         }else{
             if (!sim.world.isDaytime()){
                 if (!job.nightShift()){

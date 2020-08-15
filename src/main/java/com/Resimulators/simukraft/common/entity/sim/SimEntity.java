@@ -250,6 +250,7 @@ public class SimEntity extends AgeableEntity implements INPC {
         super.tick();
         if (!world.isRemote()) {
             this.foodStats.tick(this);
+            this.controller.tick();
         }
     }
 

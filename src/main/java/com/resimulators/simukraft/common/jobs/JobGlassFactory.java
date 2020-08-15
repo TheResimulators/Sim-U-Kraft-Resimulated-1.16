@@ -1,5 +1,6 @@
 package com.resimulators.simukraft.common.jobs;
 
+import com.resimulators.simukraft.common.entity.goals.GlassFactoryGoal;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.jobs.core.EnumJobState;
 import com.resimulators.simukraft.common.jobs.core.IJob;
@@ -14,6 +15,14 @@ public class JobGlassFactory implements IJob {
     private int periodsworked = 0;
     private BlockPos workSpace;
     private EnumJobState state = EnumJobState.NOT_WORKING;
+
+
+    public JobGlassFactory(SimEntity simEntity) {
+        this.sim = simEntity;
+        goal1 = new GlassFactoryGoal(sim);
+        addJobAi();
+    }
+
     @Override
     public EnumJobState getState() {
         return state;

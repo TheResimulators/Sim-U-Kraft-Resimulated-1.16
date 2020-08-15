@@ -9,6 +9,7 @@ import java.util.ArrayList;
 public class GuiHandler {
     public static final int Builder = 1;
     public static final int Miner = 2;
+    public static final int GLASS_FACTORY = 3;
 
 
 
@@ -19,6 +20,8 @@ public class GuiHandler {
                 break;
             case Miner:
                 Minecraft.getInstance().displayGuiScreen(new MinerGui(new StringTextComponent("Miner"),ints,pos,id));
+            case GLASS_FACTORY:
+                Minecraft.getInstance().displayGuiScreen(new GlassFactoryGui(new StringTextComponent("Glass Factory"),ints,pos,id));
         }
     }
 }

@@ -15,9 +15,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MutableBoundingBox;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.gen.feature.template.Template;
-import org.apache.commons.lang3.mutable.Mutable;
-import sun.java2d.pipe.SpanShapeRenderer;
 
 public class CommandStructure {
     private static final SimpleCommandExceptionType FAILED_EXCEPTION = new SimpleCommandExceptionType(new TranslationTextComponent("commands.structure.failed"));
