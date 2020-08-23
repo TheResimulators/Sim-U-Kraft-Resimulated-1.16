@@ -65,7 +65,7 @@ public class JobGlassFactory implements IJob {
 
     @Override
     public void addJobAi() {
-        sim.goalSelector.addGoal(4,goal1);
+        sim.goalSelector.addGoal(3,goal1);
     }
 
     @Override

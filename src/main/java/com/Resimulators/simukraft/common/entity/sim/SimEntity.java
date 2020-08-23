@@ -618,6 +618,10 @@ public class SimEntity extends AgeableEntity implements INPC {
 
     }
 
+    public WorkingController getController(){
+        return controller;
+    }
+
 
 
 }

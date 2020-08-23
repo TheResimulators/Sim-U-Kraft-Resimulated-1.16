@@ -40,11 +40,11 @@ public class WorkingController {
             } else if (job.getState() == EnumJobState.GOING_TO_WORK){
             BlockPos pos = new BlockPos(job.getWorkSpace());
             sim.getNavigator().tryMoveToXYZ(pos.getX(), pos.getY(), pos.getZ(), sim.getAIMoveSpeed()*2);
-        }
-        }else{
-            if (!sim.world.isDaytime()){
-                if (!job.nightShift()){
+        } else {
+            if (!sim.world.isDaytime()) {
+                if (!job.nightShift()) {
                     job.setState(EnumJobState.FORCE_STOP);
+                    }
                 }
             }
         }
@@ -61,5 +61,13 @@ public class WorkingController {
 
     public void deserializeNBT(CompoundNBT nbt) {
         tick = nbt.getInt("tick");
+    }
+
+    public void setTick(int tick){
+        this.tick = tick;
+    }
+
+    public int getTick(){
+        return tick;
     }
 }
