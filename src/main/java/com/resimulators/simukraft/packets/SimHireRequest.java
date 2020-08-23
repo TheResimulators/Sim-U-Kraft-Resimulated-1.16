@@ -55,20 +55,26 @@ public class SimHireRequest implements IMessage {
 
     @Override
     public void onExecute(NetworkEvent.Context ctxIn, boolean isLogicalServer) {
-        if (ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayerByUUID(playerId) != null){
+        if (ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayerByUUID(playerId) != null) {
             PlayerEntity player = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayerByUUID(playerId);
-            SavedWorldData data = SavedWorldData.get(player.world);
-            int id = data.getFactionWithPlayer(player.getUniqueID()).getId();
-            data.hireSim(id,(SimEntity) player.world.getEntityByID(simId));
-            ((ITile)player.world.getTileEntity(pos)).setHired(true);
-            SimEntity sim =  ((SimEntity) player.world.getEntityByID(simId));
-            sim.setProfession(job);
-            ((ITile)player.world.getTileEntity(pos)).setSimId(sim.getUniqueID());
-            ((SimEntity) player.world.getEntityByID(simId)).setJob(ModJobs.JOB_LOOKUP.get(job).apply(sim));
-            sim.getJob().setWorkSpace(pos);
-            data.getFaction(id).sendPacketToFaction(new SimHirePacket(simId,id,pos,job));
-            sim.getJob();
+            if (player != null) {
+                SavedWorldData data = SavedWorldData.get(player.world);
+                int id = data.getFactionWithPlayer(player.getUniqueID()).getId();
+                data.hireSim(id, (SimEntity) player.world.getEntityByID(simId));
+                ((ITile) player.world.getTileEntity(pos)).setHired(true);
+                SimEntity sim = ((SimEntity) player.world.getEntityByID(simId));
+                if (sim != null){
+                    sim.setProfession(job);
+                    ITile tile = (ITile) player.world.getTileEntity(pos);
+                    if (tile != null){
+                    tile.setSimId(sim.getUniqueID());
+                    sim.setJob(ModJobs.JOB_LOOKUP.get(job).apply(sim));
+                    sim.getJob().setWorkSpace(pos);
+                    data.getFaction(id).sendPacketToFaction(new SimHirePacket(simId, id, pos, job));
+                    sim.getController().setTick(sim.getJob().intervalTime());
+                    }
+                }
+            }
         }
-
     }
 }
