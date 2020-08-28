@@ -15,6 +15,9 @@ public class TileMiner extends TileEntity implements ITile {
     private Direction dir;
 
     private BlockPos marker;
+    public TileMiner() {
+        super(ModTileEntities.MINER.get());
+    }
 
     @Override
     public void func_230337_a_(BlockState state, CompoundNBT compound) {
@@ -39,9 +42,7 @@ public class TileMiner extends TileEntity implements ITile {
         return super.write(compound);
     }
 
-    public TileMiner() {
-        super(ModTileEntities.MINER.get());
-    }
+
 
     @Override
     public void setHired(boolean hired) {
@@ -113,10 +114,7 @@ public class TileMiner extends TileEntity implements ITile {
     public Direction getDir(){
         return dir;
     }
-    @Override
-    public CompoundNBT getUpdateTag() {
-        return write(new CompoundNBT());
-    }
+
 
     public boolean CheckValidity(){
         if (this.world != null) {
@@ -130,6 +128,9 @@ public class TileMiner extends TileEntity implements ITile {
         return false;
     }
 
-
+    @Override
+    public CompoundNBT getUpdateTag() {
+        return write(new CompoundNBT());
+    }
 
 }

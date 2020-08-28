@@ -6,7 +6,6 @@ import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.tileentity.ITile;
 import com.resimulators.simukraft.packets.SimFireRequest;
 import com.resimulators.simukraft.packets.SimHireRequest;
-import com.sun.java.accessibility.util.java.awt.TextComponentTranslator;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.Widget;
@@ -16,7 +15,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 
-import javax.annotation.Nullable;
 import java.awt.*;
 import java.util.ArrayList;
 
@@ -30,7 +28,7 @@ public class BaseJobGui extends Screen {
     PlayerEntity player;
     ArrayList<Integer> ids;
     ArrayList<SimButton> simButtons = new ArrayList<>();
-    SimEntity selectedsim;
+    SimEntity selectedSim;
     int state = State.MAIN;
     BlockPos pos;
     boolean firing = false;
@@ -53,7 +51,7 @@ public class BaseJobGui extends Screen {
 
         func_230480_a_(Hire = new Button(20, height - 60, 110, 20, new StringTextComponent("Hire"), (Hire -> {
             ShowHiring();
-            state = State.HIRE_INFO;//hire_info is used to select a sim for hiring
+            state = State.HIRE_INFO;  //hire_info is used to select a sim for hiring
         })));
 
         func_230480_a_(Fire = new Button(20, height - 30, 110, 20, new StringTextComponent("Fire"), (Fire -> {
@@ -63,13 +61,17 @@ public class BaseJobGui extends Screen {
         func_230480_a_(ShowEmployees = new Button(width - 120, height - 60, 110, 20, new StringTextComponent("Show Employees"), (ShowEmployees -> {
             //TODO: Implement show employes system to show all employees that have a job
         })));
-        Minecraft.getInstance().world.getTileEntity(pos);
-        if (((ITile) Minecraft.getInstance().world.getTileEntity(pos)).getHired()) {
-            Fire.field_230693_o_ = true;
-            Hire.field_230693_o_ = false;
-        } else {
-            Fire.field_230693_o_ = false;
-            Hire.field_230693_o_ = true;
+        if (Minecraft.getInstance().world != null){
+            ITile tile = (ITile) Minecraft.getInstance().world.getTileEntity(pos);
+            if (tile != null){
+                if (tile.getHired()) {
+                    Fire.field_230693_o_ = true;
+                    Hire.field_230693_o_ = false;
+                } else {
+                    Fire.field_230693_o_ = false;
+                    Hire.field_230693_o_ = true;
+                }
+            }
         }
 
         func_230480_a_(Back = new Button(width - 120, height - 30, 110, 20, new StringTextComponent("Back"), (Back -> {
@@ -138,7 +140,7 @@ public class BaseJobGui extends Screen {
             field_230712_o_.func_238421_b_(stack, "Hiring", (float) (field_230708_k_ / 2 - field_230712_o_.getStringWidth("Hiring") / 2), 10, Color.white.getRGB());
         } else if (state == State.SIM_INFO) {
             field_230712_o_.func_238421_b_(stack, "Info", (float) (field_230708_k_ / 2 - field_230712_o_.getStringWidth("Info") / 2), 10, Color.white.getRGB());
-            field_230712_o_.func_238421_b_(stack, "Name: " + selectedsim.getDisplayName().getString(), (float) 20, 50, Color.white.getRGB());
+            field_230712_o_.func_238421_b_(stack, "Name: " + selectedSim.getDisplayName().getString(), (float) 20, 50, Color.white.getRGB());
             field_230712_o_.func_238421_b_(stack, "Level: WIP", (float) 20, 70, Color.white.getRGB());
         }
         if (state == State.Firing) {
@@ -158,10 +160,10 @@ public class BaseJobGui extends Screen {
         int y = 0;
         int ConstantXSpacing = (field_230708_k_ / 5);
         int ConstantYSpacing = field_230709_l_ / 4;
-        for (int i = 0; i < ids.size(); i++) {
-            SimEntity sim = (SimEntity) player.getEntityWorld().getEntityByID(ids.get(i));
+        for (Integer id : ids) {
+            SimEntity sim = (SimEntity) player.getEntityWorld().getEntityByID(id);
             if (sim != null) {
-                simButtons.add(func_230480_a_(new SimButton(20 + x * ConstantXSpacing, 40 + y * ConstantYSpacing, 100, 20, sim.getName(), ids.get(i), this)));
+                simButtons.add(func_230480_a_(new SimButton(20 + x * ConstantXSpacing, 40 + y * ConstantYSpacing, 100, 20, sim.getName(), id, this)));
                 x++;
                 if (x > 4) {
                     x = 0;
@@ -180,8 +182,7 @@ public class BaseJobGui extends Screen {
 
     private void showSimInfo(int id) {
         hideAll();
-        SimEntity sim = (SimEntity) player.world.getEntityByID(id);
-        selectedsim = sim;
+        selectedSim = (SimEntity) player.world.getEntityByID(id);
         state = State.SIM_INFO;
         Back.field_230694_p_ = true;
         Confirm.field_230694_p_ = true;
@@ -190,27 +191,25 @@ public class BaseJobGui extends Screen {
 
 
     static class SimButton extends Button {
-        private int id;
 
         SimButton(int widthIn, int heightIn, int width, int height, ITextComponent text, int id, BaseJobGui gui) {
-            super(widthIn, heightIn, width, height, text, (Sim -> {
-                gui.showSimInfo(id);
-
-
-            }));
-            this.id = id;
+            super(widthIn, heightIn, width, height, text, (Sim -> gui.showSimInfo(id)));
         }
 
 
     }
 
     public boolean isHired() {
-        return ((ITile) Minecraft.getInstance().world.getTileEntity(pos)).getSimId() != null;
+        if (Minecraft.getInstance().world != null){
+        ITile tile = (ITile) Minecraft.getInstance().world.getTileEntity(pos);
+        if (tile != null) return (tile.getSimId() != null);
+        }
+        return false;
     }
 
     private void sendPackets() {
         if (!firing) {
-            Network.getNetwork().sendToServer(new SimHireRequest(selectedsim.getEntityId(), Minecraft.getInstance().player.getUniqueID(), pos, job));
+            Network.getNetwork().sendToServer(new SimHireRequest(selectedSim.getEntityId(), Minecraft.getInstance().player.getUniqueID(), pos, job));
         } else {
             Network.getNetwork().sendToServer(new SimFireRequest(Minecraft.getInstance().player.getUniqueID(), ((ITile) Minecraft.getInstance().world.getTileEntity(pos)).getSimId(), pos));
         }

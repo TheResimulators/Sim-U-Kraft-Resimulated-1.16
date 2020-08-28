@@ -4,24 +4,19 @@ import com.resimulators.simukraft.init.ModTileEntities;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
-
 import java.util.UUID;
 
-public class TileConstructor extends TileEntity implements ITile {
-
+public class TileFarmer extends TileEntity implements ITile {
     private boolean hired;
     private UUID simId;
-
-    public TileConstructor() {
-        super(ModTileEntities.CONSTRUCTOR.get());
+    public TileFarmer() {
+        super(ModTileEntities.FARMER.get());
     }
 
     @Override
     public CompoundNBT getUpdateTag() {
         return write(new CompoundNBT());
     }
-
-
 
     @Override
     public CompoundNBT write(CompoundNBT nbt) {

@@ -10,6 +10,7 @@ public class GuiHandler {
     public static final int Builder = 1;
     public static final int Miner = 2;
     public static final int GLASS_FACTORY = 3;
+    public static final int FARMER = 4;
 
 
 
@@ -22,6 +23,9 @@ public class GuiHandler {
                 Minecraft.getInstance().displayGuiScreen(new MinerGui(new StringTextComponent("Miner"),ints,pos,id));
             case GLASS_FACTORY:
                 Minecraft.getInstance().displayGuiScreen(new GlassFactoryGui(new StringTextComponent("Glass Factory"),ints,pos,id));
+            case FARMER:
+                Minecraft.getInstance().displayGuiScreen(new FarmerGui(new StringTextComponent("Farmer"),ints,pos,id));
+
         }
     }
 }
