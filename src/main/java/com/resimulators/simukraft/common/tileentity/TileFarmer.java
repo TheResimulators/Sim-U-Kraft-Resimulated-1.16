@@ -1,60 +1,43 @@
 package com.resimulators.simukraft.common.tileentity;
 
+import com.resimulators.simukraft.common.enums.Seed;
 import com.resimulators.simukraft.init.ModTileEntities;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import java.util.UUID;
 
-public class TileFarmer extends TileEntity implements ITile {
-    private boolean hired;
-    private UUID simId;
+public class TileFarmer extends TileBaseMarker {
+    private Seed seed = Seed.WHEAT;
     public TileFarmer() {
         super(ModTileEntities.FARMER.get());
     }
 
-    @Override
-    public CompoundNBT getUpdateTag() {
-        return write(new CompoundNBT());
-    }
 
     @Override
-    public CompoundNBT write(CompoundNBT nbt) {
-        nbt.putBoolean("hired", hired);
-        if (simId != null) {
-            nbt.putUniqueId("simid", simId);
+    public CompoundNBT write(CompoundNBT compound) {
+        if (seed != null){
+        compound.putInt("seed",seed.getId());
         }
-        return nbt;
+        return super.write(compound);
     }
 
+
     @Override
-    public void func_230337_a_(BlockState state, CompoundNBT nbt) {
-        hired = nbt.getBoolean("hired");
-        if (nbt.contains("simid")) {
-            simId = nbt.getUniqueId("simid");
+    public void func_230337_a_(BlockState state, CompoundNBT compound) { // read
+        if (compound.contains("seed")){
+            seed = Seed.getSeedById(compound.getInt("seed"));
         }
+        super.func_230337_a_(state, compound);
     }
 
-    @Override
-    public void setHired(boolean hired) {
-        this.hired = hired;
+
+    public void setSeed(Seed seed) {
+        this.seed = seed;
         markDirty();
     }
 
-    @Override
-    public boolean getHired() {
-        return hired;
+    public Seed getSeed(){
+        return seed;
     }
-
-    @Override
-    public UUID getSimId() {
-        return simId;
-    }
-
-    @Override
-    public void setSimId(UUID id) {
-        this.simId = id;
-        markDirty();
-    }
-
 }

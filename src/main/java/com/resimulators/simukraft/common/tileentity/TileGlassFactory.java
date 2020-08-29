@@ -3,6 +3,8 @@ package com.resimulators.simukraft.common.tileentity;
 import com.resimulators.simukraft.init.ModTileEntities;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.NetworkManager;
+import net.minecraft.network.play.server.SUpdateTileEntityPacket;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
 
@@ -56,5 +58,10 @@ public class TileGlassFactory extends TileEntity implements ITile {
     @Override
     public void setSimId(UUID id) {
         this.simID = id;
+    }
+
+    @Override
+    public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
+        func_230337_a_(this.getBlockState(),pkt.getNbtCompound());
     }
 }

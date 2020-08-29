@@ -21,10 +21,13 @@ public class GuiHandler {
                 break;
             case Miner:
                 Minecraft.getInstance().displayGuiScreen(new MinerGui(new StringTextComponent("Miner"),ints,pos,id));
+                break;
             case GLASS_FACTORY:
                 Minecraft.getInstance().displayGuiScreen(new GlassFactoryGui(new StringTextComponent("Glass Factory"),ints,pos,id));
+                break;
             case FARMER:
                 Minecraft.getInstance().displayGuiScreen(new FarmerGui(new StringTextComponent("Farmer"),ints,pos,id));
+                break;
 
         }
     }

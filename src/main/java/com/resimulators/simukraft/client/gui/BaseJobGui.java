@@ -17,6 +17,7 @@ import net.minecraft.util.text.StringTextComponent;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class BaseJobGui extends Screen {
     Button Hire;
@@ -34,6 +35,8 @@ public class BaseJobGui extends Screen {
     boolean firing = false;
     int hiredId;
     int job;
+    ArrayList<Button> mainMenu = new ArrayList<Button>() {{
+    }};
 
     public BaseJobGui(ITextComponent component, ArrayList<Integer> ids, BlockPos pos, int id, int job) {
         super(component);
@@ -61,18 +64,15 @@ public class BaseJobGui extends Screen {
         func_230480_a_(ShowEmployees = new Button(width - 120, height - 60, 110, 20, new StringTextComponent("Show Employees"), (ShowEmployees -> {
             //TODO: Implement show employes system to show all employees that have a job
         })));
-        if (Minecraft.getInstance().world != null){
-            ITile tile = (ITile) Minecraft.getInstance().world.getTileEntity(pos);
-            if (tile != null){
-                if (tile.getHired()) {
+
+        if (((ITile) Minecraft.getInstance().world.getTileEntity(pos)).getHired()) {
                     Fire.field_230693_o_ = true;
                     Hire.field_230693_o_ = false;
                 } else {
                     Fire.field_230693_o_ = false;
                     Hire.field_230693_o_ = true;
                 }
-            }
-        }
+
 
         func_230480_a_(Back = new Button(width - 120, height - 30, 110, 20, new StringTextComponent("Back"), (Back -> {
             if (state == State.HIRE_INFO) {
@@ -105,15 +105,17 @@ public class BaseJobGui extends Screen {
             ShowEmployees.field_230694_p_ = false;
         }
 
-
+        mainMenu.add(Hire);
+        mainMenu.add(Fire);
+        mainMenu.add(ShowEmployees);
+        mainMenu.add(Done);
     }
 
     public void showMainMenu() {
         hideAll();
-        Hire.field_230694_p_ = true;
-        Fire.field_230694_p_ = true;
-        ShowEmployees.field_230694_p_ = true;
-        Done.field_230694_p_ = true;
+        for (Button button:mainMenu){
+            button.field_230694_p_ = true;
+        }
     }
 
     private void showFiring() {

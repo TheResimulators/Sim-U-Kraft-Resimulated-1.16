@@ -7,10 +7,10 @@ import com.resimulators.simukraft.common.jobs.core.IJob;
 import com.resimulators.simukraft.common.world.Faction;
 import com.resimulators.simukraft.common.world.SavedWorldData;
 import com.resimulators.simukraft.utils.BlockUtils;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.ai.goal.MoveToBlockGoal;
+import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.tileentity.ChestTileEntity;
@@ -20,19 +20,12 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.common.Tags;
-import org.codehaus.plexus.util.CollectionUtils;
-import org.jline.utils.NonBlockingPumpInputStream;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.stream.Stream;
 
 public class GlassFactoryGoal extends MoveToBlockGoal {
     private final SimEntity sim;
-    World world;
+    private final World world;
     private int tick;
     private IJob job;
     private int delay = 20;
@@ -488,7 +481,8 @@ public class GlassFactoryGoal extends MoveToBlockGoal {
         }
 
 
-    private boolean smeltSand(ArrayList<Integer> indexs, int burnable){
+    private boolean smeltSand(ArrayList<Integer> indexs,int burnable){
+        boolean success = false;
         for (BlockPos pos: furnaces){
             if (world.getTileEntity(pos) instanceof FurnaceTileEntity){
                 FurnaceTileEntity tile = (FurnaceTileEntity) world.getTileEntity(pos);
@@ -497,7 +491,7 @@ public class GlassFactoryGoal extends MoveToBlockGoal {
                         tile.setInventorySlotContents(0,sim.getInventory().getStackInSlot(indexs.get(0)));
                         sim.getInventory().setInventorySlotContents(indexs.get(0),ItemStack.EMPTY);
                         indexs.remove(indexs.get(0));
-                        return true;
+                        success = true;
                     }else if(tile.getStackInSlot(0).getItem() == Items.SAND){
                         ItemStack tileStack = tile.getStackInSlot(0);
                         if (tileStack.getCount() < tileStack.getMaxStackSize()){
@@ -509,19 +503,23 @@ public class GlassFactoryGoal extends MoveToBlockGoal {
                                 tileStack.grow(space);
                                 sim.getInventory().getStackInSlot(indexs.get(0)).shrink(space);
                             }
-                            if (burnable >= 0){
-                                tile.setInventorySlotContents(1,sim.getInventory().getStackInSlot(burnable));
-                                sim.getInventory().setInventorySlotContents(burnable,ItemStack.EMPTY);
-                            }
 
-                            return true;
+                            success = true;
                         }
                     }
-
+                    if (success) {
+                        if (burnable < 0){
+                            burnable = checkInventoryBurnables();
+                        }
+                        if (burnable >= 0) {
+                            tile.setInventorySlotContents(1, sim.getInventory().getStackInSlot(burnable));
+                            sim.getInventory().setInventorySlotContents(burnable, ItemStack.EMPTY);
+                        }
+                    }
                 }
             }
         }
-        return false;
+        return success;
     }
 
 
@@ -559,6 +557,26 @@ public class GlassFactoryGoal extends MoveToBlockGoal {
             return false;
         }
         return valid;
+    }
+
+    private int checkInventoryBurnables(){
+        int stack = -1;
+        SimInventory inv = sim.getInventory();
+                for (int i = 0; i < inv.getSizeInventory(); i++){
+                    ItemStack invStack = inv.getStackInSlot(i);
+                    ItemStack currentStack;
+                    if (stack != -1){
+                        currentStack = inv.getStackInSlot(stack);
+                        if (ForgeHooks.getBurnTime(invStack) > ForgeHooks.getBurnTime(currentStack) && ForgeHooks.getBurnTime(invStack) > 0){
+                            stack = i;
+                        }
+                    }else {
+                        if (ForgeHooks.getBurnTime(invStack) > 0){
+                            stack = i;
+                        }
+                    }
+                }
+        return stack;
     }
 
     private void addItemToInventoryFromWorld(BlockPos pos){

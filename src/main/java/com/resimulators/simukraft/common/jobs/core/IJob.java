@@ -44,6 +44,8 @@ public interface IJob {
 
     BlockPos getWorkSpace();
 
+    boolean hasAi();
+
 
 }
 

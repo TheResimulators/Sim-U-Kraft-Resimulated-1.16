@@ -65,7 +65,6 @@ public class MinerGoal extends MoveToBlockGoal {
 
     @Override
     public boolean shouldExecute() {
-        super.shouldExecute();
         job = sim.getJob();
         if (job == null) return false;
         if (job.getWorkSpace() == null) return false;
@@ -74,16 +73,15 @@ public class MinerGoal extends MoveToBlockGoal {
         if (!((TileMiner) sim.world.getTileEntity(job.getWorkSpace())).CheckValidity()) return false;
         if (job.getWorkSpace() == null) return false;
         if (sim.world.getTileEntity(job.getWorkSpace()) == null) return false;
-        job.setState(EnumJobState.WORKING);
-        if (true) return true; //Temporary
+        job.setState(EnumJobState.GOING_TO_WORK);
         if (job.getState() == EnumJobState.GOING_TO_WORK) {
             if (sim.func_233580_cy_().withinDistance(new Vector3d(job.getWorkSpace().getX(), job.getWorkSpace().getY(), job.getWorkSpace().getZ()), 5)) {
                 job.setState(EnumJobState.WORKING);
-                currentTask = Task.TRAVLELING;
+                currentTask = Task.TRAVELING;
                 return true;
             } else {
 
-                sim.getNavigator().tryMoveToXYZ(job.getWorkSpace().getX(), job.getWorkSpace().getY(), job.getWorkSpace().getZ(), sim.getAIMoveSpeed());
+                sim.getNavigator().tryMoveToXYZ(job.getWorkSpace().getX(), job.getWorkSpace().getY()+1, job.getWorkSpace().getZ(), sim.getAIMoveSpeed());
             }
         }
 
@@ -107,6 +105,9 @@ public class MinerGoal extends MoveToBlockGoal {
         height = miner.getYpos() - 1; // height from bedrock / y = 0
         stair_num = progress % (width*depth);
         stair_pos = findCurrentStairProgress();
+        row = progress/width;
+        column = progress%width;
+        layer= progress%(width*depth);
         if (!sim.getInventory().hasItemStack(new ItemStack(Items.DIAMOND_PICKAXE)))
             sim.addItemStackToInventory(new ItemStack(Items.DIAMOND_PICKAXE));
     }
@@ -132,7 +133,7 @@ public class MinerGoal extends MoveToBlockGoal {
                     if (block == Blocks.BEDROCK || minepos.getY() <= 1) {
                         currentTask = Task.RETURNING;
                     } else {
-                        currentTask = Task.TRAVLELING;
+                        currentTask = Task.TRAVELING;
                     }
 
                     if (!block.isAir(state, world, minepos)) {
@@ -172,7 +173,7 @@ public class MinerGoal extends MoveToBlockGoal {
 
 
                     }
-            if (currentTask == Task.TRAVLELING) {
+            if (currentTask == Task.TRAVELING) {
                 minepos = offset;
                 minepos = minepos.add(markerPos.getX(), markerPos.getY(), markerPos.getZ());
 
@@ -189,7 +190,8 @@ public class MinerGoal extends MoveToBlockGoal {
                 minepos = minepos.offset(dir, row);
                 minepos = minepos.offset(dir.rotateY(), column);
                 minepos = minepos.offset(Direction.DOWN, layer);
-                if (sim.getDistanceSq(minepos.getX(),minepos.getY(),minepos.getZ()) <= 5){
+                destinationBlock = minepos;
+                if (minepos.withinDistance(sim.getPositionVec(),5)){
                     currentTask = Task.MINING;
                 }else {
                     destinationBlock = minepos;
@@ -211,12 +213,12 @@ public class MinerGoal extends MoveToBlockGoal {
                             SavedWorldData.get(sim.world).getFactionWithSim(sim.getUniqueID()).sendFactionChatMessage(String.format("Sim %s in unable to empty its invetory into a chest at %s", sim.getDisplayName().getString(), sim.getJob().getWorkSpace().toString()), sim.world);
                         }
                     }
+                }else{
+                    destinationBlock = sim.getJob().getWorkSpace();
                 }
-            }else{
-                destinationBlock = sim.getJob().getWorkSpace();
             }
             if (currentTask == Task.NONE) {
-                currentTask = Task.TRAVLELING;
+                currentTask = Task.TRAVELING;
             }
         }
         world.getPlayerByUuid(SavedWorldData.get(sim.world).getFactionWithSim(sim.getUniqueID()).getPlayers().get(0)).sendStatusMessage(new StringTextComponent("Working at: " + minepos + "; and navigator set at: " + sim.getNavigator().getTargetPos() + "; inventory state: " + (sim.getInventory().getFirstEmptyStack() == -1 ? "Full" : "Not Full")), true);
@@ -224,7 +226,6 @@ public class MinerGoal extends MoveToBlockGoal {
 
     @Override
     protected boolean shouldMoveTo(IWorldReader worldIn, BlockPos minepos) {
-        //sim.getNavigator().tryMoveToXYZ(minepos.getX(),minepos.getY()+1,minepos.getZ(),sim.getAIMoveSpeed());
         return !(sim.getPositionVec().distanceTo(new Vector3d(minepos.getX(),minepos.getY(),minepos.getZ())) < getTargetDistanceSq());
     }
 
@@ -500,7 +501,7 @@ public class MinerGoal extends MoveToBlockGoal {
         MINING,
         RETURNING,
         WAITING,
-        TRAVLELING,
+        TRAVELING,
         NONE
 
     }

@@ -1,6 +1,7 @@
 package com.resimulators.simukraft.common.block;
 
 import com.resimulators.simukraft.client.gui.GuiHandler;
+import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.tileentity.ITile;
 import com.resimulators.simukraft.common.tileentity.TileConstructor;
 import com.resimulators.simukraft.common.tileentity.TileFarmer;
@@ -8,6 +9,7 @@ import com.resimulators.simukraft.common.world.Faction;
 import com.resimulators.simukraft.common.world.SavedWorldData;
 import com.resimulators.simukraft.handlers.SimUKraftPacketHandler;
 import com.resimulators.simukraft.packets.OpenJobGuiPacket;
+import com.resimulators.simukraft.packets.SimFirePacket;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -39,13 +41,17 @@ public class BlockFarmBox extends BlockBase {
             Faction faction = SavedWorldData.get(world).getFactionWithPlayer(player.getUniqueID());
             ArrayList<Integer> simids = faction.getSimUnemployedIds((ServerWorld) world);
             System.out.println(world.getTileEntity(pos));
-            if (((ITile)world.getTileEntity(pos)).getHired()){
-                int hiredId = ((ServerWorld) world).getEntityByUuid(((ITile)world.getTileEntity(pos)).getSimId()).getEntityId();
-                SimUKraftPacketHandler.INSTANCE.sendTo(new OpenJobGuiPacket(simids,pos,hiredId, GuiHandler.FARMER),((ServerPlayerEntity) player).connection.netManager, NetworkDirection.PLAY_TO_CLIENT);// used when there is a sim hired
-            } else {
-                SimUKraftPacketHandler.INSTANCE.sendTo(new OpenJobGuiPacket(simids,pos,GuiHandler.FARMER),((ServerPlayerEntity) player).connection.netManager, NetworkDirection.PLAY_TO_CLIENT);//used when there is no sim employed at this block
+            ITile tile =(ITile) world.getTileEntity(pos);
+            if (tile != null){
+                ((TileFarmer)tile).onOpenGui(player.getAdjustedHorizontalFacing());
+                if (tile.getHired()){
+                    int hiredId = ((ServerWorld) world).getEntityByUuid(((ITile)world.getTileEntity(pos)).getSimId()).getEntityId();
+                    SimUKraftPacketHandler.INSTANCE.sendTo(new OpenJobGuiPacket(simids,pos,hiredId, GuiHandler.FARMER),((ServerPlayerEntity) player).connection.netManager, NetworkDirection.PLAY_TO_CLIENT);// used when there is a sim hired
+                } else {
+                    SimUKraftPacketHandler.INSTANCE.sendTo(new OpenJobGuiPacket(simids,pos,GuiHandler.FARMER),((ServerPlayerEntity) player).connection.netManager, NetworkDirection.PLAY_TO_CLIENT);//used when there is no sim employed at this block
+                    }
+                }
             }
-        }
         return ActionResultType.SUCCESS;
     }
 
@@ -53,5 +59,32 @@ public class BlockFarmBox extends BlockBase {
     @Override
     public TileEntity createTileEntity(BlockState state, IBlockReader world) {
         return new TileFarmer();
+    }
+
+
+
+    @Override
+    public void onBlockHarvested(World worldIn, BlockPos pos, BlockState state, PlayerEntity player) {
+        super.onBlockHarvested(worldIn, pos, state, player);
+        if (!worldIn.isRemote){
+
+            ITile tile = ((ITile) worldIn.getTileEntity(pos));
+
+            SimEntity sim = (SimEntity) ((ServerWorld)worldIn).getEntityByUuid(tile.getSimId());
+            if (sim != null){
+                int id = SavedWorldData.get(worldIn).getFactionWithPlayer(player.getUniqueID()).getId();
+                SavedWorldData.get(worldIn).fireSim(id,sim);
+                SavedWorldData.get(worldIn).getFaction(id).sendPacketToFaction(new SimFirePacket(id,sim.getEntityId(),pos));
+                if (sim.getJob().hasAi()){
+                    sim.getJob().removeJobAi();
+                }
+                sim.setJob(null);
+                sim.setProfession(0);
+                tile.setHired(false);
+                tile.setSimId(null);
+
+            }
+        }
+
     }
 }

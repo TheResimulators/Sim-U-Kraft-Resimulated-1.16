@@ -1,30 +1,36 @@
 package com.resimulators.simukraft.common.jobs;
 
+import com.resimulators.simukraft.common.entity.goals.FarmerGoal;
+import com.resimulators.simukraft.common.entity.goals.MinerGoal;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.jobs.core.EnumJobState;
 import com.resimulators.simukraft.common.jobs.core.IJob;
 import net.minecraft.entity.ai.goal.Goal;
+import net.minecraft.entity.ai.goal.PrioritizedGoal;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.math.BlockPos;
 
+import java.util.function.Predicate;
 
-public class JobBuilder implements IJob {
+public class JobFarmer implements IJob {
     private SimEntity sim;
     private Goal goal1;
     private int periodsworked = 0;
     private BlockPos workSpace;
     private EnumJobState state = EnumJobState.NOT_WORKING;
 
-    public JobBuilder(SimEntity sim) {
+    public JobFarmer(SimEntity sim) {
         this.sim = sim;
+        goal1 = new FarmerGoal(sim);
+        addJobAi();
 
     }
 
 
     @Override
     public Profession jobType() {
-        return Profession.BUILDER;
+        return Profession.FARMER;
     }
 
     @Override
@@ -44,7 +50,7 @@ public class JobBuilder implements IJob {
 
     @Override
     public int workTime() {
-        return 12000;
+        return 10000;
     }
 
     @Override
@@ -66,7 +72,7 @@ public class JobBuilder implements IJob {
 
     @Override
     public void addJobAi() {
-        sim.goalSelector.addGoal(4, goal1);
+        sim.goalSelector.addGoal(3, goal1);
     }
 
     @Override
@@ -79,6 +85,11 @@ public class JobBuilder implements IJob {
         CompoundNBT ints = new CompoundNBT();
         ints.putInt("periodsworked", periodsworked);
         nbt.add(ints);
+        CompoundNBT other = new CompoundNBT(); // other info that is unique to the miner
+        if (workSpace != null) {
+            other.putLong("jobpos", workSpace.toLong());
+        }
+        nbt.add(other);
 
         return nbt;
     }
@@ -90,6 +101,10 @@ public class JobBuilder implements IJob {
             if (list.contains("periodsworked")) {
                 periodsworked = list.getInt("periodsworked");
             }
+            if (list.contains("jobpos")) {
+                setWorkSpace(BlockPos.fromLong(list.getLong("jobpos")));
+            }
+
         }
     }
 
@@ -122,6 +137,6 @@ public class JobBuilder implements IJob {
     public boolean hasAi() {
         return sim.goalSelector.getRunningGoals().anyMatch((goal) -> goal.getGoal() == goal1);
     }
-
-
 }
+
+

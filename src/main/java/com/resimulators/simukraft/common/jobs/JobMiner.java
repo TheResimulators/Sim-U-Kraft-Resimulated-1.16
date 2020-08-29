@@ -151,4 +151,9 @@ public class JobMiner implements IJob {
     public void addProgress(){
         progress++;
     }
+
+    @Override
+    public boolean hasAi() {
+        return sim.goalSelector.getRunningGoals().anyMatch((goal) -> goal.getGoal() == goal1);
+    }
 }

@@ -1,10 +1,7 @@
 package com.resimulators.simukraft.init;
 
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
-import com.resimulators.simukraft.common.jobs.JobBuilder;
-import com.resimulators.simukraft.common.jobs.JobGlassFactory;
-import com.resimulators.simukraft.common.jobs.JobMiner;
-import com.resimulators.simukraft.common.jobs.Profession;
+import com.resimulators.simukraft.common.jobs.*;
 import com.resimulators.simukraft.common.jobs.core.IJob;
 import com.google.common.collect.ImmutableMap;
 
@@ -16,8 +13,7 @@ public class ModJobs {
             .put(Profession.BUILDER.getId(), JobBuilder::new)
             .put(Profession.MINER.getId(), JobMiner::new)
             .put(Profession.GLASS_FACTORY.getId(), JobGlassFactory::new)
-
-
+            .put(Profession.FARMER.getId(), JobFarmer::new)
             .build();
 
 }

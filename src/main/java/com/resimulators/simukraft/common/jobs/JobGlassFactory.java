@@ -116,4 +116,9 @@ public class JobGlassFactory implements IJob {
     public BlockPos getWorkSpace() {
         return workSpace;
     }
+
+    @Override
+    public boolean hasAi() {
+        return sim.goalSelector.getRunningGoals().anyMatch((goal) -> goal.getGoal() == goal1);
+    }
 }

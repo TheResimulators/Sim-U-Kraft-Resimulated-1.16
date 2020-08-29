@@ -54,22 +54,29 @@ public class SimFireRequest implements IMessage {
     public void onExecute(NetworkEvent.Context ctxIn, boolean isLogicalServer) {
         if (ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayerByUUID(playerId) != null) {
             PlayerEntity player = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayerByUUID(playerId);
+            if (player != null){
             SavedWorldData data = SavedWorldData.get(player.world);
             int id = data.getFactionWithPlayer(player.getUniqueID()).getId();
-            ((ITile)player.world.getTileEntity(pos)).setHired(false);
-            System.out.println(player.world.getTileEntity(pos));
-            data.fireSim(id, (SimEntity) ((ServerWorld)player.world).getEntityByUuid(simId));
-            ((ITile) player.world.getTileEntity(pos)).setSimId(null);
             SimEntity sim = (SimEntity) ((ServerWorld)player.world).getEntityByUuid(simId);
-            int simid =sim.getEntityId();
-            if (sim.getJob() != null){
-            sim.getJob().removeJobAi();
-            sim.setJob(null);
-            sim.setHeldItem(Hand.MAIN_HAND, ItemStack.EMPTY);
+            if (sim != null){
+                ITile tile =((ITile)player.world.getTileEntity(pos));
+                if (tile != null){
+                    tile.setHired(false);
+                System.out.println(player.world.getTileEntity(pos));
+                data.fireSim(id, (SimEntity) ((ServerWorld)player.world).getEntityByUuid(simId));
+                tile.setSimId(null);
+                int simid = sim.getEntityId();
+                if (sim.getJob() != null){
+                sim.getJob().removeJobAi();
+                sim.setJob(null);
+                sim.setHeldItem(Hand.MAIN_HAND, ItemStack.EMPTY);
+
+                }
+
+                    }
+                }
+                data.getFaction(id).sendPacketToFaction(new SimFirePacket(id, 0, pos));
             }
-
-
-            data.getFaction(id).sendPacketToFaction(new SimFirePacket(id, simid, pos));
 
         }
     }

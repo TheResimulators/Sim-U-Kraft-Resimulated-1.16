@@ -17,7 +17,7 @@ import java.awt.*;
 import java.util.ArrayList;
 
 public class MinerGui extends BaseJobGui {
-    Button scan;
+
 
     public MinerGui(ITextComponent component, ArrayList<Integer> ids, BlockPos pos, int id) {
         super(component, ids, pos, id, Profession.MINER.getId());
@@ -26,15 +26,6 @@ public class MinerGui extends BaseJobGui {
     @Override
     public void func_231158_b_(Minecraft minecraft, int width, int height) {
         super.func_231158_b_(minecraft, width, height);
-        func_230480_a_(scan = new Button(width - 100, 30, 80, 20, new StringTextComponent("Scan"), Scan -> {
-            if (((TileMiner) Minecraft.getInstance().world.getTileEntity(pos)).getDir() == null) {
-                ((TileMiner) Minecraft.getInstance().world.getTileEntity(pos)).onOpenGui(Minecraft.getInstance().player.getAdjustedHorizontalFacing());
-            }
-            ((TileMiner) Minecraft.getInstance().world.getTileEntity(pos)).Scan();
-        }));
-        if (!((TileMiner) Minecraft.getInstance().world.getTileEntity(pos)).getHired()) {
-            scan.field_230693_o_ = false;
-        }
 
     }
 
@@ -43,13 +34,18 @@ public class MinerGui extends BaseJobGui {
         super.func_230430_a_(stack, p_render_1_, p_render_2_, p_render_3_);
         World world = SimuKraft.proxy.getClientWorld();
         if (world != null) {
-            TileEntity tileEntity = world.getTileEntity(pos);
-            if (tileEntity instanceof TileMiner) {
-                if (((TileMiner)tileEntity).getMarker() != null) {
-                    BlockPos marker = ((TileMiner)tileEntity).getMarker();
-                    if (state == State.MAIN) {
+            if (state == State.MAIN) {
+            TileMiner tileEntity = (TileMiner)world.getTileEntity(pos);
+            if (tileEntity !=null) {
+                if (tileEntity.getMarker() != null) {
+                    BlockPos marker = tileEntity.getMarker();
                         field_230712_o_.func_238421_b_(stack, "Markers Position:", 20, 90, Color.WHITE.getRGB());
                         field_230712_o_.func_238421_b_(stack, String.format("X: %d, Y: %d, Z: %d", marker.getX(), marker.getY(), marker.getZ()), 20, 110, Color.WHITE.getRGB());
+                    }
+                if(tileEntity.getWidth() != 0){
+                    field_230712_o_.func_238421_b_(stack, "Width: " + tileEntity.getWidth(), field_230708_k_-80, 90, Color.WHITE.getRGB());
+                    field_230712_o_.func_238421_b_(stack, "Depth: " + tileEntity.getDepth(), field_230708_k_-80, 120, Color.WHITE.getRGB());
+                    field_230712_o_.func_238421_b_(stack, "Height: " + tileEntity.getYpos(), field_230708_k_-80, 150, Color.WHITE.getRGB());
                     }
                 }
             }
