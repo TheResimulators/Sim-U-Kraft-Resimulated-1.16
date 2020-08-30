@@ -19,6 +19,7 @@ public class JobFarmer implements IJob {
     private int periodsworked = 0;
     private BlockPos workSpace;
     private EnumJobState state = EnumJobState.NOT_WORKING;
+    private boolean tilled = false;
 
     public JobFarmer(SimEntity sim) {
         this.sim = sim;
@@ -89,7 +90,10 @@ public class JobFarmer implements IJob {
         if (workSpace != null) {
             other.putLong("jobpos", workSpace.toLong());
         }
+        other.putBoolean("tilled",tilled);
         nbt.add(other);
+
+
 
         return nbt;
     }
@@ -103,6 +107,9 @@ public class JobFarmer implements IJob {
             }
             if (list.contains("jobpos")) {
                 setWorkSpace(BlockPos.fromLong(list.getLong("jobpos")));
+            }
+            if (list.contains("tilled")){
+                setTilled(list.getBoolean("tilled"));
             }
 
         }
@@ -136,6 +143,15 @@ public class JobFarmer implements IJob {
     @Override
     public boolean hasAi() {
         return sim.goalSelector.getRunningGoals().anyMatch((goal) -> goal.getGoal() == goal1);
+    }
+
+    public boolean isTilled() {
+        return tilled;
+    }
+
+
+    public void setTilled(boolean tilled){
+        this.tilled = tilled;
     }
 }
 
