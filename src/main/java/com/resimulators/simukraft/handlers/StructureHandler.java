@@ -36,7 +36,7 @@ public class StructureHandler {
         return templateManager;
     }
 
-    public static void saveStructure(World world, BlockPos origin, BlockPos size, String name, String author) {
+    public static boolean saveStructure(World world, BlockPos origin, BlockPos size, String name, String author) {
         if (templateManager == null && world.getServer() != null)
             templateManager = world.getServer().func_241755_D_().getStructureTemplateManager();
 
@@ -45,7 +45,9 @@ public class StructureHandler {
             template.takeBlocksFromWorld(world, origin, size, false, null);
             template.setAuthor(author);
             templateManager.writeToFile(new ResourceLocation(Reference.MODID, name));
+            return true;
         }
+        return false;
     }
 
     public static Template loadStructure(String name) {

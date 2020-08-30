@@ -1,17 +1,14 @@
 package com.resimulators.simukraft.common.jobs;
 
 import com.resimulators.simukraft.common.entity.goals.FarmerGoal;
-import com.resimulators.simukraft.common.entity.goals.MinerGoal;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.jobs.core.EnumJobState;
 import com.resimulators.simukraft.common.jobs.core.IJob;
 import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.entity.ai.goal.PrioritizedGoal;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.math.BlockPos;
 
-import java.util.function.Predicate;
 
 public class JobFarmer implements IJob {
     private SimEntity sim;
@@ -20,6 +17,7 @@ public class JobFarmer implements IJob {
     private BlockPos workSpace;
     private EnumJobState state = EnumJobState.NOT_WORKING;
     private boolean tilled = false;
+    private int progress;
 
     public JobFarmer(SimEntity sim) {
         this.sim = sim;
@@ -152,6 +150,14 @@ public class JobFarmer implements IJob {
 
     public void setTilled(boolean tilled){
         this.tilled = tilled;
+    }
+
+    public void setProgress(int progress){
+        this.progress = progress;
+    }
+
+    public int getProgress(){
+        return progress;
     }
 }
 

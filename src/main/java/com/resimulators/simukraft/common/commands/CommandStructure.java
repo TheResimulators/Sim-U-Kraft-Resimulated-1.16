@@ -37,8 +37,10 @@ public class CommandStructure {
         int i = bounds.getXSize() * bounds.getYSize() * bounds.getZSize();
         if (i == 0)
             throw FAILED_EXCEPTION.create();
-        StructureHandler.saveStructure(source.getWorld(), minPos, size, name, source.getName());
-        source.sendFeedback(new StringTextComponent("Saved " + name), true);
+        if (StructureHandler.saveStructure(source.getWorld(), minPos, size, name, source.getName()))
+            source.sendFeedback(new StringTextComponent("Saved " + name), true);
+        else
+            source.sendFeedback(new StringTextComponent("Couldn't save " + name), true);
         return i;
     }
 
@@ -47,6 +49,7 @@ public class CommandStructure {
         ItemStack stack = player.getHeldItemMainhand();
         if (stack.getItem() instanceof ItemStructureTest) {
             ((ItemStructureTest) stack.getItem()).setTemplate(stack, name);
+            source.sendFeedback(new StringTextComponent("Loaded Template " + name), true);
             return 1;
         } else {
             throw WRONG_ITEM_EXCEPTION.create();

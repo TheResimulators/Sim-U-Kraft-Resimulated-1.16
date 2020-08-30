@@ -1,5 +1,6 @@
 package com.resimulators.simukraft.common.jobs;
 
+import com.resimulators.simukraft.common.entity.goals.BuilderGoal;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.jobs.core.EnumJobState;
 import com.resimulators.simukraft.common.jobs.core.IJob;
@@ -7,20 +8,30 @@ import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.gen.feature.template.Template;
 
 
 public class JobBuilder implements IJob {
-    private SimEntity sim;
-    private Goal goal1;
+    private final SimEntity sim;
+    private final Goal goal1;
+    private Template template;
     private int periodsworked = 0;
     private BlockPos workSpace;
     private EnumJobState state = EnumJobState.NOT_WORKING;
 
     public JobBuilder(SimEntity sim) {
         this.sim = sim;
-
+        goal1 = new BuilderGoal(sim);
+        addJobAi();
     }
 
+    public void setTemplate(Template template) {
+        this.template = template;
+    }
+
+    public Template getTemplate() {
+        return template;
+    }
 
     @Override
     public Profession jobType() {
@@ -66,7 +77,8 @@ public class JobBuilder implements IJob {
 
     @Override
     public void addJobAi() {
-        sim.goalSelector.addGoal(4, goal1);
+        sim.goalSelector.addGoal(3, goal1);
+        System.out.println("Added " + goal1 + " to sim " + sim.getUniqueID());
     }
 
     @Override
@@ -95,7 +107,7 @@ public class JobBuilder implements IJob {
 
     @Override
     public void finishedWorkPeriod() {
-        setWorkedPeriods(++periodsworked);
+        setWorkedPeriods(periodsworked++);
     }
 
     @Override

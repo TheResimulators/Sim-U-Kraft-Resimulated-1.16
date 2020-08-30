@@ -28,7 +28,7 @@ public class FarmerGui extends BaseJobGui {
         super(component, ids, pos, id, Profession.FARMER.getId());
         farmer = (TileFarmer) Minecraft.getInstance().world.getTileEntity(pos);
         title = component.getString();
-   }
+    }
 
 
     @Override

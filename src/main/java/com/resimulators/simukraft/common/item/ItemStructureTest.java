@@ -1,8 +1,13 @@
 package com.resimulators.simukraft.common.item;
 
+import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.item.interfaces.IStructureStorage;
+import com.resimulators.simukraft.common.jobs.JobBuilder;
+import com.resimulators.simukraft.common.jobs.Profession;
 import com.resimulators.simukraft.handlers.StructureHandler;
+import com.resimulators.simukraft.init.ModJobs;
 import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -45,6 +50,23 @@ public class ItemStructureTest extends Item implements IStructureStorage {
         }
 
         return ActionResult.resultSuccess(playerIn.getHeldItem(handIn));
+    }
+
+    @Override
+    public ActionResultType itemInteractionForEntity(ItemStack stack, PlayerEntity playerIn, LivingEntity target, Hand hand) {
+        Template temp = this.getTemplate(this.getStructure(stack));
+        System.out.println(temp != null);
+
+        if (temp != null && target instanceof SimEntity) {
+            ((SimEntity) target).setProfession(Profession.BUILDER.getId());
+            ((SimEntity) target).setJob(ModJobs.JOB_LOOKUP.get(Profession.BUILDER.getId()).apply((SimEntity)target));
+            if (((SimEntity) target).getJob() instanceof JobBuilder) {
+                ((JobBuilder) ((SimEntity) target).getJob()).setTemplate(temp);
+                ((SimEntity) target).getJob().setWorkSpace(placementArea);
+            }
+        }
+
+        return ActionResultType.SUCCESS;
     }
 
     @Override

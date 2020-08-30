@@ -17,7 +17,7 @@ public class TileFarmer extends TileBaseMarker {
     @Override
     public CompoundNBT write(CompoundNBT compound) {
         if (seed != null){
-        compound.putInt("seed",seed.getId());
+            compound.putInt("seed",seed.getId());
         }
         return super.write(compound);
     }

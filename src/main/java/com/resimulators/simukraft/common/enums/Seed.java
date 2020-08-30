@@ -38,11 +38,11 @@ public enum Seed {
     }
 
     public static Seed getSeedById(int id){
-       for (Seed seed: Seed.values()){
-           if (seed.getId() == id){
-               return seed;
-           }
-       }
+        for (Seed seed: Seed.values()){
+            if (seed.getId() == id){
+                return seed;
+            }
+        }
         return null;
     }
 
@@ -59,7 +59,7 @@ public enum Seed {
             if (seed.enabled){
                 return seed;
             }else{
-            seed = getNextSeed(seed);
+                seed = getNextSeed(seed);
             }
 
         }

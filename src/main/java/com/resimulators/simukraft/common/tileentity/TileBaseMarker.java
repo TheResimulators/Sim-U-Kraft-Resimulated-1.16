@@ -35,13 +35,13 @@ public class TileBaseMarker extends TileEntity implements ITile {
         }
         hired = compound.getBoolean("hired");
         if (compound.contains("width")){
-        width = compound.getInt("width");
+            width = compound.getInt("width");
         }
         if (compound.contains("depth")){
-        depth = compound.getInt("depth");
+            depth = compound.getInt("depth");
         }
         if (compound.contains("height")){
-        height = compound.getInt("height");
+            height = compound.getInt("height");
         }
         if (compound.contains("marker")){
             marker = BlockPos.fromLong(compound.getLong("marker"));
@@ -59,13 +59,13 @@ public class TileBaseMarker extends TileEntity implements ITile {
         }
         compound.putBoolean("hired", hired);
         if (width != 0){
-        compound.putInt("width",width);
+            compound.putInt("width",width);
         }
         if (depth != 0){
-        compound.putInt("depth",depth);
+            compound.putInt("depth",depth);
         }
         if (height != 0){
-        compound.putInt("height",height);
+            compound.putInt("height",height);
         }
         if (marker != null){
             compound.putLong("marker",marker.toLong());

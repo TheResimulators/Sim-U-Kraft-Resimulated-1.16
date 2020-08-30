@@ -87,114 +87,113 @@ public class GlassFactoryGoal extends MoveToBlockGoal {
     public void tick() {
         super.tick();
         tick++;
-        if (delay <= 0){
+        if (delay <= 0) {
             delay = 10;
-        if (state == State.FURNACE_INTERACTION){
-            if(interactWithFurnace()){
-                state = State.CHEST_INTERACTION;
-                getItemsToMove();
-                ValidateChests();
-            if (!chests.isEmpty()){
-                destinationBlock = chests.get(0);
-                } else {
-                    if (!sendStatuses()){
-                        sim.getJob().setState(EnumJobState.NOT_WORKING);
+            if (state == State.FURNACE_INTERACTION) {
+                if (interactWithFurnace()) {
+                    state = State.CHEST_INTERACTION;
+                    getItemsToMove();
+                    ValidateChests();
+                    if (!chests.isEmpty()) {
+                        destinationBlock = chests.get(0);
+                    } else {
+                        if (!sendStatuses()) {
+                            sim.getJob().setState(EnumJobState.NOT_WORKING);
+                        }
                     }
                 }
             }
-        }
-        if (state == State.CHEST_INTERACTION){
-                if (!collected){ // just started shift
+            if (state == State.CHEST_INTERACTION) {
+                if (!collected) { // just started shift
                     getItemsToMove();
                     if (emptyInventory()) {
                         state = State.TRAVELING;
                         BlockPos sand = findSand();
-                        if(sand != BlockPos.ZERO){
+                        if (sand != BlockPos.ZERO) {
                             targetPos = sand;
                             destinationBlock = sand;
                         }
                     }
-                    } else {
+                } else {
                     getItemsToMove();
                     getSandToMove();
-                    if (emptyInventory()){
+                    if (emptyInventory()) {
                         state = State.TRAVELING;
                         BlockPos sand = findSand();
-                        if(sand != BlockPos.ZERO){
+                        if (sand != BlockPos.ZERO) {
                             targetPos = sand;
                             destinationBlock = sand;
                         }
-                }
-                }
-            }
-        if (state == State.TRAVELING){
-            if (targetPos != null){
-            if (sim.getDistanceSq(targetPos.getX(),targetPos.getY(),targetPos.getZ()) < 5){
-                state = State.COLLECTING;
-                }else{
-                destinationBlock = targetPos;
-                if (sim.getDistanceSq(targetPos.getX(),targetPos.getY(),targetPos.getZ()) > 50){
-                    targetPos = null;
-                }
-            }
-            }else {
-                BlockPos sand = findSand();
-                if (sand != BlockPos.ZERO){
-                    targetPos = sand;
-                    destinationBlock = sand;
                     }
                 }
             }
-
-        if (state == State.COLLECTING){
-            if (targetPos != null){
-                if (sim.getDistanceSq(targetPos.getX(),targetPos.getY(),targetPos.getZ()) < 6){
-                    if (world.getBlockState(targetPos).getBlock() == Blocks.SAND){
-                        addItemToInventoryFromWorld(targetPos);
-                        if (!findNextSand()){
-                            state = State.RETURNING;
-                            destinationBlock = job.getWorkSpace();
+            if (state == State.TRAVELING) {
+                if (targetPos != null) {
+                    if (sim.getDistanceSq(targetPos.getX(), targetPos.getY(), targetPos.getZ()) < 5) {
+                        state = State.COLLECTING;
+                    } else {
+                        destinationBlock = targetPos;
+                        if (sim.getDistanceSq(targetPos.getX(), targetPos.getY(), targetPos.getZ()) > 50) {
                             targetPos = null;
-                            collected = true;
                         }
-                    }else{
-                        findNextSand();
+                    }
+                } else {
+                    BlockPos sand = findSand();
+                    if (sand != BlockPos.ZERO) {
+                        targetPos = sand;
+                        destinationBlock = sand;
+                    }
+                }
+            }
+            if (state == State.COLLECTING) {
+                if (targetPos != null) {
+                    if (sim.getDistanceSq(targetPos.getX(), targetPos.getY(), targetPos.getZ()) < 6) {
+                        if (world.getBlockState(targetPos).getBlock() == Blocks.SAND) {
+                            addItemToInventoryFromWorld(targetPos);
+                            if (!findNextSand()) {
+                                state = State.RETURNING;
+                                destinationBlock = job.getWorkSpace();
+                                targetPos = null;
+                                collected = true;
+                            }
+                        } else {
+                            findNextSand();
                         }
+                    }
+                } else {
+                    //state = State.TRAVELING;
                 }
-            }else {
-                //state = State.TRAVELING;
             }
-        }
-        if (state == State.RETURNING){
-            if (sim.getDistanceSq(job.getWorkSpace().getX(),job.getWorkSpace().getY(),job.getWorkSpace().getZ()) < 4){
-                state = State.SMELTING;
-            }
-        }
-
-        if (state == State.SMELTING){
-            ArrayList<Integer> stacks = getSandInventory();
-            if (stacks.size() > 0){
-                int index = getBurnables();
-                if (index >= 0 || !checkFuelStatus()){
-                if (!smeltSand(stacks,index)){
-                    state = State.CHEST_INTERACTION;
-                    getSandToMove();
-                }
-
-            }else{
-                state = State.CHEST_INTERACTION;
-                getSandToMove();
-                getItemsToMove();
+            if (state == State.RETURNING) {
+                if (sim.getDistanceSq(job.getWorkSpace().getX(), job.getWorkSpace().getY(), job.getWorkSpace().getZ()) < 4) {
+                    state = State.SMELTING;
                 }
             }
 
-        }
-        if (state == State.NOTHING){
-            state = State.FURNACE_INTERACTION;
-            destinationBlock = furnaces.get(0);
-        }
+            if (state == State.SMELTING) {
+                ArrayList<Integer> stacks = getSandInventory();
+                if (stacks.size() > 0) {
+                    int index = getBurnables();
+                    if (index >= 0 || !checkFuelStatus()) {
+                        if (!smeltSand(stacks, index)) {
+                            state = State.CHEST_INTERACTION;
+                            getSandToMove();
+                        }
 
-        }else {
+                    } else {
+                        state = State.CHEST_INTERACTION;
+                        getSandToMove();
+                        getItemsToMove();
+                    }
+                }
+
+            }
+            if (state == State.NOTHING) {
+                state = State.FURNACE_INTERACTION;
+                destinationBlock = furnaces.get(0);
+            }
+
+        } else {
             delay--;
         }
     }
