@@ -227,18 +227,18 @@ public class SimInventory implements IInventory, INamedContainerProvider {
         return i == -1 ? itemStackIn.getCount() : this.addResource(i, itemStackIn);
     }
 
-    private int addResource(int p_191973_1_, ItemStack p_191973_2_) {
-        Item item = p_191973_2_.getItem();
-        int i = p_191973_2_.getCount();
-        ItemStack itemstack = this.getStackInSlot(p_191973_1_);
+    private int addResource(int index, ItemStack itemStack) {
+        Item item = itemStack.getItem();
+        int i = itemStack.getCount();
+        ItemStack itemstack = this.getStackInSlot(index);
         if (itemstack.isEmpty()) {
-            itemstack = p_191973_2_.copy();
+            itemstack = itemStack.copy();
             itemstack.setCount(0);
-            if (p_191973_2_.hasTag()) {
-                itemstack.setTag(p_191973_2_.getTag().copy());
+            if (itemStack.hasTag()) {
+                itemstack.setTag(itemStack.getTag().copy());
             }
 
-            this.setInventorySlotContents(p_191973_1_, itemstack);
+            this.setInventorySlotContents(index, itemstack);
         }
 
         int j = i;

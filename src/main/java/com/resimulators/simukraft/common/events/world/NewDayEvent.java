@@ -115,12 +115,21 @@ public class NewDayEvent implements INBTSerializable<CompoundNBT> {
         // loop through provided blocks
         SimuKraft.LOGGER().debug(blocksAroundPlayer.size());
 
-            int i = random.nextInt(blocksAroundPlayer.size());
+            BlockPos spawnPos = null;
             // if there are no invalid positions, spawn sim and break out of loop
-            BlockPos spawnPos = getSpawnPosition(world, blocksAroundPlayer.get(i), sim);
-            if (spawnPos == null) {
-                SimuKraft.LOGGER().debug("AHHHH NULL " + i);
-            }else{
+            for (int i = 0;i< blocksAroundPlayer.size(); i++){
+                int index = random.nextInt(blocksAroundPlayer.size()-i);
+                spawnPos = getSpawnPosition(world, blocksAroundPlayer.get(index), sim);
+                if (spawnPos == null){
+                    SimuKraft.LOGGER().debug("AHHHH NULL " + index);
+                    blocksAroundPlayer.remove(i);
+                }else{
+                    break;
+                }
+
+            }
+
+            if (spawnPos != null){
             // get x, y, z coords of block
             double x = spawnPos.getX();
             double y = spawnPos.getY();

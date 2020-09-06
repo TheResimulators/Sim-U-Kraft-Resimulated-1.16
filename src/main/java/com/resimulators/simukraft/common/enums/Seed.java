@@ -1,26 +1,28 @@
 package com.resimulators.simukraft.common.enums;
 
 
+import net.minecraft.block.Block;
+import net.minecraft.block.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 
 public enum Seed {
 
-    WHEAT("wheat",0, Items.WHEAT,true,Type.CROP),
-    POTATO("potato",1, Items.POTATO, false,Type.CROP),
-    CARROTS("carrot",2, Items.CARROT, false, Type.CROP),
-    PUMPKIN("pumpkin",3, Items.PUMPKIN,false,Type.OUTCROP),
-    MELON("melon",4,Items.MELON,false,Type.OUTCROP),
-    SUGAR_CANE("sugar cane",5,Items.SUGAR_CANE,false,Type.VERTICAL),
-    CACTUS("cactus",6,Items.CACTUS,false,Type.VERTICAL);
+    WHEAT("wheat",0, Blocks.WHEAT,true,Type.CROP),
+    POTATO("potato",1, Blocks.POTATOES, false,Type.CROP),
+    CARROTS("carrot",2, Blocks.CARROTS, false, Type.CROP),
+    PUMPKIN("pumpkin",3, Blocks.PUMPKIN,false,Type.OUTCROP),
+    MELON("melon",4,Blocks.MELON,false,Type.OUTCROP),
+    SUGAR_CANE("sugar cane",5,Blocks.SUGAR_CANE,false,Type.VERTICAL),
+    CACTUS("cactus",6,Blocks.CACTUS,false,Type.VERTICAL);
 
 
     private final String name;
     private final int id;
-    private final Item item;
+    private final Block item;
     private final boolean enabled;
     private final Type type;
-    Seed(String string, int id, Item item,boolean enabled,Type type){
+    Seed(String string, int id, Block item,boolean enabled,Type type){
         this.name = string;
         this.id = id;
         this.item = item;
@@ -73,7 +75,7 @@ public enum Seed {
         return id;
     }
 
-    public Item getItem() {
+    public Block getItem() {
         return item;
     }
 

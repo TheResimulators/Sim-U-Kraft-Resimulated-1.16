@@ -75,9 +75,10 @@ public class BlockFarmBox extends BlockBase {
                 int id = SavedWorldData.get(worldIn).getFactionWithPlayer(player.getUniqueID()).getId();
                 SavedWorldData.get(worldIn).fireSim(id,sim);
                 SavedWorldData.get(worldIn).getFaction(id).sendPacketToFaction(new SimFirePacket(id,sim.getEntityId(),pos));
+                if (sim.getJob() != null){
                 if (sim.getJob().hasAi()){
                     sim.getJob().removeJobAi();
-                }
+                }}
                 sim.setJob(null);
                 sim.setProfession(0);
                 tile.setHired(false);

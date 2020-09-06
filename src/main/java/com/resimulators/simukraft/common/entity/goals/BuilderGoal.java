@@ -58,11 +58,10 @@ public class BuilderGoal extends Goal {
                 .setCenterOffset(template.getSize().subtract(new Vector3i(template.getSize().getX() / 2, 0, template.getSize().getZ() / 2)))
                 .setRotation(Rotation.NONE)
                 .setMirror(Mirror.NONE);
-        blocks = template.func_215386_a(sim.getJob().getWorkSpace(), settings, Blocks.AIR, true);
+        blocks = template.func_215386_a(sim.getJob().getWorkSpace(), settings, Blocks.PACKED_ICE, true);
 
         for (Template.BlockInfo blockInfo : blocks) {
-            if (blockInfo.state.getBlock() != Blocks.AIR)
-                sim.world.setBlockState(sim.getJob().getWorkSpace().add(blockInfo.pos), blockInfo.state);
+                sim.world.setBlockState(blockInfo.pos, blockInfo.state);
         }
     }
 
