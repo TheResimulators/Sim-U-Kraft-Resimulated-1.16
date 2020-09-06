@@ -54,7 +54,7 @@ public class JobFarmer implements IJob {
 
     @Override
     public int maximumWorkPeriods() {
-        return -1;
+        return 10;
         //negative one so that it can work as much as it can. builder should work all day.
         // if it can't find resources it take a 1000 tick break
     }

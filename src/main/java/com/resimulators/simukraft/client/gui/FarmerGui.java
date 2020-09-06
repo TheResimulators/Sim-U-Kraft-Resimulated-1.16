@@ -69,7 +69,6 @@ public class FarmerGui extends BaseJobGui {
                         field_230712_o_.func_238421_b_(stack, "Dimensions", field_230708_k_-50-field_230712_o_.getStringWidth("Dimensions")/2, 70, Color.YELLOW.getRGB());
                         field_230712_o_.func_238421_b_(stack, "Width: " + tileEntity.getWidth(), field_230708_k_-80, 90, Color.WHITE.getRGB());
                         field_230712_o_.func_238421_b_(stack, "Depth: " + tileEntity.getDepth(), field_230708_k_-80, 120, Color.WHITE.getRGB());
-                        field_230712_o_.func_238421_b_(stack, "Height: " + tileEntity.getYpos(), field_230708_k_-80, 150, Color.WHITE.getRGB());
                     }
                 }
             }
