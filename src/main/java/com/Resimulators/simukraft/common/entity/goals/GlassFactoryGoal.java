@@ -7,21 +7,31 @@ import com.resimulators.simukraft.common.jobs.core.IJob;
 import com.resimulators.simukraft.common.world.Faction;
 import com.resimulators.simukraft.common.world.SavedWorldData;
 import com.resimulators.simukraft.utils.BlockUtils;
+import com.resimulators.simukraft.utils.RayTraceHelper;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.ai.goal.MoveToBlockGoal;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.loot.LootContext;
+import net.minecraft.loot.LootParameters;
 import net.minecraft.tileentity.ChestTileEntity;
 import net.minecraft.tileentity.FurnaceTileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.ForgeHooks;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public class GlassFactoryGoal extends MoveToBlockGoal {
     private final SimEntity sim;
@@ -129,7 +139,7 @@ public class GlassFactoryGoal extends MoveToBlockGoal {
             }
             if (state == State.TRAVELING) {
                 if (targetPos != null) {
-                    if (sim.getDistanceSq(targetPos.getX(), targetPos.getY(), targetPos.getZ()) < 5) {
+                    if (targetPos.withinDistance(sim.getPositionVec(),6)) {
                         state = State.COLLECTING;
                     } else {
                         destinationBlock = targetPos;
@@ -147,9 +157,10 @@ public class GlassFactoryGoal extends MoveToBlockGoal {
             }
             if (state == State.COLLECTING) {
                 if (targetPos != null) {
-                    if (sim.getDistanceSq(targetPos.getX(), targetPos.getY(), targetPos.getZ()) < 6) {
+                    if (targetPos.withinDistance(sim.getPositionVec(),6)) {
                         if (world.getBlockState(targetPos).getBlock() == Blocks.SAND) {
                             addItemToInventoryFromWorld(targetPos);
+                            world.setBlockState(targetPos,Blocks.AIR.getDefaultState());
                             if (!findNextSand()) {
                                 state = State.RETURNING;
                                 destinationBlock = job.getWorkSpace();
@@ -159,6 +170,8 @@ public class GlassFactoryGoal extends MoveToBlockGoal {
                         } else {
                             findNextSand();
                         }
+                    }else {
+                        destinationBlock = targetPos;
                     }
                 } else {
                     //state = State.TRAVELING;
@@ -340,11 +353,16 @@ public class GlassFactoryGoal extends MoveToBlockGoal {
 
     private BlockPos findSand(){
         final BlockPos[] sand = {BlockPos.ZERO};
-        Iterable<BlockPos> blockPoses = BlockPos.getAllInBoxMutable(job.getWorkSpace().add(-20,-10,-20), job.getWorkSpace().add(20,10,20));
+        Iterable<BlockPos> blockPoses = BlockPos.getAllInBox(job.getWorkSpace().add(-10,-3,-10), job.getWorkSpace().add(10,5,10))
+                .filter(blockPos -> world.getBlockState(blockPos).getBlock() == Blocks.SAND)
+                .map(BlockPos::toImmutable)
+                .sorted(Comparator.comparingDouble(blockPos ->job.getWorkSpace().distanceSq(blockPos)))
+                .collect(Collectors.toCollection(ArrayList::new));
         for (BlockPos blockPos: blockPoses){
             if (world.getBlockState(blockPos).getBlock() == Blocks.SAND){
                 sand[0] = blockPos;
                 break;
+
             }
         }
 
@@ -354,15 +372,13 @@ public class GlassFactoryGoal extends MoveToBlockGoal {
 
     private boolean findNextSand() {
         BlockPos sand = BlockPos.ZERO;
-        Iterable<BlockPos> blockPoses = BlockPos.getAllInBoxMutable(new BlockPos(sim.getPositionVec().add(-5,-3,-5)), new BlockPos(sim.getPositionVec().add(5,3,5)));
-
-        for (BlockPos blockPos: blockPoses){
-            if (world.getBlockState(blockPos).getBlock() == Blocks.SAND){
-                sand = blockPos;
-                break;
-            }
-        }
-        if (sand != BlockPos.ZERO){
+        ArrayList<BlockPos> blockPoses = BlockPos.getAllInBox(job.getWorkSpace().add(-5,-3,-5), job.getWorkSpace().add(5,5,5))
+                .filter(blockPos -> world.getBlockState(blockPos).getBlock() == Blocks.SAND)
+                .map(BlockPos::toImmutable)
+                .sorted(Comparator.comparingDouble(blockPos ->sim.getPositionVec().squareDistanceTo(blockPos.getX(),blockPos.getY(),blockPos.getZ())))
+                .collect(Collectors.toCollection(ArrayList::new));
+        if (blockPoses.size() > 0) {
+            sand = blockPoses.get(0);
             destinationBlock = sand;
             targetPos = destinationBlock;
         }
@@ -579,33 +595,25 @@ public class GlassFactoryGoal extends MoveToBlockGoal {
     }
 
     private void addItemToInventoryFromWorld(BlockPos pos){
-        ItemStack stack = new ItemStack(world.getBlockState(pos).getBlock());
         SimInventory inventory = sim.getInventory();
-        BlockState above = world.getBlockState(pos.add(0,1,0));
+        BlockState above = world.getBlockState(pos.up());
+
         if (above.getBlock() == Blocks.AIR){
-        world.setBlockState(pos, Blocks.AIR.getDefaultState());
-        }else if (above.getBlock() == Blocks.SAND){
-            world.setBlockState(pos.add(0,1,0),Blocks.AIR.getDefaultState());
+            pos = pos.up();
         }
-        for (int i = 1; i < inventory.getSizeInventory(); i++){
-            if (inventory.getStackInSlot(i).getItem() == Items.SAND){
-                ItemStack invStack = inventory.getStackInSlot(i);
-                if (invStack.getCount() < invStack.getMaxStackSize()){
-                    inventory.getStackInSlot(i).grow(1);
-                    return;
-                }
-            }
+        Block block = world.getBlockState(pos).getBlock();
+        LootContext.Builder builder = new LootContext.Builder((ServerWorld) sim.getEntityWorld())
+                .withRandom(world.rand)
+                .withParameter(LootParameters.POSITION, pos)
+                .withParameter(LootParameters.TOOL, sim.getActiveItemStack())
+                .withNullableParameter(LootParameters.BLOCK_ENTITY, world.getTileEntity(pos));
+        List<ItemStack> drops = block.getDefaultState().getDrops(builder);
 
-
-
+        for (ItemStack stack : drops) {
+            sim.getInventory().addItemStackToInventory(stack);
         }
-        int i = inventory.getFirstEmptyStack();
-        inventory.setInventorySlotContents(i,stack);
-
-
-
-
     }
+
     @Override
     public void resetTask() {
         sim.setHeldItem(sim.getActiveHand(),ItemStack.EMPTY);
