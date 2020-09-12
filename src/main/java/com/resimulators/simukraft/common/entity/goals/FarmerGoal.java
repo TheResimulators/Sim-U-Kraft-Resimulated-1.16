@@ -3,6 +3,7 @@ package com.resimulators.simukraft.common.entity.goals;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
+import com.resimulators.simukraft.common.entity.sim.SimInventory;
 import com.resimulators.simukraft.common.jobs.JobFarmer;
 import com.resimulators.simukraft.common.jobs.core.EnumJobState;
 import com.resimulators.simukraft.common.tileentity.TileFarmer;
@@ -15,6 +16,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.CropsBlock;
 import net.minecraft.entity.ai.goal.MoveToBlockGoal;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.loot.LootContext;
@@ -200,9 +202,19 @@ public class FarmerGoal extends MoveToBlockGoal {
                 if (checkForHarvestable()){
                     getNextHarvestable();
                 }else{
-                    state = State.WAITING;
-                    sim.getJob().setState(EnumJobState.NOT_WORKING);
+                    state = State.STORING;
                 }
+            }
+        }
+        if (state == State.STORING){
+            if (job.getWorkSpace().withinDistance(sim.getPositionVec(),5)){
+                ArrayList<Integer> itemIndex = getHarvestItems();
+                if (itemIndex.size() > 0){
+                    if (!addItemToInventory(itemIndex)){
+                        state = State.WAITING;
+                    }
+                }else{}
+
             }
         }
         if (state == State.WAITING) {
@@ -319,6 +331,54 @@ public class FarmerGoal extends MoveToBlockGoal {
         return true;
     }
 
+    private ArrayList<Integer> getHarvestItems(){
+        ArrayList<Integer> harvestItems = new ArrayList<>();
+        SimInventory inventory = sim.getInventory();
+        Item item = farmerTile.getSeed().getItem().asItem();
+        if (inventory != null){
+            for (int i = 0; i < inventory.getSizeInventory();i++){
+                ItemStack stack = inventory.getStackInSlot(i);
+                if (stack.getItem() == item || stack.getItem() == ((CropsBlock)farmerTile.getSeed().getItem()).getItem(world,targetPos,world.getBlockState(targetPos)).getItem()){
+                    harvestItems.add(i);
+
+                }
+            }
+
+        }
+
+        return harvestItems;
+    }
+
+    private boolean addItemToInventory(ArrayList<Integer> itemsIndex){
+        ItemStack stack = sim.getInventory().getStackInSlot(itemsIndex.get(0));
+        if (stack != null){
+            sim.getInventory().removeStackFromSlot(itemsIndex.get(0));
+            for (BlockPos pos: chests){
+                ChestTileEntity tileEntity = (ChestTileEntity) world.getTileEntity(pos);
+                if (tileEntity != null){
+                    for (int i = 0; i < tileEntity.getSizeInventory();i++){
+                        int count = stack.getCount();
+                        if (tileEntity.getStackInSlot(i).getItem() == stack.getItem()){
+                            ItemStack chestStack = tileEntity.getStackInSlot(i);
+                            if (chestStack.getCount() + stack.getCount() > chestStack.getMaxStackSize()){
+                                int difference = chestStack.getMaxStackSize() - chestStack.getCount();
+                                chestStack.grow(difference);
+                                count -= difference;
+                            } else{
+                                chestStack.grow(count);
+                                count = 0;
+                            }
+                            if (count <= 0){
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        return false;
+    }
 
 
     private boolean checkForHarvestable() {
@@ -356,7 +416,7 @@ public class FarmerGoal extends MoveToBlockGoal {
         RESOURCES,
         PLANTING,
         HARVESTING,
-        RETURNING,
+        STORING,
         WAITING
 
 
