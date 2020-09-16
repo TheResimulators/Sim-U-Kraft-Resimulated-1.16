@@ -15,12 +15,14 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.CropsBlock;
+import net.minecraft.command.arguments.NBTTagArgument;
 import net.minecraft.entity.ai.goal.MoveToBlockGoal;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.loot.LootContext;
 import net.minecraft.loot.LootParameters;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.ChestTileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.SoundCategory;
@@ -56,12 +58,14 @@ public class FarmerGoal extends MoveToBlockGoal {
     private int depth;
     private int progress;
 
+
     private static final Map<Block, BlockState> HOE_LOOKUP = Maps.newHashMap(ImmutableMap.of(Blocks.GRASS_BLOCK, Blocks.FARMLAND.getDefaultState(), Blocks.DIRT, Blocks.FARMLAND.getDefaultState()));
 
     public FarmerGoal(SimEntity sim) {
         super(sim, 2 * sim.getAIMoveSpeed(), 20);
         this.sim = sim;
         this.world = sim.getEntityWorld();
+
     }
 
     @Override
@@ -69,6 +73,7 @@ public class FarmerGoal extends MoveToBlockGoal {
         job = (JobFarmer) sim.getJob();
 
         if (job != null) {
+            chests = new ArrayList<>();
             findChests();
             if (job.getState() == EnumJobState.GOING_TO_WORK) {
                 if (sim.func_233580_cy_().withinDistance(new Vector3d(job.getWorkSpace().getX(), job.getWorkSpace().getY(), job.getWorkSpace().getZ()), 5)) {
@@ -187,6 +192,7 @@ public class FarmerGoal extends MoveToBlockGoal {
                 List<ItemStack> drops = world.getBlockState(targetPos).getDrops(builder);
 
                 for (ItemStack stack : drops) {
+                    stack.setTagInfo("harvested",new CompoundNBT());
                     sim.getInventory().addItemStackToInventory(stack);
                 }
                 world.setBlockState(targetPos, farmerTile.getSeed().getItem().getDefaultState());
@@ -194,7 +200,7 @@ public class FarmerGoal extends MoveToBlockGoal {
                 if (checkForHarvestable()){
                     getNextHarvestable();
                 }else{
-                    state = State.WAITING;
+                    state = State.STORING;
                     sim.getJob().setState(EnumJobState.NOT_WORKING);
                 }
             }
@@ -213,7 +219,9 @@ public class FarmerGoal extends MoveToBlockGoal {
                     if (!addItemToInventory(itemIndex)){
                         state = State.WAITING;
                     }
-                }else{}
+                }else{
+                    state = State.WAITING;
+                }
 
             }
         }
@@ -334,13 +342,15 @@ public class FarmerGoal extends MoveToBlockGoal {
     private ArrayList<Integer> getHarvestItems(){
         ArrayList<Integer> harvestItems = new ArrayList<>();
         SimInventory inventory = sim.getInventory();
-        Item item = farmerTile.getSeed().getItem().asItem();
+
         if (inventory != null){
             for (int i = 0; i < inventory.getSizeInventory();i++){
                 ItemStack stack = inventory.getStackInSlot(i);
-                if (stack.getItem() == item || stack.getItem() == ((CropsBlock)farmerTile.getSeed().getItem()).getItem(world,targetPos,world.getBlockState(targetPos)).getItem()){
+                CompoundNBT nbt = stack.getTag();
+                if (nbt != null){
+                if (stack.getTag().contains("harvested")){
                     harvestItems.add(i);
-
+                    }
                 }
             }
 
@@ -351,7 +361,11 @@ public class FarmerGoal extends MoveToBlockGoal {
 
     private boolean addItemToInventory(ArrayList<Integer> itemsIndex){
         ItemStack stack = sim.getInventory().getStackInSlot(itemsIndex.get(0));
+
         if (stack != null){
+            if (stack.getTag() != null){
+                stack.getTag().remove("harvested");
+            }
             sim.getInventory().removeStackFromSlot(itemsIndex.get(0));
             for (BlockPos pos: chests){
                 ChestTileEntity tileEntity = (ChestTileEntity) world.getTileEntity(pos);
@@ -360,17 +374,25 @@ public class FarmerGoal extends MoveToBlockGoal {
                         int count = stack.getCount();
                         if (tileEntity.getStackInSlot(i).getItem() == stack.getItem()){
                             ItemStack chestStack = tileEntity.getStackInSlot(i);
-                            if (chestStack.getCount() + stack.getCount() > chestStack.getMaxStackSize()){
+                            if (chestStack.getCount() < chestStack.getMaxStackSize()){
+                                if (chestStack.getCount() + count >= chestStack.getMaxStackSize()){
                                 int difference = chestStack.getMaxStackSize() - chestStack.getCount();
                                 chestStack.grow(difference);
                                 count -= difference;
+                                stack.shrink(difference);
                             } else{
                                 chestStack.grow(count);
                                 count = 0;
+                                stack.shrink(stack.getCount());
                             }
                             if (count <= 0){
                                 return true;
+                                }
                             }
+                        } else if (tileEntity.getStackInSlot(i).getItem() == Items.AIR) {
+                                tileEntity.setInventorySlotContents(i, stack);
+                                return true;
+
                         }
                     }
                 }
