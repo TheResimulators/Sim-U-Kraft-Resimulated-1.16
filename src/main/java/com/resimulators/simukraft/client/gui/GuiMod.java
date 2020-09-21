@@ -11,7 +11,6 @@ import java.util.function.Supplier;
 
 public enum GuiMod {
     ;
-
     private Function<PlayerEntity, ItemStack> stackReader;
     private Function<ItemStack, Supplier<? extends Screen>> clientScreenProvider;
 

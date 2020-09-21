@@ -22,6 +22,7 @@ public class ModTileEntities {
     public static final RegistryObject<TileEntityType<TileConstructor>> CONSTRUCTOR = REGISTRY.register("constructor", () -> TileEntityType.Builder.create(TileConstructor::new, ModBlocks.CONSTRUCTOR_BOX.get()).build(null));
     public static final RegistryObject<TileEntityType<TileMarker>> MARKER = REGISTRY.register("marker", () -> TileEntityType.Builder.create(TileMarker::new, ModBlocks.MARKER.get()).build(null));
     public static final RegistryObject<TileEntityType<TileMiner>> MINER = REGISTRY.register("miner", () -> TileEntityType.Builder.create(TileMiner::new, ModBlocks.MINE_BOX.get()).build(null));
-    public static final RegistryObject<TileEntityType<TileGlassFactory>> GLASS_FACTORY = REGISTRY.register("glass_factory", () -> TileEntityType.Builder.create(TileGlassFactory::new, ModBlocks.CONTROL_BOX.get()).build(null));
     public static final RegistryObject<TileEntityType<TileFarmer>> FARMER = REGISTRY.register("farmer", () -> TileEntityType.Builder.create(TileFarmer::new,ModBlocks.FARM_BOX.get()).build(null));
+    public static final RegistryObject<TileEntityType<TileGlassFactory>> GLASS_FACTORY = REGISTRY.register("glass_factory", () -> TileEntityType.Builder.create(TileGlassFactory::new, ModBlocks.CONTROL_BOX.get()).build(null));
+    public static final RegistryObject<TileEntityType<TileCustomData>> CUSTOM_DATA = REGISTRY.register("custom_data", () -> TileEntityType.Builder.create(TileCustomData::new,ModBlocks.CONTROL_BOX.get()).build(null));
 }

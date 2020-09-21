@@ -7,7 +7,6 @@ import com.resimulators.simukraft.packets.OpenJobGuiPacket;
 import com.resimulators.simukraft.packets.SimFirePacket;
 import com.resimulators.simukraft.common.world.Faction;
 import com.resimulators.simukraft.common.world.SavedWorldData;
-import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.common.tileentity.ITile;
 import com.resimulators.simukraft.common.tileentity.TileConstructor;
 import net.minecraft.block.BlockState;
@@ -43,9 +42,9 @@ public class BlockConstructor extends BlockBase {
             System.out.println(world.getTileEntity(pos));
             if (((ITile)world.getTileEntity(pos)).getHired()){
                 int hiredId = ((ServerWorld) world).getEntityByUuid(((ITile)world.getTileEntity(pos)).getSimId()).getEntityId();
-                SimUKraftPacketHandler.INSTANCE.sendTo(new OpenJobGuiPacket(simids,pos,hiredId, GuiHandler.Builder),((ServerPlayerEntity) player).connection.netManager, NetworkDirection.PLAY_TO_CLIENT);// used when there is a sim hired
+                SimUKraftPacketHandler.INSTANCE.sendTo(new OpenJobGuiPacket(simids,pos,hiredId, GuiHandler.BUILDER),((ServerPlayerEntity) player).connection.netManager, NetworkDirection.PLAY_TO_CLIENT);// used when there is a sim hired
             } else {
-                SimUKraftPacketHandler.INSTANCE.sendTo(new OpenJobGuiPacket(simids,pos,GuiHandler.Builder),((ServerPlayerEntity) player).connection.netManager, NetworkDirection.PLAY_TO_CLIENT);//used when there is no sim employed at this block
+                SimUKraftPacketHandler.INSTANCE.sendTo(new OpenJobGuiPacket(simids,pos,GuiHandler.BUILDER),((ServerPlayerEntity) player).connection.netManager, NetworkDirection.PLAY_TO_CLIENT);//used when there is no sim employed at this block
             }
         }
         return ActionResultType.SUCCESS;

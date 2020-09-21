@@ -5,7 +5,6 @@ import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.handlers.SimUKraftPacketHandler;
 import com.resimulators.simukraft.packets.OpenJobGuiPacket;
 import com.resimulators.simukraft.packets.SimFirePacket;
-import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.common.tileentity.ITile;
 import com.resimulators.simukraft.common.tileentity.TileMiner;
 import com.resimulators.simukraft.common.world.Faction;
@@ -57,9 +56,9 @@ public class BlockMineBox extends BlockBase {
                     miner.setSimId(null);
                     return ActionResultType.FAIL;
                 }
-                SimUKraftPacketHandler.INSTANCE.sendTo(new OpenJobGuiPacket(simids,pos,hiredId, GuiHandler.Miner),((ServerPlayerEntity) player).connection.netManager, NetworkDirection.PLAY_TO_CLIENT);// used when there is a sim hired
+                SimUKraftPacketHandler.INSTANCE.sendTo(new OpenJobGuiPacket(simids,pos,hiredId, GuiHandler.MINER),((ServerPlayerEntity) player).connection.netManager, NetworkDirection.PLAY_TO_CLIENT);// used when there is a sim hired
             } else {
-                SimUKraftPacketHandler.INSTANCE.sendTo(new OpenJobGuiPacket(simids,pos,GuiHandler.Miner),((ServerPlayerEntity) player).connection.netManager, NetworkDirection.PLAY_TO_CLIENT);//used when there is no sim employed at this block
+                SimUKraftPacketHandler.INSTANCE.sendTo(new OpenJobGuiPacket(simids,pos,GuiHandler.MINER),((ServerPlayerEntity) player).connection.netManager, NetworkDirection.PLAY_TO_CLIENT);//used when there is no sim employed at this block
             }
 
         }}

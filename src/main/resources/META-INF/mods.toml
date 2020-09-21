@@ -45,6 +45,6 @@ description='''This mod is a remake of the original simukraft. it was updated to
 [[dependencies.suk]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.15.2]"
+    versionRange="[1.16.2]"
     ordering="NONE"
     side="BOTH"
