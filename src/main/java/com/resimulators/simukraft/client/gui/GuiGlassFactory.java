@@ -6,8 +6,8 @@ import net.minecraft.util.text.ITextComponent;
 
 import java.util.ArrayList;
 
-public class GlassFactoryGui extends BaseJobGui {
-    public GlassFactoryGui(ITextComponent component, ArrayList<Integer> ids, BlockPos pos, int id) {
+public class GuiGlassFactory extends GuiBaseJob {
+    public GuiGlassFactory(ITextComponent component, ArrayList<Integer> ids, BlockPos pos, int id) {
         super(component, ids, pos, id, Profession.GLASS_FACTORY.getId());
     }
 }

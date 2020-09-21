@@ -6,7 +6,6 @@ import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.common.enums.Seed;
 import com.resimulators.simukraft.common.jobs.Profession;
 import com.resimulators.simukraft.common.tileentity.TileFarmer;
-import com.resimulators.simukraft.common.tileentity.TileMiner;
 import com.resimulators.simukraft.packets.FarmerSeedPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.widget.button.Button;
@@ -19,12 +18,12 @@ import org.codehaus.plexus.util.StringUtils;
 import java.awt.*;
 import java.util.ArrayList;
 
-public class FarmerGui extends BaseJobGui {
+public class GuiFarmer extends GuiBaseJob {
     private Button seedButton;
     private Button confirmSeed;
     private TileFarmer farmer;
     private String title;
-    public FarmerGui(ITextComponent component, ArrayList<Integer> ids, BlockPos pos, int id) {
+    public GuiFarmer(ITextComponent component, ArrayList<Integer> ids, BlockPos pos, int id) {
         super(component, ids, pos, id, Profession.FARMER.getId());
         farmer = (TileFarmer) Minecraft.getInstance().world.getTileEntity(pos);
         title = component.getString();

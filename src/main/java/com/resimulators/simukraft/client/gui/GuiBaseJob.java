@@ -17,9 +17,8 @@ import net.minecraft.util.text.StringTextComponent;
 
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 
-public class BaseJobGui extends Screen {
+public class GuiBaseJob extends Screen {
     Button Hire;
     Button Fire;
     Button ShowEmployees;
@@ -38,7 +37,7 @@ public class BaseJobGui extends Screen {
     ArrayList<Button> mainMenu = new ArrayList<Button>() {{
     }};
 
-    public BaseJobGui(ITextComponent component, ArrayList<Integer> ids, BlockPos pos, int id, int job) {
+    public GuiBaseJob(ITextComponent component, ArrayList<Integer> ids, BlockPos pos, int id, int job) {
         super(component);
         this.hiredId = id;
         this.player = Minecraft.getInstance().player;
@@ -194,7 +193,7 @@ public class BaseJobGui extends Screen {
 
     static class SimButton extends Button {
 
-        SimButton(int widthIn, int heightIn, int width, int height, ITextComponent text, int id, BaseJobGui gui) {
+        SimButton(int widthIn, int heightIn, int width, int height, ITextComponent text, int id, GuiBaseJob gui) {
             super(widthIn, heightIn, width, height, text, (Sim -> gui.showSimInfo(id)));
         }
 

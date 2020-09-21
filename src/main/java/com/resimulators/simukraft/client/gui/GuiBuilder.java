@@ -21,14 +21,14 @@ import java.awt.*;
 
 import java.util.ArrayList;
 
-public class BuilderGui extends BaseJobGui {
+public class GuiBuilder extends GuiBaseJob {
     private Button Build;
     private Button CustomBack;
 
     private boolean loaded = false;
     private ArrayList<Structure> structures;
 
-    public BuilderGui(ITextComponent component, ArrayList<Integer> ids, BlockPos pos, @Nullable int id) {
+    public GuiBuilder(ITextComponent component, ArrayList<Integer> ids, BlockPos pos, @Nullable int id) {
         super(component, ids, pos, id, Profession.BUILDER.getId());
         loaded = true;// need to test
     }
@@ -93,7 +93,7 @@ public class BuilderGui extends BaseJobGui {
         Build.field_230694_p_ = true;
     }
 
-    static class State extends BaseJobGui.State {
+    static class State extends GuiBaseJob.State {
         private static final int SELECTBULDING = nextID();
         private static final int BUILDINGINFO = nextID();
 
