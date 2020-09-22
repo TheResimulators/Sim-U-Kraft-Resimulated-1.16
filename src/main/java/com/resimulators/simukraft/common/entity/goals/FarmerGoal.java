@@ -76,7 +76,7 @@ public class FarmerGoal extends MoveToBlockGoal {
             chests = new ArrayList<>();
             findChests();
             if (job.getState() == EnumJobState.GOING_TO_WORK) {
-                if (sim.func_233580_cy_().withinDistance(new Vector3d(job.getWorkSpace().getX(), job.getWorkSpace().getY(), job.getWorkSpace().getZ()), 5)) {
+                if (sim.getPosition().withinDistance(new Vector3d(job.getWorkSpace().getX(), job.getWorkSpace().getY(), job.getWorkSpace().getZ()), 5)) {
                     farmerTile = (TileFarmer) world.getTileEntity(job.getWorkSpace());
                     if (farmerTile != null) {
                         dir = farmerTile.getDir();

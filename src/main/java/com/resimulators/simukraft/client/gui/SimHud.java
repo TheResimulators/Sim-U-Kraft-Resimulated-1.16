@@ -31,9 +31,9 @@ public class SimHud extends AbstractGui {
                 num = data.getFactionWithPlayer(player.getUniqueID()).getAmountOfSims();
                 credits = data.getFactionWithPlayer(player.getUniqueID()).getCredits();
                 String day = DayOfWeek.of((int) (1 + (Math.floor(world.getDayTime() / 24000f) % 7))).getDisplayName(TextStyle.FULL, Locale.ENGLISH);
-                Minecraft.getInstance().fontRenderer.func_238421_b_(new MatrixStack(), "Sims: " + num, 10, 10, 16777215);
-                Minecraft.getInstance().fontRenderer.func_238421_b_(new MatrixStack(), "Credits: " + String.format("%.2f", credits), 10, 30, 16777215);
-                Minecraft.getInstance().fontRenderer.func_238421_b_(new MatrixStack(), "Day: " + day, 60, 10, 16777215);
+                Minecraft.getInstance().fontRenderer.drawString(new MatrixStack(), "Sims: " + num, 10, 10, 16777215);
+                Minecraft.getInstance().fontRenderer.drawString(new MatrixStack(), "Credits: " + String.format("%.2f", credits), 10, 30, 16777215);
+                Minecraft.getInstance().fontRenderer.drawString(new MatrixStack(), "Day: " + day, 60, 10, 16777215);
                 }
             }
         }

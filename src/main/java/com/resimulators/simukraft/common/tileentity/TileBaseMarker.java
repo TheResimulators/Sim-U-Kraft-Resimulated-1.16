@@ -27,7 +27,7 @@ public class TileBaseMarker extends TileEntity implements ITile {
     }
 
     @Override
-    public void func_230337_a_(BlockState state, CompoundNBT compound) {
+    public void read(BlockState state, CompoundNBT compound) {
 
         dir = Direction.byIndex(compound.getInt("dir"));
         if (compound.contains("sim id")) {
@@ -46,7 +46,7 @@ public class TileBaseMarker extends TileEntity implements ITile {
         if (compound.contains("marker")){
             marker = BlockPos.fromLong(compound.getLong("marker"));
         }
-        super.func_230337_a_(state, compound);
+        super.read(state, compound);
     }
 
     @Override
@@ -173,7 +173,7 @@ public class TileBaseMarker extends TileEntity implements ITile {
 
     @Override
     public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
-        func_230337_a_(this.getBlockState(),pkt.getNbtCompound());
+        read(this.getBlockState(),pkt.getNbtCompound());
     }
 
     @Override

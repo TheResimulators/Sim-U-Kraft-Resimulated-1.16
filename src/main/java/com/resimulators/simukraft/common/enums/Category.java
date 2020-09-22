@@ -14,5 +14,15 @@ public enum Category {
         this.category = string;
         this.id = id;
     }
+    
+    
+    public static Category getById(int id){
+        for (Category category: Category.values()){
+            if (category.id == id){
+                return category;
+            }
+        }
+        return null;
+    }
 
 }

@@ -33,7 +33,7 @@ public class TileConstructor extends TileEntity implements ITile {
     }
 
     @Override
-    public void func_230337_a_(BlockState state, CompoundNBT nbt) {
+    public void read(BlockState state, CompoundNBT nbt) {
         hired = nbt.getBoolean("hired");
         if (nbt.contains("simid")) {
             simId = nbt.getUniqueId("simid");

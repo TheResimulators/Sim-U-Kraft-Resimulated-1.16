@@ -31,28 +31,28 @@ public class GuiFarmer extends GuiBaseJob {
 
 
     @Override
-    public void func_231158_b_(Minecraft minecraft, int width, int height) {
-        super.func_231158_b_(minecraft, width, height);
-        func_230480_a_(seedButton = new Button(width/2-55, height-60, 110, 20, new StringTextComponent(StringUtils.capitalizeFirstLetter(farmer.getSeed().getName())), (seedButton) -> {
+    public void init(Minecraft minecraft, int width, int height) {
+        super.init(minecraft, width, height);
+        addButton(seedButton = new Button(width/2-55, height-60, 110, 20, new StringTextComponent(StringUtils.capitalizeFirstLetter(farmer.getSeed().getName())), (seedButton) -> {
             farmer.setSeed(Seed.getNextEnabledSeed(farmer.getSeed()));
-            seedButton.func_238482_a_(new StringTextComponent(StringUtils.capitalizeFirstLetter(farmer.getSeed().getName())));
-            confirmSeed.field_230693_o_ = true;
+            seedButton.setMessage(new StringTextComponent(StringUtils.capitalizeFirstLetter(farmer.getSeed().getName())));
+            confirmSeed.active = true;
         }));
-        func_230480_a_(confirmSeed = new Button(width/2-55, height-30, 110, 20, new StringTextComponent("Confirm"), (seedButton) -> {
+        addButton(confirmSeed = new Button(width/2-55, height-30, 110, 20, new StringTextComponent("Confirm"), (seedButton) -> {
             Network.getNetwork().sendToServer(new FarmerSeedPacket(farmer.getSeed(),farmer.getPos()));
-            confirmSeed.field_230693_o_ = false;
+            confirmSeed.active = false;
         }));
-        confirmSeed.field_230693_o_ = false;
+        confirmSeed.active = false;
         mainMenu.add(confirmSeed);
         mainMenu.add(seedButton);
     }
 
     @Override
-    public void func_230430_a_(MatrixStack stack, int p_render_1_, int p_render_2_, float p_render_3_) {
-        super.func_230430_a_(stack,p_render_1_,p_render_2_,p_render_3_);
+    public void render(MatrixStack stack, int p_render_1_, int p_render_2_, float p_render_3_) {
+        super.render(stack,p_render_1_,p_render_2_,p_render_3_);
         if (state == State.MAIN){
-            field_230712_o_.func_238421_b_(stack, "Select Seed", this.field_230708_k_/2-(field_230712_o_.getStringWidth("Select Seed")/2), this.field_230709_l_-80, Color.GREEN.getRGB());
-            field_230712_o_.func_238421_b_(stack, "Level (Wip) " + StringUtils.capitalizeFirstLetter(farmer.getSeed().getName()) + " Farm" , this.field_230708_k_/2-(field_230712_o_.getStringWidth("Level (Wip) " + farmer.getSeed().getName() + " Farm")/2), 20,new Color(76,153,0).brighter().getRGB() );
+            font.drawString(stack, "Select Seed", this.width/2-(font.getStringWidth("Select Seed")/2), this.height-80, Color.GREEN.getRGB());
+            font.drawString(stack, "Level (Wip) " + StringUtils.capitalizeFirstLetter(farmer.getSeed().getName()) + " Farm" , this.width/2-(font.getStringWidth("Level (Wip) " + farmer.getSeed().getName() + " Farm")/2), 20,new Color(76,153,0).brighter().getRGB() );
         }
         World world = SimuKraft.proxy.getClientWorld();
         if (world != null) {
@@ -61,13 +61,13 @@ public class GuiFarmer extends GuiBaseJob {
                 if (tileEntity !=null) {
                     if (tileEntity.getMarker() != null) {
                         BlockPos marker = tileEntity.getMarker();
-                        field_230712_o_.func_238421_b_(stack, "Markers Position:", 20, 90, Color.WHITE.getRGB());
-                        field_230712_o_.func_238421_b_(stack, String.format("X: %d, Y: %d, Z: %d", marker.getX(), marker.getY(), marker.getZ()), 20, 110, Color.WHITE.getRGB());
+                        font.drawString(stack, "Markers Position:", 20, 90, Color.WHITE.getRGB());
+                        font.drawString(stack, String.format("X: %d, Y: %d, Z: %d", marker.getX(), marker.getY(), marker.getZ()), 20, 110, Color.WHITE.getRGB());
                     }
                     if(tileEntity.getWidth() != 0){
-                        field_230712_o_.func_238421_b_(stack, "Dimensions", field_230708_k_-50-field_230712_o_.getStringWidth("Dimensions")/2, 70, Color.YELLOW.getRGB());
-                        field_230712_o_.func_238421_b_(stack, "Width: " + tileEntity.getWidth(), field_230708_k_-80, 90, Color.WHITE.getRGB());
-                        field_230712_o_.func_238421_b_(stack, "Depth: " + tileEntity.getDepth(), field_230708_k_-80, 120, Color.WHITE.getRGB());
+                        font.drawString(stack, "Dimensions", width-50-font.getStringWidth("Dimensions")/2, 70, Color.YELLOW.getRGB());
+                        font.drawString(stack, "Width: " + tileEntity.getWidth(), width-80, 90, Color.WHITE.getRGB());
+                        font.drawString(stack, "Depth: " + tileEntity.getDepth(), width-80, 120, Color.WHITE.getRGB());
                     }
                 }
             }

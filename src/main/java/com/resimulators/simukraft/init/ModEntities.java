@@ -52,7 +52,7 @@ public class ModEntities {
 
     @SubscribeEvent
     public static void registerEntities(RegistryEvent.Register<EntityType<?>> event) {
-        for (EntityType entity : entities) {
+        for (EntityType<?> entity : entities) {
             Preconditions.checkNotNull(entity.getRegistryName(), "registryName");
             event.getRegistry().register(entity);
         }
@@ -71,6 +71,6 @@ public class ModEntities {
     }
 
     public static void registerAttributes() {
-        GlobalEntityTypeAttributes.put(ENTITY_SIM, SimEntity.getAttributes().func_233813_a_());
+        GlobalEntityTypeAttributes.put(ENTITY_SIM, SimEntity.getAttributes().create());
     }
 }

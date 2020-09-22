@@ -65,7 +65,7 @@ public class GlassFactoryGoal extends MoveToBlockGoal {
     public boolean shouldExecute() {
         job = sim.getJob();
         if (job.getState() == EnumJobState.GOING_TO_WORK){
-            if (sim.func_233580_cy_().withinDistance(new Vector3d(job.getWorkSpace().getX(),job.getWorkSpace().getY(),job.getWorkSpace().getZ()),5)){
+            if (sim.getPosition().withinDistance(new Vector3d(job.getWorkSpace().getX(),job.getWorkSpace().getY(),job.getWorkSpace().getZ()),5)){
                 job.setState(EnumJobState.WORKING);
                 findChestAroundBlock(job.getWorkSpace());
                 findFurnaceAroundBlock(job.getWorkSpace());

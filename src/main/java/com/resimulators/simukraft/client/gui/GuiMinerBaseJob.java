@@ -20,14 +20,14 @@ public class GuiMinerBaseJob extends GuiBaseJob {
     }
 
     @Override
-    public void func_231158_b_(Minecraft minecraft, int width, int height) {
-        super.func_231158_b_(minecraft, width, height);
+    public void init(Minecraft minecraft, int width, int height) {
+        super.init(minecraft, width, height);
 
     }
 
     @Override
-    public void func_230430_a_(MatrixStack stack, int p_render_1_, int p_render_2_, float p_render_3_) {
-        super.func_230430_a_(stack, p_render_1_, p_render_2_, p_render_3_);
+    public void render(MatrixStack stack, int p_render_1_, int p_render_2_, float p_render_3_) {
+        super.render(stack, p_render_1_, p_render_2_, p_render_3_);
         World world = SimuKraft.proxy.getClientWorld();
         if (world != null) {
             if (state == State.MAIN) {
@@ -35,13 +35,13 @@ public class GuiMinerBaseJob extends GuiBaseJob {
             if (tileEntity !=null) {
                 if (tileEntity.getMarker() != null) {
                     BlockPos marker = tileEntity.getMarker();
-                        field_230712_o_.func_238421_b_(stack, "Markers Position:", 20, 90, Color.WHITE.getRGB());
-                        field_230712_o_.func_238421_b_(stack, String.format("X: %d, Y: %d, Z: %d", marker.getX(), marker.getY(), marker.getZ()), 20, 110, Color.WHITE.getRGB());
+                        font.drawString(stack, "Markers Position:", 20, 90, Color.WHITE.getRGB());
+                        font.drawString(stack, String.format("X: %d, Y: %d, Z: %d", marker.getX(), marker.getY(), marker.getZ()), 20, 110, Color.WHITE.getRGB());
                     }
                 if(tileEntity.getWidth() != 0){
-                    field_230712_o_.func_238421_b_(stack, "Width: " + tileEntity.getWidth(), field_230708_k_-80, 90, Color.WHITE.getRGB());
-                    field_230712_o_.func_238421_b_(stack, "Depth: " + tileEntity.getDepth(), field_230708_k_-80, 120, Color.WHITE.getRGB());
-                    field_230712_o_.func_238421_b_(stack, "Height: " + tileEntity.getYpos(), field_230708_k_-80, 150, Color.WHITE.getRGB());
+                    font.drawString(stack, "Width: " + tileEntity.getWidth(), width-80, 90, Color.WHITE.getRGB());
+                    font.drawString(stack, "Depth: " + tileEntity.getDepth(), width-80, 120, Color.WHITE.getRGB());
+                    font.drawString(stack, "Height: " + tileEntity.getYpos(), width-80, 150, Color.WHITE.getRGB());
                     }
                 }
             }

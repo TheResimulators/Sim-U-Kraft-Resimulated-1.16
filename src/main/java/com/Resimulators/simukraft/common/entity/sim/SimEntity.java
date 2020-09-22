@@ -141,16 +141,16 @@ public class SimEntity extends AgeableEntity implements INPC {
     }
 
     public static AttributeModifierMap.MutableAttribute getAttributes() {
-        return MobEntity.func_233666_p_().func_233815_a_(Attributes.field_233821_d_, 0.5D) //Movement Speed
-                .func_233815_a_(Attributes.field_233818_a_, 20.0D) //Health
-                .func_233815_a_(Attributes.field_233823_f_, 1.0D); //Base Attack Damage
+        return MobEntity.func_233666_p_().createMutableAttribute(Attributes.MOVEMENT_SPEED, 0.5D) //Movement Speed
+                .createMutableAttribute(Attributes.MAX_HEALTH, 20.0D) //Health
+                .createMutableAttribute(Attributes.ATTACK_DAMAGE, 1.0D); //Base Attack Damage
     }
 
     @Nullable
     @Override
     public AgeableEntity createChild(AgeableEntity ageable) {
         SimEntity simEntity = new SimEntity(world);
-        simEntity.onInitialSpawn(this.world, this.world.getDifficultyForLocation(simEntity.func_233580_cy_()), SpawnReason.BREEDING, new AgeableData(), null);
+        simEntity.onInitialSpawn(this.world, this.world.getDifficultyForLocation(simEntity.getPosition()), SpawnReason.BREEDING, new AgeableData(), null);
         return simEntity;
     }
 

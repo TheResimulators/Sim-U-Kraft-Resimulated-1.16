@@ -697,7 +697,7 @@ public class SimInventory implements IInventory, INamedContainerProvider {
                 }
 
                 ItemStack itemstack = (ItemStack)iterator.next();
-                if (!itemstack.isEmpty() && itemTag.func_230235_a_(itemstack.getItem())) {
+                if (!itemstack.isEmpty() && itemTag.contains(itemstack.getItem())) {
                     break;
                 }
             }

@@ -32,7 +32,7 @@ public class TileGlassFactory extends TileEntity implements ITile {
     }
 
     @Override
-    public void func_230337_a_(BlockState state, CompoundNBT nbt) {
+    public void read(BlockState state, CompoundNBT nbt) {
         hired = nbt.getBoolean("hired");
         if (nbt.contains("simid")) {
             simID = nbt.getUniqueId("simid");
@@ -62,6 +62,6 @@ public class TileGlassFactory extends TileEntity implements ITile {
 
     @Override
     public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
-        func_230337_a_(this.getBlockState(),pkt.getNbtCompound());
+        read(this.getBlockState(),pkt.getNbtCompound());
     }
 }

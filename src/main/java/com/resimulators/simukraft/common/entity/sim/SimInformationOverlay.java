@@ -157,7 +157,7 @@ public class SimInformationOverlay {
                 loadGLState();
                 RenderSystem.enableDepthTest();
 
-                minecraft.fontRenderer.func_238421_b_(new MatrixStack(), (SimuKraft.config.getSims().coloredNames.get() ? TextFormatting.fromColorIndex(ColorHelper.convertDyeToTF(sim.getNameColor())) : TextFormatting.WHITE) + sim.getName().getString(), posX + 5, posY + 5, Color.WHITE.getRGB());
+                minecraft.fontRenderer.drawString(new MatrixStack(), (SimuKraft.config.getSims().coloredNames.get() ? TextFormatting.fromColorIndex(ColorHelper.convertDyeToTF(sim.getNameColor())) : TextFormatting.WHITE) + sim.getName().getString(), posX + 5, posY + 5, Color.WHITE.getRGB());
 
                 RenderSystem.popMatrix();
             }
@@ -262,7 +262,7 @@ public class SimInformationOverlay {
 
     public static void renderIcon(int x, int y, int sx, int sy, Icons icon) {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        Minecraft.getInstance().getTextureManager().bindTexture(AbstractGui.field_230665_h_);
+        Minecraft.getInstance().getTextureManager().bindTexture(AbstractGui.GUI_ICONS_LOCATION);
 
         if (icon == null)
             return;

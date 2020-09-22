@@ -35,17 +35,17 @@ public class GuiBuilder extends GuiBaseJob {
 
 
     @Override
-    public void func_231158_b_(Minecraft minecraft, int width, int height) {
-        super.func_231158_b_(minecraft, width, height);
+    public void init(Minecraft minecraft, int width, int height) {
+        super.init(minecraft, width, height);
         if (loaded) {
-            func_230480_a_(Build = new LargeButton(width / 2 - 55, height - 55, 110, 42, new StringTextComponent("Build"), (Build -> {
+            addButton(Build = new LargeButton(width / 2 - 55, height - 55, 110, 42, new StringTextComponent("Build"), (Build -> {
                 super.hideAll();
-                CustomBack.field_230694_p_ = true;
+                CustomBack.visible = true;
                 state = State.SELECTBULDING;
             })));
             //Build.active=false;
-            func_230480_a_(CustomBack = new Button(width - 120, height - 30, 110, 20, new StringTextComponent("Back"), (Back -> {
-                super.Back.func_230930_b_();
+            addButton(CustomBack = new Button(width - 120, height - 30, 110, 20, new StringTextComponent("Back"), (Back -> {
+                super.Back.onPress();
                 if (state == State.SELECTBULDING) {
                     state = State.MAIN;
                     showMainMenu();
@@ -60,16 +60,16 @@ public class GuiBuilder extends GuiBaseJob {
 
             )));
             if (!isHired()) {
-                Build.field_230693_o_ = false;
+                Build.active = false;
             }
-            CustomBack.field_230694_p_ = false;
+            CustomBack.visible = false;
         }
     }
 
     public void loadBuildings(ArrayList<Structure> structures) {
         this.loaded = true;
         this.structures = structures;
-        func_231160_c_(); //init
+        init(); //init
     }
 
     public void setStructures(ArrayList<Structure> structures) {
@@ -78,11 +78,11 @@ public class GuiBuilder extends GuiBaseJob {
     }
 
     @Override
-    public void func_230430_a_(MatrixStack stack, int p_render_1_, int p_render_2_, float p_render_3_) {
-        func_230446_a_(stack);
-        if (loaded) super.func_230430_a_(stack, p_render_1_, p_render_2_, p_render_3_);
+    public void render(MatrixStack stack, int p_render_1_, int p_render_2_, float p_render_3_) {
+        renderBackground(stack);
+        if (loaded) super.render(stack, p_render_1_, p_render_2_, p_render_3_);
         else {
-            field_230712_o_.func_238421_b_(stack, "Loading", (float) field_230708_k_ / 2 - field_230712_o_.getStringWidth("Loading") / 2, (float) field_230709_l_ / 2, Color.WHITE.getRGB());
+            font.drawString(stack, "Loading", (float) width / 2 - font.getStringWidth("Loading") / 2, (float) height / 2, Color.WHITE.getRGB());
         }
 
     }
@@ -90,7 +90,7 @@ public class GuiBuilder extends GuiBaseJob {
     @Override
     public void showMainMenu() {
         super.showMainMenu();
-        Build.field_230694_p_ = true;
+        Build.visible = true;
     }
 
     static class State extends GuiBaseJob.State {
@@ -108,29 +108,29 @@ public class GuiBuilder extends GuiBaseJob {
         }
 
         @Override
-        public void func_230431_b_(MatrixStack stack, int p_renderButton_1_, int p_renderButton_2_, float p_renderButton_3_) {
+        public void renderButton(MatrixStack stack, int p_renderButton_1_, int p_renderButton_2_, float p_renderButton_3_) {
             Minecraft minecraft = Minecraft.getInstance();
             FontRenderer fontrenderer = minecraft.fontRenderer;
             minecraft.getTextureManager().bindTexture(LARGE_BUTTON);
-            RenderSystem.color4f(1.0F, 1.0F, 1.0F, this.field_230695_q_);
-            int i = this.func_230989_a_(this.func_230449_g_());
+            RenderSystem.color4f(1.0F, 1.0F, 1.0F, this.alpha);
+            int i = this.getYImage(this.isHovered);
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
             RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 
-            this.func_238474_b_(stack, this.field_230690_l_, this.field_230691_m_, 0, 1 + i * 42, this.field_230688_j_ / 2, this.field_230689_k_);
-            this.func_238474_b_(stack, this.field_230690_l_ + this.field_230688_j_ / 2, this.field_230691_m_, 200 - this.field_230688_j_ / 2, 1 + i * 42, this.field_230688_j_ / 2, this.field_230689_k_);
-            this.func_230441_a_(stack, minecraft, p_renderButton_1_, p_renderButton_2_);
+            this.blit(stack, this.x, this.y, 0, 1 + i * 42, this.width / 2, this.height);
+            this.blit(stack, this.x + this.width / 2, this.y, 200 - this.width / 2, 1 + i * 42, this.width / 2, this.height);
+            this.renderBg(stack, minecraft, p_renderButton_1_, p_renderButton_2_);
             int j = getFGColor();
-            this.func_238471_a_(stack, fontrenderer, this.func_230458_i_().getString(), this.field_230690_l_ + this.field_230688_j_ / 2, this.field_230691_m_ + (this.field_230689_k_ - 8) / 2, j | MathHelper.ceil(this.field_230695_q_ * 255.0F) << 24);
+            this.drawCenteredString(stack, fontrenderer, this.getMessage().getString(), this.x + this.width / 2, this.y + (this.height - 8) / 2, j | MathHelper.ceil(this.alpha * 255.0F) << 24);
 
         }
 
 
         @Override
-        public int func_230989_a_(boolean hovered) {
+        public int getYImage(boolean hovered) {
             int i = 0;
-            if (!this.field_230693_o_) {
+            if (!this.active) {
                 i = 1;
             } else if (hovered) {
                 i = 2;

@@ -19,7 +19,7 @@ public class TalkingToPlayerGoal extends Goal {
             return false;
         } else if (this.sim.isInWater()) {
             return false;
-        } else if (!this.sim.func_233570_aj_()) {
+        } else if (!this.sim.isOnGround()) {
             return false;
         } else if (this.sim.velocityChanged) {
             return false;

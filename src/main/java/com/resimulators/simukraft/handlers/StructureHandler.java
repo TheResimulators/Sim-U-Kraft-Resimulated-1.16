@@ -25,7 +25,7 @@ public class StructureHandler {
             field.setAccessible(true);
             SaveFormat.LevelSave levelSave = (SaveFormat.LevelSave) field.get(server);
             field.setAccessible(false);
-            templateManager = new TemplateManager(server.getDataPackRegistries().func_240970_h_(), levelSave, server.getDataFixer());
+            templateManager = new TemplateManager(server.getDataPackRegistries().getResourceManager(), levelSave, server.getDataFixer());
         } catch (IllegalAccessException | NoSuchFieldException e) {
             //FIXME fabbe50: Make own instance of TemplateManager
             templateManager = server.func_241755_D_().getStructureTemplateManager();

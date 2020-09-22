@@ -35,8 +35,8 @@ public class TileMarker extends TileEntity {
     }
 
     @Override
-    public void func_230337_a_(BlockState state, CompoundNBT nbt) {
-        super.func_230337_a_(state, nbt);
+    public void read(BlockState state, CompoundNBT nbt) {
+        super.read(state, nbt);
         if (nbt.contains("origin")) origin = BlockPos.fromLong(nbt.getLong("origin"));
         if (nbt.contains("backleft")) backLeft = BlockPos.fromLong(nbt.getLong("backleft"));
         if (nbt.contains("frontright")) frontRight = BlockPos.fromLong(nbt.getLong("frontright"));

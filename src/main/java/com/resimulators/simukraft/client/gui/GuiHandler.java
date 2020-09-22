@@ -33,7 +33,9 @@ public class GuiHandler {
             case FARMER:
                 Minecraft.getInstance().displayGuiScreen(new GuiFarmer(new StringTextComponent("Farmer"),ints,pos,id));
                 break;
-
+            case CUSTOM_DATA:
+                Minecraft.getInstance().displayGuiScreen(new GuiCustomData(new StringTextComponent("Custom Data"),pos));
+                break;
         }
     }
 }

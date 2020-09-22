@@ -30,7 +30,7 @@ public class PickupItemGoal extends Goal {
             ItemEntity closest = null;
             double closestDistance = Double.MAX_VALUE;
             for (ItemEntity item : items) {
-                if (item.isAlive() && item.func_233570_aj_()) {
+                if (item.isAlive() && item.isOnGround()) {
                     double distance = item.getDistance(sim);
                     if (distance < closestDistance && sim.canPickupStack(item.getItem()) && !item.isInWater() && !item.isInLava()) {
                         closest = item;
@@ -60,7 +60,7 @@ public class PickupItemGoal extends Goal {
     @Override
     public void startExecuting() {
         if (this.item != null) {
-            navigator.tryMoveToXYZ(this.item.func_233580_cy_().getX(), this.item.func_233580_cy_().getY(), this.item.func_233580_cy_().getZ(), 0.6f);
+            navigator.tryMoveToXYZ(this.item.getPosition().getX(), this.item.getPosition().getY(), this.item.getPosition().getZ(), 0.6f);
         }
     }
 

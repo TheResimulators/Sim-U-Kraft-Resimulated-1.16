@@ -52,41 +52,41 @@ public class GuiSimInventory extends DisplayEffectsScreen<SimContainer> {
         this.container = container;
         xSize = WIDTH;
         ySize = HEIGHT;
-        this.field_230711_n_ = true;
+        this.passEvents = true;
     }
 
     @Override
-    protected void func_231160_c_() {
-        super.func_231160_c_();
+    protected void init() {
+        super.init();
         this.sim = container.getSim();
-        this.sim.setCustomName(new StringTextComponent(this.field_230704_d_.getString()));
+        this.sim.setCustomName(new StringTextComponent(this.title.getString()));
 
     }
 
     @Override
-    protected void func_230451_b_(MatrixStack stack, int x, int y) {
+    protected void drawGuiContainerForegroundLayer(MatrixStack stack, int x, int y) {
         String name = container.job;
 
-        this.field_230712_o_.func_238421_b_(stack, this.field_230704_d_.getString(), 80f, 8f, 4210752);
-        this.field_230712_o_.func_238421_b_(stack,"Job: " + StringUtils.capitalizeFirstLetter(name),80f, 30f, 4210752);
+        this.font.drawString(stack, this.title.getString(), 80f, 8f, 4210752);
+        this.font.drawString(stack,"Job: " + StringUtils.capitalizeFirstLetter(name),80f, 30f, 4210752);
     }
 
     @Override
-    public void func_230430_a_(MatrixStack stack, int x, int y, float z) {
-        this.func_230446_a_(stack);
-        super.func_230430_a_(stack, x, y, z);
-        this.func_230459_a_(stack, x, y);
+    public void render(MatrixStack stack, int x, int y, float z) {
+        this.renderBackground(stack);
+        super.render(stack, x, y, z);
+        this.renderHoveredTooltip(stack, x, y);
         this.oldMouseX = x;
         this.oldMouseY = y;
     }
 
     @Override
-    protected void func_230450_a_(MatrixStack stack, float partialTicks, int mouseX, int mouseY) {
+    protected void drawGuiContainerBackgroundLayer(MatrixStack stack, float partialTicks, int mouseX, int mouseY) {
         RenderSystem.color4f(1, 1,1, 1);
-        this.field_230706_i_.getTextureManager().bindTexture(TEXTURE);
+        this.minecraft.getTextureManager().bindTexture(TEXTURE);
         int left = this.guiLeft;
         int top = this.guiTop;
-        this.func_238474_b_(stack, left, top, 0, 0, this.xSize, this.ySize);
+        this.blit(stack, left, top, 0, 0, this.xSize, this.ySize);
         if (this.sim != null)
             renderEntity(left + 51, top + 75, 30, (float) (left + 51) - this.oldMouseX, (float) (top + 75 - 50) - this.oldMouseY, this.sim);
     }
@@ -148,8 +148,8 @@ public class GuiSimInventory extends DisplayEffectsScreen<SimContainer> {
     }
 
     @Override
-    public void func_231023_e_() {
+    public void tick() {
         this.ticks++;
-        super.func_231023_e_();
+        super.tick();
     }
 }
