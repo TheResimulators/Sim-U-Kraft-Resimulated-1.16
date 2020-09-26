@@ -97,6 +97,20 @@ public class Faction {
         return this.credits;
     }
 
+    public void subCredits(double credits){
+        if (this.credits >= credits){
+            this.credits -= credits;
+        }
+    }
+
+    public boolean hasEnoughCredits(double creditsNeeded){
+        if (this.credits >= creditsNeeded){
+            return true;
+        }
+
+        return true; // change this to false when everything else is done
+    }
+
     public ArrayList<UUID> getUnemployedSims() {
         ArrayList<UUID> sims = new ArrayList<>();
 

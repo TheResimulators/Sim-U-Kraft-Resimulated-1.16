@@ -20,6 +20,7 @@ import net.minecraft.entity.ai.attributes.AttributeModifierMap;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerModelPart;
 import net.minecraft.inventory.EquipmentSlotType;
@@ -38,9 +39,11 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.*;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.event.entity.living.LivingSpawnEvent;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -78,6 +81,7 @@ public class SimEntity extends AgeableEntity implements INPC {
         this.foodStats = new FoodStats(this);
     }
 
+
     @Override
     protected void registerData() {
         super.registerData();
@@ -94,8 +98,7 @@ public class SimEntity extends AgeableEntity implements INPC {
     }
 
     @Override
-    public ILivingEntityData onInitialSpawn(IWorld world, DifficultyInstance difficultyInstance, SpawnReason spawnReason, @Nullable ILivingEntityData livingEntityData, @Nullable CompoundNBT nbt) {
-        ILivingEntityData livingData = super.onInitialSpawn(world, difficultyInstance, spawnReason, livingEntityData, nbt);
+    public ILivingEntityData onInitialSpawn(IServerWorld worldIn, DifficultyInstance difficultyIn, SpawnReason reason, ILivingEntityData spawnDataIn, CompoundNBT dataTag) {
         this.setSpecial(Utils.randomizeBooleanWithChance(SimuKraft.config.getSims().specialSpawnChance.get()));
 
         //TODO: Add professions
@@ -121,7 +124,7 @@ public class SimEntity extends AgeableEntity implements INPC {
         }
 
         this.writeAdditional(this.getPersistentData());
-        return livingData;
+        return super.onInitialSpawn(worldIn, difficultyIn, reason, spawnDataIn, dataTag);
     }
 
     @Override
@@ -148,17 +151,22 @@ public class SimEntity extends AgeableEntity implements INPC {
 
     @Nullable
     @Override
-    public AgeableEntity createChild(AgeableEntity ageable) {
+    public AgeableEntity func_241840_a(ServerWorld world, AgeableEntity ageable) {
         SimEntity simEntity = new SimEntity(world);
-        simEntity.onInitialSpawn(this.world, this.world.getDifficultyForLocation(simEntity.getPosition()), SpawnReason.BREEDING, new AgeableData(), null);
+        simEntity.onInitialSpawn(world, this.world.getDifficultyForLocation(simEntity.getPosition()), SpawnReason.BREEDING, new AgeableData(true), null);
         return simEntity;
     }
+
+
+
+
 
     //Logic
     @Override
     public boolean canDespawn(double p_213397_1_) {
         return false;
     }
+
 
     public boolean canPickupStack(@Nonnull ItemStack stack) {
         return Utils.canInsertStack(inventory.getHandler(), stack);

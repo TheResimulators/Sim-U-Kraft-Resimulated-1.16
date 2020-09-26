@@ -37,7 +37,7 @@ public class Lang extends LanguageProvider {
         add(ModBlocks.LIGHT_GREEN.get(), "Green Light");
         add(ModBlocks.LIGHT_RED.get(), "Red Light");
         add(ModBlocks.LIGHT_BLACK.get(), "Black Light");
-        add(SimUTab.tab.getTranslationKey(), "Sim-U-Kraft");
+        add(SimUTab.tab.getPath(), "Sim-U-Kraft");
 
 
     }

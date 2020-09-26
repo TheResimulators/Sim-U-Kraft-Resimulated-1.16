@@ -604,7 +604,6 @@ public class GlassFactoryGoal extends MoveToBlockGoal {
         Block block = world.getBlockState(pos).getBlock();
         LootContext.Builder builder = new LootContext.Builder((ServerWorld) sim.getEntityWorld())
                 .withRandom(world.rand)
-                .withParameter(LootParameters.POSITION, pos)
                 .withParameter(LootParameters.TOOL, sim.getActiveItemStack())
                 .withNullableParameter(LootParameters.BLOCK_ENTITY, world.getTileEntity(pos));
         List<ItemStack> drops = block.getDefaultState().getDrops(builder);

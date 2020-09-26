@@ -7,6 +7,8 @@ import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.world.server.ServerWorld;
+
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -52,7 +54,7 @@ public class TileAnimalFarm extends TileEntity implements IControlBlock{
 
     public void spawnAnimal(){
         if (world != null){
-            entity.getAnimal().spawn(world,null,null,pos.add(0,1,0), SpawnReason.TRIGGERED,false , false);
+            entity.getAnimal().spawn((ServerWorld) world,null,null,pos.add(0,1,0), SpawnReason.TRIGGERED,false , false);
         }
 
     }

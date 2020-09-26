@@ -118,6 +118,7 @@ public class FarmerGoal extends MoveToBlockGoal {
     public void tick() {
         super.tick();
         if (delay <= 0) {
+            SavedWorldData.get(world).getFactionWithSim(sim.getUniqueID()).subCredits(0.2);
             delay = 5;
             if (state == State.RESOURCES) {
                 if (hasSeeds()) {
@@ -186,7 +187,6 @@ public class FarmerGoal extends MoveToBlockGoal {
 
                 LootContext.Builder builder = new LootContext.Builder((ServerWorld) sim.getEntityWorld())
                         .withRandom(world.rand)
-                        .withParameter(LootParameters.POSITION, targetPos)
                         .withParameter(LootParameters.TOOL, sim.getActiveItemStack())
                         .withNullableParameter(LootParameters.BLOCK_ENTITY, world.getTileEntity(targetPos));
                 List<ItemStack> drops = world.getBlockState(targetPos).getDrops(builder);

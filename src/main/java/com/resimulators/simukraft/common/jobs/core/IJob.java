@@ -46,6 +46,8 @@ public interface IJob {
 
     boolean hasAi();
 
+    double getWage();
+
 
 }
 

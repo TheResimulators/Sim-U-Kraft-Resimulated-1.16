@@ -23,6 +23,7 @@ import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
@@ -88,10 +89,9 @@ public class SimuKraft {
     }
 
     @SubscribeEvent
-    public void onServerStarting(FMLServerStartingEvent event) {
-        CommandStructure.register(event.getCommandDispatcher());
+    public void onCommandRegister(RegisterCommandsEvent event){
+        CommandStructure.register(event.getDispatcher());
     }
-
     @SubscribeEvent
     public void onServerStarted(FMLServerStartedEvent event) {
         StructureHandler.createTemplateManager(event.getServer());

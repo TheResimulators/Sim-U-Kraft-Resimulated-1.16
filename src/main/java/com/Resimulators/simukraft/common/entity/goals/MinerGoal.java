@@ -149,7 +149,6 @@ public class MinerGoal extends MoveToBlockGoal {
                     //added mined block to inventory
                     LootContext.Builder builder = new LootContext.Builder((ServerWorld) sim.getEntityWorld())
                             .withRandom(world.rand)
-                            .withParameter(LootParameters.POSITION, minepos)
                             .withParameter(LootParameters.TOOL, tool)
                             .withNullableParameter(LootParameters.BLOCK_ENTITY, world.getTileEntity(minepos));
                     List<ItemStack> drops = block.getDefaultState().getDrops(builder);
