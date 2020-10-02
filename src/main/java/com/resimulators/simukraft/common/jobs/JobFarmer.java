@@ -143,6 +143,11 @@ public class JobFarmer implements IJob {
         return sim.goalSelector.getRunningGoals().anyMatch((goal) -> goal.getGoal() == goal1);
     }
 
+    @Override
+    public double getWage() {
+        return 0.2;
+    }
+
     public boolean isTilled() {
         return tilled;
     }

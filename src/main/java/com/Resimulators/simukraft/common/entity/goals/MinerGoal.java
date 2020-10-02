@@ -34,10 +34,9 @@ import net.minecraft.world.server.ServerWorld;
 
 import java.util.List;
 
-public class MinerGoal extends MoveToBlockGoal {
+public class MinerGoal extends BaseGoal<JobMiner> {
     private final SimEntity sim;
     private int tick;
-    private IJob job;
     private BlockPos markerPos;
     private BlockPos offset;
     private BlockPos minepos;
@@ -58,14 +57,13 @@ public class MinerGoal extends MoveToBlockGoal {
     private Task currentTask = Task.NONE;
     public MinerGoal(SimEntity sim) {
         super(sim,sim.getAIMoveSpeed()*2,20);
-        job = sim.getJob();
         this.sim = sim;
 
     }
 
     @Override
     public boolean shouldExecute() {
-        job = sim.getJob();
+        job = (JobMiner) sim.getJob();
         if (job == null) return false;
         if (job.getWorkSpace() == null) return false;
         if (sim.world.getTileEntity(job.getWorkSpace()) == null) return false;
@@ -243,13 +241,13 @@ public class MinerGoal extends MoveToBlockGoal {
                 return true;
             }
         }
-        ((JobMiner) job).setProgress(progress);
-        return shouldExecute();
+        (job).setProgress(progress);
+        return shouldExecute() && super.shouldContinueExecuting();
     }
 
     @Override
     public void resetTask() {
-        ((JobMiner) job).setProgress(progress);
+        (job).setProgress(progress);
         sim.getJob().finishedWorkPeriod();
         sim.getJob().setState(EnumJobState.NOT_WORKING);
     }

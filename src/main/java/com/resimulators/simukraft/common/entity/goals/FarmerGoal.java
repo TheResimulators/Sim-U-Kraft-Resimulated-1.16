@@ -39,11 +39,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class FarmerGoal extends MoveToBlockGoal {
-    private SimEntity sim;
+public class FarmerGoal extends BaseGoal<JobFarmer> {
     private final World world;
     private int tick;
-    private JobFarmer job;
     private int delay = 20;
     private BlockPos targetPos;
     private BlockPos offset;
@@ -255,7 +253,8 @@ public class FarmerGoal extends MoveToBlockGoal {
                 return true;
             }
         }
-        return shouldExecute();
+
+        return shouldExecute() && super.shouldContinueExecuting();
     }
 
     private void getSeeds() {

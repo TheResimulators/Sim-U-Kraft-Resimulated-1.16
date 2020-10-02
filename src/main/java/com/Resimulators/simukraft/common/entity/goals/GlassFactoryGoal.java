@@ -2,6 +2,7 @@ package com.resimulators.simukraft.common.entity.goals;
 
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.entity.sim.SimInventory;
+import com.resimulators.simukraft.common.jobs.JobGlassFactory;
 import com.resimulators.simukraft.common.jobs.core.EnumJobState;
 import com.resimulators.simukraft.common.jobs.core.IJob;
 import com.resimulators.simukraft.common.world.Faction;
@@ -33,11 +34,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-public class GlassFactoryGoal extends MoveToBlockGoal {
+public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
     private final SimEntity sim;
     private final World world;
     private int tick;
-    private IJob job;
     private int delay = 20;
     private State state = State.WAITING;
     private BlockPos targetPos;
@@ -52,7 +52,6 @@ public class GlassFactoryGoal extends MoveToBlockGoal {
 
     public GlassFactoryGoal(SimEntity sim) {
         super(sim,sim.getAIMoveSpeed()*2,20);
-        job = sim.getJob();
         this.sim = sim;
         this.world = sim.world;
 
@@ -63,7 +62,7 @@ public class GlassFactoryGoal extends MoveToBlockGoal {
 
     @Override
     public boolean shouldExecute() {
-        job = sim.getJob();
+        job = (JobGlassFactory) sim.getJob();
         if (job.getState() == EnumJobState.GOING_TO_WORK){
             if (sim.getPosition().withinDistance(new Vector3d(job.getWorkSpace().getX(),job.getWorkSpace().getY(),job.getWorkSpace().getZ()),5)){
                 job.setState(EnumJobState.WORKING);
@@ -228,7 +227,7 @@ public class GlassFactoryGoal extends MoveToBlockGoal {
                 return true;
             }
         }
-        return shouldExecute();
+        return shouldExecute() && super.shouldContinueExecuting();
     }
 
     @Override
