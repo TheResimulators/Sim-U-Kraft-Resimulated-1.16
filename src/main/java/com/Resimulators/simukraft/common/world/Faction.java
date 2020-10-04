@@ -2,9 +2,11 @@ package com.resimulators.simukraft.common.world;
 
 import com.google.common.collect.Lists;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
+import com.resimulators.simukraft.packets.CreditUpdatePacket;
 import com.resimulators.simukraft.packets.IMessage;
 import com.resimulators.simukraft.Network;
 import com.resimulators.simukraft.SimuKraft;
+import com.resimulators.simukraft.proxy.ServerProxy;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -15,7 +17,13 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.fml.FMLWorldPersistenceHook;
+import net.minecraftforge.fml.LogicalSide;
+import net.minecraftforge.fml.loading.FMLCommonLaunchHandler;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
 
 import java.util.*;
@@ -26,10 +34,13 @@ public class Faction {
     private double credits = 0d;
     private int id;
     private static Random rand = new Random();
+    private World world;
     //TODO: add Housing to this
 
-    public Faction(int id) {
+    public Faction(int id, World world) {
         this.id = id;
+        this.world = world;
+
     }
 
     public CompoundNBT write(CompoundNBT nbt) {
@@ -77,6 +88,10 @@ public class Faction {
         addSim(sim.getUniqueID());
     }
 
+    private void updateCredits() {
+        sendPacketToFaction(new CreditUpdatePacket(credits, this.id));
+    }
+
     public void addSim(UUID id) {
         sims.put(id, new SimInfo(id));
     }
@@ -87,6 +102,16 @@ public class Faction {
 
     public void setCredits(double credits) {
         this.credits = credits;
+        if (world != null){
+            if (!world.isRemote){
+                updateCredits();
+                }
+            }
+        }
+
+    public void subCredits(double credits){
+        setCredits(this.credits - credits);
+
     }
 
     public void addCredits(double credits) {
@@ -95,12 +120,6 @@ public class Faction {
 
     public double getCredits() {
         return this.credits;
-    }
-
-    public void subCredits(double credits){
-        if (this.credits >= credits){
-            this.credits -= credits;
-        }
     }
 
     public boolean hasEnoughCredits(double creditsNeeded){
@@ -210,13 +229,29 @@ public class Faction {
 
     public void sendPacketToFaction(IMessage message) {
         for (UUID id : players) {
-            ServerPlayerEntity player = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayerByUUID(id);
-            if (player != null) {
-                Network.handler.sendToPlayer(message, player);
+            if (ServerLifecycleHooks.getCurrentServer() != null){
+                ServerPlayerEntity player = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayerByUUID(id);
+                if (player != null) {
+                    Network.handler.sendToPlayer(message, player);
+                    }
             }
         }
     }
 
+
+
+    public UUID getOnlineFactionPlayer(){
+        for (UUID id : players) {
+            if (ServerLifecycleHooks.getCurrentServer() != null){
+                ServerPlayerEntity player = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayerByUUID(id);
+                if (player != null){
+                return id;
+                }
+            }
+
+            }
+        return null;
+    }
     public boolean containsSim(UUID id) {
         return sims.containsKey(id);
     }

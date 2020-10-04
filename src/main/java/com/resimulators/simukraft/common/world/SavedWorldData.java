@@ -23,6 +23,7 @@ import java.util.Random;
 public class SavedWorldData extends WorldSavedData {
     private static final String DATA_NAME = Reference.MODID + "_SavedWorldData";
     private static final SavedWorldData clientStorageCopy = new SavedWorldData();
+    public World world;
     private static Random rand = new Random();
     private HashMap<Integer, Faction> factions = new HashMap<>();
 
@@ -32,8 +33,14 @@ public class SavedWorldData extends WorldSavedData {
 
     public SavedWorldData() {
         this(DATA_NAME);
+    }
+
+    public SavedWorldData(World world){
+        this(DATA_NAME);
+        this.world = world;
 
     }
+
 
     public static SavedWorldData get(World world) {
         if (!(world instanceof ServerWorld)) {
@@ -43,7 +50,7 @@ public class SavedWorldData extends WorldSavedData {
         ServerWorld overworld = (ServerWorld) world;
 
         DimensionSavedDataManager storage = overworld.getSavedData();
-        return storage.getOrCreate(SavedWorldData::new, DATA_NAME);
+        return storage.getOrCreate(() -> new SavedWorldData(world), DATA_NAME);
     }
 
     @Override
@@ -53,7 +60,7 @@ public class SavedWorldData extends WorldSavedData {
             CompoundNBT compound = (CompoundNBT)factionNBT;
             compound = compound.getCompound("faction");
             int id = compound.getInt("id");
-            Faction faction = new Faction(id);
+            Faction faction = new Faction(id,world);
             faction.read(compound);
 
             this.factions.put(id,faction);
@@ -74,20 +81,23 @@ public class SavedWorldData extends WorldSavedData {
         return compound;
     }
 
-    public int getFactionId(Faction faction){
-        for (Integer ints:factions.keySet()) {
-            if (factions.get(ints) == faction){
-                return ints;
+    public Faction getFactionByID(int id){
+        for (int faction :factions.keySet()){
+            if (faction == id){
+                return factions.get(faction);
+
             }
+
         }
-        return -1;
+        return null;
+
     }
     public Faction createNewFaction() {
         int id = rand.nextInt();
         while (factions.containsKey(id)) {
             id = rand.nextInt();
         }
-        Faction faction = new Faction(id);
+        Faction faction = new Faction(id,world);
         factions.put(id, faction);
         markDirty();
         return faction;
