@@ -46,7 +46,7 @@ public class SyncPlayerCapability implements IMessage {
         World world = SimuKraft.proxy.getClientWorld();
         if (world != null) {
             SavedWorldData.get(world).clearAll();
-            Faction faction = new Faction(id);
+            Faction faction = new Faction(id,world);
             faction.read(nbt);
             SavedWorldData.get(world).setFaction(id, faction);
         }

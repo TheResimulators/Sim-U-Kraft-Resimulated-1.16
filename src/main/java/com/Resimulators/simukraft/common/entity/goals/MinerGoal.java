@@ -6,12 +6,14 @@ import com.resimulators.simukraft.common.jobs.JobMiner;
 import com.resimulators.simukraft.common.jobs.core.EnumJobState;
 import com.resimulators.simukraft.common.jobs.core.IJob;
 import com.resimulators.simukraft.common.tileentity.TileMiner;
+import com.resimulators.simukraft.common.world.Faction;
 import com.resimulators.simukraft.common.world.SavedWorldData;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.HorizontalBlock;
 import net.minecraft.entity.ai.goal.MoveToBlockGoal;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.ToolItem;
@@ -148,13 +150,13 @@ public class MinerGoal extends BaseGoal<JobMiner> {
                     LootContext.Builder builder = new LootContext.Builder((ServerWorld) sim.getEntityWorld())
                             .withRandom(world.rand)
                             .withParameter(LootParameters.TOOL, tool)
-                            .withNullableParameter(LootParameters.BLOCK_ENTITY, world.getTileEntity(minepos));
+                            .withNullableParameter(LootParameters.BLOCK_ENTITY, world.getTileEntity(minepos))
+                            .withNullableParameter(LootParameters.field_237457_g_,Vector3d.copyCentered(minepos));
                     List<ItemStack> drops = block.getDefaultState().getDrops(builder);
 
                     for (ItemStack stack : drops) {
                         sim.getInventory().addItemStackToInventory(stack);
                     }
-
                     ((JobMiner) sim.getJob()).addProgress();
                     column++;
 
@@ -218,7 +220,11 @@ public class MinerGoal extends BaseGoal<JobMiner> {
                 currentTask = Task.TRAVELING;
             }
         }
-        world.getPlayerByUuid(SavedWorldData.get(sim.world).getFactionWithSim(sim.getUniqueID()).getPlayers().get(0)).sendStatusMessage(new StringTextComponent("Working at: " + minepos + "; and navigator set at: " + sim.getNavigator().getTargetPos() + "; inventory state: " + (sim.getInventory().getFirstEmptyStack() == -1 ? "Full" : "Not Full")), true);
+        Faction faction = SavedWorldData.get(sim.world).getFactionWithSim(sim.getUniqueID());
+        PlayerEntity player = world.getPlayerByUuid(faction.getOnlineFactionPlayer());
+        if (player != null){
+            player.sendStatusMessage(new StringTextComponent("Working at: " + minepos + "; and navigator set at: " + sim.getNavigator().getTargetPos() + "; inventory state: " + (sim.getInventory().getFirstEmptyStack() == -1 ? "Full" : "Not Full")), true);
+        }
     }
 
     @Override

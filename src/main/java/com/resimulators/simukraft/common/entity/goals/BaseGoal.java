@@ -11,6 +11,7 @@ import net.minecraft.world.IWorldReader;
 public class BaseGoal<JobType extends IJob>  extends MoveToBlockGoal{
     JobType job;
     protected SimEntity sim;
+    private int delay = 60;
     public BaseGoal(SimEntity sim, double speedIn, int length) {
         super(sim, speedIn, length);
         this.sim = sim;
@@ -25,14 +26,17 @@ public class BaseGoal<JobType extends IJob>  extends MoveToBlockGoal{
     @Override
     public void tick() {
         super.tick();
-        Faction faction = SavedWorldData.get(sim.getEntityWorld()).getFactionWithSim(sim.getUniqueID());
-        if(faction != null){
-            if (faction.hasEnoughCredits(job.getWage())){
-                faction.subCredits(job.getWage());
+        if (delay <= 0){
+            delay = 60;
+            Faction faction = SavedWorldData.get(sim.getEntityWorld()).getFactionWithSim(sim.getUniqueID());
+            if(faction != null){
+                if (faction.hasEnoughCredits(job.getWage())){
+                    faction.subCredits(job.getWage());
+                }
             }
-
+        }else {
+            delay--;
         }
-
     }
 
 

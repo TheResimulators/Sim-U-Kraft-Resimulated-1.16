@@ -49,6 +49,7 @@ public class SimUKraftPacketHandler {
         registerMessage(newId(), SimFireRequest.class, SimFireRequest::new);
         registerMessage(newId(), SimFirePacket.class, SimFirePacket::new);
         registerMessage(newId(), FarmerSeedPacket.class, FarmerSeedPacket::new);
+        registerMessage(newId(), CreditUpdatePacket.class, CreditUpdatePacket::new);
     }
 
     /**

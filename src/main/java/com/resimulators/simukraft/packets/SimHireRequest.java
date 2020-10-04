@@ -72,7 +72,7 @@ public class SimHireRequest implements IMessage {
                     tile.setSimId(sim.getUniqueID());
 
                     sim.getJob().setWorkSpace(pos);
-                    data.getFaction(id).subCredits(sim.getJob().getWage());
+                    data.getFaction(id).subCredits(sim.getJob().getWage() + 4);
                     data.getFaction(id).sendPacketToFaction(new SimHirePacket(simId, id, pos, job));
                     sim.getController().setTick(sim.getJob().intervalTime());
                     }
