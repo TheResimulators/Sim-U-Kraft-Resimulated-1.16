@@ -116,17 +116,15 @@ public class MinerGoal extends BaseGoal<JobMiner> {
     public void tick() {
         super.tick();
         World world = sim.getEntityWorld();
-        if (job.getState() == EnumJobState.WORKING) {
+        if (job.getState() == EnumJobState.WORKING) { // checks if the miner should be working
 
-            if (delay <= 0 && currentTask == Task.MINING) {
+            if (delay <= 0 && currentTask == Task.MINING) {// checks if the miner should be mining or doing a different task
 
                 progress = ((JobMiner) sim.getJob()).getProgress();
 
                 ItemStack tool = sim.getHeldItemMainhand();
 
-
-
-
+                //get distance from current block targeted to be mined.
                 if (sim.getPositionVec().distanceTo(new Vector3d(minepos.getX(), minepos.getY(), minepos.getZ())) < 6) {
                     BlockState state = sim.getEntityWorld().getBlockState(minepos);
                     Block block = state.getBlock();
@@ -172,6 +170,7 @@ public class MinerGoal extends BaseGoal<JobMiner> {
 
 
                     }
+            // traveling is used when is to far away from a block and needs to move closer to it
             if (currentTask == Task.TRAVELING) {
                 minepos = offset;
                 minepos = minepos.add(markerPos.getX(), markerPos.getY(), markerPos.getZ());
@@ -198,6 +197,7 @@ public class MinerGoal extends BaseGoal<JobMiner> {
             }
 
             tick++;
+            // returning to base to empty inventory
             if (currentTask == Task.RETURNING) {
                 BlockPos pos = sim.getJob().getWorkSpace();
                 if ((sim.getDistanceSq(pos.getX(),pos.getY(),pos.getZ()) <= 5)) {
@@ -222,6 +222,7 @@ public class MinerGoal extends BaseGoal<JobMiner> {
         }
         Faction faction = SavedWorldData.get(sim.world).getFactionWithSim(sim.getUniqueID());
         PlayerEntity player = world.getPlayerByUuid(faction.getOnlineFactionPlayer());
+        // debugging \/
         if (player != null){
             player.sendStatusMessage(new StringTextComponent("Working at: " + minepos + "; and navigator set at: " + sim.getNavigator().getTargetPos() + "; inventory state: " + (sim.getInventory().getFirstEmptyStack() == -1 ? "Full" : "Not Full")), true);
         }
@@ -239,6 +240,7 @@ public class MinerGoal extends BaseGoal<JobMiner> {
 
     @Override
     public boolean shouldContinueExecuting() {
+        //checks for different situations where the sim should stop working
         if (sim.getJob() != null) {
             if (sim.getJob().getState() == EnumJobState.FORCE_STOP) {
                 return false;
@@ -253,6 +255,7 @@ public class MinerGoal extends BaseGoal<JobMiner> {
 
     @Override
     public void resetTask() {
+        // resets progress and a few other things to make things ready for the next time the sim works
         (job).setProgress(progress);
         sim.getJob().finishedWorkPeriod();
         sim.getJob().setState(EnumJobState.NOT_WORKING);
@@ -310,6 +313,7 @@ public class MinerGoal extends BaseGoal<JobMiner> {
 
         }
 
+    
     private void placeBlock(Array current_pos,BlockPos pos,Block block){
         if (stair_num == layer && stair_pos.compare(current_pos)){
             Direction rotation = getStairRotation(side); // gets the rotation the stair should be in
