@@ -16,7 +16,6 @@ import net.minecraftforge.fml.network.PacketDistributor;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
 
 
-import java.util.Optional;
 import java.util.function.Supplier;
 
 public class SimUKraftPacketHandler {
@@ -41,7 +40,7 @@ public class SimUKraftPacketHandler {
 
 
     public void init() {
-        registerMessage(newId(), SyncPlayerCapability.class, SyncPlayerCapability::new);
+        registerMessage(newId(), SyncFactionData.class, SyncFactionData::new);
         registerMessage(newId(), OpenJobGuiPacket.class, OpenJobGuiPacket::new);
         registerMessage(newId(), SimHireRequest.class, SimHireRequest::new);
         registerMessage(newId(), SimHirePacket.class, SimHirePacket::new);

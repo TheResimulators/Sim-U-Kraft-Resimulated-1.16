@@ -207,7 +207,7 @@ public class GuiBaseJob extends Screen {
         }
         return false;
     }
-
+    /**sends different packets to server to request different things*/
     private void sendPackets() {
         if (!firing) {
             Network.getNetwork().sendToServer(new SimHireRequest(selectedSim.getEntityId(), Minecraft.getInstance().player.getUniqueID(), pos, job));

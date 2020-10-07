@@ -10,16 +10,16 @@ import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.network.NetworkEvent;
 import javax.annotation.Nullable;
 
-public class SyncPlayerCapability implements IMessage {
+public class SyncFactionData implements IMessage {
     private CompoundNBT nbt;
     private int id;
 
-    public SyncPlayerCapability(CompoundNBT nbt, int id){
+    public SyncFactionData(CompoundNBT nbt, int id){
 
         this.nbt = nbt;
         this.id = id;
     }
-    public SyncPlayerCapability(){}
+    public SyncFactionData(){}
 
 
     @Override
@@ -44,7 +44,7 @@ public class SyncPlayerCapability implements IMessage {
     @Override
     public void onExecute(NetworkEvent.Context ctxIn, boolean isLogicalServer) {
         World world = SimuKraft.proxy.getClientWorld();
-        if (world != null) {
+        if (world != null) { // adds faction data to client so info can be shown in guis and on Hud's
             SavedWorldData.get(world).clearAll();
             Faction faction = new Faction(id,world);
             faction.read(nbt);

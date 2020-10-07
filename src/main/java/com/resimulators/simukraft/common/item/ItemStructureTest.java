@@ -34,6 +34,7 @@ public class ItemStructureTest extends Item implements IStructureStorage {
     @Override
     public ActionResultType onItemUse(ItemUseContext context) {
         if (context.getPlayer() != null) {
+            //sets placement position for building
             if (context.getPlayer().isCrouching()) {
                 placementArea = context.getPos();
                 context.getPlayer().sendStatusMessage(new StringTextComponent("Set Placement Area: " + placementArea), false);
@@ -45,7 +46,7 @@ public class ItemStructureTest extends Item implements IStructureStorage {
 
     @Override
     public ActionResult<ItemStack> onItemRightClick(World worldIn, PlayerEntity playerIn, Hand handIn) {
-        if (playerIn.isCrouching()) {
+        if (playerIn.isCrouching()) { // if crouching reset placement area so a new area can be set
             placementArea = null;
         }
 
@@ -56,7 +57,7 @@ public class ItemStructureTest extends Item implements IStructureStorage {
     public ActionResultType itemInteractionForEntity(ItemStack stack, PlayerEntity playerIn, LivingEntity target, Hand hand) {
         Template temp = this.getTemplate(this.getStructure(stack));
         System.out.println(temp != null);
-
+        //sets sims job to builder and relevant info needed for it to work
         if (temp != null && target instanceof SimEntity) {
             ((SimEntity) target).setProfession(Profession.BUILDER.getId());
             ((SimEntity) target).setJob(ModJobs.JOB_LOOKUP.get(Profession.BUILDER.getId()).apply((SimEntity)target));
@@ -72,17 +73,18 @@ public class ItemStructureTest extends Item implements IStructureStorage {
     @Override
     public void addInformation(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
         super.addInformation(stack, worldIn, tooltip, flagIn);
+        //adds info to tooltip when structure is loaded
         tooltip.add(new StringTextComponent(((ItemStructureTest)stack.getItem()).getStructure(stack) + "   " + placementArea));
     }
 
     public BlockPos getPlacementArea() {
         return placementArea;
     }
-
+    /**gets template that this item is linked to*/
     public Template getTemplate(String name) {
         return StructureHandler.loadStructure(name);
     }
-
+    /**sets template this item is connected to*/
     public void setTemplate(ItemStack stack, String name) {
         setStructure(stack, name);
     }

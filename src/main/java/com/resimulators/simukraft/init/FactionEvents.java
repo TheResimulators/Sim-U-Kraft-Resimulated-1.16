@@ -4,15 +4,13 @@ package com.resimulators.simukraft.init;
 import com.resimulators.simukraft.Network;
 import com.resimulators.simukraft.common.world.Faction;
 import com.resimulators.simukraft.common.world.SavedWorldData;
-import com.resimulators.simukraft.handlers.SimUKraftPacketHandler;
-import com.resimulators.simukraft.packets.SyncPlayerCapability;
+import com.resimulators.simukraft.packets.SyncFactionData;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.world.World;
 
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.network.NetworkDirection;
 
 public class FactionEvents {
 
@@ -26,7 +24,7 @@ public class FactionEvents {
                 faction = data.createNewFaction();
                 data.addPlayerToFaction(faction.getId(),event.getPlayer());
             }
-            Network.getNetwork().sendToPlayer(new SyncPlayerCapability(faction.write(new CompoundNBT()),faction.getId()),((ServerPlayerEntity) event.getPlayer()));
+            Network.getNetwork().sendToPlayer(new SyncFactionData(faction.write(new CompoundNBT()),faction.getId()),((ServerPlayerEntity) event.getPlayer()));
 
         }
     }

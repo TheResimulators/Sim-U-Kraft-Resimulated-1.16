@@ -41,7 +41,7 @@ public class SavedWorldData extends WorldSavedData {
 
     }
 
-
+    /** gets storage data for current world if exists, else creates a new storage instance*/
     public static SavedWorldData get(World world) {
         if (!(world instanceof ServerWorld)) {
             return clientStorageCopy;
@@ -81,17 +81,7 @@ public class SavedWorldData extends WorldSavedData {
         return compound;
     }
 
-    public Faction getFactionByID(int id){
-        for (int faction :factions.keySet()){
-            if (faction == id){
-                return factions.get(faction);
-
-            }
-
-        }
-        return null;
-
-    }
+    /** creates a new faction with a unique random int id and adds it to factions list*/
     public Faction createNewFaction() {
         int id = rand.nextInt();
         while (factions.containsKey(id)) {
@@ -102,7 +92,7 @@ public class SavedWorldData extends WorldSavedData {
         markDirty();
         return faction;
     }
-
+    /**deletes faction from list and removes all players and sims from that faction, leaving now reference*/
     public void deleteFaction(int id){
         factions.get(id).removeAllSims();
         factions.get(id).removeAllPlayers();
@@ -110,31 +100,34 @@ public class SavedWorldData extends WorldSavedData {
         markDirty();
 
     }
+
+    /** adds a premade faction to faction list. mostly used to update client*/
     public void addFaction(Faction faction){
-        setFaction(rand.nextInt(),faction);
+        setFaction(faction.getId(),faction);
         markDirty();
     }
 
+    /** set faction in list with given id*/
     public void setFaction(int id, Faction faction){
         markDirty();
         this.factions.put(id,faction);
     }
-
+    /**returns faction */
     public Faction getFaction(int id) {
         return factions.get(id);
     }
-
+    /**returns list of faction ids. WIP*/
     public ArrayList<Integer> getFactionIds() {
-        ArrayList<Integer> factionIds = new ArrayList<>();
-        factionIds.addAll(factions.keySet());
-        return factionIds;
+        return new ArrayList<>(factions.keySet());
     }
 
+
+    /**gets list of Faction Instances. WIP*/
     public ArrayList<Faction> getFactions() {
         return new ArrayList<>(factions.values());
 
     }
-
+    /** gets faction with a player in it. searches each faction for the one containing given UUID */
     public Faction getFactionWithPlayer(UUID id){
         for (Faction faction:factions.values()){
             if (faction.getPlayers().contains(id)){
@@ -143,7 +136,7 @@ public class SavedWorldData extends WorldSavedData {
         }
         return null;
     }
-
+    /**gets faction with sim in it, searches through each faction for given UUID*/
     public Faction getFactionWithSim(UUID id){
         for(Faction faction: factions.values()){
             if(faction.containsSim(id)){
@@ -153,33 +146,37 @@ public class SavedWorldData extends WorldSavedData {
         return null;
 
     }
+
+    /**adds sim to given faction with id, uses sim instance for usefulness*/
     public void addSimToFaction(int id, SimEntity sim){
         factions.get(id).addSim(sim);
         markDirty();
     }
-
+    /**adds player to certain faction with given id, uses playerEntity object to add player */
     public void addPlayerToFaction(int id, PlayerEntity player){
         factions.get(id).addPlayer(player.getUniqueID());
         markDirty();
     }
-
+    /**WIP*/
     public void removePlayerFromFaction(int id, PlayerEntity player){
         // TODO add removal of things
     }
 
+    /**removes sim from faction, all references removes, used for when sim dies.*/
     public void removeSimFromFaction(int id, SimEntity sim){
         this.getFaction(id).removeSim(sim);
         markDirty();
     }
 
+    /** sets sim to be hired, used to see which sims are unemployed*/
     public void hireSim(int id, SimEntity sim){
         getFaction(id).hireSim(sim);
     }
-
+    /**fires sim to make it available for hire*/
     public void fireSim(int id, SimEntity sim){
         getFaction(id).fireSim(sim);
     }
-
+    /**used to clear all stored data*/
     public void clearAll(){
         factions = new HashMap<>();
     }

@@ -40,7 +40,7 @@ public class CreditUpdatePacket implements IMessage {
     @Override
     public void onExecute(NetworkEvent.Context ctxIn, boolean isLogicalServer) {
             World world = SimuKraft.proxy.getClientWorld();
-            Faction faction = SavedWorldData.get(world).getFactionByID(factionId);
+            Faction faction = SavedWorldData.get(world).getFaction(factionId);
             if (faction != null){
                 faction.setCredits(credit);
             }

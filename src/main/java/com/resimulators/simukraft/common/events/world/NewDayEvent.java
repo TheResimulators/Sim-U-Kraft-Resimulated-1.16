@@ -82,13 +82,14 @@ public class NewDayEvent implements INBTSerializable<CompoundNBT> {
 
         if (sWorld.getPlayers().size() == 0) return;
         for (Faction faction : factions) {
-            if (faction.getUnemployedSims().isEmpty() || true) {
+            if (faction.getUnemployedSims().isEmpty() || true) { // temporary for testing and until residential system is done
                 ArrayList<SimEntity> simsToSpawn = new ArrayList<>();
                 simsToSpawn.add(new SimEntity(ModEntities.ENTITY_SIM, world));
                 for (SimEntity sim : simsToSpawn) {
                     UUID id = faction.getPlayers().get(random.nextInt(faction.getPlayers().size()));
                     PlayerEntity player = world.getPlayerByUuid(id);
                     if (player != null) {
+                        //gets blocks around player to spawn sim at
                         ArrayList<BlockPos> blocks = BlockUtils.getBlocksAroundPosition(player.getPosition(), 10);
                         if (spawn(sWorld, sim, blocks)) {
                             worldData.addSimToFaction(faction.getId(), sim);

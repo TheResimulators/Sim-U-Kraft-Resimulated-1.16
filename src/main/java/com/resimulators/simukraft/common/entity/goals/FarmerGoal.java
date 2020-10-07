@@ -10,14 +10,10 @@ import com.resimulators.simukraft.common.tileentity.TileFarmer;
 import com.resimulators.simukraft.common.tileentity.TileMarker;
 import com.resimulators.simukraft.common.world.SavedWorldData;
 import com.resimulators.simukraft.utils.BlockUtils;
-import com.sun.scenario.effect.Crop;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.CropsBlock;
-import net.minecraft.command.arguments.NBTTagArgument;
-import net.minecraft.entity.ai.goal.MoveToBlockGoal;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.loot.LootContext;
@@ -145,7 +141,7 @@ public class FarmerGoal extends BaseGoal<JobFarmer> {
                                 world.playSound(null, targetPos, SoundEvents.ITEM_HOE_TILL, SoundCategory.BLOCKS, 1.0F, 1.0F);
                                 if (!world.isRemote) {
                                     world.setBlockState(targetPos, blockstate, 11);
-                                    world.setBlockState(targetPos.up(), farmerTile.getSeed().getItem().getDefaultState());
+                                    world.setBlockState(targetPos.up(), farmerTile.getSeed().getBlock().getDefaultState());
                                     if (findNextTarget()) {
                                         job.setProgress(progress++);
                                         setDestination();
@@ -193,7 +189,7 @@ public class FarmerGoal extends BaseGoal<JobFarmer> {
                     stack.setTagInfo("harvested",new CompoundNBT());
                     sim.getInventory().addItemStackToInventory(stack);
                 }
-                world.setBlockState(targetPos, farmerTile.getSeed().getItem().getDefaultState());
+                world.setBlockState(targetPos, farmerTile.getSeed().getBlock().getDefaultState());
                 sim.getInventory().getItemStack();
                 if (checkForHarvestable()){
                     getNextHarvestable();
@@ -259,7 +255,7 @@ public class FarmerGoal extends BaseGoal<JobFarmer> {
 
     private void getSeeds() {
         int needed = farmerTile.getWidth() * farmerTile.getDepth();
-        ItemStack seed = ((CropsBlock) (farmerTile.getSeed().getItem())).getItem(world, job.getWorkSpace(), world.getBlockState(job.getWorkSpace()));
+        ItemStack seed = ((CropsBlock) (farmerTile.getSeed().getBlock())).getItem(world, job.getWorkSpace(), world.getBlockState(job.getWorkSpace()));
         for (BlockPos pos : chests) {
             ChestTileEntity chest = (ChestTileEntity) world.getTileEntity(pos);
             if (chest != null) {
@@ -282,7 +278,7 @@ public class FarmerGoal extends BaseGoal<JobFarmer> {
 
     private boolean hasSeeds() {
         int amount = 0;
-        ItemStack seed = ((CropsBlock) (farmerTile.getSeed().getItem())).getItem(world, job.getWorkSpace(), world.getBlockState(job.getWorkSpace()));
+        ItemStack seed = ((CropsBlock) (farmerTile.getSeed().getBlock())).getItem(world, job.getWorkSpace(), world.getBlockState(job.getWorkSpace()));
         for (BlockPos pos : chests) {
             ChestTileEntity chest = (ChestTileEntity) world.getTileEntity(pos);
             if (chest != null) {

@@ -28,28 +28,28 @@ public class StructureHandler {
             templateManager = new TemplateManager(server.getDataPackRegistries().getResourceManager(), levelSave, server.getDataFixer());
         } catch (IllegalAccessException | NoSuchFieldException e) {
             //FIXME fabbe50: Make own instance of TemplateManager
-            templateManager = server.func_241755_D_().getStructureTemplateManager();
+            templateManager = server.func_241755_D_().getStructureTemplateManager(); // gets servers template manager
         }
     }
-
+    /**gets instance of template manager*/
     public static TemplateManager getTemplateManager() {
         return templateManager;
     }
-
+    /**saves the structure to file using built-in template manager*/
     public static boolean saveStructure(World world, BlockPos origin, BlockPos size, String name, String author) {
         if (templateManager == null && world.getServer() != null)
             templateManager = world.getServer().func_241755_D_().getStructureTemplateManager();
 
         if (templateManager != null) {
-            Template template = templateManager.getTemplateDefaulted(new ResourceLocation(Reference.MODID, name));
-            template.takeBlocksFromWorld(world, origin, size, false, null);
-            template.setAuthor(author);
-            templateManager.writeToFile(new ResourceLocation(Reference.MODID, name));
-            return true;
+            Template template = templateManager.getTemplateDefaulted(new ResourceLocation(Reference.MODID, name)); //gets default empty template
+            template.takeBlocksFromWorld(world, origin, size, false, null); //gets all the blocks that are in the world
+            template.setAuthor(author); //sets the author to the person saving the structure
+            templateManager.writeToFile(new ResourceLocation(Reference.MODID, name)); // writes the template to file at given location
+            return true; // returns true if successful
         }
         return false;
     }
-
+    /**loads structure using template manager*/
     public static Template loadStructure(String name) {
         if (templateManager != null) {
             return templateManager.getTemplate(new ResourceLocation(Reference.MODID, name));

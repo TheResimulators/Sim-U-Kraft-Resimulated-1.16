@@ -11,7 +11,7 @@ import net.minecraft.world.IWorldReader;
 public class BaseGoal<JobType extends IJob>  extends MoveToBlockGoal{
     JobType job;
     protected SimEntity sim;
-    private int delay = 60;
+    private int delay = 60; // every 3 seconds (60 ticks) pay sim their wage
     public BaseGoal(SimEntity sim, double speedIn, int length) {
         super(sim, speedIn, length);
         this.sim = sim;

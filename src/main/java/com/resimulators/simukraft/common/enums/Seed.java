@@ -38,7 +38,7 @@ public enum Seed {
 
 
     }
-
+    /**gets the seed by id, checks each one for the correct one with given id*/
     public static Seed getSeedById(int id){
         for (Seed seed: Seed.values()){
             if (seed.getId() == id){
@@ -47,42 +47,40 @@ public enum Seed {
         }
         return null;
     }
-
+    /**gets the next id in the list, used in Gui to cycle through them*/
     public static Seed getNextSeed(Seed seed){
         int id = seed.id;
         id = (id + 1) % Seed.values().length;
         return Seed.getSeedById(id);
 
     }
-
+    /**gets the next seed that is enabled, could become configurable*/
     public static Seed getNextEnabledSeed(Seed seed){
         seed = getNextSeed(seed);
         while (seed != null && !seed.enabled){
-            if (seed.enabled){
-                return seed;
-            }else{
-                seed = getNextSeed(seed);
-            }
+            seed = getNextSeed(seed);
 
         }
         return seed;
     }
+
+    /**gets name of Seed instance*/
     public String getName() {
         return name;
     }
-
+    /**gets id of Seed instance*/
     public int getId() {
         return id;
     }
-
-    public Block getItem() {
+    /**gets block associated with Seed*/
+    public Block getBlock() {
         return item;
     }
-
+    /**returns if Seed instance is enabled*/
     public boolean isEnabled() {
         return enabled;
     }
-
+    /**gets the type of planting Seed instance is*/
     public Type getType() {
         return type;
     }
