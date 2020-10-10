@@ -11,7 +11,7 @@ import net.minecraft.world.IWorldReader;
 public class GoToWorkGoal extends MoveToBlockGoal {
 
     SimEntity sim;
-     IJob job;
+    IJob job;
 
     public GoToWorkGoal(SimEntity sim){
         super(sim,sim.getAIMoveSpeed()*2,20);

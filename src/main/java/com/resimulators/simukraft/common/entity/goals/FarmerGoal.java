@@ -182,7 +182,8 @@ public class FarmerGoal extends BaseGoal<JobFarmer> {
                 LootContext.Builder builder = new LootContext.Builder((ServerWorld) sim.getEntityWorld())
                         .withRandom(world.rand)
                         .withParameter(LootParameters.TOOL, sim.getActiveItemStack())
-                        .withNullableParameter(LootParameters.BLOCK_ENTITY, world.getTileEntity(targetPos));
+                        .withNullableParameter(LootParameters.BLOCK_ENTITY, world.getTileEntity(targetPos))
+                        .withParameter(LootParameters.field_237457_g_,Vector3d.copyCenteredHorizontally(targetPos));
                 List<ItemStack> drops = world.getBlockState(targetPos).getDrops(builder);
 
                 for (ItemStack stack : drops) {

@@ -66,7 +66,7 @@ public class StructureHandler {
             return Template.processBlockInfos(world, pos, pos, new PlacementSettings().setRotation(rotation).setMirror(mirror), blockInfos.get(0), template);
         } catch (NoSuchFieldException | IllegalAccessException e) {
             try {
-                Field field = template.getClass().getDeclaredField("field_199719_a"); //TODO (fabbe50): Check if this is the correct field name.
+                Field field = template.getClass().getDeclaredField("field_204769_a "); //TODO (fabbe50): Check if this is the correct field name. Aidie8: found the new field name i think using Forge Bot
                 field.setAccessible(true);
                 List<List<Template.BlockInfo>> blockInfos = (List<List<Template.BlockInfo>>)field.get(template);
                 field.setAccessible(false);

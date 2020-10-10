@@ -73,15 +73,11 @@ public class MinerGoal extends BaseGoal<JobMiner> {
         if (!((TileMiner) sim.world.getTileEntity(job.getWorkSpace())).CheckValidity()) return false;
         if (job.getWorkSpace() == null) return false;
         if (sim.world.getTileEntity(job.getWorkSpace()) == null) return false;
-        job.setState(EnumJobState.GOING_TO_WORK);
         if (job.getState() == EnumJobState.GOING_TO_WORK) {
             if (sim.getPosition().withinDistance(new Vector3d(job.getWorkSpace().getX(), job.getWorkSpace().getY(), job.getWorkSpace().getZ()), 5)) {
                 job.setState(EnumJobState.WORKING);
                 currentTask = Task.TRAVELING;
                 return true;
-            } else {
-
-                sim.getNavigator().tryMoveToXYZ(job.getWorkSpace().getX(), job.getWorkSpace().getY()+1, job.getWorkSpace().getZ(), sim.getAIMoveSpeed());
             }
         }
 
