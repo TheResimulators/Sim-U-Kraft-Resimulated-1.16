@@ -49,16 +49,15 @@ public class BuilderGoal extends Goal {
     @Override
     public void startExecuting() {
         //done the condition checking for it starting just need the rest done
-        //TODO the Builder AI
+        //TODO: the Builder AI
         //FABBE50
         System.out.println("startExecuting");
-
         template = ((JobBuilder)sim.getJob()).getTemplate();
         PlacementSettings settings = new PlacementSettings()
                 .setCenterOffset(template.getSize().subtract(new Vector3i(template.getSize().getX() / 2, 0, template.getSize().getZ() / 2)))
                 .setRotation(Rotation.NONE)
                 .setMirror(Mirror.NONE);
-        blocks = template.func_215386_a(sim.getJob().getWorkSpace(), settings, Blocks.PACKED_ICE, true);
+        blocks = template.func_215386_a(sim.getJob().getWorkSpace(), settings, Blocks.PACKED_ICE, true); // needs to be fixed, only places packed ice right now
 
         for (Template.BlockInfo blockInfo : blocks) {
                 sim.world.setBlockState(blockInfo.pos, blockInfo.state);
