@@ -11,7 +11,6 @@ import net.minecraft.tileentity.TileEntity;
 
 public class TileCustomData extends TileEntity implements IControlBlock{
     private BuildingType type;
-    private Category category;
     private float price;
     private float rent;
     private int width = 0;
@@ -20,6 +19,8 @@ public class TileCustomData extends TileEntity implements IControlBlock{
 
     public TileCustomData() {
         super(ModTileEntities.CUSTOM_DATA.get());
+        type = BuildingType.RESIDENTIAL;
+
     }
 
     @Override
@@ -30,7 +31,6 @@ public class TileCustomData extends TileEntity implements IControlBlock{
     @Override
     public CompoundNBT write(CompoundNBT compound) {
         compound.putInt("building type",type.id);
-        compound.putInt("category",category.id);
         compound.putFloat("price",this.price);
         compound.putFloat("rent",this.rent);
 
@@ -41,7 +41,6 @@ public class TileCustomData extends TileEntity implements IControlBlock{
     @Override
     public void read(BlockState blockState, CompoundNBT compoundNBT) {
         setBuildingType(BuildingType.getById(compoundNBT.getInt("building type")));
-        setCategory(Category.getById(compoundNBT.getInt("category")));
         setPrice(compoundNBT.getFloat("price"));
         setRent(compoundNBT.getFloat("rent"));
         super.read(blockState,compoundNBT);
@@ -49,10 +48,6 @@ public class TileCustomData extends TileEntity implements IControlBlock{
 
     public void setBuildingType(BuildingType type){
         this.type = type;
-    }
-
-    public void setCategory(Category category){
-        this.category = category;
     }
 
     public void setPrice(float price){
@@ -68,9 +63,6 @@ public class TileCustomData extends TileEntity implements IControlBlock{
         return type;
     }
 
-    public Category getCategory() {
-        return category;
-    }
 
     public float getPrice() {
         return price;

@@ -10,6 +10,7 @@ import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
@@ -28,13 +29,19 @@ public class GuiCustomData extends Screen {
     private TextFieldWidget rentInput;
     private TextFieldWidget priceInput;
     private ButtonScrollPanel buildingTypePanel;
-    private ButtonScrollPanel buildingCategoryPanel;
     private ArrayList<Button> buildingTypes =  new ArrayList<>();
-    private ArrayList<Button> buildingCategories =  new ArrayList<>();
+
+    private int buildingWidth;
+    private int buildingHeight;
+    private int buildingDepth;
+
     protected GuiCustomData(ITextComponent titleIn, BlockPos pos) {
         super(titleIn);
         this.pos = pos;
         stack = Minecraft.getInstance().player.getHeldItemMainhand();
+        if ((stack.getItem() != Items.AIR)){
+            //set width height and depth
+        }
 
     }
 
@@ -43,19 +50,22 @@ public class GuiCustomData extends Screen {
     public void render(MatrixStack stack, int p_render_1_, int p_render_2_, float p_render_3_) {
         renderBackground(stack); //Render Background
         buildingTypePanel.render(stack, p_render_1_, p_render_2_, p_render_3_);
-        buildingCategoryPanel.render(stack, p_render_1_, p_render_2_, p_render_3_);
+
         super.render(stack, p_render_1_, p_render_2_, p_render_3_);
         drawCenteredString(stack, minecraft.fontRenderer, new StringTextComponent("Currently Selected"),84,30, Color.WHITE.getRGB());
-        drawCenteredString(stack, minecraft.fontRenderer, new StringTextComponent("Currently Selected"),width-84,30, Color.WHITE.getRGB());
         if (buildingTypePanel.selection.string != null) {
             drawCenteredString(stack, minecraft.fontRenderer, StringUtils.capitalizeFirstLetter(buildingTypePanel.selection.string), 84, 50, Color.WHITE.getRGB());
         }
-        if (buildingCategoryPanel.selection.string != null){
-            drawCenteredString(stack, minecraft.fontRenderer, StringUtils.capitalizeFirstLetter(buildingCategoryPanel.selection.string),width-84, 50, Color.WHITE.getRGB());
-
-        }
         priceInput.render(stack, p_render_1_, p_render_2_, p_render_3_);
         rentInput.render(stack, p_render_1_, p_render_2_, p_render_3_);
+        rentInput.renderButton(stack, p_render_1_, p_render_2_, p_render_3_);
+
+        if ((buildingWidth != 0 && buildingHeight != 0 && buildingDepth != 0) || rentInput != null){
+            drawCenteredString(stack, minecraft.fontRenderer, new StringTextComponent("Width: " + buildingWidth), width/2-40,height/2 - 60,Color.WHITE.getRGB());
+            drawCenteredString(stack, minecraft.fontRenderer, new StringTextComponent("Height: " + buildingHeight), width/2-40,height/2 - 40,Color.WHITE.getRGB());
+            drawCenteredString(stack, minecraft.fontRenderer, new StringTextComponent("Depth: " + buildingDepth), width/2-40,height/2 - 20,Color.WHITE.getRGB());
+
+        }
 
     }
 
@@ -68,35 +78,36 @@ public class GuiCustomData extends Screen {
             closeScreen();
         }));
 
-        addButton(calculatePrice = new Button(width - 120, height / 2 + 40, 100, 20, new StringTextComponent("Calculate Price"), priceCalculate -> {
+        addButton(calculatePrice = new Button(width - 120, height / 2 - 30, 100, 20, new StringTextComponent("Calculate Price"), priceCalculate -> {
             if (stack.getItem() instanceof ItemStructureTest) {
                 //TODO: calculate price depending on the size of the structure
 
             }
         }));
 
-        addButton(calculateRent = new Button(width - 120, (height / 4) * 3 + 30, 100, 20, new StringTextComponent("Calculate Rent"), calculateRent -> {
+        addButton(calculateRent = new Button(width - 120, (height / 2) + 50, 100, 20, new StringTextComponent("Calculate Rent"), calculateRent -> {
             if (stack.getItem() instanceof ItemStructureTest) {
                 //TODO: calculate rent depending on the size of the structure
             }
         }));
         buildingTypes.clear();
-        buildingCategories.clear();
         addBuildingTypeButtons();
-        addCategoryButtons();
         buildingTypePanel = new ButtonScrollPanel(minecraft,108,120,60,30, buildingTypes, 6,2);
-        buildingCategoryPanel = new ButtonScrollPanel(minecraft,108,50,60,width-130,buildingCategories, 2, 10);
 
         this.children.add(buildingTypePanel);
-        this.children.add(buildingCategoryPanel);
 
-        rentInput = new TextFieldWidget(minecraft.fontRenderer,width-120,(height/4) * 3,100,20, new StringTextComponent("Rent"));
+        rentInput = new TextFieldWidget(minecraft.fontRenderer,width-120,(height/2) + 80,100,20, new StringTextComponent("Rent"));
         priceInput = new TextFieldWidget(minecraft.fontRenderer, width-120,(height/2),100,20, new StringTextComponent("Price"));
         rentInput.setVisible(true);
-        rentInput.setFocused2(true);
-        rentInput.active = true;
         priceInput.setVisible(true);
+
+        rentInput.setFocused2(true);
+        rentInput.setMaxStringLength(3);
+        priceInput.setMaxStringLength(4);
+        children.add(rentInput);
+        children.add(priceInput);
     }
+
 
 
 
@@ -115,21 +126,6 @@ public class GuiCustomData extends Screen {
         }
     }
 
-    public void addCategoryButtons(){
-        int i = 0;
-        for (Category category: Category.values()){
-            Button button = new Button(width-130,60 + (i*100), 100, 20 , new StringTextComponent(category.category),butn ->{
-                buildingCategoryPanel.selection.id = category.id;
-                buildingCategoryPanel.selection.string = category.category;
-                reactivateButtons(buildingCategories);
-                butn.active = false;
-            });
-            buildingCategories.add(button);
-            addButton(button);
-            i++;
-        }
-
-    }
 
     private void reactivateButtons(ArrayList<Button> buttons){
         for (Button button: buttons){
@@ -166,7 +162,7 @@ public class GuiCustomData extends Screen {
 
         @Override
         protected int getContentHeight() {
-            return maxButtonsVisible * 20 + contentOffset;
+            return maxButtonsVisible * 21 + contentOffset;
         }
 
         @Override

@@ -5,14 +5,16 @@ import net.minecraft.tileentity.TileEntityType;
 
 public enum BuildingType {
 
-    GLASS_FACTORY("glass factory", ModTileEntities.GLASS_FACTORY.get(),1),
-    COW_FARMER("cow farmer", ModTileEntities.GLASS_FACTORY.get(),2),
-    SHEEP_FARMER("sheep farmer", ModTileEntities.GLASS_FACTORY.get(),3),
-    PIG_FARMER("pig farmer", ModTileEntities.GLASS_FACTORY.get(),4),
-    CHICKEN_FARMER("chicken farmer", ModTileEntities.GLASS_FACTORY.get(),5),
-    BUTCHER("butchery", ModTileEntities.GLASS_FACTORY.get(),6),
-    BAKER("bakery", ModTileEntities.GLASS_FACTORY.get(),7),
-    GROCER("grocery", ModTileEntities.GLASS_FACTORY.get(),8);
+    GLASS_FACTORY("glass factory", ModTileEntities.GLASS_FACTORY.get(),Category.INDUSTRIAL,1),
+    COW_FARMER("cow farmer", ModTileEntities.GLASS_FACTORY.get(),Category.INDUSTRIAL,2),
+    SHEEP_FARMER("sheep farmer", ModTileEntities.GLASS_FACTORY.get(),Category.INDUSTRIAL,3),
+    PIG_FARMER("pig farmer", ModTileEntities.GLASS_FACTORY.get(), Category.INDUSTRIAL, 4),
+    CHICKEN_FARMER("chicken farmer", ModTileEntities.GLASS_FACTORY.get(), Category.INDUSTRIAL, 5),
+    BUTCHER("butchery", ModTileEntities.GLASS_FACTORY.get(), Category.COMMERCIAL,6),
+    BAKER("bakery", ModTileEntities.GLASS_FACTORY.get(), Category.COMMERCIAL, 7),
+    GROCER("grocery", ModTileEntities.GLASS_FACTORY.get(), Category.COMMERCIAL, 8),
+    RESIDENTIAL("residential", ModTileEntities.GLASS_FACTORY.get(), Category.RESIDENTIAL,9),
+    SPECIAL("special", ModTileEntities.GLASS_FACTORY.get(),Category.SPECIAL,10);
 
 
 
@@ -20,7 +22,7 @@ public enum BuildingType {
     public String name;
     public TileEntityType<?> type;
     public int id;
-    BuildingType(String name, TileEntityType<?> type,int id){
+    BuildingType(String name, TileEntityType<?> type, Category category,int id){
         this.name = name;
         this.type = type;
         this.id = id;
