@@ -22,10 +22,12 @@ public enum BuildingType {
     public String name;
     public TileEntityType<?> type;
     public int id;
+    public Category category;
     BuildingType(String name, TileEntityType<?> type, Category category,int id){
         this.name = name;
         this.type = type;
         this.id = id;
+        this.category = category;
 
     }
 

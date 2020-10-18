@@ -6,6 +6,8 @@ import com.resimulators.simukraft.common.enums.Category;
 import com.resimulators.simukraft.init.ModTileEntities;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.NetworkManager;
+import net.minecraft.network.play.server.SUpdateTileEntityPacket;
 import net.minecraft.tileentity.TileEntity;
 
 
@@ -48,14 +50,17 @@ public class TileCustomData extends TileEntity implements IControlBlock{
 
     public void setBuildingType(BuildingType type){
         this.type = type;
+        markDirty();
     }
 
     public void setPrice(float price){
         this.price = price;
+        markDirty();
     }
 
     public void setRent(float rent){
         this.rent = rent;
+        markDirty();
     }
 
 
@@ -85,14 +90,17 @@ public class TileCustomData extends TileEntity implements IControlBlock{
 
     public void setWidth(int width){
         this.width = width;
+        markDirty();
     }
 
     public void setHeight(int height){
         this.height = height;
+        markDirty();
     }
 
     public void setDepth(int depth){
         this.depth = depth;
+        markDirty();
     }
 
     public int getWidth() {
@@ -105,5 +113,15 @@ public class TileCustomData extends TileEntity implements IControlBlock{
 
     public int getDepth() {
         return depth;
+    }
+
+    @Override
+    public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
+        read(this.getBlockState(),pkt.getNbtCompound());
+    }
+
+    @Override
+    public CompoundNBT getUpdateTag() {
+        return write(new CompoundNBT());
     }
 }
