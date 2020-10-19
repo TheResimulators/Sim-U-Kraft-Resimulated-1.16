@@ -4,6 +4,8 @@ import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.jobs.JobBuilder;
 import com.resimulators.simukraft.common.jobs.core.EnumJobState;
 import com.resimulators.simukraft.common.jobs.core.IJob;
+import com.resimulators.simukraft.common.world.Structure;
+import com.resimulators.simukraft.handlers.StructureHandler;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.util.Mirror;
@@ -57,7 +59,7 @@ public class BuilderGoal extends Goal {
                 .setCenterOffset(template.getSize().subtract(new Vector3i(template.getSize().getX() / 2, 0, template.getSize().getZ() / 2)))
                 .setRotation(Rotation.NONE)
                 .setMirror(Mirror.NONE);
-        blocks = template.func_215386_a(sim.getJob().getWorkSpace(), settings, Blocks.PACKED_ICE, true); // needs to be fixed, only places packed ice right now
+        blocks = StructureHandler.modifyAndConvertTemplate(template,sim.world,sim.getJob().getWorkSpace(), Rotation.NONE, Mirror.NONE); // needs to be fixed, only places packed ice right now
 
         for (Template.BlockInfo blockInfo : blocks) {
                 sim.world.setBlockState(blockInfo.pos, blockInfo.state);
