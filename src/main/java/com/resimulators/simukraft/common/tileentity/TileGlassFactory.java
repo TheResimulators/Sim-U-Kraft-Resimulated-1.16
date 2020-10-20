@@ -1,5 +1,6 @@
 package com.resimulators.simukraft.common.tileentity;
 
+import com.resimulators.simukraft.client.gui.GuiHandler;
 import com.resimulators.simukraft.init.ModTileEntities;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;
@@ -10,7 +11,7 @@ import net.minecraft.tileentity.TileEntityType;
 
 import java.util.UUID;
 
-public class TileGlassFactory extends TileEntity implements ITile {
+public class TileGlassFactory extends TileEntity implements IControlBlock {
     private boolean hired;
     private UUID simID;
     public TileGlassFactory() {
@@ -37,6 +38,11 @@ public class TileGlassFactory extends TileEntity implements ITile {
         if (nbt.contains("simid")) {
             simID = nbt.getUniqueId("simid");
         }
+    }
+
+    @Override
+    public int getGui() {
+        return GuiHandler.GLASS_FACTORY;
     }
 
     @Override

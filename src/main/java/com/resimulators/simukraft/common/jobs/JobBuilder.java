@@ -1,5 +1,6 @@
 package com.resimulators.simukraft.common.jobs;
 
+import com.resimulators.simukraft.common.building.BuildingTemplate;
 import com.resimulators.simukraft.common.entity.goals.BuilderGoal;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.jobs.core.EnumJobState;
@@ -14,7 +15,7 @@ import net.minecraft.world.gen.feature.template.Template;
 public class JobBuilder implements IJob {
     private final SimEntity sim;
     private final Goal goal1;
-    private Template template;
+    private BuildingTemplate template;
     private int periodsworked = 0;
     private BlockPos workSpace;
     private EnumJobState state = EnumJobState.NOT_WORKING;
@@ -25,11 +26,11 @@ public class JobBuilder implements IJob {
         addJobAi();
     }
 
-    public void setTemplate(Template template) {
+    public void setTemplate(BuildingTemplate template) {
         this.template = template;
     }
 
-    public Template getTemplate() {
+    public BuildingTemplate getTemplate() {
         return template;
     }
 

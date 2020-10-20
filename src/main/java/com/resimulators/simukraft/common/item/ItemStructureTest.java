@@ -1,5 +1,6 @@
 package com.resimulators.simukraft.common.item;
 
+import com.resimulators.simukraft.common.building.BuildingTemplate;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.item.interfaces.IStructureStorage;
 import com.resimulators.simukraft.common.jobs.JobBuilder;
@@ -55,7 +56,7 @@ public class ItemStructureTest extends Item implements IStructureStorage {
 
     @Override
     public ActionResultType itemInteractionForEntity(ItemStack stack, PlayerEntity playerIn, LivingEntity target, Hand hand) {
-        Template temp = this.getTemplate(this.getStructure(stack));
+        BuildingTemplate temp = this.getTemplate(this.getStructure(stack));
         System.out.println(temp != null);
         //sets sims job to builder and relevant info needed for it to work
         if (temp != null && target instanceof SimEntity) {
@@ -81,7 +82,7 @@ public class ItemStructureTest extends Item implements IStructureStorage {
         return placementArea;
     }
     /**gets template that this item is linked to*/
-    public Template getTemplate(String name) {
+    public BuildingTemplate getTemplate(String name) {
         return StructureHandler.loadStructure(name);
     }
     /**sets template this item is connected to*/

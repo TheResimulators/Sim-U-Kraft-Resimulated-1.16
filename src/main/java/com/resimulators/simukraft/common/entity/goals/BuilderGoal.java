@@ -1,11 +1,15 @@
 package com.resimulators.simukraft.common.entity.goals;
 
+import com.resimulators.simukraft.SimuKraft;
+import com.resimulators.simukraft.common.building.BuildingTemplate;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
+import com.resimulators.simukraft.common.enums.BuildingType;
 import com.resimulators.simukraft.common.jobs.JobBuilder;
 import com.resimulators.simukraft.common.jobs.core.EnumJobState;
 import com.resimulators.simukraft.common.jobs.core.IJob;
 import com.resimulators.simukraft.common.world.Structure;
 import com.resimulators.simukraft.handlers.StructureHandler;
+import com.resimulators.simukraft.init.ModBlocks;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.util.Mirror;
@@ -21,7 +25,7 @@ import java.util.List;
 public class BuilderGoal extends Goal {
     private final SimEntity sim;
     private int tick;
-    private Template template;
+    private BuildingTemplate template;
     private List<Template.BlockInfo> blocks;
     private BlockPos origin;
 
@@ -60,9 +64,15 @@ public class BuilderGoal extends Goal {
                 .setRotation(Rotation.NONE)
                 .setMirror(Mirror.NONE);
         blocks = StructureHandler.modifyAndConvertTemplate(template,sim.world,sim.getJob().getWorkSpace(), Rotation.NONE, Mirror.NONE); // needs to be fixed, only places packed ice right now
-
+        SimuKraft.LOGGER().debug("cost: " + template.getCost());
         for (Template.BlockInfo blockInfo : blocks) {
                 sim.world.setBlockState(blockInfo.pos, blockInfo.state);
+                if (blockInfo.state.getBlock() == ModBlocks.CONTROL_BOX.get()){
+                    BuildingType type = BuildingType.getById(template.getTypeID());
+                    if (type != null) {
+                        sim.world.setTileEntity(blockInfo.pos, type.type.create());
+                    }
+                }
         }
     }
 
