@@ -14,6 +14,7 @@ public class ModJobs {
             .put(Profession.MINER.getId(), JobMiner::new)
             .put(Profession.GLASS_FACTORY.getId(), JobGlassFactory::new)
             .put(Profession.FARMER.getId(), JobFarmer::new)
+            .put(Profession.ANIMAL_FARMER.getId(), JobAnimalFarmer::new)
             .build();
 
 }

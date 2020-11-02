@@ -6,10 +6,10 @@ import net.minecraft.tileentity.TileEntityType;
 public enum BuildingType {
 
     GLASS_FACTORY("glass factory", ModTileEntities.GLASS_FACTORY.get(),Category.INDUSTRIAL,1),
-    COW_FARMER("cow farmer", ModTileEntities.GLASS_FACTORY.get(),Category.INDUSTRIAL,2),
-    SHEEP_FARMER("sheep farmer", ModTileEntities.GLASS_FACTORY.get(),Category.INDUSTRIAL,3),
-    PIG_FARMER("pig farmer", ModTileEntities.GLASS_FACTORY.get(), Category.INDUSTRIAL, 4),
-    CHICKEN_FARMER("chicken farmer", ModTileEntities.GLASS_FACTORY.get(), Category.INDUSTRIAL, 5),
+    COW_FARMER("cow farmer", ModTileEntities.COW_FARMER.get(),Category.INDUSTRIAL,2),
+    SHEEP_FARMER("sheep farmer", ModTileEntities.SHEEP_FARMER.get(),Category.INDUSTRIAL,3),
+    PIG_FARMER("pig farmer", ModTileEntities.PIG_FARMER.get(), Category.INDUSTRIAL, 4),
+    CHICKEN_FARMER("chicken farmer", ModTileEntities.CHICKEN_FARMER.get(), Category.INDUSTRIAL, 5),
     BUTCHER("butchery", ModTileEntities.GLASS_FACTORY.get(), Category.COMMERCIAL,6),
     BAKER("bakery", ModTileEntities.GLASS_FACTORY.get(), Category.COMMERCIAL, 7),
     GROCER("grocery", ModTileEntities.GLASS_FACTORY.get(), Category.COMMERCIAL, 8),

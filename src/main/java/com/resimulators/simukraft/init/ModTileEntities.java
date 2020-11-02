@@ -25,4 +25,8 @@ public class ModTileEntities {
     public static final RegistryObject<TileEntityType<TileFarmer>> FARMER = REGISTRY.register("farmer", () -> TileEntityType.Builder.create(TileFarmer::new,ModBlocks.FARM_BOX.get()).build(null));
     public static final RegistryObject<TileEntityType<TileGlassFactory>> GLASS_FACTORY = REGISTRY.register("glass_factory", () -> TileEntityType.Builder.create(TileGlassFactory::new, ModBlocks.CONTROL_BOX.get()).build(null));
     public static final RegistryObject<TileEntityType<TileCustomData>> CUSTOM_DATA = REGISTRY.register("custom_data", () -> TileEntityType.Builder.create(TileCustomData::new,ModBlocks.CONTROL_BOX.get()).build(null));
+    public static final RegistryObject<TileEntityType<TileCowFarm>> COW_FARMER = REGISTRY.register("cow_farmer", () -> TileEntityType.Builder.create(TileCowFarm::new,ModBlocks.CONTROL_BOX.get()).build(null));
+    public static final RegistryObject<TileEntityType<TileSheepFarm>> SHEEP_FARMER = REGISTRY.register("sheep_farmer", () -> TileEntityType.Builder.create(TileSheepFarm::new,ModBlocks.CONTROL_BOX.get()).build(null));
+    public static final RegistryObject<TileEntityType<TileChickenFarmer>> CHICKEN_FARMER = REGISTRY.register("chicken_farmer", () -> TileEntityType.Builder.create(TileChickenFarmer::new,ModBlocks.CONTROL_BOX.get()).build(null));
+    public static final RegistryObject<TileEntityType<TilePigFarmer>> PIG_FARMER = REGISTRY.register("pig_farmer", () -> TileEntityType.Builder.create(TilePigFarmer::new,ModBlocks.CONTROL_BOX.get()).build(null));
 }

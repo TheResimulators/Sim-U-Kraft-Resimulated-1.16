@@ -10,6 +10,8 @@ import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SUpdateTileEntityPacket;
 import net.minecraft.tileentity.TileEntity;
 
+import java.util.UUID;
+
 
 public class TileCustomData extends TileEntity implements IControlBlock{
     private BuildingType type;
@@ -28,6 +30,31 @@ public class TileCustomData extends TileEntity implements IControlBlock{
     @Override
     public int getGui() {
         return GuiHandler.CUSTOM_DATA;
+    }
+
+    @Override
+    public void setHired(boolean hired) {
+
+    }
+
+    @Override
+    public boolean getHired() {
+        return false;
+    }
+
+    @Override
+    public UUID getSimId() {
+        return null;
+    }
+
+    @Override
+    public void setSimId(UUID id) {
+
+    }
+
+    @Override
+    public String getName() {
+        return "Control Block";
     }
 
     @Override

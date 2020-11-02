@@ -67,6 +67,11 @@ public class TileGlassFactory extends TileEntity implements IControlBlock {
     }
 
     @Override
+    public String getName() {
+        return "Glass Factory";
+    }
+
+    @Override
     public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
         read(this.getBlockState(),pkt.getNbtCompound());
     }

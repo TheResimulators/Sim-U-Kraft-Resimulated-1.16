@@ -43,10 +43,10 @@ public class BlockControlBox extends BlockBase {
                     Entity entity = ((ServerWorld) world).getEntityByUuid(controlBlock.getSimId());
                     if (entity != null){
                         int hiredId = entity.getEntityId();
-                        SimUKraftPacketHandler.INSTANCE.sendTo(new OpenJobGuiPacket(simids,pos,hiredId, controlBlock.getGui()),((ServerPlayerEntity) player).connection.netManager, NetworkDirection.PLAY_TO_CLIENT);// used when there is a sim hired
+                        SimUKraftPacketHandler.INSTANCE.sendTo(new OpenJobGuiPacket(simids,pos,hiredId, controlBlock.getGui(), controlBlock.getName()),((ServerPlayerEntity) player).connection.netManager, NetworkDirection.PLAY_TO_CLIENT);// used when there is a sim hired
                     }
                 } else {
-                    SimUKraftPacketHandler.INSTANCE.sendTo(new OpenJobGuiPacket(simids,pos,controlBlock.getGui()),((ServerPlayerEntity) player).connection.netManager, NetworkDirection.PLAY_TO_CLIENT);//used when there is no sim employed at this block
+                    SimUKraftPacketHandler.INSTANCE.sendTo(new OpenJobGuiPacket(simids,pos,controlBlock.getGui(),controlBlock.getName()),((ServerPlayerEntity) player).connection.netManager, NetworkDirection.PLAY_TO_CLIENT);//used when there is no sim employed at this block
                 }
             }
 

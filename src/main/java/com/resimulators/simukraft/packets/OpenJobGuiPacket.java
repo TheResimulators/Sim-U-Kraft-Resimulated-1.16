@@ -14,19 +14,23 @@ public class OpenJobGuiPacket implements IMessage {
     private BlockPos pos;
     private int id;
     private int guiId;
+    private String string;
 
-    public OpenJobGuiPacket(ArrayList<Integer> ints, BlockPos pos, int guiId) {
+    public OpenJobGuiPacket(ArrayList<Integer> ints, BlockPos pos, int guiId,String string) {
         this.pos = pos;
         this.ints = ints;
         this.guiId = guiId;
+        this.string = string;
     }
 
-    public OpenJobGuiPacket(ArrayList<Integer> ints, BlockPos pos, int id, int guiId) {
+    public OpenJobGuiPacket(ArrayList<Integer> ints, BlockPos pos, int id, int guiId,String string) {
         this.pos = pos;
         this.ints = ints;
         this.id = id;
         this.guiId = guiId;
+        this.string = string;
     }
+
 
     public OpenJobGuiPacket() {
     }
@@ -40,6 +44,8 @@ public class OpenJobGuiPacket implements IMessage {
         for (int id : ints) {
             buf.writeInt(id);
         }
+        buf.writeString(string);
+
     }
 
     @Override
@@ -53,6 +59,7 @@ public class OpenJobGuiPacket implements IMessage {
             ids.add(buf.readInt());
         }
         ints = ids;
+        string = buf.readString();
     }
 
     @Nullable
@@ -63,6 +70,6 @@ public class OpenJobGuiPacket implements IMessage {
 
     @Override
     public void onExecute(NetworkEvent.Context ctxIn, boolean isLogicalServer) {
-        GuiHandler.openGui(ints, pos, id, guiId);
+        GuiHandler.openGui(ints, pos, id, guiId, string);
     }
 }

@@ -12,10 +12,10 @@ import net.minecraft.world.World;
 import java.awt.*;
 import java.util.ArrayList;
 
-public class GuiMinerBaseJob extends GuiBaseJob {
+public class GuiMiner extends GuiBaseJob {
 
 
-    public GuiMinerBaseJob(ITextComponent component, ArrayList<Integer> ids, BlockPos pos, int id) {
+    public GuiMiner(ITextComponent component, ArrayList<Integer> ids, BlockPos pos, int id) {
         super(component, ids, pos, id, Profession.MINER.getId());
     }
 

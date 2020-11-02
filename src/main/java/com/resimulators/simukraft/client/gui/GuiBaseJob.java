@@ -2,10 +2,12 @@ package com.resimulators.simukraft.client.gui;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.resimulators.simukraft.Network;
+import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.tileentity.ITile;
 import com.resimulators.simukraft.packets.SimFireRequest;
 import com.resimulators.simukraft.packets.SimHireRequest;
+import com.resimulators.simukraft.proxy.ClientProxy;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.Widget;
@@ -14,6 +16,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraftforge.fml.loading.StringUtils;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -29,6 +32,7 @@ public class GuiBaseJob extends Screen {
     ArrayList<Integer> ids;
     ArrayList<SimButton> simButtons = new ArrayList<>();
     SimEntity selectedSim;
+    ITextComponent component;
     int state = State.MAIN;
     BlockPos pos;
     boolean firing = false;
@@ -44,6 +48,7 @@ public class GuiBaseJob extends Screen {
         this.ids = ids;
         this.pos = pos;
         this.job = job;
+        this.component = component;
     }
 
     @Override
@@ -63,15 +68,16 @@ public class GuiBaseJob extends Screen {
         addButton(ShowEmployees = new Button(width - 120, height - 60, 110, 20, new StringTextComponent("Show Employees"), (ShowEmployees -> {
             //TODO: Implement show employes system to show all employees that have a job
         })));
-
-        if (((ITile) Minecraft.getInstance().world.getTileEntity(pos)).getHired()) {
-                    Fire.active = true;
-                    Hire.active = false;
-                } else {
-                    Fire.active = false;
-                    Hire.active = true;
-                }
-
+        ITile tile = ((ITile) SimuKraft.proxy.getClientWorld().getTileEntity(pos));
+        if (tile != null) {
+            if (tile.getHired()) {
+                Fire.active = true;
+                Hire.active = false;
+            } else {
+                Fire.active = false;
+                Hire.active = true;
+            }
+        }
 
         addButton(Back = new Button(width - 120, height - 30, 110, 20, new StringTextComponent("Back"), (Back -> {
             if (state == State.HIRE_INFO) {
@@ -130,7 +136,9 @@ public class GuiBaseJob extends Screen {
     public void render(MatrixStack stack, int p_render_1_, int p_render_2_, float p_render_3_) {
         renderBackground(stack); //Render Background
         super.render(stack, p_render_1_, p_render_2_, p_render_3_);
+
         if (state == State.MAIN) {
+
             if (isHired()) {
                 font.drawString(stack, "Level: WIP", (float) 20, 70, Color.white.getRGB());
                 if (hiredId != 0) {

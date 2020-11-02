@@ -64,7 +64,7 @@ public class GuiCustomData extends Screen {
         buildingTypePanel.render(stack, p_render_1_, p_render_2_, p_render_3_);
 
         super.render(stack, p_render_1_, p_render_2_, p_render_3_);
-        getMinecraft().fontRenderer.drawString(stack, "Custom data:",width/2 - 40,height/2 - 120, Color.WHITE.getRGB());
+
         getMinecraft().fontRenderer.drawString(stack, "Currently Selected",width/2 - 40,height/2 - 100, Color.WHITE.getRGB());
         if (buildingTypePanel.selection.string != null) {
             minecraft.fontRenderer.drawString(stack, "Building: " + StringUtils.capitalizeFirstLetter(buildingTypePanel.selection.string), width/2 - 40, height/2-80, Color.WHITE.getRGB());

@@ -6,11 +6,9 @@ public enum Profession {
     UNEMPLOYED("unemployed",0),
     BUILDER("builder",1),
     MINER("miner",2),
-    COW_FARMER("cow farmer",3),
-    SHEEP_FARMER("sheep farmer",4),
-    PIG_FARMER("cow farmer", 5),
-    FARMER("farmer",6),
-    GLASS_FACTORY("glass maker", 7);
+    ANIMAL_FARMER("animal farmer",3),
+    FARMER("farmer",4),
+    GLASS_FACTORY("glass maker", 5);
 
     Profession(String name, int i) {
         this.name = name;

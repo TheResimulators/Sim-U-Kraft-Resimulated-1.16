@@ -4,6 +4,9 @@ import com.resimulators.simukraft.client.gui.GuiHandler;
 import com.resimulators.simukraft.common.enums.Animal;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.passive.AnimalEntity;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.NetworkManager;
+import net.minecraft.network.play.server.SUpdateTileEntityPacket;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -19,16 +22,20 @@ public class TileAnimalFarm extends TileEntity implements IControlBlock{
     private UUID simId;
     int maxAnimals = 0;
     Animal entity;
+    private final String name;
 
-    public TileAnimalFarm(TileEntityType<?> tileEntityTypeIn, Animal entity) {
+    public TileAnimalFarm(TileEntityType<?> tileEntityTypeIn, Animal entity, String name) {
         super(tileEntityTypeIn);
         this.entity = entity;
         maxAnimals = 5;
+        this.name = name;
+
     }
 
     @Override
     public void setHired(boolean hired) {
         this.hired = hired;
+        markDirty();
     }
 
     @Override
@@ -44,6 +51,7 @@ public class TileAnimalFarm extends TileEntity implements IControlBlock{
     @Override
     public void setSimId(UUID id) {
         this.simId = id;
+        markDirty();
     }
 
     @Override
@@ -75,8 +83,19 @@ public class TileAnimalFarm extends TileEntity implements IControlBlock{
     }
 
     public boolean hasMaxAnimals(){
-        return maxAnimals == checkForAnimals();
+        return checkForAnimals() >= maxAnimals;
     }
 
+    public String getName() {
+        return name;
+    }
 
+    @Override
+    public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
+        read(this.getBlockState(),pkt.getNbtCompound());
+    }
+    @Override
+    public CompoundNBT getUpdateTag() {
+        return write(new CompoundNBT());
+    }
 }

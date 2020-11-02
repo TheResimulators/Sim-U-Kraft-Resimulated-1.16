@@ -8,22 +8,19 @@ public interface IControlBlock extends ITile {
     int getGui();
 
     @Override
-    default void setHired(boolean hired) {
-
-    }
+    void setHired(boolean hired);
 
     @Override
-    default boolean getHired(){
-        return false;
-    }
+    boolean getHired();
+
 
     @Override
-    default UUID getSimId(){
-        return null;
-    }
+    UUID getSimId();
+
+
 
     @Override
-    default void setSimId(UUID id){
+    void setSimId(UUID id);
 
-    }
+    String getName();
 }
