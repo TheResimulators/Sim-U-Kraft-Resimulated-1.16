@@ -24,7 +24,7 @@ public class StructureHandler {
 
     public static void createTemplateManager(MinecraftServer server) {
         try {
-            Field field = ObfuscationReflectionHelper.findField(MinecraftServer.class, "anvilConverterForAnvilFile");
+            Field field = ObfuscationReflectionHelper.findField(MinecraftServer.class, "field_71310_m");
             field.setAccessible(true);
             SaveFormat.LevelSave levelSave = (SaveFormat.LevelSave) field.get(server);
             field.setAccessible(false);
