@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "tt",
+    "tt"
+  ],
+  "key": {
+    "t": {
+      "item": "minecraft:torch"
+    }
+  },
+  "result": {
+    "item": "simukraft:light_white",
+    "count": 1
+  }
+}
