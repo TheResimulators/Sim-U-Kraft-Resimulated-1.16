@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "d",
+    "s"
+  ],
+  "key": {
+    "d": {
+      "item": "minecraft:yellow_dye"
+    },
+    "s": {
+      "item": "minecraft:stick"
+    }
+  },
+  "result": {
+    "item": "simukraft:marker",
+    "count": 3
+  }
+}
