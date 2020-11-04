@@ -97,7 +97,7 @@ public class BuildingTemplate extends Template {
 
 
     public List<BuildingTemplate.Palette> getBlocks(){
-        return ObfuscationReflectionHelper.getPrivateValue(Template.class,this, "blocks");
+        return ObfuscationReflectionHelper.getPrivateValue(Template.class,this, "field_204769_a");
     }
 
     public BlockPos getControlBlock() {
