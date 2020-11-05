@@ -32,7 +32,7 @@ public class EntitySimRender extends LivingRenderer<SimEntity, EntitySimModel> {
 
     public EntitySimRender(EntityRendererManager manager) {
         super(manager, new EntitySimModel(0.0f), 0.5f);
-        this.addLayer(new BipedArmorLayer<>(this, new BipedModel(0.5f), new BipedModel(1.0f)));
+        this.addLayer(new BipedArmorLayer<>(this, new BipedModel<SimEntity>(0.5f), new BipedModel<>(1.0f)));
         this.addLayer(new HeldItemLayer<>(this));
         this.addLayer(new HeadLayer<>(this));
     }

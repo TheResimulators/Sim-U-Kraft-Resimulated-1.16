@@ -4,8 +4,6 @@ import com.resimulators.simukraft.common.enums.Seed;
 import com.resimulators.simukraft.init.ModTileEntities;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.TileEntity;
-import java.util.UUID;
 
 public class TileFarmer extends TileBaseMarker {
     private Seed seed = Seed.WHEAT;

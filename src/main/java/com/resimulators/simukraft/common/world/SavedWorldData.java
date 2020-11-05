@@ -15,11 +15,6 @@ import net.minecraftforge.common.util.Constants;
 import java.util.*;
 
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Random;
-
-
 public class SavedWorldData extends WorldSavedData {
     private static final String DATA_NAME = Reference.MODID + "_SavedWorldData";
     private static final SavedWorldData clientStorageCopy = new SavedWorldData();

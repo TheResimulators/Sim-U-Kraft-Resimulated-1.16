@@ -3,12 +3,10 @@ package com.resimulators.simukraft.client.gui;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.common.enums.BuildingType;
-import com.resimulators.simukraft.common.enums.Category;
 import com.resimulators.simukraft.common.item.ItemStructureTest;
 import com.resimulators.simukraft.common.tileentity.TileCustomData;
 import com.resimulators.simukraft.handlers.SimUKraftPacketHandler;
 import com.resimulators.simukraft.packets.CustomDataSyncPacket;
-import com.resimulators.simukraft.proxy.ClientProxy;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
@@ -20,7 +18,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.client.gui.ScrollPanel;
-import org.codehaus.plexus.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -67,7 +65,7 @@ public class GuiCustomData extends Screen {
 
         getMinecraft().fontRenderer.drawString(stack, "Currently Selected",width/2 - 40,height/2 - 100, Color.WHITE.getRGB());
         if (buildingTypePanel.selection.string != null) {
-            minecraft.fontRenderer.drawString(stack, "Building: " + StringUtils.capitalizeFirstLetter(buildingTypePanel.selection.string), width/2 - 40, height/2-80, Color.WHITE.getRGB());
+            minecraft.fontRenderer.drawString(stack, "Building: " + StringUtils.capitalize(buildingTypePanel.selection.string), width/2 - 40, height/2-80, Color.WHITE.getRGB());
         }
         priceInput.render(stack, p_render_1_, p_render_2_, p_render_3_);
         rentInput.render(stack, p_render_1_, p_render_2_, p_render_3_);
@@ -82,7 +80,7 @@ public class GuiCustomData extends Screen {
 
         if (buildingTypePanel.selection.getType() != null){
             String category = buildingTypePanel.selection.getType().category.category;
-            minecraft.fontRenderer.drawString(stack, ("Category: " + StringUtils.capitalizeFirstLetter(category)),width/2-40, height/2 - 60, Color.WHITE.getRGB());
+            minecraft.fontRenderer.drawString(stack, ("Category: " + StringUtils.capitalize(category)),width/2-40, height/2 - 60, Color.WHITE.getRGB());
         }
 
 

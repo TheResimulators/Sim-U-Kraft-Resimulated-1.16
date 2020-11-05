@@ -7,7 +7,6 @@ import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.tileentity.ITile;
 import com.resimulators.simukraft.packets.SimFireRequest;
 import com.resimulators.simukraft.packets.SimHireRequest;
-import com.resimulators.simukraft.proxy.ClientProxy;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.Widget;
@@ -16,7 +15,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
-import net.minecraftforge.fml.loading.StringUtils;
 
 import java.awt.*;
 import java.util.ArrayList;

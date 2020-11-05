@@ -13,7 +13,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
-import org.codehaus.plexus.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -33,9 +33,9 @@ public class GuiFarmer extends GuiBaseJob {
     @Override
     public void init(Minecraft minecraft, int width, int height) {
         super.init(minecraft, width, height);
-        addButton(seedButton = new Button(width/2-55, height-60, 110, 20, new StringTextComponent(StringUtils.capitalizeFirstLetter(farmer.getSeed().getName())), (seedButton) -> {
+        addButton(seedButton = new Button(width/2-55, height-60, 110, 20, new StringTextComponent(StringUtils.capitalize(farmer.getSeed().getName())), (seedButton) -> {
             farmer.setSeed(Seed.getNextEnabledSeed(farmer.getSeed()));
-            seedButton.setMessage(new StringTextComponent(StringUtils.capitalizeFirstLetter(farmer.getSeed().getName())));
+            seedButton.setMessage(new StringTextComponent(StringUtils.capitalize(farmer.getSeed().getName())));
             confirmSeed.active = true;
         }));
         addButton(confirmSeed = new Button(width/2-55, height-30, 110, 20, new StringTextComponent("Confirm"), (seedButton) -> {
@@ -52,7 +52,7 @@ public class GuiFarmer extends GuiBaseJob {
         super.render(stack,p_render_1_,p_render_2_,p_render_3_);
         if (state == State.MAIN){
             font.drawString(stack, "Select Seed", this.width/2-(font.getStringWidth("Select Seed")/2), this.height-80, Color.GREEN.getRGB());
-            font.drawString(stack, "Level (Wip) " + StringUtils.capitalizeFirstLetter(farmer.getSeed().getName()) + " Farm" , this.width/2-(font.getStringWidth("Level (Wip) " + farmer.getSeed().getName() + " Farm")/2), 20,new Color(76,153,0).brighter().getRGB() );
+            font.drawString(stack, "Level (Wip) " + StringUtils.capitalize(farmer.getSeed().getName()) + " Farm" , this.width/2-(font.getStringWidth("Level (Wip) " + farmer.getSeed().getName() + " Farm")/2), 20,new Color(76,153,0).brighter().getRGB() );
         }
         World world = SimuKraft.proxy.getClientWorld();
         if (world != null) {

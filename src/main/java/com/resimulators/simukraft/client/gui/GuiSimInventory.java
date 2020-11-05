@@ -22,7 +22,7 @@ import net.minecraft.util.math.vector.Quaternion;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
-import org.codehaus.plexus.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Random;
 
@@ -68,7 +68,7 @@ public class GuiSimInventory extends DisplayEffectsScreen<SimContainer> {
         String name = container.job;
 
         this.font.drawString(stack, this.title.getString(), 80f, 8f, 4210752);
-        this.font.drawString(stack,"Job: " + StringUtils.capitalizeFirstLetter(name),80f, 30f, 4210752);
+        this.font.drawString(stack,"Job: " + StringUtils.capitalize(name),80f, 30f, 4210752);
     }
 
     @Override

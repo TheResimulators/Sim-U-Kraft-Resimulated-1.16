@@ -5,9 +5,7 @@ import com.resimulators.simukraft.common.jobs.core.EnumJobState;
 import com.resimulators.simukraft.common.jobs.core.IJob;
 
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
 
 
 public class WorkingController {
