@@ -2,7 +2,6 @@ package com.resimulators.simukraft.common.tileentity;
 
 import com.resimulators.simukraft.client.gui.GuiHandler;
 import com.resimulators.simukraft.common.enums.BuildingType;
-import com.resimulators.simukraft.common.enums.Category;
 import com.resimulators.simukraft.init.ModTileEntities;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;

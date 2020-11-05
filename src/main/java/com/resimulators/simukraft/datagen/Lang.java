@@ -4,7 +4,6 @@ import com.resimulators.simukraft.Reference;
 import com.resimulators.simukraft.SimUTab;
 import com.resimulators.simukraft.init.ModBlocks;
 import net.minecraft.data.DataGenerator;
-import net.minecraft.item.DyeColor;
 import net.minecraftforge.common.data.LanguageProvider;
 
 public class Lang extends LanguageProvider {

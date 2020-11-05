@@ -11,11 +11,9 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.template.PlacementSettings;
 import net.minecraft.world.gen.feature.template.Template;
-import net.minecraft.world.gen.feature.template.TemplateManager;
 import net.minecraft.world.storage.SaveFormat;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
-import java.io.File;
 import java.lang.reflect.Field;
 import java.util.List;
 

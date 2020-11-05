@@ -1,6 +1,5 @@
 package com.resimulators.simukraft.common.block;
 
-import com.resimulators.simukraft.client.gui.GuiHandler;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.tileentity.*;
 import com.resimulators.simukraft.common.world.Faction;

@@ -2,7 +2,6 @@ package com.resimulators.simukraft.packets;
 
 
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
-import com.resimulators.simukraft.common.jobs.Profession;
 import com.resimulators.simukraft.common.tileentity.ITile;
 import com.resimulators.simukraft.common.world.SavedWorldData;
 import com.resimulators.simukraft.init.ModJobs;

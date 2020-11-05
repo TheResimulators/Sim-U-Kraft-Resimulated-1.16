@@ -1,6 +1,5 @@
 package com.resimulators.simukraft.client.data;
 
-import com.resimulators.simukraft.Configs;
 import com.google.common.collect.Iterables;
 import com.mojang.authlib.AuthenticationService;
 import com.mojang.authlib.GameProfile;
