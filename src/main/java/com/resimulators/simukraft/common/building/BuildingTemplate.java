@@ -112,14 +112,15 @@ public class BuildingTemplate extends Template {
         BlockPos blockpos2 = new BlockPos(Math.max(startPos.getX(), blockpos.getX()), Math.max(startPos.getY(), blockpos.getY()), Math.max(startPos.getZ(), blockpos.getZ()));
 
         for(BlockPos blockpos3 : BlockPos.getAllInBoxMutable(blockpos1, blockpos2)) {
-                TileCustomData entity = (TileCustomData) worldIn.getTileEntity(blockpos3);
+                TileEntity entity =worldIn.getTileEntity(blockpos3);
                 if (worldIn.getTileEntity(blockpos3) instanceof TileCustomData){
                     if (entity != null){
-                    setControlBlock(blockpos3);
-                    rent = entity.getRent();
-                    cost = entity.getPrice();
-                    typeID = entity.getBuildingType().id;
-                    return;
+                        TileCustomData data = (TileCustomData) entity;
+                        setControlBlock(blockpos3);
+                        rent = data.getRent();
+                        cost = data.getPrice();
+                        typeID = data.getBuildingType().id;
+                        return;
                 }
             }
         }

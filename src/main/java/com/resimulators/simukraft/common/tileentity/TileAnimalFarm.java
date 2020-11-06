@@ -29,6 +29,7 @@ public class TileAnimalFarm extends TileEntity implements IControlBlock{
         this.entity = entity;
         maxAnimals = 5;
         this.name = name;
+        markDirty();
 
     }
 

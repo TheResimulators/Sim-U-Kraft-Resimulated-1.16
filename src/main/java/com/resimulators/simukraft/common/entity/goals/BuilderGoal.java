@@ -66,7 +66,10 @@ public class BuilderGoal extends Goal {
                 if (blockInfo.state.getBlock() == ModBlocks.CONTROL_BOX.get()){
                     BuildingType type = BuildingType.getById(template.getTypeID());
                     if (type != null) {
+                        sim.world.removeTileEntity(blockInfo.pos);
                         sim.world.setTileEntity(blockInfo.pos, type.type.create());
+                        sim.world.markAndNotifyBlock(blockInfo.pos,sim.world.getChunkAt(blockInfo.pos),sim.world.getBlockState(blockInfo.pos),sim.world.getBlockState(blockInfo.pos),3,512);
+
                     }
                 }
         }
