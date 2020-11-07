@@ -5,6 +5,8 @@ import com.resimulators.simukraft.Network;
 import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.tileentity.ITile;
+import com.resimulators.simukraft.common.world.Faction;
+import com.resimulators.simukraft.common.world.SavedWorldData;
 import com.resimulators.simukraft.packets.SimFireRequest;
 import com.resimulators.simukraft.packets.SimHireRequest;
 import net.minecraft.client.Minecraft;
@@ -18,6 +20,7 @@ import net.minecraft.util.text.StringTextComponent;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.UUID;
 
 public class GuiBaseJob extends Screen {
     Button Hire;
@@ -64,7 +67,9 @@ public class GuiBaseJob extends Screen {
             showFiring();
         })));
         addButton(ShowEmployees = new Button(width - 120, height - 60, 110, 20, new StringTextComponent("Show Employees"), (ShowEmployees -> {
-            //TODO: Implement show employes system to show all employees that have a job
+            hideAll();
+            ShowEmployees();
+            state = State.SHOW_EMPLOYEES;
         })));
         ITile tile = ((ITile) SimuKraft.proxy.getClientWorld().getTileEntity(pos));
         if (tile != null) {
@@ -149,6 +154,8 @@ public class GuiBaseJob extends Screen {
             font.drawString(stack, "Info", (float) (width / 2 - font.getStringWidth("Info") / 2), 10, Color.white.getRGB());
             font.drawString(stack, "Name: " + selectedSim.getDisplayName().getString(), (float) 20, 50, Color.white.getRGB());
             font.drawString(stack, "Level: WIP", (float) 20, 70, Color.white.getRGB());
+        } else if (state == State.SHOW_EMPLOYEES) {
+            font.drawString(stack, "Employees", (float) (width / 2 - font.getStringWidth("Employees") / 2), 10, Color.white.getRGB());
         }
         if (state == State.Firing) {
             font.drawString(stack, "Level: WIP", (float) 20, 70, Color.white.getRGB());
@@ -170,15 +177,45 @@ public class GuiBaseJob extends Screen {
         for (Integer id : ids) {
             SimEntity sim = (SimEntity) player.getEntityWorld().getEntityByID(id);
             if (sim != null) {
-                simButtons.add(addButton(new SimButton(20 + x * ConstantXSpacing, 40 + y * ConstantYSpacing, 100, 20, sim.getName(), id, this)));
-                x++;
-                if (x > 4) {
-                    x = 0;
-                    y++;
+                UUID uuid = sim.getUniqueID();
+                SavedWorldData data = SavedWorldData.get(player.world);
+                int Id = data.getFactionWithPlayer(player.getUniqueID()).getId();
+                if (!data.getFaction(Id).getHired(uuid)) {
+                    simButtons.add(addButton(new SimButton(20 + x * ConstantXSpacing, 40 + y * ConstantYSpacing, 100, 20, sim.getName(), id, this, 0)));
+                    x++;
+                    if (x > 4) {
+                        x = 0;
+                        y++;
+                    }
                 }
             }
         }
+    }
 
+    private void ShowEmployees() {
+        hideAll();
+
+        Back.visible = true;
+        int x = 0;
+        int y = 0;
+        int ConstantXSpacing = (width / 5);
+        int ConstantYSpacing = height / 4;
+        for (Integer id : ids) {
+            SimEntity sim = (SimEntity) player.getEntityWorld().getEntityByID(id);
+            if (sim != null) {
+                UUID uuid = sim.getUniqueID();
+                SavedWorldData data = SavedWorldData.get(player.world);
+                int Id = data.getFactionWithPlayer(player.getUniqueID()).getId();
+                if (data.getFaction(Id).getHired(uuid)) {
+                    simButtons.add(addButton(new SimButton(20 + x * ConstantXSpacing, 40 + y * ConstantYSpacing, 100, 20, sim.getName(), id, this, 1)));
+                    x++;
+                    if (x > 4) {
+                        x = 0;
+                        y++;
+                    }
+                }
+            }
+        }
     }
 
     protected void hideAll() {
@@ -193,17 +230,35 @@ public class GuiBaseJob extends Screen {
         state = State.SIM_INFO;
         Back.visible = true;
         Confirm.visible = true;
-
     }
+
+    private void showEmployeeInfo(int id) {
+        hideAll();
+        selectedSim = (SimEntity) player.world.getEntityByID(id);
+        state = State.SIM_INFO;
+        Back.visible = true;
+        Confirm.visible = false;
+    }
+
 
 
     static class SimButton extends Button {
 
-        SimButton(int widthIn, int heightIn, int width, int height, ITextComponent text, int id, GuiBaseJob gui) {
-            super(widthIn, heightIn, width, height, text, (Sim -> gui.showSimInfo(id)));
+        SimButton(int widthIn, int heightIn, int width, int height, ITextComponent text, int id, GuiBaseJob gui, int confirmButton) {
+            super(widthIn, heightIn, width, height, text, (Sim -> {
+                switch (confirmButton) {
+                    case 0: {
+                        gui.showSimInfo(id);
+                        break;
+                    }
+                    case 1: {
+                        gui.showEmployeeInfo(id);
+                        break;
+                    }
+                    // For more button add cases
+                }
+            }));
         }
-
-
     }
 
     public boolean isHired() {
