@@ -38,7 +38,7 @@ public class BlockConstructor extends BlockBase {
     public ActionResultType onBlockActivated(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTrace) {
         if (!world.isRemote) {
             Faction faction = SavedWorldData.get(world).getFactionWithPlayer(player.getUniqueID());
-            ArrayList<Integer> simids = faction.getSimUnemployedIds((ServerWorld) world);
+            ArrayList<Integer> simids = faction.getSimIds((ServerWorld) world);
             System.out.println(world.getTileEntity(pos));
             if (((ITile)world.getTileEntity(pos)).getHired()){
                 int hiredId = ((ServerWorld) world).getEntityByUuid(((ITile)world.getTileEntity(pos)).getSimId()).getEntityId();

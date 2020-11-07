@@ -35,7 +35,7 @@ public class BlockControlBox extends BlockBase {
     public ActionResultType onBlockActivated(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTrace) {
         if (!world.isRemote) {
             Faction faction = SavedWorldData.get(world).getFactionWithPlayer(player.getUniqueID());
-            ArrayList<Integer> simids = faction.getSimUnemployedIds((ServerWorld) world);
+            ArrayList<Integer> simids = faction.getSimIds((ServerWorld) world);
             IControlBlock controlBlock = (IControlBlock) world.getTileEntity(pos);
             if (controlBlock != null){
                 if (controlBlock.getHired()){

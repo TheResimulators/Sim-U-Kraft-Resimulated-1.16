@@ -268,6 +268,9 @@ public class Faction {
         }
 
     }
+    public boolean getHired(UUID id) {
+        return sims.get(id).hired;
+    }
     static class SimInfo {
         private UUID sim;
         private boolean hired;
