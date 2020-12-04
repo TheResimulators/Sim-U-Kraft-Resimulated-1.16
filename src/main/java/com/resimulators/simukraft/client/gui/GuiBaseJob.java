@@ -5,7 +5,6 @@ import com.resimulators.simukraft.Network;
 import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.tileentity.ITile;
-import com.resimulators.simukraft.common.world.Faction;
 import com.resimulators.simukraft.common.world.SavedWorldData;
 import com.resimulators.simukraft.packets.SimFireRequest;
 import com.resimulators.simukraft.packets.SimHireRequest;
@@ -91,7 +90,11 @@ public class GuiBaseJob extends Screen {
                 state = State.MAIN;
                 showMainMenu();
             }
-            if (state == State.SIM_INFO) {
+            if (state == State.SIM_EMPLOYEE_INFO) {
+                state = State.SHOW_EMPLOYEES;
+                ShowEmployees();
+            }
+            if (state == State.SIM_HIRING_INFO) {
                 state = State.HIRE_INFO;
                 ShowHiring();
             }
@@ -150,7 +153,7 @@ public class GuiBaseJob extends Screen {
             }
         } else if (state == State.HIRE_INFO) {
             font.drawString(stack, "Hiring", (float) (width / 2 - font.getStringWidth("Hiring") / 2), 10, Color.white.getRGB());
-        } else if (state == State.SIM_INFO) {
+        } else if (state == State.SIM_HIRING_INFO || state == State.SIM_EMPLOYEE_INFO) {
             font.drawString(stack, "Info", (float) (width / 2 - font.getStringWidth("Info") / 2), 10, Color.white.getRGB());
             font.drawString(stack, "Name: " + selectedSim.getDisplayName().getString(), (float) 20, 50, Color.white.getRGB());
             font.drawString(stack, "Level: WIP", (float) 20, 70, Color.white.getRGB());
@@ -227,7 +230,7 @@ public class GuiBaseJob extends Screen {
     private void showSimInfo(int id) {
         hideAll();
         selectedSim = (SimEntity) player.world.getEntityByID(id);
-        state = State.SIM_INFO;
+        state = State.SIM_HIRING_INFO;
         Back.visible = true;
         Confirm.visible = true;
     }
@@ -235,7 +238,7 @@ public class GuiBaseJob extends Screen {
     private void showEmployeeInfo(int id) {
         hideAll();
         selectedSim = (SimEntity) player.world.getEntityByID(id);
-        state = State.SIM_INFO;
+        state = State.SIM_EMPLOYEE_INFO;
         Back.visible = true;
         Confirm.visible = false;
     }
@@ -281,8 +284,9 @@ public class GuiBaseJob extends Screen {
     protected static class State {
         protected static int id = 0;
         protected static int MAIN = nextID();
-        protected static int SIM_INFO = nextID();
+        protected static int SIM_HIRING_INFO = nextID();
         protected static int HIRE_INFO = nextID();
+        protected static int SIM_EMPLOYEE_INFO = nextID();
         protected static int SHOW_EMPLOYEES = nextID();
         protected static int Firing = nextID();
 
