@@ -6,6 +6,7 @@ import com.resimulators.simukraft.common.jobs.core.EnumJobState;
 import com.resimulators.simukraft.common.world.Faction;
 import com.resimulators.simukraft.common.world.SavedWorldData;
 import com.resimulators.simukraft.utils.BlockUtils;
+import net.minecraft.fluid.Fluids;
 import net.minecraft.item.FishingRodItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -17,7 +18,9 @@ import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 public class FisherGoal extends BaseGoal<JobFisher> {
 
@@ -29,6 +32,7 @@ public class FisherGoal extends BaseGoal<JobFisher> {
     private int tick;
     private final Random rnd = new Random();
     private int delay = rnd.nextInt(41) + 5;
+    private boolean validateSentence = false;
 
 
     public FisherGoal(SimEntity sim) {
@@ -44,8 +48,7 @@ public class FisherGoal extends BaseGoal<JobFisher> {
             if (sim.getPosition().withinDistance(new Vector3d(job.getWorkSpace().getX(), job.getWorkSpace().getY(), job.getWorkSpace().getZ()), 5)) {
                 job.setState(EnumJobState.WORKING);
                 findChestAroundBlock(job.getWorkSpace());
-                findWaterBlocks(job.getWorkSpace());
-                return validateWorkArea();
+                return true;
             }
         }
 
@@ -68,11 +71,20 @@ public class FisherGoal extends BaseGoal<JobFisher> {
 
     @Override
     public void tick() {
-        super.tick();
-        tick++;
+        if (job.getState().equals(EnumJobState.WORKING)) {
+            super.tick();
+            tick++;
+        }
         state = State.WAITING;
-
-        if (tick >= delay * 20) {
+        findChestAroundBlock(job.getWorkSpace());
+        if (!validateWorkArea()) {
+            sim.getJob().setState(EnumJobState.NOT_WORKING);
+            validateSentence = false;
+        }
+        else if (validateWorkArea()) {
+            sim.getJob().setState(EnumJobState.WORKING);
+        }
+        if (tick >= delay * 20 && job.getState().equals(EnumJobState.WORKING)) {
             state = State.FISHING;
             double f = rnd.nextDouble();
             int index = -1;
@@ -149,43 +161,40 @@ public class FisherGoal extends BaseGoal<JobFisher> {
         
     }
 
-    private void findWaterBlocks(BlockPos workPos) {
-        //TODO: water blocks mechanic
-    }
+    private BlockPos findWater(){
+        final BlockPos[] water = {BlockPos.ZERO};
+        Iterable<BlockPos> blockPoses = BlockPos.getAllInBox(job.getWorkSpace().add(-5,-5,-5), job.getWorkSpace().add(5,0,5))
+                .filter(blockPos -> world.getFluidState(blockPos).getFluid().isEquivalentTo(Fluids.WATER))
+                .map(BlockPos::toImmutable)
+                .sorted(Comparator.comparingDouble(blockPos ->job.getWorkSpace().distanceSq(blockPos)))
+                .collect(Collectors.toCollection(ArrayList::new));
+        for (BlockPos blockPos: blockPoses){
+            if (world.getFluidState(blockPos).getFluid().isEquivalentTo(Fluids.WATER)){
+                water[0] = blockPos;
+                break;
 
-    private boolean validateFishingRod() {
-        for (BlockPos chest : chests) {
-            ChestTileEntity chestEntity = (ChestTileEntity) world.getTileEntity(chest);
-            if (chestEntity != null) {
-                for (int i = 0; i < chestEntity.getSizeInventory(); i++) {
-                    ItemStack chestContains = chestEntity.getStackInSlot(i);
-                    if (chestContains.getItem() instanceof FishingRodItem) {
-                        return true;
-                    }
-                }
             }
         }
-        return false;
+
+        return water[0];
     }
 
     private boolean validateWorkArea() {
         Faction faction = SavedWorldData.get(world).getFactionWithSim(sim.getUniqueID());
         if (job.getWorkSpace() != null) {
             if (chests.isEmpty()) {
-                faction.sendFactionChatMessage(sim.getDisplayName() + " (Fisherman) has no inventory at " + job.getWorkSpace(), world);
+                if (!validateSentence) faction.sendFactionChatMessage(sim.getDisplayName().getString() + " (Fisherman) has no inventory at " + job.getWorkSpace(), world);
             }
-            //else if (water.isEmpty()) {
-                //faction.sendFactionChatMessage(sim.getDisplayName() + " (Fisherman) has no water at " + job.getWorkSpace(), world);
-            //}
-            else if (!validateFishingRod()) {
-                faction.sendFactionChatMessage(sim.getDisplayName() + " (Fisherman) has no fishing rod at: " + job.getWorkSpace() + ", using normal fishing rod", world);
-                return true;
+            else if (findWater().equals(BlockPos.ZERO)) {
+                if (!validateSentence) faction.sendFactionChatMessage(sim.getDisplayName().getString() + " (Fisherman) has no water at " + job.getWorkSpace(), world);
             }
             else {
-                faction.sendFactionChatMessage(sim.getDisplayName() + " (Fisherman) has started work at " + job.getWorkSpace(), world);
+                if (!validateSentence) faction.sendFactionChatMessage(sim.getDisplayName().getString() + " (Fisherman) has started work at " + job.getWorkSpace(), world);
+                validateSentence = true;
                 return true;
             }
         }
+        validateSentence = true;
         return false;
     }
 
