@@ -3,6 +3,7 @@ package com.resimulators.simukraft.init;
 import com.resimulators.simukraft.Reference;
 import com.resimulators.simukraft.common.tileentity.*;
 import net.minecraft.tileentity.TileEntityType;
+import net.minecraft.util.registry.Registry;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
@@ -25,4 +26,5 @@ public class ModTileEntities {
     public static final RegistryObject<TileEntityType<TileSheepFarm>> SHEEP_FARMER = REGISTRY.register("sheep_farmer", () -> TileEntityType.Builder.create(TileSheepFarm::new,ModBlocks.CONTROL_BOX.get()).build(null));
     public static final RegistryObject<TileEntityType<TileChickenFarmer>> CHICKEN_FARMER = REGISTRY.register("chicken_farmer", () -> TileEntityType.Builder.create(TileChickenFarmer::new,ModBlocks.CONTROL_BOX.get()).build(null));
     public static final RegistryObject<TileEntityType<TilePigFarmer>> PIG_FARMER = REGISTRY.register("pig_farmer", () -> TileEntityType.Builder.create(TilePigFarmer::new,ModBlocks.CONTROL_BOX.get()).build(null));
+    public static final RegistryObject<TileEntityType<TileFisher>> FISHER_MAN = REGISTRY.register("fisher_man", () -> TileEntityType.Builder.create(TileFisher::new,ModBlocks.CONTROL_BOX.get()).build(null));
 }
