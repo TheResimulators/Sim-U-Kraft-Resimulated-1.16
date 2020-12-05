@@ -19,6 +19,7 @@ public class JobAnimalFarmer implements IJob {
     public  JobAnimalFarmer(SimEntity entity){
         this.sim = entity;
         goal1 = new AnimalFarmerGoal(sim);
+        addJobAi();
     }
     @Override
     public EnumJobState getState() {
@@ -32,7 +33,7 @@ public class JobAnimalFarmer implements IJob {
 
     @Override
     public Profession jobType() {
-        return Profession.GLASS_FACTORY;
+        return Profession.ANIMAL_FARMER;
     }
 
     @Override

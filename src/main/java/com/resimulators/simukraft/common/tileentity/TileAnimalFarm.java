@@ -2,6 +2,7 @@ package com.resimulators.simukraft.common.tileentity;
 
 import com.resimulators.simukraft.client.gui.GuiHandler;
 import com.resimulators.simukraft.common.enums.Animal;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.nbt.CompoundNBT;
@@ -70,11 +71,14 @@ public class TileAnimalFarm extends TileEntity implements IControlBlock{
 
     public int checkForAnimals(){
         if (world != null){
-        AxisAlignedBB area = new AxisAlignedBB(this.pos.add(-4,0,-4),this.pos.add(4,1,4));
-        List<AnimalEntity> entities = world.getLoadedEntitiesWithinAABB(AnimalEntity.class,area);
-        entities = entities.stream().filter(animal -> animal.getType() == entity.getAnimal())
-        .collect(Collectors.toList());
+        AxisAlignedBB area = new AxisAlignedBB(this.pos.add(-4,-1,-4),this.pos.add(4,2,4));
+        List<AnimalEntity> entities = world.getEntitiesWithinAABB(AnimalEntity.class,area);
+        entities = entities
+                .stream()
+                .filter(animal -> animal.getType() == entity.getAnimal())
+                .collect(Collectors.toList());
         return entities.size();
+
         }
         return maxAnimals; // basically force the tile entity not to spawn anything new
     }
@@ -84,11 +88,15 @@ public class TileAnimalFarm extends TileEntity implements IControlBlock{
     }
 
     public boolean hasMaxAnimals(){
-        return checkForAnimals() >= maxAnimals;
+        return checkForAnimals() >= getMaxAnimals();
     }
 
     public String getName() {
         return name;
+    }
+
+    public Animal getAnimal(){
+        return entity;
     }
 
     @Override

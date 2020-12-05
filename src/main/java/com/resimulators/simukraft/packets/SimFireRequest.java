@@ -74,7 +74,7 @@ public class SimFireRequest implements IMessage {
 
                     }
                 }
-                data.getFaction(id).sendPacketToFaction(new SimFirePacket(id, 0, pos));
+                data.getFaction(id).sendPacketToFaction(new SimFirePacket(id, sim.getEntityId(), pos));
             }
 
         }
