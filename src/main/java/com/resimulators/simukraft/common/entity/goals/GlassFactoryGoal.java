@@ -62,8 +62,7 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
                 job.setState(EnumJobState.WORKING);
                 findChestAroundBlock(job.getWorkSpace());
                 findFurnaceAroundBlock(job.getWorkSpace());
-                // TODO: Give this a better name, couldn't think of one at the time
-                return sendStatuses();
+                return validateWorkArea();
             }
         }
         return false;
@@ -79,7 +78,7 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
             state = State.FURNACE_INTERACTION;
 
         }else {
-            if (!sendStatuses()){
+            if (!validateWorkArea()){
                 sim.getJob().setState(EnumJobState.NOT_WORKING);
             }
         }
@@ -100,7 +99,7 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
                     if (!chests.isEmpty()) {
                         destinationBlock = chests.get(0);
                     } else {
-                        if (!sendStatuses()) {
+                        if (!validateWorkArea()) {
                             sim.getJob().setState(EnumJobState.NOT_WORKING);
                         }
                     }
@@ -546,7 +545,7 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
 
 
     }
-    private boolean sendStatuses(){
+    private boolean validateWorkArea(){
         Faction faction = SavedWorldData.get(world).getFactionWithSim(sim.getUniqueID());
         boolean valid = true;
         if (job.getWorkSpace() != null){

@@ -3,6 +3,7 @@ package com.resimulators.simukraft.common.building;
 import com.resimulators.simukraft.common.tileentity.TileCustomData;
 import net.minecraft.block.Block;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;

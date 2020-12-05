@@ -62,7 +62,7 @@ public class BlockControlBox extends BlockBase {
 
     @Override
     public TileEntity createTileEntity(BlockState state, IBlockReader world) {
-        return new TileCustomData();
+        return new TileFisher();
     }
 
     @Override

@@ -8,7 +8,8 @@ public enum Profession {
     MINER("miner",2),
     ANIMAL_FARMER("animal farmer",3),
     FARMER("farmer",4),
-    GLASS_FACTORY("glass maker", 5);
+    GLASS_FACTORY("glass maker", 5),
+    FISHER_MAN("fisher_man", 6);
 
     Profession(String name, int i) {
         this.name = name;

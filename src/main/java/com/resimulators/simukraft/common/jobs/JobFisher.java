@@ -1,6 +1,7 @@
 package com.resimulators.simukraft.common.jobs;
 
-import com.resimulators.simukraft.common.entity.goals.AnimalFarmerGoal;
+import com.resimulators.simukraft.common.entity.goals.FisherGoal;
+import com.resimulators.simukraft.common.entity.goals.GlassFactoryGoal;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.jobs.core.EnumJobState;
 import com.resimulators.simukraft.common.jobs.core.IJob;
@@ -9,17 +10,21 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.math.BlockPos;
 
-public class JobAnimalFarmer implements IJob {
+public class JobFisher implements IJob {
+
     private SimEntity sim;
     private Goal goal1;
     private int periodsworked = 0;
     private BlockPos workSpace;
     private EnumJobState state = EnumJobState.NOT_WORKING;
 
-    public  JobAnimalFarmer(SimEntity entity){
-        this.sim = entity;
-        goal1 = new AnimalFarmerGoal(sim);
+
+    public JobFisher(SimEntity simEntity) {
+        this.sim = simEntity;
+        goal1 = new FisherGoal(sim);
+        addJobAi();
     }
+
     @Override
     public EnumJobState getState() {
         return state;
@@ -32,7 +37,7 @@ public class JobAnimalFarmer implements IJob {
 
     @Override
     public Profession jobType() {
-        return Profession.ANIMAL_FARMER;
+        return Profession.FISHER_MAN;
     }
 
     @Override

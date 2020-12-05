@@ -14,6 +14,7 @@ public class GuiHandler {
     public static final int ANIMAL_FARM = 5;
     public static final int CUSTOM_DATA = 6;
     public static final int BAKER = 7;
+    public static final int FISHER_MAN = 8;
 
 
 
@@ -36,6 +37,8 @@ public class GuiHandler {
                 break;
             case ANIMAL_FARM:
                 Minecraft.getInstance().displayGuiScreen(new GuiAnimal(new StringTextComponent(string),ints,pos,id));
+            case FISHER_MAN:
+                Minecraft.getInstance().displayGuiScreen(new GuiFisher(new StringTextComponent(string), ints,pos,id));
         }
     }
 }
