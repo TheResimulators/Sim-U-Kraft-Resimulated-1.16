@@ -1,29 +1,32 @@
 package com.resimulators.simukraft.common.enums;
 
 import com.resimulators.simukraft.init.ModTileEntities;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
+import net.minecraftforge.fml.RegistryObject;
 
 public enum BuildingType {
 
-    GLASS_FACTORY("glass factory", ModTileEntities.GLASS_FACTORY.get(),Category.INDUSTRIAL,1),
-    COW_FARMER("cow farmer", ModTileEntities.COW_FARMER.get(),Category.INDUSTRIAL,2),
-    SHEEP_FARMER("sheep farmer", ModTileEntities.SHEEP_FARMER.get(),Category.INDUSTRIAL,3),
-    PIG_FARMER("pig farmer", ModTileEntities.PIG_FARMER.get(), Category.INDUSTRIAL, 4),
-    CHICKEN_FARMER("chicken farmer", ModTileEntities.CHICKEN_FARMER.get(), Category.INDUSTRIAL, 5),
-    BUTCHER("butchery", ModTileEntities.GLASS_FACTORY.get(), Category.COMMERCIAL,6),
-    BAKER("bakery", ModTileEntities.GLASS_FACTORY.get(), Category.COMMERCIAL, 7),
-    GROCER("grocery", ModTileEntities.GLASS_FACTORY.get(), Category.COMMERCIAL, 8),
-    RESIDENTIAL("residential", ModTileEntities.GLASS_FACTORY.get(), Category.RESIDENTIAL,9),
-    SPECIAL("special", ModTileEntities.GLASS_FACTORY.get(),Category.SPECIAL,10);
+    CUSTOM_DATA("custom Data", ModTileEntities.CUSTOM_DATA,Category.SPECIAL,1),
+    GLASS_FACTORY("glass factory", ModTileEntities.GLASS_FACTORY,Category.INDUSTRIAL,2),
+    COW_FARMER("cow farmer", ModTileEntities.COW_FARMER,Category.INDUSTRIAL,3),
+    SHEEP_FARMER("sheep farmer", ModTileEntities.SHEEP_FARMER,Category.INDUSTRIAL,4),
+    PIG_FARMER("pig farmer", ModTileEntities.PIG_FARMER, Category.INDUSTRIAL, 5),
+    CHICKEN_FARMER("chicken farmer", ModTileEntities.CHICKEN_FARMER, Category.INDUSTRIAL, 6),
+    BUTCHER("butchery", ModTileEntities.GLASS_FACTORY, Category.COMMERCIAL,7),
+    BAKER("bakery", ModTileEntities.GLASS_FACTORY, Category.COMMERCIAL, 8),
+    GROCER("grocery", ModTileEntities.GLASS_FACTORY, Category.COMMERCIAL, 9),
+    RESIDENTIAL("residential", ModTileEntities.GLASS_FACTORY, Category.RESIDENTIAL,10),
+    SPECIAL("special", ModTileEntities.GLASS_FACTORY,Category.SPECIAL,11);
 
 
 
 
     public String name;
-    public TileEntityType<?> type;
+    public RegistryObject<? extends TileEntityType<?>> type;
     public int id;
     public Category category;
-    BuildingType(String name, TileEntityType<?> type, Category category,int id){
+    BuildingType(String name, RegistryObject<? extends TileEntityType<?>> type, Category category,int id){
         this.name = name;
         this.type = type;
         this.id = id;
@@ -48,6 +51,12 @@ public enum BuildingType {
             }
         }
         return null;
+    }
+
+
+    public static int getMaxValueId(){
+        return values().length-1;
+
     }
 
 }

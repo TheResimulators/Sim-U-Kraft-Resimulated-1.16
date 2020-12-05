@@ -119,6 +119,8 @@ public class SimEntity extends AgeableEntity implements INPC {
                 this.setVariation(rand.nextInt(10));
             }
         }
+        this.getNavigator().getNodeProcessor().setCanOpenDoors(true);
+        this.getNavigator().getNodeProcessor().setCanEnterDoors(true);
 
         this.writeAdditional(this.getPersistentData());
         return super.onInitialSpawn(worldIn, difficultyIn, reason, spawnDataIn, dataTag);

@@ -7,8 +7,12 @@ import com.resimulators.simukraft.common.enums.BuildingType;
 import com.resimulators.simukraft.common.jobs.JobBuilder;
 import com.resimulators.simukraft.common.jobs.core.EnumJobState;
 import com.resimulators.simukraft.handlers.StructureHandler;
+import com.resimulators.simukraft.init.ModBlockProperties;
 import com.resimulators.simukraft.init.ModBlocks;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.ai.goal.Goal;
+import net.minecraft.state.IntegerProperty;
+import net.minecraft.state.Property;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
@@ -54,24 +58,19 @@ public class BuilderGoal extends Goal {
         //TODO: the Builder AI
         //FABBE50
         System.out.println("startExecuting");
-        template = ((JobBuilder)sim.getJob()).getTemplate();
+        template = ((JobBuilder) sim.getJob()).getTemplate();
         PlacementSettings settings = new PlacementSettings()
                 .setCenterOffset(template.getSize().subtract(new Vector3i(template.getSize().getX() / 2, 0, template.getSize().getZ() / 2)))
                 .setRotation(Rotation.NONE)
                 .setMirror(Mirror.NONE);
-        blocks = StructureHandler.modifyAndConvertTemplate(template,sim.world,sim.getJob().getWorkSpace(), Rotation.NONE, Mirror.NONE); // needs to be fixed, only places packed ice right now
+        blocks = StructureHandler.modifyAndConvertTemplate(template, sim.world, sim.getJob().getWorkSpace(), Rotation.NONE, Mirror.NONE); // needs to be fixed, only places packed ice right now
         SimuKraft.LOGGER().debug("cost: " + template.getCost());
         for (Template.BlockInfo blockInfo : blocks) {
-                sim.world.setBlockState(blockInfo.pos, blockInfo.state);
-                if (blockInfo.state.getBlock() == ModBlocks.CONTROL_BOX.get()){
-                    BuildingType type = BuildingType.getById(template.getTypeID());
-                    if (type != null) {
-                        sim.world.removeTileEntity(blockInfo.pos);
-                        sim.world.setTileEntity(blockInfo.pos, type.type.create());
-                        sim.world.markAndNotifyBlock(blockInfo.pos,sim.world.getChunkAt(blockInfo.pos),sim.world.getBlockState(blockInfo.pos),sim.world.getBlockState(blockInfo.pos),3,512);
-
-                    }
-                }
+            BlockState state = blockInfo.state;
+            if (blockInfo.state.getBlock() == ModBlocks.CONTROL_BOX.get()) {
+                state = blockInfo.state.with(ModBlockProperties.TYPE, template.getTypeID());
+            }
+            sim.world.setBlockState(blockInfo.pos, state);
         }
     }
 

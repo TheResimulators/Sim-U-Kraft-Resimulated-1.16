@@ -19,6 +19,7 @@ public class JobAnimalFarmer implements IJob {
     public  JobAnimalFarmer(SimEntity entity){
         this.sim = entity;
         goal1 = new AnimalFarmerGoal(sim);
+        addJobAi();
     }
     @Override
     public EnumJobState getState() {

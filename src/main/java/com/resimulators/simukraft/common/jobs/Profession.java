@@ -11,6 +11,7 @@ public enum Profession {
     GLASS_FACTORY("glass maker", 5),
     FISHER_MAN("fisher_man", 6);
 
+
     Profession(String name, int i) {
         this.name = name;
         this.id = i;

@@ -1,16 +1,22 @@
 package com.resimulators.simukraft.common.block;
 
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
+import com.resimulators.simukraft.common.enums.BuildingType;
 import com.resimulators.simukraft.common.tileentity.*;
 import com.resimulators.simukraft.common.world.Faction;
 import com.resimulators.simukraft.common.world.SavedWorldData;
 import com.resimulators.simukraft.handlers.SimUKraftPacketHandler;
+import com.resimulators.simukraft.init.ModBlockProperties;
 import com.resimulators.simukraft.packets.OpenJobGuiPacket;
 import com.resimulators.simukraft.packets.SimFirePacket;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.item.BlockItemUseContext;
+import net.minecraft.state.IntegerProperty;
+import net.minecraft.state.StateContainer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
@@ -24,6 +30,7 @@ import net.minecraftforge.fml.network.NetworkDirection;
 import java.util.ArrayList;
 
 public class BlockControlBox extends BlockBase {
+    public static final IntegerProperty type = ModBlockProperties.TYPE;
     public BlockControlBox(Properties properties) {
         super(properties);
     }
@@ -62,6 +69,13 @@ public class BlockControlBox extends BlockBase {
 
     @Override
     public TileEntity createTileEntity(BlockState state, IBlockReader world) {
+        if (state.hasProperty(ModBlockProperties.TYPE)){
+            int typeId = state.get(ModBlockProperties.TYPE);
+            BuildingType type = BuildingType.getById(typeId);
+            if (type != null){
+                return type.type.get().create();
+            }
+        }
         return new TileCustomData();
     }
 
@@ -87,6 +101,11 @@ public class BlockControlBox extends BlockBase {
 
             }
         }
+    }
 
+    @Override
+    protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
+        builder.add(type);
+        super.fillStateContainer(builder);
     }
 }
