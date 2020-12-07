@@ -1,7 +1,6 @@
 package com.resimulators.simukraft.common.jobs;
 
 import com.resimulators.simukraft.common.entity.goals.FisherGoal;
-import com.resimulators.simukraft.common.entity.goals.GlassFactoryGoal;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.jobs.core.EnumJobState;
 import com.resimulators.simukraft.common.jobs.core.IJob;

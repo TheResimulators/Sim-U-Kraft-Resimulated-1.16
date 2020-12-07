@@ -1,9 +1,9 @@
 package com.resimulators.simukraft.common.entity.sim;
 
+import com.mojang.datafixers.util.Pair;
 import com.resimulators.simukraft.common.jobs.Profession;
 import com.resimulators.simukraft.init.ModContainers;
 import com.resimulators.simukraft.utils.Utils;
-import com.mojang.datafixers.util.Pair;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;

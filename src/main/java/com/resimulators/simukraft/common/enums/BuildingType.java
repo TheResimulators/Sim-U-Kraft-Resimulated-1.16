@@ -1,7 +1,6 @@
 package com.resimulators.simukraft.common.enums;
 
 import com.resimulators.simukraft.init.ModTileEntities;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraftforge.fml.RegistryObject;
 
