@@ -1,13 +1,13 @@
 package com.resimulators.simukraft.client.render;
 
-import com.resimulators.simukraft.SimuKraft;
-import com.resimulators.simukraft.client.model.EntitySimModel;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.resimulators.simukraft.Reference;
+import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.client.data.SkinCacher;
+import com.resimulators.simukraft.client.model.EntitySimModel;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.utils.ColorHelper;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.entity.LivingRenderer;
 import net.minecraft.client.renderer.entity.layers.BipedArmorLayer;

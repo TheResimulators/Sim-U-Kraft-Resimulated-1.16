@@ -1,11 +1,11 @@
 package com.resimulators.simukraft.common.world;
 
 import com.google.common.collect.Lists;
+import com.resimulators.simukraft.Network;
+import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.packets.CreditUpdatePacket;
 import com.resimulators.simukraft.packets.IMessage;
-import com.resimulators.simukraft.Network;
-import com.resimulators.simukraft.SimuKraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;

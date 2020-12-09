@@ -1,9 +1,9 @@
 package com.resimulators.simukraft.init;
 
+import com.google.common.collect.ImmutableMap;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.jobs.*;
 import com.resimulators.simukraft.common.jobs.core.IJob;
-import com.google.common.collect.ImmutableMap;
 
 import java.util.Map;
 import java.util.function.Function;

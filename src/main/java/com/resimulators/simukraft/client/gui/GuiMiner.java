@@ -2,8 +2,8 @@ package com.resimulators.simukraft.client.gui;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.resimulators.simukraft.SimuKraft;
-import com.resimulators.simukraft.common.tileentity.TileMiner;
 import com.resimulators.simukraft.common.jobs.Profession;
+import com.resimulators.simukraft.common.tileentity.TileMiner;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;

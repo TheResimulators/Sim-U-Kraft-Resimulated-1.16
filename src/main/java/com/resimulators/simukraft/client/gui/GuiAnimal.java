@@ -4,7 +4,6 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.common.jobs.Profession;
 import com.resimulators.simukraft.common.tileentity.IControlBlock;
-import com.resimulators.simukraft.common.tileentity.TileAnimalFarm;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 
