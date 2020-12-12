@@ -98,6 +98,7 @@ public class AnimalFarmerGoal extends BaseGoal<JobAnimalFarmer>{
         if (tick <= 0){
             spawnNewAnimals();
             if (state == State.MOVING){
+                sim.setStatus("Moving Towards target");
                 if (entities.size() > 0){
                 destinationBlock = entities.get(0).getPosition();
                 target = entities.get(0);
@@ -110,6 +111,7 @@ public class AnimalFarmerGoal extends BaseGoal<JobAnimalFarmer>{
             }
 
             else if( state == State.ATTACKING){
+                sim.setStatus("Attacking Target");
                 sim.swing(sim.getActiveHand(),true);
                 sim.getHeldItemMainhand().getItem().hitEntity(sim.getHeldItemMainhand(),target,sim);
                 sim.attackEntityAsMob(target);
@@ -125,12 +127,14 @@ public class AnimalFarmerGoal extends BaseGoal<JobAnimalFarmer>{
                         table.generate(ctx).forEach(itemStack -> drops.add(itemStack.getItem()));
                         getCollectedItemStacks();
                         currentKillCount = 0;
+                        sim.setStatus("Emptying inventory");
                     }
 
                 }
 
             }
             else if (state == State.RETURNING){
+
                 addItemsToChests();
                 state = State.MOVING;
                 if (!(sim.getHeldItemMainhand().getItem() instanceof SwordItem)){
@@ -203,5 +207,12 @@ public class AnimalFarmerGoal extends BaseGoal<JobAnimalFarmer>{
         RETURNING,
 
 
+    }
+
+
+    @Override
+    public void resetTask() {
+        super.resetTask();
+        sim.setStatus("Idle");
     }
 }
