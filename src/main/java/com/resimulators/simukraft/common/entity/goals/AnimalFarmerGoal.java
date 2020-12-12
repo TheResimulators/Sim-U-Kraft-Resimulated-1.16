@@ -6,26 +6,35 @@ import com.resimulators.simukraft.common.jobs.JobGlassFactory;
 import com.resimulators.simukraft.common.jobs.core.EnumJobState;
 import com.resimulators.simukraft.common.tileentity.TileAnimalFarm;
 import com.resimulators.simukraft.utils.BlockUtils;
+import io.netty.util.concurrent.BlockingOperationException;
 import net.minecraft.command.arguments.EntityAnchorArgument;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.inventory.ItemStackHelper;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.item.ToolItem;
+import net.minecraft.item.*;
+import net.minecraft.loot.LootContext;
+import net.minecraft.loot.LootParameterSets;
+import net.minecraft.loot.LootParameters;
+import net.minecraft.loot.LootTable;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.tileentity.ChestTileEntity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.ItemHandlerHelper;
 import net.minecraftforge.items.ItemStackHandler;
+import net.minecraftforge.items.wrapper.InvWrapper;
 import org.lwjgl.system.CallbackI;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 public class AnimalFarmerGoal extends BaseGoal<JobAnimalFarmer>{
@@ -38,10 +47,14 @@ public class AnimalFarmerGoal extends BaseGoal<JobAnimalFarmer>{
     private State state = State.MOVING;
     private AnimalEntity target;
     private ArrayList<BlockPos> chests = new ArrayList<>();
+    private ArrayList<Integer> itemsToMove = new ArrayList<>();
+    private LootTable table;
+    private List<Item> drops = new ArrayList<>();
     public AnimalFarmerGoal(SimEntity sim) {
         super(sim,sim.getAIMoveSpeed()*2,20);
         this.sim = sim;
         this.world = sim.world;
+
     }
 
 
@@ -63,14 +76,17 @@ public class AnimalFarmerGoal extends BaseGoal<JobAnimalFarmer>{
         super.startExecuting();
         sim.setHeldItem(Hand.MAIN_HAND,new ItemStack(Items.DIAMOND_SWORD));
         findChestAroundBlock(sim.getJob().getWorkSpace());
+        if (farm == null){
+            farm = (TileAnimalFarm) world.getTileEntity(job.getWorkSpace());
+            ResourceLocation resourcelocation = farm.getAnimal().getAnimal().getLootTable();
+            table = this.world.getServer().getLootTableManager().getLootTableFromLocation(resourcelocation);
+        }
     }
 
     @Override
     public void tick() {
         super.tick();
-        if (farm == null){
-            farm = (TileAnimalFarm) world.getTileEntity(job.getWorkSpace());
-        }
+
         AxisAlignedBB area = new AxisAlignedBB(job.getWorkSpace().add(-4,0,-4),job.getWorkSpace().add(4,2,4));
         List<AnimalEntity> entities = world.getLoadedEntitiesWithinAABB(AnimalEntity.class,area);
         entities = entities
@@ -104,15 +120,23 @@ public class AnimalFarmerGoal extends BaseGoal<JobAnimalFarmer>{
                     currentKillCount++;
                     if (currentKillCount >= killsBeforeEmpty){
                         state = State.RETURNING;
+                        LootContext.Builder builder = new LootContext.Builder((ServerWorld) sim.getEntityWorld()).withRandom(new Random()).withParameter(LootParameters.THIS_ENTITY, sim).withParameter(LootParameters.field_237457_g_, sim.getPositionVec()).withParameter(LootParameters.DAMAGE_SOURCE,DamageSource.GENERIC);
+                        LootContext ctx = builder.build(LootParameterSets.ENTITY);
+                        table.generate(ctx).forEach(itemStack -> drops.add(itemStack.getItem()));
+                        getCollectedItemStacks();
+                        currentKillCount = 0;
                     }
 
                 }
 
             }
             else if (state == State.RETURNING){
+                addItemsToChests();
+                state = State.MOVING;
+                if (!(sim.getHeldItemMainhand().getItem() instanceof SwordItem)){
+                    sim.setHeldItem(Hand.MAIN_HAND,new ItemStack(Items.DIAMOND_SWORD));
 
-
-
+                }
             }
 
 
@@ -143,15 +167,34 @@ public class AnimalFarmerGoal extends BaseGoal<JobAnimalFarmer>{
     private boolean addItemsToChests(){
         for (BlockPos pos: chests){
             ChestTileEntity chest = (ChestTileEntity) world.getTileEntity(pos);
-            for (int i = 0; i< chest.getSizeInventory(); i++){
-
-
+            List<Integer> invStacks = new ArrayList<Integer>();
+            invStacks.addAll(itemsToMove);
+            for (int i = 0; i< invStacks.size(); i++){
+                if (ItemHandlerHelper.insertItemStacked(new InvWrapper(chest),sim.getInventory().getStackInSlot(invStacks.get(i)),false) == ItemStack.EMPTY);{
+                    sim.getInventory().setInventorySlotContents(i,ItemStack.EMPTY);
+                    itemsToMove.remove(invStacks.get(i));
+                }
+                if (itemsToMove.size() == 0){
+                    break; //all items have been added
+                }
             }
-
-
         }
 
         return false;
+    }
+
+
+    private void getCollectedItemStacks(){
+
+        for (int i = 0; i < sim.getInventory().getSizeInventory(); i++){
+            ItemStack stack = sim.getInventory().getStackInSlot(i);
+            if (drops.contains(stack.getItem()) || stack.getItem().getTags().contains(ItemTags.WOOL.getName())){
+                itemsToMove.add(i);
+            }
+
+        }
+        drops.clear();
+
     }
 
     private enum State {
