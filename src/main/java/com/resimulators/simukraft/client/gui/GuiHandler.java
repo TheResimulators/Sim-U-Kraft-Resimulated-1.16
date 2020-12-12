@@ -37,8 +37,10 @@ public class GuiHandler {
                 break;
             case ANIMAL_FARM:
                 Minecraft.getInstance().displayGuiScreen(new GuiAnimal(new StringTextComponent(string),ints,pos,id));
+                break;
             case FISHER_MAN:
                 Minecraft.getInstance().displayGuiScreen(new GuiFisher(new StringTextComponent(string), ints,pos,id));
+                break;
         }
     }
 }
