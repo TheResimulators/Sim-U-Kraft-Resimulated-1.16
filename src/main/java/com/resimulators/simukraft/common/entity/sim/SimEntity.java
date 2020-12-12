@@ -1,20 +1,20 @@
 package com.resimulators.simukraft.common.entity.sim;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.common.entity.goals.GoToWorkGoal;
+import com.resimulators.simukraft.common.entity.goals.PickupItemGoal;
+import com.resimulators.simukraft.common.entity.goals.TalkingToPlayerGoal;
 import com.resimulators.simukraft.common.jobs.core.IJob;
 import com.resimulators.simukraft.common.tileentity.ITile;
 import com.resimulators.simukraft.common.world.Faction;
 import com.resimulators.simukraft.common.world.SavedWorldData;
 import com.resimulators.simukraft.handlers.FoodStats;
+import com.resimulators.simukraft.init.ModEntities;
 import com.resimulators.simukraft.init.ModJobs;
 import com.resimulators.simukraft.packets.SimFirePacket;
 import com.resimulators.simukraft.utils.Utils;
-import com.resimulators.simukraft.common.entity.goals.PickupItemGoal;
-import com.resimulators.simukraft.common.entity.goals.TalkingToPlayerGoal;
-import com.resimulators.simukraft.init.ModEntities;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.attributes.AttributeModifierMap;
 import net.minecraft.entity.ai.attributes.Attributes;
@@ -44,7 +44,9 @@ import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.Random;
 
 public class SimEntity extends AgeableEntity implements INPC {
     private static final EntitySize SIZE = EntitySize.flexible(0.6f, 1.8f);

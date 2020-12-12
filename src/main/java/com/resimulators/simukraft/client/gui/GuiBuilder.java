@@ -1,11 +1,11 @@
 package com.resimulators.simukraft.client.gui;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
-import com.resimulators.simukraft.common.jobs.Profession;
-import com.resimulators.simukraft.common.world.Structure;
-import com.resimulators.simukraft.Reference;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.resimulators.simukraft.Reference;
+import com.resimulators.simukraft.common.jobs.Profession;
+import com.resimulators.simukraft.common.world.Structure;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.widget.button.Button;
@@ -16,9 +16,7 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 
 import javax.annotation.Nullable;
-
 import java.awt.*;
-
 import java.util.ArrayList;
 
 public class GuiBuilder extends GuiBaseJob {

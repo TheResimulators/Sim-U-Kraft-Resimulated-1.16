@@ -1,9 +1,9 @@
 package com.resimulators.simukraft.client.model;
 
-import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.mojang.blaze3d.matrix.MatrixStack;
+import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.util.HandSide;

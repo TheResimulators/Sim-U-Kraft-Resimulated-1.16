@@ -1,11 +1,10 @@
 package com.resimulators.simukraft.init;
+
 import com.resimulators.simukraft.Reference;
 import com.resimulators.simukraft.SimUTab;
 import com.resimulators.simukraft.common.item.ItemStructureTest;
 import net.minecraft.item.BlockItem;
-
 import net.minecraft.item.Item;
-
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;

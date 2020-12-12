@@ -1,13 +1,13 @@
 package com.resimulators.simukraft.common.entity.sim;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.client.gui.GuiSimInventory;
 import com.resimulators.simukraft.utils.ColorHelper;
 import com.resimulators.simukraft.utils.Icons;
 import com.resimulators.simukraft.utils.RayTraceHelper;
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.screen.ChatScreen;
