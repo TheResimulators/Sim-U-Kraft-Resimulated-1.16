@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern":
+  [
+    "csc",
+    "sfs",
+    "csc"
+  ],
+  "key":
+  {
+    "c": {
+      "item": "minecraft:terracotta"
+    },
+    "s": {
+      "item": "minecraft:stone"
+    },
+    "f": {
+      "item": "minecraft:oak_fence"
+    }
+  },
+  "result":
+  {
+    "item": "simukraft:composite_brick",
+    "count": 1
+  }
+}

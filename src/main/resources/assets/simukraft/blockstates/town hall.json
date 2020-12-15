@@ -1,0 +1,7 @@
+{
+  "forge_marker": 1,
+  "variants": {
+    "normal": { "model": "simukraft:town hall" },
+    "inventory": { "model": "simukraft:town hall" }
+  }
+}

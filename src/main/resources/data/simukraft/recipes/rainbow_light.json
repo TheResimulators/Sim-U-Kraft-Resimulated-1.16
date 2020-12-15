@@ -1,0 +1,38 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern":
+  [
+    "wrp",
+    "oy ",
+    "lb "
+  ],
+  "key":
+  {
+    "w": {
+      "item": "simukraft:light_white"
+    },
+    "r": {
+      "item": "minecraft:red_dye"
+    },
+    "p": {
+      "item": "minecraft:purple_dye"
+    },
+    "o": {
+      "item": "minecraft:orange_dye"
+    },
+    "y": {
+      "item": "minecraft:yellow_dye"
+    },
+    "l": {
+      "item": "minecraft:lime_dye"
+    },
+    "b": {
+      "item": "minecraft:blue_dye"
+    }
+  },
+  "result":
+  {
+    "item": "simukraft:rainbow_light",
+    "count": 1
+  }
+}

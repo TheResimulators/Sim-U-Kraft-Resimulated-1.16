@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern":
+  [
+    "www",
+    "chc",
+    "ccc"
+  ],
+  "key":
+  {
+    "w": {
+      "tag": "minecraft:planks"
+    },
+    "c": {
+      "item": "minecraft:cobblestone"
+    },
+    "h": {
+      "item": "minecraft:stone_hoe"
+    }
+  },
+  "result":
+  {
+    "item": "simukraft:farm_box",
+    "count": 1
+  }
+}

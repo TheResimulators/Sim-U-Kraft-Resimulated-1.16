@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ld"
+  ],
+  "key": {
+    "l": {
+      "item": "simukraft:light_white"
+    },
+    "d": {
+      "item": "minecraft:lime_dye"
+    }
+  },
+  "result": {
+    "item": "simukraft:light_lime",
+    "count": 1
+  }
+}
