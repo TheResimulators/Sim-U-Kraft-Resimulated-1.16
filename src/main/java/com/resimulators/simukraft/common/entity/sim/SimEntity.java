@@ -6,6 +6,7 @@ import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.common.entity.goals.GoToWorkGoal;
 import com.resimulators.simukraft.common.entity.goals.PickupItemGoal;
 import com.resimulators.simukraft.common.entity.goals.TalkingToPlayerGoal;
+import com.resimulators.simukraft.common.jobs.core.Activity;
 import com.resimulators.simukraft.common.jobs.core.IJob;
 import com.resimulators.simukraft.common.tileentity.ITile;
 import com.resimulators.simukraft.common.world.Faction;
@@ -67,6 +68,7 @@ public class SimEntity extends AgeableEntity implements INPC {
 
     protected FoodStats foodStats;
     private IJob job;
+    private Activity activity;
     private WorkingController controller = new WorkingController(this);
     private Random rand = new Random();
 
@@ -584,13 +586,15 @@ public class SimEntity extends AgeableEntity implements INPC {
 
     public void setJob(IJob job) {
         this.job = job;
-        getJob();
     }
 
     public IJob getJob() {
         return job;
     }
 
+    public boolean hasJob(){
+        return job != null;
+    }
     @Override
     public void setCustomName(ITextComponent name) {
         super.setCustomName(name);
@@ -631,6 +635,11 @@ public class SimEntity extends AgeableEntity implements INPC {
         return controller;
     }
 
+    public Activity getActivity() {
+        return activity;
+    }
 
-
+    public void setActivity(Activity activity) {
+        this.activity = activity;
+    }
 }

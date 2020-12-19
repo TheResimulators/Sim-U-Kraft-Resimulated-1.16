@@ -120,4 +120,24 @@ public class FoodStats {
     public void setFoodSaturationLevel(float foodSaturationLevel) {
         sim.getDataManager().set(SimEntity.FOOD_SATURATION_LEVEL, foodSaturationLevel);
     }
+
+
+
+    public enum FoodLevels {
+        LOW(3, "Starving"),
+        MEDIUM(8, "Peckish"),
+        HIGH(13, "A Little hungry"),
+        FULL(18, "Full");
+
+
+        public int level;
+        public String status;
+        FoodLevels(int level, String status){
+            this.level = level;
+            this.status = status;
+
+        }
+
+
+    }
 }

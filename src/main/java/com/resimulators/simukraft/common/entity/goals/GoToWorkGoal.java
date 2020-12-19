@@ -1,7 +1,7 @@
 package com.resimulators.simukraft.common.entity.goals;
 
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
-import com.resimulators.simukraft.common.jobs.core.EnumJobState;
+import com.resimulators.simukraft.common.jobs.core.Activity;
 import com.resimulators.simukraft.common.jobs.core.IJob;
 import net.minecraft.entity.ai.goal.MoveToBlockGoal;
 import net.minecraft.util.math.BlockPos;
@@ -20,7 +20,7 @@ public class GoToWorkGoal extends MoveToBlockGoal {
     @Override
     public boolean shouldExecute() {
         if (sim.getJob() == null)return false;
-        if (sim.getJob().getState() == EnumJobState.GOING_TO_WORK){
+        if (sim.getJob().getState() == Activity.GOING_TO_WORK){
             this.job = sim.getJob();
             return true;
         }

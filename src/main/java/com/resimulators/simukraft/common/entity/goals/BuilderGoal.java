@@ -3,16 +3,13 @@ package com.resimulators.simukraft.common.entity.goals;
 import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.common.building.BuildingTemplate;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
-import com.resimulators.simukraft.common.enums.BuildingType;
 import com.resimulators.simukraft.common.jobs.JobBuilder;
-import com.resimulators.simukraft.common.jobs.core.EnumJobState;
+import com.resimulators.simukraft.common.jobs.core.Activity;
 import com.resimulators.simukraft.handlers.StructureHandler;
 import com.resimulators.simukraft.init.ModBlockProperties;
 import com.resimulators.simukraft.init.ModBlocks;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.state.IntegerProperty;
-import net.minecraft.state.Property;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
@@ -41,9 +38,9 @@ public class BuilderGoal extends Goal {
 
        /*
         IJob job = sim.getJob();
-        if (job.getState() == EnumJobState.GOING_TO_WORK) {
+        if (sim.getActivity() == EnumJobState.GOING_TO_WORK) {
             if (sim.getPosition().withinDistance(new Vector3d(job.getWorkSpace().getX(), job.getWorkSpace().getY(), job.getWorkSpace().getZ()), 5)) {
-                job.setState(EnumJobState.WORKING);
+                sim.setActivity(EnumJobState.WORKING);
                 return true;
             }
         }
@@ -81,14 +78,14 @@ public class BuilderGoal extends Goal {
 
     @Override
     public boolean shouldContinueExecuting() {
-        if (sim.getJob().getState() == EnumJobState.FORCE_STOP) {
+        if (sim.getJob().getState() == Activity.FORCE_STOP) {
             return false;
         }
         if (tick < sim.getJob().workTime()) {
             return true;
         } else {
             sim.getJob().finishedWorkPeriod();
-            sim.getJob().setState(EnumJobState.NOT_WORKING);
+            sim.getJob().setState(Activity.NOT_WORKING);
         }
 
         return false;
