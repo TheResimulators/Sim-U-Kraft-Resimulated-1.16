@@ -76,10 +76,17 @@ public class JobFisher implements IJob {
 
     @Override
     public ListNBT writeToNbt(ListNBT nbt) {
+        CompoundNBT data = new CompoundNBT();
+        nbt.add(data);
+        data.putInt("id", sim.getProfession());
         CompoundNBT ints = new CompoundNBT();
         ints.putInt("periodsworked", periodsworked);
         nbt.add(ints);
-
+        CompoundNBT other = new CompoundNBT(); // other info that is unique to the miner
+        if (workSpace != null) {
+            other.putLong("jobpos", workSpace.toLong());
+        }
+        nbt.add(other);
         return nbt;
     }
 
@@ -89,6 +96,9 @@ public class JobFisher implements IJob {
             CompoundNBT list = nbt.getCompound(i);
             if (list.contains("periodsworked")) {
                 periodsworked = list.getInt("periodsworked");
+            }
+            if (list.contains("jobpos")) {
+                setWorkSpace(BlockPos.fromLong(list.getLong("jobpos")));
             }
         }
     }

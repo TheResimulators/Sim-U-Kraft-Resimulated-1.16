@@ -78,6 +78,7 @@ public class BuilderGoal extends Goal {
 
     @Override
     public boolean shouldContinueExecuting() {
+        if (sim.getJob() != null){
         if (sim.getJob().getState() == Activity.FORCE_STOP) {
             return false;
         }
@@ -86,7 +87,7 @@ public class BuilderGoal extends Goal {
         } else {
             sim.getJob().finishedWorkPeriod();
             sim.getJob().setState(Activity.NOT_WORKING);
-        }
+        }}
 
         return false;
     }

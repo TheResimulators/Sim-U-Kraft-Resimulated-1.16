@@ -188,6 +188,7 @@ public class SimEntity extends AgeableEntity implements INPC {
         compound.putInt("SelectedItemSlot", this.inventory.currentItem);
         compound.putInt("NameColor", this.getNameColor());
         compound.putString("Status", this.getStatus());
+        compound.putInt("activity", this.getActivity().id);
         this.foodStats.write(compound);
         if (job != null) {
             compound.put("job", this.job.writeToNbt(new ListNBT()));
@@ -223,12 +224,10 @@ public class SimEntity extends AgeableEntity implements INPC {
         this.foodStats.read(compound);
        ListNBT nbt = compound.getList("job", Constants.NBT.TAG_COMPOUND);
 
-        String jobType = nbt.getCompound(0).getString("jobname");
-        if (!jobType.equals("")){
+        int jobType = nbt.getCompound(0).getInt("id");
         job = ModJobs.JOB_LOOKUP.get(jobType).apply(this);
-        }
 
-        if (compound.contains("job") && !jobType.equals("")){
+        if (compound.contains("job") && job != null){
             this.job.readFromNbt((ListNBT) compound.get("job"));
         }
         controller = new WorkingController(this);
@@ -238,6 +237,9 @@ public class SimEntity extends AgeableEntity implements INPC {
         if (compound.hasUniqueId("uuid")){
             this.entityUniqueID = compound.getUniqueId("uuid");
         }
+
+        if (compound.contains("activity"))
+            setActivity(Activity.getActivityById(compound.getInt("activity")));
     }
 
 
@@ -636,6 +638,9 @@ public class SimEntity extends AgeableEntity implements INPC {
     }
 
     public Activity getActivity() {
+        if (activity == null){
+        setActivity(Activity.IDLING);
+    }
         return activity;
     }
 

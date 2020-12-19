@@ -81,6 +81,9 @@ public class JobFarmer implements IJob {
 
     @Override
     public ListNBT writeToNbt(ListNBT nbt) {
+        CompoundNBT data = new CompoundNBT();
+        data.putInt("id", sim.getProfession());
+        nbt.add(data);
         CompoundNBT ints = new CompoundNBT();
         ints.putInt("periodsworked", periodsworked);
         nbt.add(ints);

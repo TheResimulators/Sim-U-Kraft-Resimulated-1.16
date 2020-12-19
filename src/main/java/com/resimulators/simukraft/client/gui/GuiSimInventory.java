@@ -6,6 +6,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.resimulators.simukraft.Reference;
 import com.resimulators.simukraft.common.entity.sim.SimContainer;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
+import com.resimulators.simukraft.common.jobs.Profession;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.DisplayEffectsScreen;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -67,7 +68,7 @@ public class GuiSimInventory extends DisplayEffectsScreen<SimContainer> {
 
     @Override
     protected void drawGuiContainerForegroundLayer(MatrixStack stack, int x, int y) {
-        String name = container.job;
+        String name = Profession.getNameFromID(sim.getProfession());
 
         this.font.drawString(stack, this.title.getString(), 80f, 8f, 4210752);
         this.font.drawString(stack,"Job: " + StringUtils.capitalize(name),80f, 30f, 4210752);

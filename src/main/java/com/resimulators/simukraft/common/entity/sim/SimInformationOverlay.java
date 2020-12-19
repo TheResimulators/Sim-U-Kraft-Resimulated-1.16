@@ -5,6 +5,8 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.client.gui.GuiSimInventory;
+import com.resimulators.simukraft.common.jobs.Profession;
+import com.resimulators.simukraft.handlers.FoodStats;
 import com.resimulators.simukraft.utils.ColorHelper;
 import com.resimulators.simukraft.utils.Icons;
 import com.resimulators.simukraft.utils.RayTraceHelper;
@@ -17,9 +19,11 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import org.apache.commons.lang3.StringUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
@@ -77,7 +81,7 @@ public class SimInformationOverlay {
                 RenderSystem.disableLighting();
                 RenderSystem.disableDepthTest();
 
-                Rectangle rectangle = new Rectangle(posX, posY, 90, 46);
+                Rectangle rectangle = new Rectangle(posX, posY, 90, 86);
                 drawTooltipBox(rectangle.x, rectangle.y, rectangle.width, rectangle.height, new Color(0, 0 , 0, 150).getRGB(), ColorHelper.getColorFromDye(sim.getNameColor()).getRGB(), Color.BLACK.getRGB());
 
                 RenderSystem.enableBlend();
@@ -151,7 +155,7 @@ public class SimInformationOverlay {
                         xOffset += 8;
                     }
                 }
-
+                
                 RenderSystem.disableBlend();
                 RenderSystem.enableRescaleNormal();
                 loadGLState();
@@ -159,6 +163,22 @@ public class SimInformationOverlay {
 
                 minecraft.fontRenderer.drawString(new MatrixStack(), (SimuKraft.config.getSims().coloredNames.get() ? TextFormatting.fromColorIndex(ColorHelper.convertDyeToTF(sim.getNameColor())) : TextFormatting.WHITE) + sim.getName().getString(), posX + 5, posY + 5, Color.WHITE.getRGB());
 
+                //TODO: WIP Couple Status (Temp)
+                minecraft.fontRenderer.drawString(new MatrixStack(), "Single (WIP)" + TextFormatting.RESET,posX + 5,posY + 50,Color.WHITE.getRGB());
+
+
+                //TODO:WIP HOUSE STATUS (TEMP)
+                minecraft.fontRenderer.drawString(new MatrixStack(), "Homeless (WIP)" + TextFormatting.RESET,posX + 5,posY + 63,Color.WHITE.getRGB());
+
+                if (sim.getJob() == null){
+
+                   minecraft.fontRenderer.drawString(new MatrixStack(), "Unemployed" + TextFormatting.RESET,posX + 5,posY + 76,Color.WHITE.getRGB());
+                }else{
+                    String profession = Profession.getNameFromID(sim.getProfession());
+
+                    minecraft.fontRenderer.drawString(new MatrixStack(),StringUtils.capitalize(profession) + TextFormatting.RESET,posX + 5,posY + 76,Color.WHITE.getRGB());
+
+                }
                 RenderSystem.popMatrix();
             }
         }

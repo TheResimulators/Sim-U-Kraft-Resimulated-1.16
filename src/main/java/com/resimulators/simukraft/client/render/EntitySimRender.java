@@ -116,53 +116,11 @@ public class EntitySimRender extends LivingRenderer<SimEntity, EntitySimModel> {
         matrix.push();
             if (d < 100.0d) {
                 matrix.translate(0, (9.0F * 1.2f * 0.025F), 0);
-                /*if(simEntity.getFoodStats() != null){
-                    String state = "Full";
-                    matrix.scale(.9f,.9f,.9f);
-                    if (simEntity.getFoodStats().getFoodLevel() < FoodStats.FoodLevels.LOW.level){
-                        state = FoodStats.FoodLevels.LOW.status;
-                    }
-                    else if (simEntity.getFoodStats().getFoodLevel() < FoodStats.FoodLevels.MEDIUM.level){
-                        state = FoodStats.FoodLevels.MEDIUM.status;
-                    }
-                    else if (simEntity.getFoodStats().getFoodLevel() < FoodStats.FoodLevels.HIGH.level){
-                        state = FoodStats.FoodLevels.HIGH.status;
-                    }
-                    else if (simEntity.getFoodStats().getFoodLevel() < FoodStats.FoodLevels.FULL.level){
-                        state = FoodStats.FoodLevels.FULL.status;
-                    }
-                    super.renderName(simEntity, new StringTextComponent(TextFormatting.YELLOW + state + TextFormatting.RESET), matrix, renderBuffer, light);
-
-                    matrix.scale(1f,1f,1f);
-                    matrix.translate(0, (double) (9.0F * 2.4F * 0.025F), 0);
-
-                    //TODO: WIP Couple Status (Temp)
-                    matrix.scale(.9f,.9f,.9f);
-                    super.renderName(simEntity, new StringTextComponent(TextFormatting.YELLOW + "Single (WIP)" + TextFormatting.RESET), matrix, renderBuffer, light);
-                    matrix.translate(0, (double) (9.0F * 2.4F * 0.025F), 0);
-                    matrix.scale(1f,1f,1f);
-                }
-
-                    //TODO:WIP HOUSE STATUS (TEMP)
-                    matrix.scale(.9f,.9f,.9f);
-                    super.renderName(simEntity, new StringTextComponent(TextFormatting.YELLOW + "Homeless (WIP)" + TextFormatting.RESET), matrix, renderBuffer, light);
-                    matrix.translate(0, (double) (9.0F * 2.4F * 0.025F), 0);
-                    matrix.scale(1f,1f,1f);
 
 
-                if (simEntity.getJob() == null){
-                    matrix.scale(.9f,.9f,.9f);
-                    super.renderName(simEntity, new StringTextComponent(TextFormatting.YELLOW + "Unemployed" + TextFormatting.RESET), matrix, renderBuffer, light);
-                }else{
-                    String profession = Profession.getNameFromID(simEntity.getProfession());
-                    matrix.scale(.9f,.9f,.9f);
-                    super.renderName(simEntity, new StringTextComponent(TextFormatting.YELLOW + StringUtils.capitalize(profession) + TextFormatting.RESET), matrix, renderBuffer, light);
-
-                }*/
-                simEntity.setStatus("Wandering");
                 if (!simEntity.getStatus().equals("")){
                     matrix.scale(.9f,.9f,.9f);
-                    super.renderName(simEntity, new StringTextComponent(TextFormatting.YELLOW  + simEntity.getStatus() + TextFormatting.RESET), matrix, renderBuffer, light);
+                    super.renderName(simEntity, new StringTextComponent(TextFormatting.YELLOW  + simEntity.getActivity().name + TextFormatting.RESET), matrix, renderBuffer, light);
                     matrix.translate(0, (double) (9.0F *1.2f* 0.025F), 0);
                 }
                 //matrix.translate(0, (double) (9.0F * 1F * 0.025F), 0);
