@@ -1,0 +1,16 @@
+{
+  "name": "Fisher Job",
+  "icon": "minecraft:fishing_rod",
+  "category": "simukraft:jobs",
+  "pages": [
+    {
+      "type": "text",
+      "text": "Fishy man go fishing."
+    },
+    {
+      "type": "text",
+      "title": "Required Tools",
+      "text": "The Fishing Rod:$(br)The fishing rod is the most important tool to any fisher. By enchanting this tool the yield of fish and/or treasure can be increased."
+    }
+  ]
+}
