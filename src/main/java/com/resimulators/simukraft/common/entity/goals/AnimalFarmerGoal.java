@@ -2,14 +2,11 @@ package com.resimulators.simukraft.common.entity.goals;
 
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.jobs.JobAnimalFarmer;
-import com.resimulators.simukraft.common.jobs.JobGlassFactory;
-import com.resimulators.simukraft.common.jobs.core.EnumJobState;
+import com.resimulators.simukraft.common.jobs.core.Activity;
 import com.resimulators.simukraft.common.tileentity.TileAnimalFarm;
 import com.resimulators.simukraft.utils.BlockUtils;
-import io.netty.util.concurrent.BlockingOperationException;
 import net.minecraft.command.arguments.EntityAnchorArgument;
 import net.minecraft.entity.passive.AnimalEntity;
-import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.item.*;
 import net.minecraft.loot.LootContext;
 import net.minecraft.loot.LootParameterSets;
@@ -25,11 +22,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
-import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.items.wrapper.InvWrapper;
-import org.lwjgl.system.CallbackI;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -61,9 +55,9 @@ public class AnimalFarmerGoal extends BaseGoal<JobAnimalFarmer>{
     @Override
     public boolean shouldExecute() {
         job = (JobAnimalFarmer) sim.getJob();
-        if (job.getState() == EnumJobState.GOING_TO_WORK){
+        if (sim.getActivity() == Activity.GOING_TO_WORK){
             if (sim.getPosition().withinDistance(new Vector3d(job.getWorkSpace().getX(),job.getWorkSpace().getY(),job.getWorkSpace().getZ()),5)) {
-                job.setState(EnumJobState.WORKING);
+                sim.setActivity(Activity.WORKING);
                 return true;
             }
         }

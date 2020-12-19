@@ -3,7 +3,7 @@ package com.resimulators.simukraft.common.entity.goals;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.entity.sim.SimInventory;
 import com.resimulators.simukraft.common.jobs.JobGlassFactory;
-import com.resimulators.simukraft.common.jobs.core.EnumJobState;
+import com.resimulators.simukraft.common.jobs.core.Activity;
 import com.resimulators.simukraft.common.world.Faction;
 import com.resimulators.simukraft.common.world.SavedWorldData;
 import com.resimulators.simukraft.utils.BlockUtils;
@@ -57,9 +57,9 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
     @Override
     public boolean shouldExecute() {
         job = (JobGlassFactory) sim.getJob();
-        if (job.getState() == EnumJobState.GOING_TO_WORK){
+        if (sim.getActivity() == Activity.GOING_TO_WORK){
             if (sim.getPosition().withinDistance(new Vector3d(job.getWorkSpace().getX(),job.getWorkSpace().getY(),job.getWorkSpace().getZ()),5)){
-                job.setState(EnumJobState.WORKING);
+                sim.setActivity(Activity.WORKING);
                 findChestAroundBlock(job.getWorkSpace());
                 findFurnaceAroundBlock(job.getWorkSpace());
                 return validateWorkArea();
@@ -79,7 +79,7 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
 
         }else {
             if (!validateWorkArea()){
-                sim.getJob().setState(EnumJobState.NOT_WORKING);
+                sim.getJob().setState(Activity.NOT_WORKING);
             }
         }
     }
@@ -100,7 +100,7 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
                         destinationBlock = chests.get(0);
                     } else {
                         if (!validateWorkArea()) {
-                            sim.getJob().setState(EnumJobState.NOT_WORKING);
+                            sim.getJob().setState(Activity.NOT_WORKING);
                         }
                     }
                 }
@@ -213,7 +213,7 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
     @Override
     public boolean shouldContinueExecuting() {
         if (sim.getJob() != null) {
-            if (sim.getJob().getState() == EnumJobState.FORCE_STOP) {
+            if (sim.getJob().getState() == Activity.FORCE_STOP) {
                 return false;
             }
             if (tick < sim.getJob().workTime()) {

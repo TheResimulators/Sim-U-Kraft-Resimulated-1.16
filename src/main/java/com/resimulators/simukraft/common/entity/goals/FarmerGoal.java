@@ -5,7 +5,7 @@ import com.google.common.collect.Maps;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.entity.sim.SimInventory;
 import com.resimulators.simukraft.common.jobs.JobFarmer;
-import com.resimulators.simukraft.common.jobs.core.EnumJobState;
+import com.resimulators.simukraft.common.jobs.core.Activity;
 import com.resimulators.simukraft.common.tileentity.TileFarmer;
 import com.resimulators.simukraft.common.tileentity.TileMarker;
 import com.resimulators.simukraft.common.world.SavedWorldData;
@@ -69,14 +69,14 @@ public class FarmerGoal extends BaseGoal<JobFarmer> {
         if (job != null) {
             chests = new ArrayList<>();
             findChests();
-            if (job.getState() == EnumJobState.GOING_TO_WORK) {
+            if (sim.getActivity() == Activity.GOING_TO_WORK) {
                 if (sim.getPosition().withinDistance(new Vector3d(job.getWorkSpace().getX(), job.getWorkSpace().getY(), job.getWorkSpace().getZ()), 5)) {
                     farmerTile = (TileFarmer) world.getTileEntity(job.getWorkSpace());
                     if (farmerTile != null) {
                         dir = farmerTile.getDir();
                     }
                     if (hasSeeds()) {
-                        job.setState(EnumJobState.WORKING);
+                        sim.setActivity(Activity.WORKING);
                         return true;
                     } else {
                         SavedWorldData.get(world).getFactionWithSim(sim.getUniqueID()).sendFactionChatMessage((sim.getDisplayName().getString() + " does not have the seeds required to work" + "(" + farmerTile.getSeed().getName() + ")"), world);
@@ -196,7 +196,7 @@ public class FarmerGoal extends BaseGoal<JobFarmer> {
                     getNextHarvestable();
                 }else{
                     state = State.STORING;
-                    sim.getJob().setState(EnumJobState.NOT_WORKING);
+                    sim.getJob().setState(Activity.NOT_WORKING);
                 }
             }
         }else{
@@ -225,7 +225,7 @@ public class FarmerGoal extends BaseGoal<JobFarmer> {
                 state = State.HARVESTING;
                 getNextHarvestable();
             }else{
-                sim.getJob().setState(EnumJobState.FORCE_STOP);
+                sim.getJob().setState(Activity.FORCE_STOP);
             }
         if (row > depth){
             state = State.WAITING;
@@ -243,7 +243,7 @@ public class FarmerGoal extends BaseGoal<JobFarmer> {
     @Override
     public boolean shouldContinueExecuting() {
         if (sim.getJob() != null) {
-            if (sim.getJob().getState() == EnumJobState.FORCE_STOP) {
+            if (sim.getJob().getState() == Activity.FORCE_STOP) {
                 return false;
             }
             if (tick < sim.getJob().workTime()) {

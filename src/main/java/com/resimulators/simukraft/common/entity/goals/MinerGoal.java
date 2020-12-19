@@ -3,7 +3,7 @@ package com.resimulators.simukraft.common.entity.goals;
 import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.jobs.JobMiner;
-import com.resimulators.simukraft.common.jobs.core.EnumJobState;
+import com.resimulators.simukraft.common.jobs.core.Activity;
 import com.resimulators.simukraft.common.tileentity.TileMiner;
 import com.resimulators.simukraft.common.world.Faction;
 import com.resimulators.simukraft.common.world.SavedWorldData;
@@ -71,9 +71,9 @@ public class MinerGoal extends BaseGoal<JobMiner> {
         if (!((TileMiner) sim.world.getTileEntity(job.getWorkSpace())).CheckValidity()) return false;
         if (job.getWorkSpace() == null) return false;
         if (sim.world.getTileEntity(job.getWorkSpace()) == null) return false;
-        if (job.getState() == EnumJobState.GOING_TO_WORK) {
+        if (sim.getActivity() == Activity.GOING_TO_WORK) {
             if (sim.getPosition().withinDistance(new Vector3d(job.getWorkSpace().getX(), job.getWorkSpace().getY(), job.getWorkSpace().getZ()), 5)) {
-                job.setState(EnumJobState.WORKING);
+                sim.setActivity(Activity.WORKING);
                 currentTask = Task.TRAVELING;
                 return true;
             }
@@ -110,7 +110,7 @@ public class MinerGoal extends BaseGoal<JobMiner> {
     public void tick() {
         super.tick();
         World world = sim.getEntityWorld();
-        if (job.getState() == EnumJobState.WORKING) { // checks if the miner should be working
+        if (sim.getActivity() == Activity.WORKING) { // checks if the miner should be working
 
             if (delay <= 0 && currentTask == Task.MINING) {// checks if the miner should be mining or doing a different task
 
@@ -197,7 +197,7 @@ public class MinerGoal extends BaseGoal<JobMiner> {
                 if ((sim.getDistanceSq(pos.getX(),pos.getY(),pos.getZ()) <= 5)) {
                     if (getInventoryAroundPos(sim.getJob().getWorkSpace()) != null) {
                         if (addSimInventoryToChest(getInventoryAroundPos(sim.getJob().getWorkSpace()))) {
-                            sim.getJob().setState(EnumJobState.NOT_WORKING);
+                            sim.getJob().setState(Activity.NOT_WORKING);
                             currentTask = Task.NONE;
                             int id = SavedWorldData.get(sim.world).getFactionWithSim(sim.getUniqueID()).getId();
                             sim.fireSim(sim, id, false);
@@ -236,7 +236,7 @@ public class MinerGoal extends BaseGoal<JobMiner> {
     public boolean shouldContinueExecuting() {
         //checks for different situations where the sim should stop working
         if (sim.getJob() != null) {
-            if (sim.getJob().getState() == EnumJobState.FORCE_STOP) {
+            if (sim.getJob().getState() == Activity.FORCE_STOP) {
                 return false;
             }
             if (tick < sim.getJob().workTime()) {
@@ -252,7 +252,7 @@ public class MinerGoal extends BaseGoal<JobMiner> {
         // resets progress and a few other things to make things ready for the next time the sim works
         (job).setProgress(progress);
         sim.getJob().finishedWorkPeriod();
-        sim.getJob().setState(EnumJobState.NOT_WORKING);
+        sim.getJob().setState(Activity.NOT_WORKING);
     }
 
     @Override

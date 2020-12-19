@@ -2,7 +2,7 @@ package com.resimulators.simukraft.common.jobs;
 
 import com.resimulators.simukraft.common.entity.goals.FarmerGoal;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
-import com.resimulators.simukraft.common.jobs.core.EnumJobState;
+import com.resimulators.simukraft.common.jobs.core.Activity;
 import com.resimulators.simukraft.common.jobs.core.IJob;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.nbt.CompoundNBT;
@@ -15,7 +15,7 @@ public class JobFarmer implements IJob {
     private Goal goal1;
     private int periodsworked = 0;
     private BlockPos workSpace;
-    private EnumJobState state = EnumJobState.NOT_WORKING;
+    private Activity state = Activity.NOT_WORKING;
     private boolean tilled = false;
     private int progress;
 
@@ -33,12 +33,12 @@ public class JobFarmer implements IJob {
     }
 
     @Override
-    public EnumJobState getState() {
+    public Activity getState() {
         return state;
     }
 
     @Override
-    public void setState(EnumJobState state) {
+    public void setState(Activity state) {
         this.state = state;
     }
 

@@ -2,7 +2,7 @@ package com.resimulators.simukraft.common.entity.goals;
 
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.jobs.JobFisher;
-import com.resimulators.simukraft.common.jobs.core.EnumJobState;
+import com.resimulators.simukraft.common.jobs.core.Activity;
 import com.resimulators.simukraft.common.world.Faction;
 import com.resimulators.simukraft.common.world.SavedWorldData;
 import com.resimulators.simukraft.utils.BlockUtils;
@@ -43,9 +43,9 @@ public class FisherGoal extends BaseGoal<JobFisher> {
     @Override
     public boolean shouldExecute() {
         job = (JobFisher) sim.getJob();
-        if (job.getState() == EnumJobState.GOING_TO_WORK) {
+        if (sim.getActivity() == Activity.GOING_TO_WORK) {
             if (sim.getPosition().withinDistance(new Vector3d(job.getWorkSpace().getX(), job.getWorkSpace().getY(), job.getWorkSpace().getZ()), 5)) {
-                job.setState(EnumJobState.WORKING);
+                sim.setActivity(Activity.WORKING);
                 findChestAroundBlock(job.getWorkSpace());
                 return true;
             }
@@ -63,27 +63,27 @@ public class FisherGoal extends BaseGoal<JobFisher> {
         }
         else {
             if (!validateWorkArea()) {
-                sim.getJob().setState(EnumJobState.NOT_WORKING);
+                sim.getJob().setState(Activity.NOT_WORKING);
             }
         }
     }
 
     @Override
     public void tick() {
-        if (job.getState().equals(EnumJobState.WORKING)) {
+        if (sim.getActivity().equals(Activity.WORKING)) {
             super.tick();
             tick++;
         }
         state = State.WAITING;
         findChestAroundBlock(job.getWorkSpace());
         if (!validateWorkArea()) {
-            sim.getJob().setState(EnumJobState.NOT_WORKING);
+            sim.getJob().setState(Activity.NOT_WORKING);
             validateSentence = false;
         }
         else if (validateWorkArea()) {
-            sim.getJob().setState(EnumJobState.WORKING);
+            sim.getJob().setState(Activity.WORKING);
         }
-        if (tick >= delay * 20 && job.getState().equals(EnumJobState.WORKING)) {
+        if (tick >= delay * 20 && sim.getActivity().equals(Activity.WORKING)) {
             state = State.FISHING;
             double f = rnd.nextDouble();
             int index = -1;
@@ -135,7 +135,7 @@ public class FisherGoal extends BaseGoal<JobFisher> {
     @Override
     public boolean shouldContinueExecuting() {
         if (sim.getJob() != null) {
-            if (sim.getJob().getState() == EnumJobState.FORCE_STOP) {
+            if (sim.getJob().getState() == Activity.FORCE_STOP) {
                 return false;
             }
             if (tick < sim.getJob().workTime()) {

@@ -49,4 +49,10 @@ public class BaseGoal<JobType extends IJob>  extends MoveToBlockGoal{
         }
         return false;
     }
+
+    @Override
+    public void resetTask() {
+        super.resetTask();
+        sim.setStatus("");
+    }
 }
