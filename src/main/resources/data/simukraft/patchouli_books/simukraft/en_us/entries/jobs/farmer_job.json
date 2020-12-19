@@ -1,0 +1,16 @@
+{
+  "name": "Farmer Job",
+  "icon": "minecraft:diamond_hoe",
+  "category": "simukraft:jobs",
+  "pages": [
+    {
+      "type": "text",
+      "text": "Farmy farm woman man."
+    },
+    {
+      "type": "text",
+      "title": "Required Tools",
+      "text": "The Hoe:$(br)The hoe is used for tilling soil so you can plant seeds in it."
+    }
+  ]
+}
