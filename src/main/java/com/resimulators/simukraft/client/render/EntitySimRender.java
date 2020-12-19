@@ -115,8 +115,8 @@ public class EntitySimRender extends LivingRenderer<SimEntity, EntitySimModel> {
         double d = this.renderManager.squareDistanceTo(simEntity);
         matrix.push();
             if (d < 100.0d) {
-                matrix.translate(0, (9.0F * 1 * 0.025F), 0);
-                if(simEntity.getFoodStats() != null){
+                matrix.translate(0, (9.0F * 1.2f * 0.025F), 0);
+                /*if(simEntity.getFoodStats() != null){
                     String state = "Full";
                     matrix.scale(.9f,.9f,.9f);
                     if (simEntity.getFoodStats().getFoodLevel() < FoodStats.FoodLevels.LOW.level){
@@ -143,11 +143,11 @@ public class EntitySimRender extends LivingRenderer<SimEntity, EntitySimModel> {
                     matrix.scale(1f,1f,1f);
                 }
 
-                //TODO:WIP HOUSE STATUS (TEMP)
-                matrix.scale(.9f,.9f,.9f);
-                super.renderName(simEntity, new StringTextComponent(TextFormatting.YELLOW + "Homeless (WIP)" + TextFormatting.RESET), matrix, renderBuffer, light);
-                matrix.translate(0, (double) (9.0F * 2.4F * 0.025F), 0);
-                matrix.scale(1f,1f,1f);
+                    //TODO:WIP HOUSE STATUS (TEMP)
+                    matrix.scale(.9f,.9f,.9f);
+                    super.renderName(simEntity, new StringTextComponent(TextFormatting.YELLOW + "Homeless (WIP)" + TextFormatting.RESET), matrix, renderBuffer, light);
+                    matrix.translate(0, (double) (9.0F * 2.4F * 0.025F), 0);
+                    matrix.scale(1f,1f,1f);
 
 
                 if (simEntity.getJob() == null){
@@ -158,14 +158,15 @@ public class EntitySimRender extends LivingRenderer<SimEntity, EntitySimModel> {
                     matrix.scale(.9f,.9f,.9f);
                     super.renderName(simEntity, new StringTextComponent(TextFormatting.YELLOW + StringUtils.capitalize(profession) + TextFormatting.RESET), matrix, renderBuffer, light);
 
-                }
+                }*/
+                simEntity.setStatus("Wandering");
                 if (!simEntity.getStatus().equals("")){
                     matrix.scale(.9f,.9f,.9f);
-                    // super.renderName(simEntity, new StringTextComponent(TextFormatting.YELLOW  + simEntity.getStatus() + TextFormatting.RESET), matrix, renderBuffer, light);
-                    matrix.translate(0, (double) (9.0F *.7f* 0.025F), 0);
+                    super.renderName(simEntity, new StringTextComponent(TextFormatting.YELLOW  + simEntity.getStatus() + TextFormatting.RESET), matrix, renderBuffer, light);
+                    matrix.translate(0, (double) (9.0F *1.2f* 0.025F), 0);
                 }
                 //matrix.translate(0, (double) (9.0F * 1F * 0.025F), 0);
-                matrix.scale(1.2f,1.2f,1.2f);
+                matrix.scale(1f,1f,1f);
 
 
 
