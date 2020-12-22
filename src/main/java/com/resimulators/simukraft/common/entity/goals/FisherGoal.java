@@ -45,6 +45,7 @@ public class FisherGoal extends BaseGoal<JobFisher> {
     @Override
     public boolean shouldExecute() {
         job = (JobFisher) sim.getJob();
+        if (job == null) return  false;
         if (sim.getActivity() == Activity.GOING_TO_WORK) {
             if (sim.getPosition().withinDistance(new Vector3d(job.getWorkSpace().getX(), job.getWorkSpace().getY(), job.getWorkSpace().getZ()), 5)) {
                 sim.setActivity(Activity.WORKING);

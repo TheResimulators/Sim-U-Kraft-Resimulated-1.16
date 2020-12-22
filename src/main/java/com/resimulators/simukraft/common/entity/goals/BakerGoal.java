@@ -34,6 +34,7 @@ public class BakerGoal extends BaseGoal<JobBaker> {
     @Override
     public boolean shouldExecute() {
         job = (JobBaker) sim.getJob();
+        if (job == null) return  false;
         if (sim.getActivity() == Activity.GOING_TO_WORK) {
             if (sim.getPosition().withinDistance(new Vector3d(job.getWorkSpace().getX(), job.getWorkSpace().getY(), job.getWorkSpace().getZ()), 2)) {
                 sim.setActivity(Activity.WORKING);
