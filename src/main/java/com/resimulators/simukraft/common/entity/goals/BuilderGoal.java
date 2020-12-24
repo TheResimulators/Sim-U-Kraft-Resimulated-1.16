@@ -56,21 +56,22 @@ public class BuilderGoal extends Goal {
         //FABBE50
         System.out.println("startExecuting");
         template = ((JobBuilder) sim.getJob()).getTemplate();
-        PlacementSettings settings = new PlacementSettings()
+        if (template != null) {
+            PlacementSettings settings = new PlacementSettings()
                 .setCenterOffset(template.getSize().subtract(new Vector3i(template.getSize().getX() / 2, 0, template.getSize().getZ() / 2)))
                 .setRotation(Rotation.NONE)
                 .setMirror(Mirror.NONE);
-        blocks = StructureHandler.modifyAndConvertTemplate(template, sim.world, sim.getJob().getWorkSpace(), Rotation.NONE, Mirror.NONE); // needs to be fixed, only places packed ice right now
-        SimuKraft.LOGGER().debug("cost: " + template.getCost());
-        for (Template.BlockInfo blockInfo : blocks) {
-            BlockState state = blockInfo.state;
-            if (blockInfo.state.getBlock() == ModBlocks.CONTROL_BOX.get()) {
-                state = blockInfo.state.with(ModBlockProperties.TYPE, template.getTypeID());
+            blocks = StructureHandler.modifyAndConvertTemplate(template, sim.world, sim.getJob().getWorkSpace(), Rotation.NONE, Mirror.NONE); // needs to be fixed, only places packed ice right now
+            SimuKraft.LOGGER().debug("cost: " + template.getCost());
+            for (Template.BlockInfo blockInfo : blocks) {
+                BlockState state = blockInfo.state;
+                if (blockInfo.state.getBlock() == ModBlocks.CONTROL_BOX.get()) {
+                    state = blockInfo.state.with(ModBlockProperties.TYPE, template.getTypeID());
+                }
+                sim.world.setBlockState(blockInfo.pos, state);
             }
-            sim.world.setBlockState(blockInfo.pos, state);
         }
     }
-
     @Override
     public void tick() {
         tick++;
