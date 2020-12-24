@@ -16,6 +16,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.state.IntegerProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.tileentity.TileEntity;
@@ -98,6 +99,7 @@ public class BlockControlBox extends BlockBase {
                     sim.getJob().removeJobAi();
                 }
                 sim.setJob(null);
+                sim.setHeldItem(sim.getActiveHand(), ItemStack.EMPTY);
                 sim.setProfession(0);
                 tile.setHired(false);
                 tile.setSimId(null);

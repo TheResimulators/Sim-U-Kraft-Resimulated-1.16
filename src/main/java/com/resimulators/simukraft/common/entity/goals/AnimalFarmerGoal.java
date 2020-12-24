@@ -55,6 +55,7 @@ public class AnimalFarmerGoal extends BaseGoal<JobAnimalFarmer>{
     @Override
     public boolean shouldExecute() {
         job = (JobAnimalFarmer) sim.getJob();
+        if (job == null) return  false;
         if (sim.getActivity() == Activity.GOING_TO_WORK){
             if (job.getWorkSpace() != null){
                 if (sim.getPosition().withinDistance(new Vector3d(job.getWorkSpace().getX(),job.getWorkSpace().getY(),job.getWorkSpace().getZ()),5)) {

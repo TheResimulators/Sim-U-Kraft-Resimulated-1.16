@@ -38,6 +38,9 @@ public class GuiHandler {
             case ANIMAL_FARM:
                 Minecraft.getInstance().displayGuiScreen(new GuiAnimal(new StringTextComponent(string),ints,pos,id));
                 break;
+            case BAKER:
+                Minecraft.getInstance().displayGuiScreen(new GuiBaker(new StringTextComponent(string), ints, pos, id));
+                break;
             case FISHER_MAN:
                 Minecraft.getInstance().displayGuiScreen(new GuiFisher(new StringTextComponent(string), ints,pos,id));
                 break;
