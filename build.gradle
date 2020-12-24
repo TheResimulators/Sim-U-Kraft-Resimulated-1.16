@@ -45,11 +45,11 @@ minecraft {
             ideaModule "${project.name}.main"
 
             environment 'MOD_CLASSES', "${project.file("out/production/resources").canonicalPath};${project.file("out/production/classes").canonicalPath}"
-            /*mods {
-                main {
+            mods {
+                simukraft {
                     sources sourceSets.main
                 }
-            }*/
+            }
         }
         server {
             workingDirectory project.file('run')
