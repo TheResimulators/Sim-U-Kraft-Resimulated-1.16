@@ -28,11 +28,13 @@ public class FisherGoal extends BaseGoal<JobFisher> {
     private final ArrayList<BlockPos> chests = new ArrayList<>();
     private State state = State.WAITING;
     private final Item[] fish = {Items.TROPICAL_FISH, Items.PUFFERFISH, Items.SALMON, Items.COD};
-    private int tick;
+    private int tick, fishTrigger;
     private final Random rnd = new Random();
     private int delay = rnd.nextInt(41) + 5;
     private boolean validateSentence = false;
 
+
+    //TODO: Fisher Mechanics (Swing) - CrAzyScreamX
 
     public FisherGoal(SimEntity sim) {
         super(sim, sim.getAIMoveSpeed()* 2, 20);
@@ -43,6 +45,7 @@ public class FisherGoal extends BaseGoal<JobFisher> {
     @Override
     public boolean shouldExecute() {
         job = (JobFisher) sim.getJob();
+        if (job == null) return  false;
         if (sim.getActivity() == Activity.GOING_TO_WORK) {
             if (sim.getPosition().withinDistance(new Vector3d(job.getWorkSpace().getX(), job.getWorkSpace().getY(), job.getWorkSpace().getZ()), 5)) {
                 sim.setActivity(Activity.WORKING);
@@ -70,10 +73,9 @@ public class FisherGoal extends BaseGoal<JobFisher> {
 
     @Override
     public void tick() {
-        if (sim.getActivity().equals(Activity.WORKING)) {
-            super.tick();
-            tick++;
-        }
+        super.tick();
+        tick++;
+        fishTrigger++;
         state = State.WAITING;
         findChestAroundBlock(job.getWorkSpace());
         if (!validateWorkArea()) {
@@ -83,7 +85,7 @@ public class FisherGoal extends BaseGoal<JobFisher> {
         else if (validateWorkArea()) {
             sim.getJob().setState(Activity.WORKING);
         }
-        if (tick >= delay * 20 && sim.getActivity().equals(Activity.WORKING)) {
+        if (fishTrigger >= delay * 20 && sim.getActivity().equals(Activity.WORKING)) {
             state = State.FISHING;
             double f = rnd.nextDouble();
             int index = -1;
@@ -123,7 +125,7 @@ public class FisherGoal extends BaseGoal<JobFisher> {
                 break;
             }
             delay = rnd.nextInt(41) + 5;
-            tick = 0;
+            fishTrigger = 0;
         }
     }
 
@@ -153,7 +155,7 @@ public class FisherGoal extends BaseGoal<JobFisher> {
     private void findChestAroundBlock(BlockPos workPos) {
         ArrayList<BlockPos> blocks = BlockUtils.getBlocksAroundPosition(workPos, 5);
         for (BlockPos pos: blocks) {
-            if (world.getTileEntity(pos) instanceof ChestTileEntity) {
+            if (world.getTileEntity(pos) instanceof ChestTileEntity && !chests.contains(pos)) {
                 chests.add(pos);
             }
         }
