@@ -1,17 +1,18 @@
 package com.resimulators.simukraft.datagen;
 
-import com.resimulators.simukraft.Reference;
-import com.resimulators.simukraft.init.ModEntities;
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
+import com.resimulators.simukraft.Reference;
+import com.resimulators.simukraft.init.ModEntities;
 import net.minecraft.block.Block;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.IDataProvider;
 import net.minecraft.data.LootTableProvider;
-import net.minecraft.data.loot.*;
+import net.minecraft.data.loot.BlockLootTables;
+import net.minecraft.data.loot.EntityLootTables;
 import net.minecraft.entity.EntityType;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.loot.*;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.List;

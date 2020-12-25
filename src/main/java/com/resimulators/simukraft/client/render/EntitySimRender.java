@@ -1,14 +1,11 @@
 package com.resimulators.simukraft.client.render;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.datafixers.optics.profunctors.ProfunctorFunctorWrapper;
 import com.resimulators.simukraft.Reference;
 import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.client.data.SkinCacher;
 import com.resimulators.simukraft.client.model.EntitySimModel;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
-import com.resimulators.simukraft.common.jobs.Profession;
-import com.resimulators.simukraft.handlers.FoodStats;
 import com.resimulators.simukraft.utils.ColorHelper;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
@@ -27,7 +24,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nonnull;
 

@@ -1,7 +1,6 @@
 package com.resimulators.simukraft.common.jobs;
 
 import com.resimulators.simukraft.common.entity.goals.BakerGoal;
-import com.resimulators.simukraft.common.entity.goals.FisherGoal;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.jobs.core.Activity;
 import com.resimulators.simukraft.common.jobs.core.IJob;
