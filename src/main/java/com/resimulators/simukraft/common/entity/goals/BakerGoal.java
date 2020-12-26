@@ -16,9 +16,12 @@ import net.minecraft.item.Items;
 import net.minecraft.tileentity.ChestTileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.world.ForcedChunksSaveData;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.event.world.WorldEvent;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -109,7 +112,7 @@ public class BakerGoal extends BaseGoal<JobBaker> {
                 for (BlockPos workChests : farmChestsHashMap.get(destinationBlock)) {
                     ChestTileEntity chestTileEntity = (ChestTileEntity) world.getTileEntity(workChests);
                     if (chestTileEntity != null) {
-                        int simInvLeftOver = 0;
+                        int simInvLeftOver;
                         int farmChestCount = Math.min(chestTileEntity.count(Items.WHEAT), 192);
                         int simInvFarmStack = farmChestCount / 64;
                         if (simInvFarmStack >= 1) simInvLeftOver = farmChestCount - (simInvFarmStack * 64);
@@ -235,13 +238,9 @@ public class BakerGoal extends BaseGoal<JobBaker> {
                 {
                     if (chestTileEntity.getStackInSlot(i).isEmpty()) {
                         chestTileEntity.setInventorySlotContents(i, new ItemStack(Items.BREAD, bread));
-                        sortChest(chestTileEntity, Items.BREAD);
-                        sortChest(chestTileEntity, Items.WHEAT);
                         break chestLoop;
                     }
                 }
-                sortChest(chestTileEntity, Items.BREAD);
-                sortChest(chestTileEntity, Items.WHEAT);
             }
 
         }
@@ -320,7 +319,7 @@ public class BakerGoal extends BaseGoal<JobBaker> {
     }
 
     private void putSimInvInChest() {
-        int simInvLeftOver = 0;
+        int simInvLeftOver;
         int simInvAmount = sim.getInventory().count(Items.WHEAT);
         int simInvStack = simInvAmount / 64;
         if (simInvStack >= 1) {
@@ -361,36 +360,6 @@ public class BakerGoal extends BaseGoal<JobBaker> {
             }
         }
         return false;
-    }
-
-    private void sortChest(ChestTileEntity chestTileEntity, Item itemIn) {
-        int amountOfItem = 0;
-        for (int i = 0; i < chestTileEntity.getSizeInventory(); i++) {
-            ItemStack itemStack = chestTileEntity.getStackInSlot(i);
-            if (itemStack.getItem().equals(itemIn)) {
-                amountOfItem += itemStack.getCount();
-                chestTileEntity.setInventorySlotContents(i, ItemStack.EMPTY);
-            }
-        }
-        int stackAmount = amountOfItem / 64;
-        int leftOver = 0;
-        if (stackAmount >= 1) {
-            leftOver = amountOfItem - (stackAmount * 64);
-        } else {
-            leftOver = amountOfItem;
-        }
-        for (int i = 0; i < chestTileEntity.getSizeInventory(); i++) {
-            ItemStack itemStack = chestTileEntity.getStackInSlot(i);
-            if (itemStack.isEmpty()) {
-                if (stackAmount != 0) {
-                    stackAmount--;
-                    chestTileEntity.setInventorySlotContents(i, new ItemStack(itemIn, 64));
-                } else {
-                    chestTileEntity.setInventorySlotContents(i, new ItemStack(itemIn, leftOver));
-                    break;
-                }
-            }
-        }
     }
 
     private boolean validateWorkArea() {
