@@ -2,7 +2,6 @@ package com.resimulators.simukraft.common.tileentity;
 
 import com.resimulators.simukraft.client.gui.GuiHandler;
 import com.resimulators.simukraft.common.enums.Animal;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.nbt.CompoundNBT;
