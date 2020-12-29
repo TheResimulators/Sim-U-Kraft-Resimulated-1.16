@@ -135,6 +135,17 @@ public class Faction {
         return sims;
     }
 
+    public ArrayList<UUID> getEmployedSims() {
+        ArrayList<UUID> sims = new ArrayList<>();
+
+        for (SimInfo info : this.sims.values()) {
+            if (info.hired) {
+                sims.add(info.sim);
+            }
+        }
+        return sims;
+    }
+
     public void hireSim(UUID id) {
         this.sims.get(id).hired = true;
     }
