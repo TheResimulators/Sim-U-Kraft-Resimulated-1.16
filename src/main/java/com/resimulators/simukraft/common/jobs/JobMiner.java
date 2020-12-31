@@ -82,15 +82,17 @@ public class JobMiner implements IJob {
 
     @Override
     public ListNBT writeToNbt(ListNBT nbt) {
+        CompoundNBT data = new CompoundNBT();
+        data.putInt("id", sim.getProfession());
         CompoundNBT ints = new CompoundNBT();
         ints.putInt("periodsworked", periodsworked);
         nbt.add(ints);
         CompoundNBT other = new CompoundNBT(); // other info that is unique to the miner
+        if (workSpace != null) {
+            other.putLong("jobpos", workSpace.toLong());
+        }
         other.putInt("progress",progress);
-        if (workSpace != null){
-        other.putLong("jobpos",workSpace.toLong());}
         nbt.add(other);
-
         return nbt;
     }
 

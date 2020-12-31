@@ -1,7 +1,6 @@
 package com.resimulators.simukraft.common.jobs;
 
-import com.resimulators.simukraft.common.building.BuildingTemplate;
-import com.resimulators.simukraft.common.entity.goals.BuilderGoal;
+import com.resimulators.simukraft.common.entity.goals.BakerGoal;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.jobs.core.Activity;
 import com.resimulators.simukraft.common.jobs.core.IJob;
@@ -10,32 +9,19 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.math.BlockPos;
 
+public class JobBaker implements IJob {
 
-public class JobBuilder implements IJob {
-    private final SimEntity sim;
-    private final Goal goal1;
-    private BuildingTemplate template;
+    private SimEntity sim;
+    private Goal goal1;
     private int periodsworked = 0;
     private BlockPos workSpace;
     private Activity state = Activity.NOT_WORKING;
 
-    public JobBuilder(SimEntity sim) {
-        this.sim = sim;
-        goal1 = new BuilderGoal(sim);
+
+    public JobBaker(SimEntity simEntity) {
+        this.sim = simEntity;
+        goal1 = new BakerGoal(sim);
         addJobAi();
-    }
-
-    public void setTemplate(BuildingTemplate template) {
-        this.template = template;
-    }
-
-    public BuildingTemplate getTemplate() {
-        return template;
-    }
-
-    @Override
-    public Profession jobType() {
-        return Profession.BUILDER;
     }
 
     @Override
@@ -49,20 +35,23 @@ public class JobBuilder implements IJob {
     }
 
     @Override
+    public Profession jobType() {
+        return Profession.BAKER;
+    }
+
+    @Override
     public int intervalTime() {
-        return 1000;
+        return 400;
     }
 
     @Override
     public int workTime() {
-        return 12000;
+        return 10000;
     }
 
     @Override
     public int maximumWorkPeriods() {
-        return -1;
-        //negative one so that it can work as much as it can. builder should work all day.
-        // if it can't find resources it take a 1000 tick break
+        return 3;
     }
 
     @Override
@@ -77,8 +66,7 @@ public class JobBuilder implements IJob {
 
     @Override
     public void addJobAi() {
-        sim.goalSelector.addGoal(3, goal1);
-        System.out.println("Added " + goal1 + " to sim " + sim.getUniqueID());
+        sim.goalSelector.addGoal(3,goal1);
     }
 
     @Override
@@ -89,8 +77,8 @@ public class JobBuilder implements IJob {
     @Override
     public ListNBT writeToNbt(ListNBT nbt) {
         CompoundNBT data = new CompoundNBT();
-        data.putInt("id", sim.getProfession());
         nbt.add(data);
+        data.putInt("id", sim.getProfession());
         CompoundNBT ints = new CompoundNBT();
         ints.putInt("periodsworked", periodsworked);
         nbt.add(ints);
@@ -99,7 +87,6 @@ public class JobBuilder implements IJob {
             other.putLong("jobpos", workSpace.toLong());
         }
         nbt.add(other);
-
         return nbt;
     }
 
@@ -118,7 +105,7 @@ public class JobBuilder implements IJob {
 
     @Override
     public void finishedWorkPeriod() {
-        setWorkedPeriods(periodsworked++);
+        setWorkedPeriods(++periodsworked);
     }
 
     @Override
@@ -148,8 +135,6 @@ public class JobBuilder implements IJob {
 
     @Override
     public double getWage() {
-        return 0;
+        return 0.7d;
     }
-
-
 }

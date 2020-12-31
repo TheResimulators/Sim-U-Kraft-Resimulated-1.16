@@ -2,8 +2,8 @@ package com.resimulators.simukraft.packets;
 
 import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
-import com.resimulators.simukraft.common.world.SavedWorldData;
 import com.resimulators.simukraft.common.tileentity.ITile;
+import com.resimulators.simukraft.common.world.SavedWorldData;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;

@@ -25,5 +25,6 @@ public class ModTileEntities {
     public static final RegistryObject<TileEntityType<TileSheepFarm>> SHEEP_FARMER = REGISTRY.register("sheep_farmer", () -> TileEntityType.Builder.create(TileSheepFarm::new,ModBlocks.CONTROL_BOX.get()).build(null));
     public static final RegistryObject<TileEntityType<TileChickenFarmer>> CHICKEN_FARMER = REGISTRY.register("chicken_farmer", () -> TileEntityType.Builder.create(TileChickenFarmer::new,ModBlocks.CONTROL_BOX.get()).build(null));
     public static final RegistryObject<TileEntityType<TilePigFarmer>> PIG_FARMER = REGISTRY.register("pig_farmer", () -> TileEntityType.Builder.create(TilePigFarmer::new,ModBlocks.CONTROL_BOX.get()).build(null));
+    public static final RegistryObject<TileEntityType<TileBaker>> BAKER = REGISTRY.register("baker", () -> TileEntityType.Builder.create(TileBaker::new, ModBlocks.CONTROL_BOX.get()).build(null));
     public static final RegistryObject<TileEntityType<TileFisher>> FISHER_MAN = REGISTRY.register("fisher_man", () -> TileEntityType.Builder.create(TileFisher::new,ModBlocks.CONTROL_BOX.get()).build(null));
 }

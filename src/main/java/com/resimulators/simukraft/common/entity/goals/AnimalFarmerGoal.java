@@ -5,9 +5,11 @@ import com.resimulators.simukraft.common.jobs.JobAnimalFarmer;
 import com.resimulators.simukraft.common.jobs.core.Activity;
 import com.resimulators.simukraft.common.tileentity.TileAnimalFarm;
 import com.resimulators.simukraft.utils.BlockUtils;
-import net.minecraft.command.arguments.EntityAnchorArgument;
 import net.minecraft.entity.passive.AnimalEntity;
-import net.minecraft.item.*;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.item.SwordItem;
 import net.minecraft.loot.LootContext;
 import net.minecraft.loot.LootParameterSets;
 import net.minecraft.loot.LootParameters;
@@ -55,10 +57,13 @@ public class AnimalFarmerGoal extends BaseGoal<JobAnimalFarmer>{
     @Override
     public boolean shouldExecute() {
         job = (JobAnimalFarmer) sim.getJob();
+        if (job == null) return  false;
         if (sim.getActivity() == Activity.GOING_TO_WORK){
-            if (sim.getPosition().withinDistance(new Vector3d(job.getWorkSpace().getX(),job.getWorkSpace().getY(),job.getWorkSpace().getZ()),5)) {
-                sim.setActivity(Activity.WORKING);
-                return true;
+            if (job.getWorkSpace() != null){
+                if (sim.getPosition().withinDistance(new Vector3d(job.getWorkSpace().getX(),job.getWorkSpace().getY(),job.getWorkSpace().getZ()),5)) {
+                    sim.setActivity(Activity.WORKING);
+                    return true;
+                }
             }
         }
         return false;
@@ -96,7 +101,7 @@ public class AnimalFarmerGoal extends BaseGoal<JobAnimalFarmer>{
                 if (entities.size() > 0){
                 destinationBlock = entities.get(0).getPosition();
                 target = entities.get(0);
-                sim.lookAt(EntityAnchorArgument.Type.EYES,new Vector3d(destinationBlock.getX(),destinationBlock.getY(),destinationBlock.getZ()));}
+                sim.getLookController().setLookPosition(new Vector3d(destinationBlock.getX(),destinationBlock.getY(),destinationBlock.getZ()));}
                 System.out.println(sim.getPosition().distanceSq(destinationBlock));
                 if (sim.getPosition().withinDistance(destinationBlock,6f)){
                     state = State.ATTACKING;
@@ -106,7 +111,7 @@ public class AnimalFarmerGoal extends BaseGoal<JobAnimalFarmer>{
 
             else if( state == State.ATTACKING){
                 sim.setStatus("Attacking Target");
-                sim.swing(sim.getActiveHand(),true);
+                sim.swingArm(sim.getActiveHand());
                 sim.getHeldItemMainhand().getItem().hitEntity(sim.getHeldItemMainhand(),target,sim);
                 sim.attackEntityAsMob(target);
                 if (target.getShouldBeDead()){
@@ -165,10 +170,11 @@ public class AnimalFarmerGoal extends BaseGoal<JobAnimalFarmer>{
     private boolean addItemsToChests(){
         for (BlockPos pos: chests){
             ChestTileEntity chest = (ChestTileEntity) world.getTileEntity(pos);
+            InvWrapper wrapper = new InvWrapper((chest));
             List<Integer> invStacks = new ArrayList<Integer>();
             invStacks.addAll(itemsToMove);
             for (int i = 0; i< invStacks.size(); i++){
-                if (ItemHandlerHelper.insertItemStacked(new InvWrapper(chest),sim.getInventory().getStackInSlot(invStacks.get(i)),false) == ItemStack.EMPTY);{
+                if (ItemHandlerHelper.insertItemStacked(wrapper,sim.getInventory().getStackInSlot(invStacks.get(i)),false) == ItemStack.EMPTY);{
                     sim.getInventory().setInventorySlotContents(i,ItemStack.EMPTY);
                     itemsToMove.remove(invStacks.get(i));
                 }
