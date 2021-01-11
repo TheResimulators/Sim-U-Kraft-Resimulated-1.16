@@ -15,6 +15,7 @@ import com.resimulators.simukraft.handlers.FoodStats;
 import com.resimulators.simukraft.init.ModEntities;
 import com.resimulators.simukraft.init.ModJobs;
 import com.resimulators.simukraft.packets.SimFirePacket;
+import com.resimulators.simukraft.utils.TextureUtils;
 import com.resimulators.simukraft.utils.Utils;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.attributes.AttributeModifierMap;
@@ -45,8 +46,11 @@ import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 
 public class SimEntity extends AgeableEntity implements INPC {
@@ -116,11 +120,19 @@ public class SimEntity extends AgeableEntity implements INPC {
             if (this.getFemale()) {
                 if (!SimuKraft.config.getNames().femaleNames.get().isEmpty())
                     this.setCustomName(new StringTextComponent(SimuKraft.config.getNames().femaleNames.get().get(rand.nextInt(SimuKraft.config.getNames().femaleNames.get().size()))));
-                this.setVariation(rand.nextInt(13));
+                try {
+                    this.setVariation(rand.nextInt(Objects.requireNonNull(TextureUtils.getAllFilesInFolder("textures/entity/sim/female")).size()));
+                } catch (URISyntaxException | IOException e) {
+                    e.printStackTrace();
+                }
             } else {
                 if (!SimuKraft.config.getNames().maleNames.get().isEmpty())
                     this.setCustomName(new StringTextComponent(SimuKraft.config.getNames().maleNames.get().get(rand.nextInt(SimuKraft.config.getNames().maleNames.get().size()))));
-                this.setVariation(rand.nextInt(10));
+                try {
+                    this.setVariation(rand.nextInt((Objects.requireNonNull(TextureUtils.getAllFilesInFolder("textures/entity/sim/male")).size())));
+                } catch (URISyntaxException | IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
         this.getNavigator().getNodeProcessor().setCanOpenDoors(true);

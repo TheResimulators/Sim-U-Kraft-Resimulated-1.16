@@ -55,3 +55,5 @@ src/generated/resources/data/
 src/generated/
 .floo
 .flooignore
+setup.bat
+gradle
