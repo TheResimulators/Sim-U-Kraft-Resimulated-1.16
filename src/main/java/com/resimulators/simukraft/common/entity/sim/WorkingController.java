@@ -27,8 +27,8 @@ public class WorkingController {
                 if (job.getPeriodsWorked() < job.maximumWorkPeriods() || job.maximumWorkPeriods() < 0) {
                     if (sim.getEntityWorld().isDaytime() || job.nightShift()) {
                         if (job.getWorkSpace() != null) {
-|                            sim.setActivity(Activity.GOING_TO_WORK);
-.lpllj
+                            sim.setActivity(Activity.GOING_TO_WORK);
+
                             BlockPos pos = new BlockPos(job.getWorkSpace());
                             sim.getNavigator().tryMoveToXYZ(pos.getX(), pos.getY(), pos.getZ(), sim.getAIMoveSpeed()*2);
                             }

@@ -3,8 +3,11 @@ package com.resimulators.simukraft.common.tileentity;
 import com.resimulators.simukraft.init.ModTileEntities;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.NetworkManager;
+import net.minecraft.network.play.server.SUpdateTileEntityPacket;
 import net.minecraft.tileentity.TileEntity;
 
+import java.io.FileInputStream;
 import java.util.UUID;
 
 public class TileConstructor extends TileEntity implements ITile {
@@ -15,12 +18,6 @@ public class TileConstructor extends TileEntity implements ITile {
     public TileConstructor() {
         super(ModTileEntities.CONSTRUCTOR.get());
     }
-
-    @Override
-    public CompoundNBT getUpdateTag() {
-        return write(new CompoundNBT());
-    }
-
 
 
     @Override
@@ -62,4 +59,20 @@ public class TileConstructor extends TileEntity implements ITile {
         markDirty();
     }
 
+
+    @Override
+    public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
+        read(this.getBlockState(),pkt.getNbtCompound());
+    }
+
+
+    @Override
+    public CompoundNBT getUpdateTag() {
+        return write(new CompoundNBT());
+    }
+
+    public void FindAndLoadBuilding(){
+        FileInputStream stream =
+
+    }
 }
