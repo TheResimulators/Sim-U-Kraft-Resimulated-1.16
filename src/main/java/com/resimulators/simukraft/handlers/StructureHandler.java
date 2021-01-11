@@ -4,6 +4,7 @@ import com.resimulators.simukraft.Reference;
 import com.resimulators.simukraft.common.building.BuildingTemplate;
 import com.resimulators.simukraft.common.building.CustomTemplateManager;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.Direction;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Rotation;
@@ -37,7 +38,7 @@ public class StructureHandler {
         return templateManager;
     }
     /**saves the structure to file using built-in template manager*/
-    public static boolean saveStructure(World world, BlockPos origin, BlockPos size, String name, String author) {
+    public static boolean saveStructure(World world, BlockPos origin, BlockPos size, String name, String author, Direction dir) {
         if (templateManager == null && world.getServer() != null)
             templateManager = (CustomTemplateManager) world.getServer().func_241755_D_().getStructureTemplateManager();
 
@@ -46,6 +47,7 @@ public class StructureHandler {
             template.takeBlocksFromWorld(world, origin, size, false, null); //gets all the blocks that are in the world
             template.setAuthor(author); //sets the author to the person saving the structure
             template.findControlBox(world,origin,size);
+            template.setDirection(dir);
             templateManager.writeToFile(new ResourceLocation(Reference.MODID, name)); // writes the template to file at given location
             return true; // returns true if successful
         }
@@ -59,8 +61,8 @@ public class StructureHandler {
         return null;
     }
 
-    public static List<Template.BlockInfo> modifyAndConvertTemplate(BuildingTemplate template, World world, BlockPos pos, Rotation rotation, Mirror mirror) {
+    public static List<Template.BlockInfo> modifyAndConvertTemplate(BuildingTemplate template, World world, BlockPos pos,PlacementSettings settings) {
             List<Template.Palette> blockInfos = template.getBlocks();
-            return BuildingTemplate.processBlockInfos(world, pos, pos, new PlacementSettings().setRotation(rotation).setMirror(mirror), blockInfos.get(0).func_237157_a_(), template);
+            return BuildingTemplate.processBlockInfos(world, pos, pos, settings, blockInfos.get(0).func_237157_a_(), template);
     }
 }

@@ -13,9 +13,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUseContext;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Hand;
+import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
@@ -26,7 +24,7 @@ import java.util.List;
 
 public class ItemStructureTest extends Item implements IStructureStorage {
     private BlockPos placementArea;
-
+    private Direction direction;
     public ItemStructureTest(Properties properties) {
         super(properties);
     }
@@ -37,6 +35,7 @@ public class ItemStructureTest extends Item implements IStructureStorage {
             //sets placement position for building
             if (context.getPlayer().isCrouching()) {
                 placementArea = context.getPos();
+                direction = context.getPlacementHorizontalFacing();
                 context.getPlayer().sendStatusMessage(new StringTextComponent("Set Placement Area: " + placementArea), false);
             }
         }
@@ -63,6 +62,7 @@ public class ItemStructureTest extends Item implements IStructureStorage {
             ((SimEntity) target).setJob(ModJobs.JOB_LOOKUP.get(Profession.BUILDER.getId()).apply((SimEntity)target));
             if (((SimEntity) target).getJob() instanceof JobBuilder) {
                 ((JobBuilder) ((SimEntity) target).getJob()).setTemplate(temp);
+                ((JobBuilder) ((SimEntity) target).getJob()).setDirection(direction);
                 ((SimEntity) target).getJob().setWorkSpace(placementArea);
             }
         }
@@ -87,5 +87,9 @@ public class ItemStructureTest extends Item implements IStructureStorage {
     /**sets template this item is connected to*/
     public void setTemplate(ItemStack stack, String name) {
         setStructure(stack, name);
+    }
+
+    public Direction getDirection(){
+        return direction;
     }
 }

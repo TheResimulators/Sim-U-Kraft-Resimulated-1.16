@@ -8,6 +8,7 @@ import com.resimulators.simukraft.common.jobs.core.IJob;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 
 
@@ -18,6 +19,7 @@ public class JobBuilder implements IJob {
     private int periodsworked = 0;
     private BlockPos workSpace;
     private Activity state = Activity.NOT_WORKING;
+    private Direction direction;
 
     public JobBuilder(SimEntity sim) {
         this.sim = sim;
@@ -33,6 +35,13 @@ public class JobBuilder implements IJob {
         return template;
     }
 
+    public void setDirection(Direction dir){
+        this.direction = dir;
+    }
+
+    public Direction getDirection(){
+        return direction;
+    }
     @Override
     public Profession jobType() {
         return Profession.BUILDER;
@@ -50,7 +59,7 @@ public class JobBuilder implements IJob {
 
     @Override
     public int intervalTime() {
-        return 1000;
+        return 200;
     }
 
     @Override

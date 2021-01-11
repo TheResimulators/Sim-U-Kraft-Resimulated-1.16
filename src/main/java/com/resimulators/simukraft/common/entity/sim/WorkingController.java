@@ -24,10 +24,11 @@ public class WorkingController {
                 tick = 0;
                 //TODO add if idling condition to make sure that we don't interrupt anything else like eating or socializing add to the one below
 
-                if (job.getPeriodsWorked() < job.maximumWorkPeriods()) {
+                if (job.getPeriodsWorked() < job.maximumWorkPeriods() || job.maximumWorkPeriods() < 0) {
                     if (sim.getEntityWorld().isDaytime() || job.nightShift()) {
                         if (job.getWorkSpace() != null) {
-                            sim.setActivity(Activity.GOING_TO_WORK);
+|                            sim.setActivity(Activity.GOING_TO_WORK);
+.lpllj
                             BlockPos pos = new BlockPos(job.getWorkSpace());
                             sim.getNavigator().tryMoveToXYZ(pos.getX(), pos.getY(), pos.getZ(), sim.getAIMoveSpeed()*2);
                             }

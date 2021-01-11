@@ -616,9 +616,10 @@ public class SimEntity extends AgeableEntity implements INPC {
                 SavedWorldData.get(world).getFaction(id).sendPacketToFaction(new SimFirePacket(id, sim.getEntityId(), sim.getJob().getWorkSpace()));
                 BlockPos jobPos = sim.getJob().getWorkSpace();
                 ITile tile = (ITile) sim.world.getTileEntity(jobPos);
-                tile.setHired(false);
-                tile.setSimId(null);
-
+                if (tile != null) {
+                    tile.setHired(false);
+                    tile.setSimId(null);
+                }
             }
             if (!dying){
                 sim.getJob().removeJobAi();

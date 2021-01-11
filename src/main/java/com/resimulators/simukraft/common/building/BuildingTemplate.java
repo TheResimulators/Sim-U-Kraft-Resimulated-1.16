@@ -4,6 +4,7 @@ import com.resimulators.simukraft.common.tileentity.TileCustomData;
 import net.minecraft.block.Block;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.Direction;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
@@ -22,6 +23,7 @@ public class BuildingTemplate extends Template {
     private float rent; // if applicable
     private float cost;
     private int typeID;
+    private Direction direction;
 
     @Override
     public void takeBlocksFromWorld(World worldIn, BlockPos startPos, BlockPos size, boolean takeEntities, Block toIgnore) {
@@ -83,6 +85,7 @@ public class BuildingTemplate extends Template {
         nbt.putFloat("rent", rent);
         nbt.putFloat("cost", cost);
         nbt.putInt("typeID",typeID);
+        nbt.putInt("direction",direction.getHorizontalIndex());
         return super.writeToNBT(nbt);
     }
 
@@ -91,6 +94,7 @@ public class BuildingTemplate extends Template {
         rent = compound.getFloat("rent");
         cost = compound.getFloat("cost");
         typeID = compound.getInt("typeID");
+        direction = Direction.byHorizontalIndex(compound.getInt("direction"));
         super.read(compound);
     }
 
@@ -127,6 +131,13 @@ public class BuildingTemplate extends Template {
         }
     }
 
+    public void setDirection(Direction dir){
+        this.direction = dir;
+    }
+
+    public Direction getDirection(){
+        return direction;
+    }
     public float getRent() {
         return rent;
     }

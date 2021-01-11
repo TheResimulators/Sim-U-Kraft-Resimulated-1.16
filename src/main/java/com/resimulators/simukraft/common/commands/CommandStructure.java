@@ -37,7 +37,7 @@ public class CommandStructure {
         int i = bounds.getXSize() * bounds.getYSize() * bounds.getZSize();
         if (i == 0)
             throw FAILED_EXCEPTION.create();
-        if (StructureHandler.saveStructure(source.getWorld(), minPos, size, name, source.getName()))
+        if (StructureHandler.saveStructure(source.getWorld(), minPos, size, name, source.getName(),source.asPlayer().getHorizontalFacing()))
             source.sendFeedback(new StringTextComponent("Saved " + name), true);
         else
             source.sendFeedback(new StringTextComponent("Couldn't save " + name), true);
