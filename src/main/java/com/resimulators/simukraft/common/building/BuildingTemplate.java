@@ -23,8 +23,12 @@ public class BuildingTemplate extends Template {
     private float rent; // if applicable
     private float cost;
     private int typeID;
+    private String name = "";
     private Direction direction;
 
+
+
+    public BuildingTemplate(){}
     @Override
     public void takeBlocksFromWorld(World worldIn, BlockPos startPos, BlockPos size, boolean takeEntities, Block toIgnore) {
         super.takeBlocksFromWorld(worldIn, startPos, size, takeEntities, toIgnore);
@@ -86,6 +90,8 @@ public class BuildingTemplate extends Template {
         nbt.putFloat("cost", cost);
         nbt.putInt("typeID",typeID);
         nbt.putInt("direction",direction.getHorizontalIndex());
+        nbt.putString("name",name);
+        nbt.putString("author",this.getAuthor());
         return super.writeToNBT(nbt);
     }
 
@@ -95,6 +101,10 @@ public class BuildingTemplate extends Template {
         cost = compound.getFloat("cost");
         typeID = compound.getInt("typeID");
         direction = Direction.byHorizontalIndex(compound.getInt("direction"));
+        if (compound.contains("name"))
+        {name = compound.getString("name");}else{
+            name = "Placeholder";
+        }
         super.read(compound);
     }
 
@@ -148,6 +158,25 @@ public class BuildingTemplate extends Template {
 
     public int getTypeID() {
         return typeID;
+    }
+
+    public String getName(){return name;}
+
+    public void setName(String name){
+        this.name = name;
+
+    }
+
+    public void setCost(float cost) {
+        this.cost = cost;
+    }
+
+    public void setRent(float rent) {
+        this.rent = rent;
+    }
+
+    public void setTypeID(int typeID) {
+        this.typeID = typeID;
     }
 }
 

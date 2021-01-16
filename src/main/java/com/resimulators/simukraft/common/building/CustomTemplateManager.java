@@ -2,6 +2,8 @@ package com.resimulators.simukraft.common.building;
 
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.DataFixer;
+import com.resimulators.simukraft.Reference;
+import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.common.enums.BuildingType;
 import com.resimulators.simukraft.common.enums.Category;
 import net.minecraft.nbt.CompoundNBT;
@@ -21,10 +23,12 @@ import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nullable;
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.InvalidPathException;
-import java.nio.file.Path;
-import java.util.Map;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.*;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class CustomTemplateManager extends TemplateManager {
 
@@ -135,7 +139,6 @@ public class CustomTemplateManager extends TemplateManager {
                     LOGGER.error("Failed to create parent directory: {}", (Object)path1);
                     return false;
                 }
-
                 CompoundNBT compoundnbt = template.writeToNBT(new CompoundNBT());
 
                 try (OutputStream outputstream = new FileOutputStream(path.toFile())) {
@@ -173,5 +176,11 @@ public class CustomTemplateManager extends TemplateManager {
 
     public void remove(ResourceLocation templatePath) {
         this.templates.remove(templatePath);
+    }
+
+    public List<ResourceLocation> getAllTemplates(){
+            Path path = pathGenerated.resolve(Reference.MODID + "/structures");
+
+            return Arrays.stream(Objects.requireNonNull(path.toFile().list())).map(e -> new ResourceLocation(Reference.MODID, e)).collect(Collectors.toList());
     }
 }

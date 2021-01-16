@@ -48,6 +48,7 @@ public class StructureHandler {
             template.setAuthor(author); //sets the author to the person saving the structure
             template.findControlBox(world,origin,size);
             template.setDirection(dir);
+            template.setName(name);
             templateManager.writeToFile(new ResourceLocation(Reference.MODID, name)); // writes the template to file at given location
             return true; // returns true if successful
         }

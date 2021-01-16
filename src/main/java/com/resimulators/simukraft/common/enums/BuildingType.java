@@ -4,6 +4,8 @@ import com.resimulators.simukraft.init.ModTileEntities;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraftforge.fml.RegistryObject;
 
+import javax.annotation.Nonnull;
+
 public enum BuildingType {
 
     CUSTOM_DATA("custom Data", ModTileEntities.CUSTOM_DATA,Category.SPECIAL,1),

@@ -115,7 +115,9 @@ public class GuiBaseJob extends Screen {
             Fire.visible = false;
             ShowEmployees.visible = false;
         }
-
+        if (state != State.MAIN){
+            hideAll();
+        }
         mainMenu.add(Hire);
         mainMenu.add(Fire);
         mainMenu.add(ShowEmployees);
@@ -128,7 +130,12 @@ public class GuiBaseJob extends Screen {
             button.visible = true;
         }
     }
+    public void hideMainMenu(){
+        for (Button button:mainMenu){
+            button.visible = false;
+        }
 
+    }
     private void showFiring() {
         hideAll();
         state = State.Firing;
@@ -196,7 +203,7 @@ public class GuiBaseJob extends Screen {
     }
 
     private void ShowEmployees() {
-        hideAll();
+
 
         Back.visible = true;
         int x = 0;

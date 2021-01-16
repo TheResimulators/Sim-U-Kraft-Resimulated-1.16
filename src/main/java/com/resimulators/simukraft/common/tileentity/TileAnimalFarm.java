@@ -111,6 +111,7 @@ public class TileAnimalFarm extends TileEntity implements IControlBlock{
 
     @Override
     public CompoundNBT write(CompoundNBT nbt) {
+        super.write(nbt);
         nbt.putBoolean("hired", this.hired);
         if (simId != null) {
             nbt.putUniqueId("simid", simId);
@@ -122,6 +123,7 @@ public class TileAnimalFarm extends TileEntity implements IControlBlock{
 
     @Override
     public void read(BlockState state, CompoundNBT nbt) {
+        super.read(state,nbt);
         hired = nbt.getBoolean("hired");
         if (nbt.contains("simid")) {
             simId = nbt.getUniqueId("simid");
