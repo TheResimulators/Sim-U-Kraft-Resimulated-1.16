@@ -50,6 +50,7 @@ public class SimUKraftPacketHandler {
         registerMessage(newId(), CreditUpdatePacket.class, CreditUpdatePacket::new);
         registerMessage(newId(), CustomDataSyncPacket.class, CustomDataSyncPacket::new);
         registerMessage(newId(),BuildingsPacket.class, BuildingsPacket::new);
+        registerMessage(newId(), StartBuildingPacket.class, StartBuildingPacket::new);
     }
 
     /**

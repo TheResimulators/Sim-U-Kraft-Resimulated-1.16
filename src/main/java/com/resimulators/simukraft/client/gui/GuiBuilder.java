@@ -3,11 +3,13 @@ package com.resimulators.simukraft.client.gui;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.resimulators.simukraft.Network;
 import com.resimulators.simukraft.Reference;
 import com.resimulators.simukraft.common.building.BuildingTemplate;
 import com.resimulators.simukraft.common.enums.BuildingType;
 import com.resimulators.simukraft.common.enums.Category;
 import com.resimulators.simukraft.common.jobs.Profession;
+import com.resimulators.simukraft.packets.StartBuildingPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.widget.button.Button;
@@ -28,6 +30,7 @@ public class GuiBuilder extends GuiBaseJob {
     private Button CustomBack;
     private BuildingTemplate selected;
     private boolean loaded = false;
+    private Button confirmBuilding;
     private ArrayList<BuildingTemplate> structures;
     private HashMap<Category, ArrayList<StructureButton>> structureButtons = new HashMap<>();
     public GuiBuilder(ITextComponent component, ArrayList<Integer> ids, BlockPos pos, @Nullable int id) {
@@ -60,11 +63,14 @@ public class GuiBuilder extends GuiBaseJob {
                 if (state == State.BUILDINGINFO) {
                     state = State.SELECTBULDING;
                     controlStructures(true);
+                    confirmBuilding.visible = false;
                 }
 
 
 
             })));
+            addButton(confirmBuilding = new Button(20, height - 30, 110, 20, new StringTextComponent("Confirm"), Confirm -> startBuilding()));
+            confirmBuilding.visible = false;
 
 
             if (structures != null){
@@ -82,12 +88,22 @@ public class GuiBuilder extends GuiBaseJob {
 
             if (state != State.MAIN){
                 Build.visible = false;
+
             if (state == State.SELECTBULDING){
                controlStructures(true);
+
+            }
+            if (state == State.BUILDINGINFO){
+                confirmBuilding.visible = true;
             }
             }
 
         }
+    }
+
+    private void startBuilding() {
+        Network.getNetwork().sendToServer(new StartBuildingPacket(pos,Minecraft.getInstance().player.getAdjustedHorizontalFacing(),selected.getName(),Minecraft.getInstance().player.getUniqueID()));
+        Minecraft.getInstance().currentScreen = null;
     }
 
     public void setStructures(ArrayList<BuildingTemplate> structures) {
@@ -180,6 +196,7 @@ public class GuiBuilder extends GuiBaseJob {
             addButton(name = new Button(x,y,width,height,new StringTextComponent(template.getName()),button ->{
                state = State.BUILDINGINFO;
                CustomBack.visible = true;
+               confirmBuilding.visible = true;
                controlStructures(false);
                selected = template;
             }));

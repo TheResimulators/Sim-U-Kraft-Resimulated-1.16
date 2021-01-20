@@ -76,7 +76,9 @@ public class BlockConstructor extends BlockBase {
                 if (sim.getJob().hasAi()){
                     sim.getJob().removeJobAi();
                 }
+                sim.getJob().removeJobAi();
                 sim.setJob(null);
+
                 sim.setProfession(0);
                 tile.setHired(false);
                 tile.setSimId(null);

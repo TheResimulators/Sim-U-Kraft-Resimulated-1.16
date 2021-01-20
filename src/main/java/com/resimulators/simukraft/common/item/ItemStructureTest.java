@@ -63,7 +63,7 @@ public class ItemStructureTest extends Item implements IStructureStorage {
             if (((SimEntity) target).getJob() instanceof JobBuilder) {
                 ((JobBuilder) ((SimEntity) target).getJob()).setTemplate(temp);
                 ((JobBuilder) ((SimEntity) target).getJob()).setDirection(direction);
-                ((SimEntity) target).getJob().setWorkSpace(placementArea);
+                ((SimEntity) target).getJob().setWorkSpace(placementArea.offset(direction.getOpposite()));
             }
         }
 
