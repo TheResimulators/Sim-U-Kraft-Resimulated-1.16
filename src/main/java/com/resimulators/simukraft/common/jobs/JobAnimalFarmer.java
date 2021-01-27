@@ -15,6 +15,9 @@ public class JobAnimalFarmer implements IJob {
     private int periodsworked = 0;
     private BlockPos workSpace;
     private Activity state = Activity.NOT_WORKING;
+    private boolean finished;
+
+
 
     public  JobAnimalFarmer(SimEntity entity){
         this.sim = entity;
@@ -83,6 +86,7 @@ public class JobAnimalFarmer implements IJob {
         if (workSpace != null) {
             other.putLong("jobpos", workSpace.toLong());
         }
+        other.putBoolean("finished",finished);
         nbt.add(other);
         return nbt;
     }
@@ -96,6 +100,9 @@ public class JobAnimalFarmer implements IJob {
             }
             if (list.contains("jobpos")) {
                 setWorkSpace(BlockPos.fromLong(list.getLong("jobpos")));
+            }
+            if (list.contains("finished")){
+                finished = list.getBoolean("finished");
             }
         }
     }
@@ -126,12 +133,22 @@ public class JobAnimalFarmer implements IJob {
     }
 
     @Override
-    public boolean hasAi() {
+    public boolean hasAiRunning() {
         return sim.goalSelector.getRunningGoals().anyMatch((goal) -> goal.getGoal() == goal1);
     }
 
     @Override
     public double getWage() {
         return 0.7d;
+    }
+
+    @Override
+    public boolean isFinished() {
+        return finished;
+    }
+
+    @Override
+    public void setFinished(boolean finished) {
+    this.finished = finished;
     }
 }

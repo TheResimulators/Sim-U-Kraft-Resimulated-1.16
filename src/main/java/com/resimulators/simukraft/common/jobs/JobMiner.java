@@ -20,6 +20,8 @@ public class JobMiner implements IJob {
 
     //specific to the miner
     private int progress;
+    private boolean finished;
+
     public JobMiner(SimEntity sim) {
         this.sim = sim;
         goal1 =  new MinerGoal(sim);
@@ -92,6 +94,7 @@ public class JobMiner implements IJob {
             other.putLong("jobpos", workSpace.toLong());
         }
         other.putInt("progress",progress);
+        other.putBoolean("finished",finished);
         nbt.add(other);
         return nbt;
     }
@@ -112,9 +115,14 @@ public class JobMiner implements IJob {
                 setProgress(0);
             }
             if (list.contains("jobpos")){
-                setWorkSpace(BlockPos.fromLong(list.getLong("jobpos")));}
+                setWorkSpace(BlockPos.fromLong(list.getLong("jobpos")));
+            }
+            if (list.contains("finished")){
+                finished = list.getBoolean("finished");
+            }
 
             }
+
         }
 
     @Override
@@ -155,12 +163,22 @@ public class JobMiner implements IJob {
     }
 
     @Override
-    public boolean hasAi() {
+    public boolean hasAiRunning() {
         return sim.goalSelector.getRunningGoals().anyMatch((goal) -> goal.getGoal() == goal1);
     }
 
     @Override
     public double getWage() {
         return 0.3d;
+    }
+
+    @Override
+    public boolean isFinished() {
+        return finished;
+    }
+
+    @Override
+    public void setFinished(boolean finished) {
+        this.finished = finished;
     }
 }
