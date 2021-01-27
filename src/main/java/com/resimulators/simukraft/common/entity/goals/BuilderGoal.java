@@ -3,9 +3,12 @@ package com.resimulators.simukraft.common.entity.goals;
 import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.common.building.BuildingTemplate;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
+import com.resimulators.simukraft.common.enums.BuildingType;
 import com.resimulators.simukraft.common.jobs.JobBuilder;
 import com.resimulators.simukraft.common.jobs.core.Activity;
 import com.resimulators.simukraft.common.jobs.core.IJob;
+import com.resimulators.simukraft.common.world.Faction;
+import com.resimulators.simukraft.common.world.SavedWorldData;
 import com.resimulators.simukraft.handlers.StructureHandler;
 import com.resimulators.simukraft.init.ModBlockProperties;
 import com.resimulators.simukraft.init.ModBlocks;
@@ -23,6 +26,7 @@ import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.gen.feature.template.PlacementSettings;
 import net.minecraft.world.gen.feature.template.Template;
+import net.minecraft.world.storage.WorldSavedData;
 
 import java.util.List;
 
@@ -35,7 +39,7 @@ public class BuilderGoal extends MoveToBlockGoal {
     private int blockIndex = 0;
     private BlockPos origin;
     private int delay = 20;
-
+    Rotation rotation;
     public BuilderGoal(SimEntity sim) {
         super(sim, .7d, 20);
         this.sim = sim;
@@ -45,16 +49,17 @@ public class BuilderGoal extends MoveToBlockGoal {
     public boolean shouldExecute() {
         JobBuilder job = ((JobBuilder) sim.getJob());
         //System.out.println("startExecuting");
-        template = job.getTemplate();
+        if (job != null) {
+            template = job.getTemplate();
 
 
-        if (sim.getActivity() == Activity.GOING_TO_WORK) {
-            if (sim.getPosition().withinDistance(new Vector3d(job.getWorkSpace().getX(), job.getWorkSpace().getY(), job.getWorkSpace().getZ()), 5)) {
-                sim.setActivity(Activity.WORKING);
-                return template != null;
+            if (sim.getActivity() == Activity.GOING_TO_WORK) {
+                if (sim.getPosition().withinDistance(new Vector3d(job.getWorkSpace().getX(), job.getWorkSpace().getY(), job.getWorkSpace().getZ()), 5)) {
+                    sim.setActivity(Activity.WORKING);
+                    return template != null;
+                }
             }
         }
-
         return false;
     }
 
@@ -72,11 +77,11 @@ public class BuilderGoal extends MoveToBlockGoal {
 
             Direction orgDir = template.getDirection();
             Direction facing = job.getDirection();
-            Rotation rotation = getRotation(orgDir,facing);
+            rotation = getRotation(orgDir,facing);
             PlacementSettings settings = new PlacementSettings()
                 .setRotation(rotation)
                 .setMirror(Mirror.NONE);
-            blocks = StructureHandler.modifyAndConvertTemplate(template, sim.world, sim.getJob().getWorkSpace(),settings);
+            blocks = StructureHandler.modifyAndConvertTemplate(template, sim.world, sim.getJob().getWorkSpace().offset(facing),settings);
             SimuKraft.LOGGER().debug("cost: " + template.getCost());
 
             /*for (Template.BlockInfo blockInfo : blocks) {
@@ -94,13 +99,13 @@ public class BuilderGoal extends MoveToBlockGoal {
         tick++;
         super.tick();
         if (delay >= 0){
-            delay = 20;
+            delay = 60;
             if (state == State.STARTING){
                 state = State.TRAVELING;
                 destinationBlock = blocks.get(blockIndex).pos;
             }
             if (state == State.TRAVELING){
-                if (sim.getDistanceSq(destinationBlock.getX(),destinationBlock.getY(),destinationBlock.getZ()) < 10){
+                if (sim.getDistanceSq(destinationBlock.getX(),destinationBlock.getY(),destinationBlock.getZ()) < 20){
                     state = State.BUILDING;
                     return;
                 }
@@ -111,18 +116,27 @@ public class BuilderGoal extends MoveToBlockGoal {
                 if (blockInfo.state.getBlock() == ModBlocks.CONTROL_BOX.get()) {
                     blockstate = blockInfo.state.with(ModBlockProperties.TYPE, template.getTypeID());
                 }
-                sim.world.setBlockState(blockInfo.pos, blockstate);
+                sim.world.setBlockState(blockInfo.pos, blockstate.rotate(sim.world,blockInfo.pos,rotation));
+
                 blockIndex++;
+                if (blockIndex < blocks.size() - 1) {
                 destinationBlock = blocks.get(blockIndex).pos;
+                sim.getNavigator().setPath(null,7d);
                 state = State.TRAVELING;
+
+                }
             }
         } else {
             delay--;
         }
-        if (blockIndex >= blocks.size()-1){
+        if (blockIndex >= blocks.size()){
             sim.getJob().setState(Activity.FORCE_STOP);
-            sim.getJob().removeJobAi();
+            Faction faction = SavedWorldData.get(sim.getEntityWorld()).getFactionWithSim(sim.getUniqueID());
+            faction.sendFactionChatMessage("Builder " + sim.getName().getString() + "has finished building " + template.getName().replace("_" ," "), sim.getEntityWorld());
+            if (template.getTypeID() == BuildingType.RESIDENTIAL.id)
+            faction.addNewHouse(template.getControlBlock(),template.getName(),template.getRent());
             blockIndex = 0;
+
             template = null;
 
         }
@@ -130,7 +144,7 @@ public class BuilderGoal extends MoveToBlockGoal {
 
     @Override
     public boolean shouldMove() {
-        return sim.getDistanceSq(destinationBlock.getX(),destinationBlock.getY(),destinationBlock.getZ()) > getTargetDistanceSq() && super.shouldMove();
+        return sim.getDistanceSq(destinationBlock.getX(),destinationBlock.getY(),destinationBlock.getZ()) > getTargetDistanceSq();
     }
 
     @Override

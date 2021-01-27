@@ -105,6 +105,7 @@ public class BuildingTemplate extends Template {
         {name = compound.getString("name");}else{
             name = "Placeholder";
         }
+        setAuthor(compound.getString("author"));
         super.read(compound);
     }
 

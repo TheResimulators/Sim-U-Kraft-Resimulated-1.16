@@ -103,7 +103,7 @@ public class GuiBuilder extends GuiBaseJob {
 
     private void startBuilding() {
         Network.getNetwork().sendToServer(new StartBuildingPacket(pos,Minecraft.getInstance().player.getAdjustedHorizontalFacing(),selected.getName(),Minecraft.getInstance().player.getUniqueID()));
-        Minecraft.getInstance().currentScreen = null;
+        Minecraft.getInstance().displayGuiScreen(null);
     }
 
     public void setStructures(ArrayList<BuildingTemplate> structures) {
