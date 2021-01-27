@@ -58,25 +58,10 @@ public class SimFireRequest implements IMessage {
             SavedWorldData data = SavedWorldData.get(player.world);
             int id = data.getFactionWithPlayer(player.getUniqueID()).getId();
             SimEntity sim = (SimEntity) ((ServerWorld)player.world).getEntityByUuid(simId);
-            if (sim != null){
-                ITile tile =((ITile)player.world.getTileEntity(pos));
-                if (tile != null){
-                    tile.setHired(false);
-                System.out.println(player.world.getTileEntity(pos));
-                data.fireSim(id, (SimEntity) ((ServerWorld)player.world).getEntityByUuid(simId));
-                tile.setSimId(null);
-                if (sim.getJob() != null){
-                sim.getJob().removeJobAi();
-                sim.setJob(null);
-                sim.setHeldItem(Hand.MAIN_HAND, ItemStack.EMPTY);
-
+            if (sim != null) {
+                sim.fireSim(sim, id, false);
                 }
-
-                    }
-                }
-                data.getFaction(id).sendPacketToFaction(new SimFirePacket(id, sim.getEntityId(), pos));
             }
-
         }
     }
 }
