@@ -43,15 +43,13 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.event.world.WorldEvent;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
 
 public class SimEntity extends AgeableEntity implements INPC {
     private static final EntitySize SIZE = EntitySize.flexible(0.6f, 1.8f);
@@ -75,7 +73,8 @@ public class SimEntity extends AgeableEntity implements INPC {
     private Activity activity;
     private WorkingController controller = new WorkingController(this);
     private Random rand = new Random();
-
+    private UUID houseID;
+    private int houseHuntDelay = 200;
     public SimEntity(World worldIn) {
         this(ModEntities.ENTITY_SIM, worldIn);
     }
@@ -276,6 +275,14 @@ public class SimEntity extends AgeableEntity implements INPC {
         if (!world.isRemote()) {
             this.foodStats.tick(this);
             this.controller.tick();
+            if (houseID == null){
+                if (houseHuntDelay <= 0){
+                    findHouseToLive();
+                }else{
+                    houseHuntDelay--;
+
+                }
+            }
         }
     }
 
@@ -625,7 +632,7 @@ public class SimEntity extends AgeableEntity implements INPC {
         if (sim.getJob() != null) {
             if (sim.getJob().getWorkSpace() != null){
                 SavedWorldData.get(world).fireSim(id, sim);
-                SavedWorldData.get(world).getFaction(id).sendPacketToFaction(new SimFirePacket(id, sim.getEntityId(), sim.getJob().getWorkSpace()));
+                if (!world.isRemote) SavedWorldData.get(world).getFaction(id).sendPacketToFaction(new SimFirePacket(id, sim.getEntityId(), sim.getJob().getWorkSpace()));
                 BlockPos jobPos = sim.getJob().getWorkSpace();
                 ITile tile = (ITile) sim.world.getTileEntity(jobPos);
                 if (tile != null) {
@@ -659,5 +666,42 @@ public class SimEntity extends AgeableEntity implements INPC {
 
     public void setActivity(Activity activity) {
         this.activity = activity;
+    }
+
+    public void setHouseID(UUID id){
+        this.houseID = id;
+    }
+
+    public void removeHouse(){
+        this.houseID = null;
+    }
+
+    public List<UUID> getOtherHouseOccupants(){
+        ArrayList<UUID> list = SavedWorldData.get(world).getFactionWithSim(this.getUniqueID()).getOccupants(houseID);
+        list.remove(this.getUniqueID());
+        return list;
+
+    }
+    public void moveHouse(UUID currentHouseID,UUID newHouseID){
+        Faction faction = SavedWorldData.get(world).getFactionWithSim(this.getUniqueID());
+        faction.removeSimFromHouse(currentHouseID,this.getUniqueID());
+        faction.addSimToHouse(newHouseID,getUniqueID());
+        houseID = newHouseID;
+
+    }
+
+    public void findHouseToLive(){
+        Faction faction = SavedWorldData.get(world).getFactionWithSim(this.getUniqueID());
+        UUID house = faction.getFreeHouse();
+        if (house != null){
+        faction.addSimToHouse(house,getUniqueID());
+        faction.sendFactionChatMessage("Sim " + this.getName().getString() + " Has Moved into " + faction.getHouseByID(house).getName().replace("_"," "),world);
+
+        houseID = house;
+        }
+    }
+
+    public boolean isHomeless(){
+        return houseID == null;
     }
 }

@@ -15,6 +15,7 @@ public class GuiHandler {
     public static final int CUSTOM_DATA = 6;
     public static final int BAKER = 7;
     public static final int FISHER_MAN = 8;
+    public static final int RESIDENTIAL = 9;
 
 
 
