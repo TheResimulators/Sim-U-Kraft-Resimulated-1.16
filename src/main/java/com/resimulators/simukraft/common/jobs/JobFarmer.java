@@ -18,6 +18,7 @@ public class JobFarmer implements IJob {
     private Activity state = Activity.NOT_WORKING;
     private boolean tilled = false;
     private int progress;
+    private boolean finished;
 
     public JobFarmer(SimEntity sim) {
         this.sim = sim;
@@ -92,6 +93,7 @@ public class JobFarmer implements IJob {
             other.putLong("jobpos", workSpace.toLong());
         }
         other.putBoolean("tilled",tilled);
+        other.putBoolean("finished",finished);
         nbt.add(other);
 
 
@@ -111,6 +113,9 @@ public class JobFarmer implements IJob {
             }
             if (list.contains("tilled")){
                 setTilled(list.getBoolean("tilled"));
+            }
+            if (list.contains("finished")){
+                finished = list.getBoolean("finished");
             }
 
         }
@@ -142,7 +147,7 @@ public class JobFarmer implements IJob {
     }
 
     @Override
-    public boolean hasAi() {
+    public boolean hasAiRunning() {
         return sim.goalSelector.getRunningGoals().anyMatch((goal) -> goal.getGoal() == goal1);
     }
 
@@ -166,6 +171,16 @@ public class JobFarmer implements IJob {
 
     public int getProgress(){
         return progress;
+    }
+
+    @Override
+    public boolean isFinished() {
+        return finished;
+    }
+
+    @Override
+    public void setFinished(boolean finished) {
+        this.finished = finished;
     }
 }
 

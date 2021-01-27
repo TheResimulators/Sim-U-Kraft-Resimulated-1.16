@@ -44,9 +44,13 @@ public interface IJob {
 
     BlockPos getWorkSpace();
 
-    boolean hasAi();
+    boolean hasAiRunning();
     //gets the amount the job gets paid per x Ticks
     double getWage();
+
+    boolean isFinished();
+
+    void setFinished(boolean finished);
 
 
 }

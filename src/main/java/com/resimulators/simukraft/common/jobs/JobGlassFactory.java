@@ -15,6 +15,7 @@ public class JobGlassFactory implements IJob {
     private int periodsworked = 0;
     private BlockPos workSpace;
     private Activity state = Activity.NOT_WORKING;
+    private boolean finished;
 
 
     public JobGlassFactory(SimEntity simEntity) {
@@ -86,6 +87,7 @@ public class JobGlassFactory implements IJob {
             other.putLong("jobpos", workSpace.toLong());
         }
         nbt.add(other);
+        other.putBoolean("finished",finished);
         return nbt;
     }
 
@@ -98,6 +100,9 @@ public class JobGlassFactory implements IJob {
             }
             if (list.contains("jobpos")) {
                 setWorkSpace(BlockPos.fromLong(list.getLong("jobpos")));
+            }
+            if (list.contains("finished")){
+                finished = list.getBoolean("finished");
             }
         }
     }
@@ -128,12 +133,22 @@ public class JobGlassFactory implements IJob {
     }
 
     @Override
-    public boolean hasAi() {
+    public boolean hasAiRunning() {
         return sim.goalSelector.getRunningGoals().anyMatch((goal) -> goal.getGoal() == goal1);
     }
 
     @Override
     public double getWage() {
         return 0.7d;
+    }
+
+    @Override
+    public boolean isFinished() {
+        return finished;
+    }
+
+    @Override
+    public void setFinished(boolean finished) {
+        this.finished = finished;
     }
 }
