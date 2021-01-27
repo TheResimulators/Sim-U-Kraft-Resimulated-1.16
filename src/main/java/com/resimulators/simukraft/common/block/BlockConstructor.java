@@ -71,17 +71,7 @@ public class BlockConstructor extends BlockBase {
             SimEntity sim = (SimEntity) ((ServerWorld)worldIn).getEntityByUuid(tile.getSimId());
             if (sim != null){
                 int id = SavedWorldData.get(worldIn).getFactionWithPlayer(player.getUniqueID()).getId();
-                SavedWorldData.get(worldIn).fireSim(id,sim);
-                SavedWorldData.get(worldIn).getFaction(id).sendPacketToFaction(new SimFirePacket(id,sim.getEntityId(),pos));
-                if (sim.getJob().hasAi()){
-                    sim.getJob().removeJobAi();
-                }
-                sim.getJob().removeJobAi();
-                sim.setJob(null);
-
-                sim.setProfession(0);
-                tile.setHired(false);
-                tile.setSimId(null);
+                sim.fireSim(sim,id,false);
 
             }
         }
