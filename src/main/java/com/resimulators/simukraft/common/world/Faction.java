@@ -364,7 +364,26 @@ public class Faction {
         houses.put(houseID,house);
 
     }
+    public ArrayList<House> getAllOccupiedHouses(){
+            ArrayList<House> houses = new ArrayList<>();
+            for (UUID house: this.houses.keySet()){
+                if (!this.houses.get(house).simOccupants.isEmpty()){
+                    houses.add(this.houses.get(house));
+                }
 
+            }
+            return houses;
+    }
+
+
+    public float getRent(){
+        float rent = 0;
+        List<House> rentHouses = getAllOccupiedHouses();
+        for (House house: rentHouses){
+            rent += house.rent;
+        }
+        return rent;
+    }
     static class SimInfo {
         private UUID sim;
         private boolean hired;

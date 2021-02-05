@@ -39,7 +39,7 @@ public class NewDayEvent implements INBTSerializable<CompoundNBT> {
 
             if (day != previousDay) {
 
-                payRent();
+                payRent(world);
                 spawnSims(world);
                 previousDay = day;
                 }
@@ -63,8 +63,16 @@ public class NewDayEvent implements INBTSerializable<CompoundNBT> {
     }
 
 
-    public void payRent() {
+    public void payRent(World world) {
         SimuKraft.LOGGER().debug("Paying rent...");
+        SavedWorldData worldData = SavedWorldData.get(world);
+        ArrayList<Faction> factions = worldData.getFactions();
+        for (Faction faction: factions){
+            float rent = faction.getRent();
+            faction.sendFactionChatMessage(rent +" Collected in rent today",world);
+            faction.addCredits(rent);
+
+        }
     }
 
     public static DayOfWeek getDay() {

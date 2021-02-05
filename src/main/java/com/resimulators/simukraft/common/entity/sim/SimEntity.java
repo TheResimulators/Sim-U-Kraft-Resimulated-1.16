@@ -692,12 +692,14 @@ public class SimEntity extends AgeableEntity implements INPC {
 
     public void findHouseToLive(){
         Faction faction = SavedWorldData.get(world).getFactionWithSim(this.getUniqueID());
-        UUID house = faction.getFreeHouse();
-        if (house != null){
-        faction.addSimToHouse(house,getUniqueID());
-        faction.sendFactionChatMessage("Sim " + this.getName().getString() + " Has Moved into " + faction.getHouseByID(house).getName().replace("_"," "),world);
+        if (faction != null){
+            UUID house = faction.getFreeHouse();
+            if (house != null){
+            faction.addSimToHouse(house,getUniqueID());
+            faction.sendFactionChatMessage("Sim " + this.getName().getString() + " Has Moved into " + faction.getHouseByID(house).getName().replace("_"," "),world);
 
-        houseID = house;
+            houseID = house;
+            }
         }
     }
 
