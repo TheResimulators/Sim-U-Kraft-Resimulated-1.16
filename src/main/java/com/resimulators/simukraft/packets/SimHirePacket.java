@@ -54,5 +54,6 @@ public class SimHirePacket implements IMessage{
         ((ITile)Minecraft.getInstance().world.getTileEntity(pos)).setHired(true);
         ((ITile)Minecraft.getInstance().world.getTileEntity(pos)).setSimId(sim.getUniqueID());
         sim.setJob(ModJobs.JOB_LOOKUP.get(job).apply(sim));
+        sim.getJob().setWorkSpace(pos);
     }
 }
