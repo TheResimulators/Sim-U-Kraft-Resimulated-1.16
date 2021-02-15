@@ -128,10 +128,12 @@ public class TileBaseMarker extends TileEntity implements ITile {
     }
 
     private void setDimensions() {
+        if (marker == null){Scan();}
         width = marker.manhattanDistance(((TileMarker) this.world.getTileEntity(marker)).getFrontRight());
         depth = marker.manhattanDistance(((TileMarker) this.world.getTileEntity(marker)).getBackLeft());
         height = marker.getY() - 1;
         markDirty();
+
     }
 
     // gets the distance to the back left. because it shoul be same y and

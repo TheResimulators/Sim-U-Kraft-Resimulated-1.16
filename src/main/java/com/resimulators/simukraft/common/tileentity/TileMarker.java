@@ -77,11 +77,10 @@ public class TileMarker extends TileEntity {
     public void onRightClick(Direction dir) {
         int x = 0;
         int z = 0;
-        int y = 0;
         if (!used){
             used = true;
             origin = this.pos;
-            y=origin.getY();
+
         for (int i = 1; i < range; i++) {
             BlockPos pos = this.pos.offset(dir, i);
             if (this.world.getTileEntity(pos) instanceof TileMarker) {
