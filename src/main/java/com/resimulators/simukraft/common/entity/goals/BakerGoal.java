@@ -290,7 +290,7 @@ public class BakerGoal extends BaseGoal<JobBaker> {
     private void getFarmChests() {
         for (BlockPos farmBox : farmerWorkSpace) {
             ArrayList<BlockPos> chestArrayList = new ArrayList<>();
-            ArrayList<BlockPos> blockPosArrayList = BlockUtils.getBlocksAroundPosition(farmBox, 5);
+            ArrayList<BlockPos> blockPosArrayList = BlockUtils.getBlocksAroundAndBelowPosition(farmBox, 5);
             for (BlockPos blockPos : blockPosArrayList) {
                 if (world.getTileEntity(blockPos) instanceof ChestTileEntity) {
                     ChestTileEntity chestTileEntity = (ChestTileEntity) world.getTileEntity(blockPos);
@@ -306,7 +306,7 @@ public class BakerGoal extends BaseGoal<JobBaker> {
     }
 
     private void findChestAroundBlock(BlockPos workPos) {
-        ArrayList<BlockPos> blocks = BlockUtils.getBlocksAroundPosition(workPos, 5);
+        ArrayList<BlockPos> blocks = BlockUtils.getBlocksAroundAndBelowPosition(workPos, 5);
         for (BlockPos pos: blocks) {
             if (world.getTileEntity(pos) instanceof ChestTileEntity && !chests.contains(pos)) {
                 chests.add(pos);

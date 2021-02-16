@@ -296,7 +296,7 @@ public class FarmerGoal extends BaseGoal<JobFarmer> {
     }
 
     private void findChests() {
-        ArrayList<BlockPos> blocks = BlockUtils.getBlocksAroundPosition(job.getWorkSpace(), 5);
+        ArrayList<BlockPos> blocks = BlockUtils.getBlocksAroundAndBelowPosition(job.getWorkSpace(), 5);
         for (BlockPos pos : blocks) {
             if (world.getTileEntity(pos) instanceof ChestTileEntity) {
                 chests.add(pos);

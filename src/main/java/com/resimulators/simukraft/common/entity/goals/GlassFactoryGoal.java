@@ -231,7 +231,7 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
 
 
     public void findChestAroundBlock(BlockPos workPos){
-        ArrayList<BlockPos> blocks =  BlockUtils.getBlocksAroundPosition(workPos,5);
+        ArrayList<BlockPos> blocks =  BlockUtils.getBlocksAroundAndBelowPosition(workPos,5);
         for (BlockPos pos: blocks){
             if (world.getTileEntity(pos) instanceof ChestTileEntity){
                 chests.add(pos);
@@ -240,7 +240,7 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
     }
 
     public void findFurnaceAroundBlock(BlockPos workPos){
-        ArrayList<BlockPos> blocks =  BlockUtils.getBlocksAroundPosition(workPos,5);
+        ArrayList<BlockPos> blocks =  BlockUtils.getBlocksAroundAndBelowPosition(workPos,5);
         for (BlockPos pos: blocks){
             if (world.getTileEntity(pos) instanceof FurnaceTileEntity){
                 furnaces.add(pos);

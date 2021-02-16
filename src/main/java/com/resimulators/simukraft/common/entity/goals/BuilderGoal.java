@@ -214,8 +214,8 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
 
     //Checks for inventories around position.
     private void checkForInventories() {
-        ArrayList<BlockPos> blocks =  BlockUtils.getBlocksAroundPosition(job.getWorkSpace(),5);
-        blocks.addAll(BlockUtils.getBlocksAroundPosition(job.getWorkSpace().up(),5));
+        ArrayList<BlockPos> blocks =  BlockUtils.getBlocksAroundAndBelowPosition(job.getWorkSpace(),5);
+        blocks.addAll(BlockUtils.getBlocksAroundAndBelowPosition(job.getWorkSpace().up(),5));
         blocks = (ArrayList<BlockPos>) blocks.stream().filter(pos -> sim.world.getTileEntity(pos) != null).collect(Collectors.toList());
         for (BlockPos pos: blocks){
             if (sim.world.getTileEntity(pos) instanceof ChestTileEntity){

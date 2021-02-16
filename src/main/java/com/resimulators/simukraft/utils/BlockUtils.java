@@ -19,7 +19,19 @@ public class BlockUtils {
         }
         return blocks;
     }
+    public static ArrayList<BlockPos> getBlocksAroundAndBelowPosition(BlockPos startingPos, int radius) {
+        ArrayList<BlockPos> blocks = new ArrayList<>();
+        for (int y = -1; y <=1;y++){
+            for (int x = -radius; x <= radius; x++) {
+                for (int z = -radius; z <= radius; z++) {
+                    BlockPos blockPos = startingPos.add(x, y, z);
+                    blocks.add(blockPos);
+                }
+            }
+        }
 
+        return blocks;
+    }
     public static boolean aboveBlocksValid(World world, BlockPos startingPos) {
         for (int y = 0; y <= 3; y++) {
             BlockPos blockAbovePos = startingPos.add(0, y, 0);

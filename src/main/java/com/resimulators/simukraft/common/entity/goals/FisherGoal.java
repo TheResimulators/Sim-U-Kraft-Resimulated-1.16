@@ -153,7 +153,7 @@ public class FisherGoal extends BaseGoal<JobFisher> {
     }
 
     private void findChestAroundBlock(BlockPos workPos) {
-        ArrayList<BlockPos> blocks = BlockUtils.getBlocksAroundPosition(workPos, 5);
+        ArrayList<BlockPos> blocks = BlockUtils.getBlocksAroundAndBelowPosition(workPos, 5);
         for (BlockPos pos: blocks) {
             if (world.getTileEntity(pos) instanceof ChestTileEntity && !chests.contains(pos)) {
                 chests.add(pos);

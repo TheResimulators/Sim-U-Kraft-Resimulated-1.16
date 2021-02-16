@@ -159,7 +159,7 @@ public class AnimalFarmerGoal extends BaseGoal<JobAnimalFarmer>{
     }
 
     public void findChestAroundBlock(BlockPos workPos){
-        ArrayList<BlockPos> blocks =  BlockUtils.getBlocksAroundPosition(workPos,5);
+        ArrayList<BlockPos> blocks =  BlockUtils.getBlocksAroundAndBelowPosition(workPos,5);
         for (BlockPos pos: blocks){
             if (world.getTileEntity(pos) instanceof ChestTileEntity){
                 chests.add(pos);
