@@ -118,6 +118,7 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
         if (delay >= 0){
             delay = 60;
             if (state == State.STARTING){
+                setBlocksNeeded();
                 retrieveItemsFromChest();
                 state = State.TRAVELING;
                 destinationBlock = blocks.get(blockIndex).pos;
@@ -136,7 +137,8 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
                 }
                 if (sim.getInventory().hasItemStack(new ItemStack(blockInfo.state.getBlock()))){
                     sim.world.setBlockState(blockInfo.pos, blockstate.rotate(sim.world,blockInfo.pos,rotation));
-
+                    int index = sim.getInventory().findSlotMatchingUnusedItem(new ItemStack(blockInfo.state.getBlock()));
+                    sim.getInventory().decrStackSize(index,1);
                     blockIndex++;
                     if (blockIndex < blocks.size() - 1) {
                         destinationBlock = blocks.get(blockIndex).pos;
@@ -225,7 +227,9 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
     }
 
     private void setBlocksNeeded(){
-        for (Template.BlockInfo info: blocks){
+        blocksNeeded.clear();
+        for (int i = this.blockIndex; i< blocks.size();i++){
+            Template.BlockInfo info = blocks.get(i);
             Block block = info.state.getBlock();
             if (block == Blocks.AIR) continue;
             if (blocksNeeded.get(block.asItem()) == null){
@@ -272,8 +276,10 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
              string[0] += amount + " " + key + " ";
 
         });
+            if (!string[0].equals("")){
         SavedWorldData.get(sim.world).getFactionWithSim(sim.getUniqueID()).sendFactionChatMessage(sim.getName().getString() + " still needs " + string[0],sim.world);
-    }
+        delay = 2000;
+    }}
 
     private enum State {
         STARTING,

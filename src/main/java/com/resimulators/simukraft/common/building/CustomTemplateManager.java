@@ -6,6 +6,7 @@ import com.resimulators.simukraft.Reference;
 import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.common.enums.BuildingType;
 import com.resimulators.simukraft.common.enums.Category;
+import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTUtil;
@@ -18,6 +19,7 @@ import net.minecraft.util.datafix.DefaultTypeReferences;
 import net.minecraft.world.gen.feature.template.TemplateManager;
 import net.minecraft.world.storage.FolderName;
 import net.minecraft.world.storage.SaveFormat;
+import net.minecraftforge.fml.server.ServerLifecycleHooks;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -43,7 +45,9 @@ public class CustomTemplateManager extends TemplateManager {
         super(p_i232119_1_, p_i232119_2_, p_i232119_3_);
         this.field_237130_d_ = p_i232119_1_;
         this.fixer = p_i232119_3_;
-        this.pathGenerated = p_i232119_2_.resolveFilePath(FolderName.GENERATED).normalize();
+        //this.pathGenerated = p_i232119_2_.resolveFilePath(FolderName.GENERATED).normalize();
+
+        this.pathGenerated = new File(ServerLifecycleHooks.getCurrentServer().getDataDirectory(),"resources").toPath().normalize();
     }
 
     public BuildingTemplate getTemplateDefaulted(ResourceLocation p_200220_1_) {
