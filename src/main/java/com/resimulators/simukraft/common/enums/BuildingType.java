@@ -18,8 +18,8 @@ public enum BuildingType {
     BAKER("bakery", ModTileEntities.BAKER, Category.COMMERCIAL, 8),
     GROCER("grocery", ModTileEntities.GLASS_FACTORY, Category.COMMERCIAL, 9),
     RESIDENTIAL("residential", ModTileEntities.GLASS_FACTORY, Category.RESIDENTIAL,10),
-    SPECIAL("special", ModTileEntities.GLASS_FACTORY,Category.SPECIAL,11);
-
+    SPECIAL("special", ModTileEntities.GLASS_FACTORY,Category.SPECIAL,11),
+    FISHERMAN("fisherman",ModTileEntities.FISHER_MAN, Category.INDUSTRIAL,12);
 
 
 
