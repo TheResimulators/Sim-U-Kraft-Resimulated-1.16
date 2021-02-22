@@ -166,7 +166,8 @@ public class CustomTemplateManager extends TemplateManager {
         try {
             Path path = this.pathGenerated.resolve(locationIn.getNamespace());
             Path path1 = path.resolve("structures");
-            path1 = path1.resolve(category.category);
+            if (category != null){
+            path1 = path1.resolve(category.category);}
             return FileUtil.resolveResourcePath(path1, locationIn.getPath(), extIn);
         } catch (InvalidPathException invalidpathexception) {
             throw new ResourceLocationException("Invalid resource path: " + locationIn, invalidpathexception);
@@ -193,6 +194,6 @@ public class CustomTemplateManager extends TemplateManager {
     public List<ResourceLocation> getAllTemplates(){
             Path path = pathGenerated.resolve(Reference.MODID + "/structures");
 
-            return Arrays.stream(Objects.requireNonNull(path.toFile().list())).map(e -> new ResourceLocation(Reference.MODID, e)).collect(Collectors.toList());
+            return Arrays.stream(Objects.requireNonNull(path.toFile().listFiles())).filter(file -> !file.isDirectory()).map(e -> new ResourceLocation(Reference.MODID, e.getName())).collect(Collectors.toList());
     }
 }

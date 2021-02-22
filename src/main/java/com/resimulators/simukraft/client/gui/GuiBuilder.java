@@ -5,6 +5,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.resimulators.simukraft.Network;
 import com.resimulators.simukraft.Reference;
+import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.common.building.BuildingTemplate;
 import com.resimulators.simukraft.common.enums.BuildingType;
 import com.resimulators.simukraft.common.enums.Category;
@@ -18,6 +19,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import sun.awt.windows.WPrinterJob;
 
 import javax.annotation.Nullable;
 import java.awt.*;
@@ -119,15 +121,18 @@ public class GuiBuilder extends GuiBaseJob {
         int xPadding = 20;
         int index = 0;
         for (BuildingTemplate template: structures) {
+            BuildingType type = BuildingType.getById(template.getTypeID());
+            if (type != null){
             StructureButton button = new StructureButton();
             button.createButtons(template,xSpacing *index + xPadding,50);
             index++;
-            BuildingType type = BuildingType.getById(template.getTypeID());
-            if (type != null){
             structureButtons.computeIfAbsent(type.category, k -> new ArrayList<>());
             ArrayList<StructureButton> list = structureButtons.get(type.category);
             list.add(button);
             structureButtons.put(type.category,list);
+            } else {
+                SimuKraft.LOGGER().error("structure " + template.getName() + " is missing building type and cannot be added to the UI");
+
             }
         }
 
@@ -192,29 +197,35 @@ public class GuiBuilder extends GuiBaseJob {
         int height = 20;
 
         void createButtons(BuildingTemplate template, int x, int y){
-
-            addButton(name = new Button(x,y,width,height,new StringTextComponent(template.getName()),button ->{
-               state = State.BUILDINGINFO;
-               CustomBack.visible = true;
-               confirmBuilding.visible = true;
-               controlStructures(false);
-               selected = template;
+        try {
+            addButton(name = new Button(x, y, width, height, new StringTextComponent(template.getName()), button -> {
+                state = State.BUILDINGINFO;
+                CustomBack.visible = true;
+                confirmBuilding.visible = true;
+                controlStructures(false);
+                selected = template;
             }));
             name.visible = false;
-            addButton(author = new Button(x,y+height,width,height,new StringTextComponent("Author: " + template.getAuthor()),button->{}));
+            addButton(author = new Button(x, y + height, width, height, new StringTextComponent("Author: " + template.getAuthor()), button -> {
+            }));
             author.active = false;
             author.visible = false;
-            addButton(price = new Button(x,y+height*2,width,height, new StringTextComponent("Price: " + template.getCost()),button ->{}));
+            addButton(price = new Button(x, y + height * 2, width, height, new StringTextComponent("Price: " + template.getCost()), button -> {
+            }));
             price.active = false;
             price.visible = false;
-            addButton(rent = new Button(x,y + height*3,width,height,new StringTextComponent("Rent: " +template.getRent()),button->{}));
+            addButton(rent = new Button(x, y + height * 3, width, height, new StringTextComponent("Rent: " + template.getRent()), button -> {
+            }));
             rent.active = false;
             rent.visible = false;
             infoButtons.add(name);
             infoButtons.add(author);
             infoButtons.add(price);
             infoButtons.add(rent);
+        } catch (Exception e){
+            e.printStackTrace();
 
+        }
         }
 
 
