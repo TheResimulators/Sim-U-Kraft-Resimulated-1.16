@@ -3,6 +3,7 @@ package com.resimulators.simukraft.client.gui;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.datafixers.functions.PointFreeRule;
 import com.resimulators.simukraft.Network;
 import com.resimulators.simukraft.Reference;
 import com.resimulators.simukraft.SimuKraft;
@@ -19,17 +20,19 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
-import sun.awt.windows.WPrinterJob;
-
 import javax.annotation.Nullable;
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Dictionary;
 import java.util.HashMap;
 
 public class GuiBuilder extends GuiBaseJob {
     private Button Build;
     private Button CustomBack;
+    private Button residential;
+    private Button commercial;
+    private Button industrial;
+    private Button special;
+    private Category currentCategory;
     private BuildingTemplate selected;
     private boolean loaded = false;
     private Button confirmBuilding;
@@ -50,31 +53,67 @@ public class GuiBuilder extends GuiBaseJob {
             addButton(Build = new LargeButton(width / 2 - 55, height - 55, 110, 42, new StringTextComponent("Build"), (Build -> {
                 super.hideAll();
                 CustomBack.visible = true;
-                controlStructures(true);
-                state = State.SELECTBULDING;
+                controlCategoryButtons(true);
+                state = State.SELECTCATEGORY;
             })));
             //Build.active=false;
             addButton(CustomBack = new Button(width - 120, height - 30, 110, 20, new StringTextComponent("Back"), (Back -> {
                 super.Back.onPress();
                 if (state == State.SELECTBULDING) {
-                    state = State.MAIN;
-                    showMainMenu();
-                    controlStructures(false);
+                    state = State.SELECTCATEGORY;
+                    controlStructures(false,currentCategory);
+                    controlCategoryButtons(true);
 
                 }
-                if (state == State.BUILDINGINFO) {
+                else if (state == State.BUILDINGINFO) {
                     state = State.SELECTBULDING;
-                    controlStructures(true);
+                    controlStructures(true,currentCategory);
                     confirmBuilding.visible = false;
+                }
+                else if (state == State.SELECTCATEGORY){
+                    state = State.MAIN;
+                    controlCategoryButtons(false);
+                    showMainMenu();
                 }
 
 
 
             })));
             addButton(confirmBuilding = new Button(20, height - 30, 110, 20, new StringTextComponent("Confirm"), Confirm -> startBuilding()));
-            confirmBuilding.visible = false;
+                confirmBuilding.visible = false;
+
+            addButton(residential = new Button(width/2-100,height/2-30,100,20, new StringTextComponent("Residential"),Residential ->{
+                controlCategoryButtons(false);
+                currentCategory = Category.RESIDENTIAL;
+                controlStructures(true,currentCategory);
+                state = State.SELECTBULDING;
+            }));
+            addButton(commercial = new Button(width/2+10,height/2-30, 100, 20, new StringTextComponent("Commercial"),Commercial -> {
+                controlCategoryButtons(false);
+                currentCategory = Category.COMMERCIAL;
+                controlStructures(true,currentCategory);
+                state = State.SELECTBULDING;
+            }));
+
+            addButton(industrial = new Button(width/2-100,height/2+30,100,20,new StringTextComponent("Industrial"),industrial-> {
+                controlCategoryButtons(false);
+                currentCategory = Category.INDUSTRIAL;
+                controlStructures(true,currentCategory);
+                state = State.SELECTBULDING;
+            }));
 
 
+            addButton(special = new Button(width/2+10,height/2 + 30,100,20, new StringTextComponent("Special"),special ->{
+                controlCategoryButtons(false);
+                currentCategory = Category.SPECIAL;
+                controlStructures(true,currentCategory);
+                state = State.SELECTBULDING;
+            }));
+
+            residential.visible = false;
+            commercial.visible = false;
+            industrial.visible = false;
+            special.visible = false;
             if (structures != null){
                 createStructureButtons();
                 loaded = true;
@@ -92,15 +131,19 @@ public class GuiBuilder extends GuiBaseJob {
                 Build.visible = false;
 
             if (state == State.SELECTBULDING){
-               controlStructures(true);
+               controlStructures(true,currentCategory);
 
             }
             if (state == State.BUILDINGINFO){
                 confirmBuilding.visible = true;
             }
+            if (state == State.SELECTCATEGORY){
+                controlCategoryButtons(true);
+            }
             }
 
         }
+
     }
 
     private void startBuilding() {
@@ -124,9 +167,9 @@ public class GuiBuilder extends GuiBaseJob {
             BuildingType type = BuildingType.getById(template.getTypeID());
             if (type != null){
             StructureButton button = new StructureButton();
-            button.createButtons(template,xSpacing *index + xPadding,50);
-            index++;
             structureButtons.computeIfAbsent(type.category, k -> new ArrayList<>());
+            index = (structureButtons.get(type.category)).size();
+            button.createButtons(template,xSpacing *index + xPadding,50);
             ArrayList<StructureButton> list = structureButtons.get(type.category);
             list.add(button);
             structureButtons.put(type.category,list);
@@ -139,12 +182,24 @@ public class GuiBuilder extends GuiBaseJob {
 
     }
 
-    private void controlStructures(boolean visible){
+    private void controlCategoryButtons(boolean enable){
+        residential.visible = enable;
+        commercial.visible = enable;
+        industrial.visible = enable;
+        special.visible = enable;
 
-        for (ArrayList<StructureButton> array: structureButtons.values()){
-            for (StructureButton button: array){
-                button.controlVisibility(visible);
-            }
+    }
+
+    private void controlStructures(boolean visible, Category category){
+            if (structureButtons.containsKey(category)){
+                for (StructureButton button: structureButtons.get(category)){
+                    button.controlVisibility(visible);
+                }
+        }
+    }
+    private void controlStructures(boolean visible){
+        for (Category category: Category.values()){
+            controlStructures(visible,category);
         }
 
     }
@@ -179,9 +234,10 @@ public class GuiBuilder extends GuiBaseJob {
         Build.visible = true;
     }
 
-    static class State extends GuiBaseJob.State {
+    private static class State extends GuiBaseJob.State {
         private static final int SELECTBULDING = nextID();
         private static final int BUILDINGINFO = nextID();
+        private static final int SELECTCATEGORY = nextID();
 
 
 

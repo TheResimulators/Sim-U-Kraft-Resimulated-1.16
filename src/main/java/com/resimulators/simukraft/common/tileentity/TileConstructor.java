@@ -1,6 +1,7 @@
 package com.resimulators.simukraft.common.tileentity;
 
 import com.resimulators.simukraft.Network;
+import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.common.building.BuildingTemplate;
 import com.resimulators.simukraft.handlers.StructureHandler;
 import com.resimulators.simukraft.init.ModTileEntities;
@@ -86,7 +87,14 @@ public class TileConstructor extends TileEntity implements ITile {
         ArrayList<BuildingTemplate> templates = new ArrayList<>();
         for (ResourceLocation location : locations){
             String name = location.getPath().replace(".nbt","");
-            templates.add(StructureHandler.loadStructure(name));
+            BuildingTemplate template = StructureHandler.loadStructure(name);
+            if (template != null){
+                templates.add(template);
+
+            }else{
+                SimuKraft.LOGGER().warn("Structure with name " + name + " is corrupted and could not be loaded");
+
+            }
 
         }
         Network.getNetwork().sendToPlayer(new BuildingsPacket(templates),(ServerPlayerEntity) playerEntity);

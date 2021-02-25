@@ -25,6 +25,7 @@ import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nullable;
 import java.io.*;
+import java.lang.reflect.Array;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -193,7 +194,20 @@ public class CustomTemplateManager extends TemplateManager {
 
     public List<ResourceLocation> getAllTemplates(){
             Path path = pathGenerated.resolve(Reference.MODID + "/structures");
+            ArrayList<File> folders = Arrays.stream(Objects.requireNonNull(path.toFile().listFiles()))
+                    .filter(File::isDirectory)
+                    .collect(Collectors.toCollection(ArrayList::new));
 
-            return Arrays.stream(Objects.requireNonNull(path.toFile().listFiles())).filter(file -> !file.isDirectory()).map(e -> new ResourceLocation(Reference.MODID, e.getName())).collect(Collectors.toList());
+            ArrayList<ResourceLocation> structures;
+            structures = Arrays.stream(Objects.requireNonNull(path.toFile().listFiles()))
+                    .filter(file -> !file.isDirectory())
+                    .map(e -> new ResourceLocation(Reference.MODID, e.getName()))
+                    .collect(Collectors.toCollection(ArrayList::new));
+            folders.forEach(folder -> structures.addAll(Arrays.stream(Objects.requireNonNull(folder.listFiles()))
+                    .filter(file -> !file.isDirectory())
+                    .map(e -> new ResourceLocation(Reference.MODID, e.getName()))
+                    .collect(Collectors.toList())));
+
+            return structures;
     }
 }

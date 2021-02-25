@@ -289,7 +289,7 @@ public class GuiBaseJob extends Screen {
     }
 
     protected static class State {
-        protected static int id = 0;
+        protected static int id = nextID();
         protected static int MAIN = nextID();
         protected static int SIM_HIRING_INFO = nextID();
         protected static int HIRE_INFO = nextID();
