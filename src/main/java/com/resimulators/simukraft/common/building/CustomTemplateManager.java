@@ -3,10 +3,8 @@ package com.resimulators.simukraft.common.building;
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.DataFixer;
 import com.resimulators.simukraft.Reference;
-import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.common.enums.BuildingType;
 import com.resimulators.simukraft.common.enums.Category;
-import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTUtil;
@@ -17,7 +15,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.ResourceLocationException;
 import net.minecraft.util.datafix.DefaultTypeReferences;
 import net.minecraft.world.gen.feature.template.TemplateManager;
-import net.minecraft.world.storage.FolderName;
 import net.minecraft.world.storage.SaveFormat;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
 import org.apache.logging.log4j.LogManager;
@@ -25,10 +22,6 @@ import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nullable;
 import java.io.*;
-import java.lang.reflect.Array;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.*;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -98,7 +91,7 @@ public class CustomTemplateManager extends TemplateManager {
         if (!this.pathGenerated.toFile().isDirectory()) {
             return null;
         } else {
-            Path path = this.resolvePath(locationIn, ".nbt");
+            Path path = this.resolvePath(locationIn,".nbt");
 
             try (InputStream inputstream = new FileInputStream(path.toFile())) {
                 return this.loadTemplate(inputstream);
@@ -169,6 +162,16 @@ public class CustomTemplateManager extends TemplateManager {
             Path path1 = path.resolve("structures");
             if (category != null){
             path1 = path1.resolve(category.category);}
+            else {
+                for (Category category: Category.values()){
+                    Path path2 = path1.resolve(category.category);
+                    if(Files.exists(path2)){
+                        path1 = path2;
+                        break;
+                    }
+                }
+
+            }
             return FileUtil.resolveResourcePath(path1, locationIn.getPath(), extIn);
         } catch (InvalidPathException invalidpathexception) {
             throw new ResourceLocationException("Invalid resource path: " + locationIn, invalidpathexception);

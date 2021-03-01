@@ -88,7 +88,7 @@ public class BuildingTemplate extends Template {
     public CompoundNBT writeToNBT(CompoundNBT nbt) {
         nbt.putFloat("rent", rent);
         nbt.putFloat("cost", cost);
-        nbt.putInt("typeID",typeID);
+        nbt.putInt("typeid",typeID);
         nbt.putInt("direction",direction.getHorizontalIndex());
         nbt.putString("name",name);
         nbt.putString("author",this.getAuthor());
@@ -99,13 +99,14 @@ public class BuildingTemplate extends Template {
     public void read(CompoundNBT compound) {
         rent = compound.getFloat("rent");
         cost = compound.getFloat("cost");
-        typeID = compound.getInt("typeID");
+        typeID = compound.getInt("typeid");
         direction = Direction.byHorizontalIndex(compound.getInt("direction"));
         if (compound.contains("name"))
         {name = compound.getString("name");}else{
             name = "Placeholder";
         }
         setAuthor(compound.getString("author"));
+        System.out.println(name);
         super.read(compound);
     }
 

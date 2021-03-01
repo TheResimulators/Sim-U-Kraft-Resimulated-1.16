@@ -38,6 +38,7 @@ public class GuiBuilder extends GuiBaseJob {
     private Button confirmBuilding;
     private ArrayList<BuildingTemplate> structures;
     private HashMap<Category, ArrayList<StructureButton>> structureButtons = new HashMap<>();
+    private int pageIndex = 0;
     public GuiBuilder(ITextComponent component, ArrayList<Integer> ids, BlockPos pos, @Nullable int id) {
         super(component, ids, pos, id, Profession.BUILDER.getId());
     }
@@ -114,7 +115,7 @@ public class GuiBuilder extends GuiBaseJob {
             commercial.visible = false;
             industrial.visible = false;
             special.visible = false;
-            if (structures != null){
+            if (structures != null && !loaded){
                 createStructureButtons();
                 loaded = true;
 
@@ -162,14 +163,14 @@ public class GuiBuilder extends GuiBaseJob {
     public void createStructureButtons(){
         int xSpacing = 100;
         int xPadding = 20;
-        int index = 0;
+        int index;
         for (BuildingTemplate template: structures) {
             BuildingType type = BuildingType.getById(template.getTypeID());
             if (type != null){
             StructureButton button = new StructureButton();
             structureButtons.computeIfAbsent(type.category, k -> new ArrayList<>());
             index = (structureButtons.get(type.category)).size();
-            button.createButtons(template,xSpacing *index + xPadding,50);
+            button.createButtons(template,xSpacing *index + xPadding,50 * ((int)index/5));
             ArrayList<StructureButton> list = structureButtons.get(type.category);
             list.add(button);
             structureButtons.put(type.category,list);

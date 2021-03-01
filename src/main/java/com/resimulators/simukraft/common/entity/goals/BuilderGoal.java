@@ -118,8 +118,11 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
         if (delay >= 0){
             delay = 60;
             if (state == State.STARTING){
-                setBlocksNeeded();
-                retrieveItemsFromChest();
+                /*
+                 setBlocksNeeded();
+                 retrieveItemsFromChest();
+                 un-comment for official release
+                */
                 state = State.TRAVELING;
                 destinationBlock = blocks.get(blockIndex).pos;
             }
@@ -135,7 +138,7 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
                 if (blockInfo.state.getBlock() == ModBlocks.CONTROL_BOX.get()) {
                     blockstate = blockInfo.state.with(ModBlockProperties.TYPE, template.getTypeID());
                 }
-                if (sim.getInventory().hasItemStack(new ItemStack(blockInfo.state.getBlock()))){
+                if (sim.getInventory().hasItemStack(new ItemStack(blockInfo.state.getBlock())) || true){ // remove true for official release. for testing purposes
                     sim.world.setBlockState(blockInfo.pos, blockstate.rotate(sim.world,blockInfo.pos,rotation));
                     int index = sim.getInventory().findSlotMatchingUnusedItem(new ItemStack(blockInfo.state.getBlock()));
                     sim.getInventory().decrStackSize(index,1);

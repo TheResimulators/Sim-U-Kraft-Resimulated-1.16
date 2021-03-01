@@ -92,7 +92,8 @@ public class TileConstructor extends TileEntity implements ITile {
                 templates.add(template);
 
             }else{
-                SimuKraft.LOGGER().warn("Structure with name " + name + " is corrupted and could not be loaded");
+                SimuKraft.LOGGER().warn("Structure with name " + name + " is missing or corrupted and could not be loaded," +
+                    " please check if it is in the right location and that it is a valid structure");
 
             }
 
