@@ -170,7 +170,7 @@ public class GuiBuilder extends GuiBaseJob {
             StructureButton button = new StructureButton();
             structureButtons.computeIfAbsent(type.category, k -> new ArrayList<>());
             index = (structureButtons.get(type.category)).size();
-            button.createButtons(template,xSpacing *index + xPadding,50 * ((int)index/5));
+            button.createButtons(template,(xSpacing *index + xPadding),150 * (((int)index/3)) + 50);
             ArrayList<StructureButton> list = structureButtons.get(type.category);
             list.add(button);
             structureButtons.put(type.category,list);
