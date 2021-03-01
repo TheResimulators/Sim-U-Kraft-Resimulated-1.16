@@ -12,6 +12,7 @@ import com.resimulators.simukraft.common.enums.BuildingType;
 import com.resimulators.simukraft.common.enums.Category;
 import com.resimulators.simukraft.common.jobs.Profession;
 import com.resimulators.simukraft.packets.StartBuildingPacket;
+import com.sun.org.apache.xpath.internal.operations.String;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.widget.button.Button;
@@ -20,6 +21,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import org.lwjgl.system.CallbackI;
+
 import javax.annotation.Nullable;
 import java.awt.*;
 import java.util.ArrayList;
@@ -32,12 +35,15 @@ public class GuiBuilder extends GuiBaseJob {
     private Button commercial;
     private Button industrial;
     private Button special;
+    private Button nextPage;
+    private Button previousPage;
     private Category currentCategory;
     private BuildingTemplate selected;
     private boolean loaded = false;
     private Button confirmBuilding;
     private ArrayList<BuildingTemplate> structures;
     private HashMap<Category, ArrayList<StructureButton>> structureButtons = new HashMap<>();
+    private int maxButtons;
     private int pageIndex = 0;
     public GuiBuilder(ITextComponent component, ArrayList<Integer> ids, BlockPos pos, @Nullable int id) {
         super(component, ids, pos, id, Profession.BUILDER.getId());
@@ -47,8 +53,9 @@ public class GuiBuilder extends GuiBaseJob {
     @Override
     public void init(Minecraft minecraft, int width, int height) {
         super.init(minecraft, width, height);
-        if (structures != null)loaded = true;
-
+        if (structures != null){
+            loaded = true;
+        }
 
 
             addButton(Build = new LargeButton(width / 2 - 55, height - 55, 110, 42, new StringTextComponent("Build"), (Build -> {
@@ -68,6 +75,8 @@ public class GuiBuilder extends GuiBaseJob {
                 }
                 else if (state == State.BUILDINGINFO) {
                     state = State.SELECTBULDING;
+                    nextPage.visible = true;
+                    previousPage.visible = true;
                     controlStructures(true,currentCategory);
                     confirmBuilding.visible = false;
                 }
@@ -76,9 +85,6 @@ public class GuiBuilder extends GuiBaseJob {
                     controlCategoryButtons(false);
                     showMainMenu();
                 }
-
-
-
             })));
             addButton(confirmBuilding = new Button(20, height - 30, 110, 20, new StringTextComponent("Confirm"), Confirm -> startBuilding()));
                 confirmBuilding.visible = false;
@@ -88,12 +94,16 @@ public class GuiBuilder extends GuiBaseJob {
                 currentCategory = Category.RESIDENTIAL;
                 controlStructures(true,currentCategory);
                 state = State.SELECTBULDING;
+                nextPage.visible = true;
+                previousPage.visible = true;
             }));
             addButton(commercial = new Button(width/2+10,height/2-30, 100, 20, new StringTextComponent("Commercial"),Commercial -> {
                 controlCategoryButtons(false);
                 currentCategory = Category.COMMERCIAL;
                 controlStructures(true,currentCategory);
                 state = State.SELECTBULDING;
+                nextPage.visible = true;
+                previousPage.visible = true;
             }));
 
             addButton(industrial = new Button(width/2-100,height/2+30,100,20,new StringTextComponent("Industrial"),industrial-> {
@@ -101,16 +111,33 @@ public class GuiBuilder extends GuiBaseJob {
                 currentCategory = Category.INDUSTRIAL;
                 controlStructures(true,currentCategory);
                 state = State.SELECTBULDING;
+                nextPage.visible = true;
+                previousPage.visible = true;
             }));
-
 
             addButton(special = new Button(width/2+10,height/2 + 30,100,20, new StringTextComponent("Special"),special ->{
                 controlCategoryButtons(false);
                 currentCategory = Category.SPECIAL;
                 controlStructures(true,currentCategory);
                 state = State.SELECTBULDING;
+                nextPage.visible = true;
+                previousPage.visible = true;
             }));
 
+            addButton(nextPage = new Button(width-120,height-60,100,20, new StringTextComponent("Next Page"),nextPage ->{
+                hideAllStructures(currentCategory);
+                pageIndex++;
+                controlStructures(true,currentCategory);
+            }));
+
+            addButton(previousPage = new Button(20,height-60,100,20, new StringTextComponent("Previous Page"), previousPage ->{
+                hideAllStructures(currentCategory);
+                pageIndex--;
+                controlStructures(true,currentCategory);
+
+            }));
+            nextPage.visible = false;
+            previousPage.visible = false;
             residential.visible = false;
             commercial.visible = false;
             industrial.visible = false;
@@ -161,16 +188,18 @@ public class GuiBuilder extends GuiBaseJob {
     }
 
     public void createStructureButtons(){
-        int xSpacing = 100;
+        int xSpacing = 150;
         int xPadding = 20;
+        int maxButtonsWidth = this.width/150;
+        maxButtons = maxButtonsWidth * (this.height/125);
         int index;
         for (BuildingTemplate template: structures) {
             BuildingType type = BuildingType.getById(template.getTypeID());
             if (type != null){
             StructureButton button = new StructureButton();
             structureButtons.computeIfAbsent(type.category, k -> new ArrayList<>());
-            index = (structureButtons.get(type.category)).size();
-            button.createButtons(template,(xSpacing *index + xPadding),150 * (((int)index/3)) + 50);
+            index = (structureButtons.get(type.category)).size() %maxButtons;
+            button.createButtons(template,(xSpacing *(index%maxButtonsWidth) + xPadding),100 * (((int)index/maxButtonsWidth)) + 25);
             ArrayList<StructureButton> list = structureButtons.get(type.category);
             list.add(button);
             structureButtons.put(type.category,list);
@@ -193,10 +222,22 @@ public class GuiBuilder extends GuiBaseJob {
 
     private void controlStructures(boolean visible, Category category){
             if (structureButtons.containsKey(category)){
-                for (StructureButton button: structureButtons.get(category)){
+                int currentIndex = maxButtons*pageIndex;
+                for (int i = currentIndex; i<maxButtons + currentIndex;i++){
+                    if (i >= structureButtons.get(category).size()) return;
+                    StructureButton button = structureButtons.get(category).get(i);
                     button.controlVisibility(visible);
                 }
         }
+    }
+    private void hideAllStructures(Category category){
+        if(structureButtons.containsKey(category)){
+            for(StructureButton button: structureButtons.get(category)){
+                button.controlVisibility(false);
+            }
+
+        }
+
     }
     private void controlStructures(boolean visible){
         for (Category category: Category.values()){
@@ -250,7 +291,7 @@ public class GuiBuilder extends GuiBaseJob {
         Button price;
         Button author;
         Button rent;
-        int width = 100;
+        int width = 150;
         int height = 20;
 
         void createButtons(BuildingTemplate template, int x, int y){
@@ -259,6 +300,8 @@ public class GuiBuilder extends GuiBaseJob {
                 state = State.BUILDINGINFO;
                 CustomBack.visible = true;
                 confirmBuilding.visible = true;
+                nextPage.visible = false;
+                previousPage.visible = false;
                 controlStructures(false);
                 selected = template;
             }));
