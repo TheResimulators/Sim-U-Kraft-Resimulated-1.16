@@ -28,6 +28,8 @@ public class GuiBaseJob extends Screen {
     Button Done;
     Button Back;
     Button Confirm;
+    Button nextPage;
+    Button previousPage;
     PlayerEntity player;
     ArrayList<Integer> ids;
     ArrayList<SimButton> simButtons = new ArrayList<>();
@@ -178,11 +180,10 @@ public class GuiBaseJob extends Screen {
 
     private void ShowHiring() {
         hideAll();
-
         Back.visible = true;
         int x = 0;
         int y = 0;
-        int ConstantXSpacing = (width / 5);
+        int ConstantXSpacing = 125;
         int ConstantYSpacing = height / 4;
         for (Integer id : ids) {
             SimEntity sim = (SimEntity) player.getEntityWorld().getEntityByID(id);

@@ -57,6 +57,7 @@ public class StructureHandler {
     /**loads structure using template manager*/
     public static BuildingTemplate loadStructure(String name) {
         if (templateManager != null) {
+            System.out.println(name);
             return templateManager.getTemplate(new ResourceLocation(Reference.MODID, name));
         }
         return null;

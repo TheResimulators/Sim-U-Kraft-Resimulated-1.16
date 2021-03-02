@@ -223,6 +223,10 @@ public class GuiBuilder extends GuiBaseJob {
     private void controlStructures(boolean visible, Category category){
             if (structureButtons.containsKey(category)){
                 int currentIndex = maxButtons*pageIndex;
+                if (currentIndex < 0){
+                    currentIndex = 0;
+                    pageIndex = 0;
+                }
                 for (int i = currentIndex; i<maxButtons + currentIndex;i++){
                     if (i >= structureButtons.get(category).size()) return;
                     StructureButton button = structureButtons.get(category).get(i);

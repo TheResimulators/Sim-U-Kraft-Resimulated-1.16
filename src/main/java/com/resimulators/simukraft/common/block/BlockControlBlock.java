@@ -31,9 +31,9 @@ import net.minecraftforge.fml.network.NetworkDirection;
 
 import java.util.ArrayList;
 
-public class BlockControlBox extends BlockBase {
+public class BlockControlBlock extends BlockBase {
     public static final IntegerProperty type = ModBlockProperties.TYPE;
-    public BlockControlBox(Properties properties) {
+    public BlockControlBlock(Properties properties) {
         super(properties);
     }
 

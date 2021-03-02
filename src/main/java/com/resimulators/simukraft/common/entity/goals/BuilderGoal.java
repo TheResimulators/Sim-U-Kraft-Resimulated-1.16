@@ -125,6 +125,11 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
                 */
                 state = State.TRAVELING;
                 destinationBlock = blocks.get(blockIndex).pos;
+                while (sim.getEntityWorld().getBlockState(destinationBlock) ==blocks.get(blockIndex).state){
+                    blockIndex++;
+                    destinationBlock = blocks.get(blockIndex).pos;
+
+                }
             }
             if (state == State.TRAVELING){
                 if (sim.getDistanceSq(destinationBlock.getX(),destinationBlock.getY(),destinationBlock.getZ()) < 20){
@@ -139,9 +144,11 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
                     blockstate = blockInfo.state.with(ModBlockProperties.TYPE, template.getTypeID());
                 }
                 if (sim.getInventory().hasItemStack(new ItemStack(blockInfo.state.getBlock())) || true){ // remove true for official release. for testing purposes
+
                     sim.world.setBlockState(blockInfo.pos, blockstate.rotate(sim.world,blockInfo.pos,rotation));
                     int index = sim.getInventory().findSlotMatchingUnusedItem(new ItemStack(blockInfo.state.getBlock()));
-                    sim.getInventory().decrStackSize(index,1);
+                    if (index >= 0){
+                    sim.getInventory().decrStackSize(index,1);}
                     blockIndex++;
                     if (blockIndex < blocks.size() - 1) {
                         destinationBlock = blocks.get(blockIndex).pos;
