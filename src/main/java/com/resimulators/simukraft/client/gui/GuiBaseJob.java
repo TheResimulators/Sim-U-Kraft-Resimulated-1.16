@@ -43,6 +43,8 @@ public class GuiBaseJob extends Screen {
     int job;
     private int pageIndex;
     private int maxButtons;
+    private final SavedWorldData data;
+    private final int Id;
     ArrayList<Button> mainMenu = new ArrayList<Button>() {{
     }};
 
@@ -50,6 +52,8 @@ public class GuiBaseJob extends Screen {
         super(component);
         this.hiredId = id;
         this.player = Minecraft.getInstance().player;
+        data = SavedWorldData.get(player.world);
+        Id = data.getFactionWithPlayer(player.getUniqueID()).getId();
         this.ids = ids;
         this.pos = pos;
         this.job = job;
@@ -59,10 +63,19 @@ public class GuiBaseJob extends Screen {
     @Override
     public void init(Minecraft minecraft, int width, int height) {
         super.init(minecraft, width, height);
+        employeeButtons.clear();
+        simButtons.clear();
+        pageIndex = 0;
+        createEmployees();
         addButton(Done = new Button(width - 120, height - 30, 110, 20, new StringTextComponent("Done"), (Done) -> minecraft.displayGuiScreen(null)));
 
         addButton(Hire = new Button(20, height - 60, 110, 20, new StringTextComponent("Hire"), (Hire -> {
-
+            pageIndex = 0;
+            hideAll();
+            showHiring();
+            Back.visible = true;
+            nextPage.visible = true;
+            previousPage.visible = true;
             state = State.HIRE_INFO;  //hire_info is used to select a sim for hiring
         })));
         createHiring();
@@ -71,8 +84,12 @@ public class GuiBaseJob extends Screen {
             showFiring();
         })));
         addButton(ShowEmployees = new Button(width - 120, height - 60, 110, 20, new StringTextComponent("Show Employees"), (ShowEmployees -> {
+            pageIndex = 0;
             hideAll();
-            createEmployees();
+            showEmployees();
+            Back.visible = true;
+            nextPage.visible = true;
+            previousPage.visible = true;
             state = State.SHOW_EMPLOYEES;
         })));
         ITile tile = ((ITile) SimuKraft.proxy.getClientWorld().getTileEntity(pos));
@@ -96,10 +113,14 @@ public class GuiBaseJob extends Screen {
                 showMainMenu();
             }
             if (state == State.SIM_EMPLOYEE_INFO) {
+                previousPage.visible = true;
+                nextPage.visible = true;
                 state = State.SHOW_EMPLOYEES;
-                createEmployees();
+                showEmployees();
             }
             if (state == State.SIM_HIRING_INFO) {
+                previousPage.visible = true;
+                nextPage.visible = true;
                 state = State.HIRE_INFO;
                 ShowHiring();
             }
@@ -121,10 +142,16 @@ public class GuiBaseJob extends Screen {
         }
 
         addButton(nextPage = new Button(width-120,height-60,100,20, new StringTextComponent("Next Page"),nextPage ->{
-            pageIndex++;
+
             if (state == State.SHOW_EMPLOYEES){
+                if ((pageIndex + 1) * maxButtons < employeeButtons.size())
+                {pageIndex++;}
+                hideEmployees();
                 showEmployees();
             }else if (state == State.HIRE_INFO){
+                if ((pageIndex + 1) * maxButtons < simButtons.size())
+                {pageIndex++;}
+                hideHiring();
                 showHiring();
             }
 
@@ -141,9 +168,29 @@ public class GuiBaseJob extends Screen {
             }
         }));
 
+        previousPage.visible = false;
+        nextPage.visible = false;
+        Back.visible = false;
         if (state != State.MAIN){
             hideAll();
+            showHiring();
+            Back.visible = true;
+            nextPage.visible = true;
+            previousPage.visible = true;
         }
+        if (state == State.HIRE_INFO){
+            showHiring();
+            Back.visible = true;
+            nextPage.visible = true;
+            previousPage.visible = true;
+        }
+        if (state == State.SHOW_EMPLOYEES){
+            showEmployees();
+            Back.visible = true;
+            nextPage.visible = true;
+            previousPage.visible = true;
+        }
+
         mainMenu.add(Hire);
         mainMenu.add(Fire);
         mainMenu.add(ShowEmployees);
@@ -254,20 +301,21 @@ public class GuiBaseJob extends Screen {
         int ConstantXSpacing = 125;
         int ConstantYSpacing = 30;
         int maxWidth = width/125;
-        maxButtons = maxWidth * height/30;
-        for (int i = 0; i< ids.size();i++) {
-            SimEntity sim = (SimEntity) player.getEntityWorld().getEntityByID(ids.get(i));
+        int i = 0;
+        maxButtons = maxWidth * (height-150)/30;
+        for (int id: ids) {
+            SimEntity sim = (SimEntity) player.getEntityWorld().getEntityByID(id);
             if (sim != null) {
                 UUID uuid = sim.getUniqueID();
-                SavedWorldData data = SavedWorldData.get(player.world);
-                int Id = data.getFactionWithPlayer(player.getUniqueID()).getId();
                 int index = i% maxButtons;
-                if (data.getFaction(Id).getHired(uuid)) {
-                    SimButton button = new SimButton(ConstantXSpacing*(index%maxWidth) + 20,   ConstantYSpacing * (index/maxWidth) + 40, 100, 20, sim.getName(), ids.get(i), this, 1);
+                if (!data.getFaction(Id).getHired(uuid)) {
+                    SimButton button = new SimButton(ConstantXSpacing*(index%maxWidth) + 40,   ConstantYSpacing * (index/maxWidth) + 40, 100, 20, sim.getName(), ids.get(i), this, 0);
                     simButtons.add(addButton(button));
                     button.visible = false;
+                    i++;
                 }
             }
+
         }
     }
 
@@ -275,18 +323,18 @@ public class GuiBaseJob extends Screen {
         int ConstantXSpacing = 125;
         int ConstantYSpacing = 30;
         int maxWidth = width/125;
+        int i = 0;
         maxButtons = maxWidth * height/30;
-        for (int i = 0; i< ids.size();i++) {
-            SimEntity sim = (SimEntity) player.getEntityWorld().getEntityByID(ids.get(i));
+        for (int id: ids) {
+            SimEntity sim = (SimEntity) player.getEntityWorld().getEntityByID(id);
             if (sim != null) {
                 UUID uuid = sim.getUniqueID();
-                SavedWorldData data = SavedWorldData.get(player.world);
-                int Id = data.getFactionWithPlayer(player.getUniqueID()).getId();
                 int index = i% maxButtons;
                 if (data.getFaction(Id).getHired(uuid)) {
                     SimButton button = new SimButton(ConstantXSpacing*(index%maxWidth) + 20,   ConstantYSpacing * (index/maxWidth) + 40, 100, 20, sim.getName(), ids.get(i), this, 1);
                     employeeButtons.add(addButton(button));
-
+                    button.visible = false;
+                    i++;
                 }
             }
         }

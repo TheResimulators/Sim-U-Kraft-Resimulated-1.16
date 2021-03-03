@@ -56,7 +56,7 @@ public class GuiBuilder extends GuiBaseJob {
         if (structures != null){
             loaded = true;
         }
-
+        pageIndex = 0;
 
             addButton(Build = new LargeButton(width / 2 - 55, height - 55, 110, 42, new StringTextComponent("Build"), (Build -> {
                 super.hideAll();
@@ -71,6 +71,8 @@ public class GuiBuilder extends GuiBaseJob {
                     state = State.SELECTCATEGORY;
                     controlStructures(false,currentCategory);
                     controlCategoryButtons(true);
+                    nextPage.visible = false;
+                    previousPage.visible = false;
 
                 }
                 else if (state == State.BUILDINGINFO) {
@@ -126,7 +128,8 @@ public class GuiBuilder extends GuiBaseJob {
 
             addButton(nextPage = new Button(width-120,height-60,100,20, new StringTextComponent("Next Page"),nextPage ->{
                 hideAllStructures(currentCategory);
-                pageIndex++;
+                if ((pageIndex + 1) * maxButtons < structureButtons.size())
+                {pageIndex++;}
                 controlStructures(true,currentCategory);
             }));
 
@@ -154,18 +157,20 @@ public class GuiBuilder extends GuiBaseJob {
             CustomBack.visible = false;
             Build.visible = false;
         }else {
-
+            CustomBack.visible = false;
             if (state != State.MAIN){
                 Build.visible = false;
 
             if (state == State.SELECTBULDING){
                controlStructures(true,currentCategory);
-
+                CustomBack.visible = true;
             }
             if (state == State.BUILDINGINFO){
                 confirmBuilding.visible = true;
+                CustomBack.visible = true;
             }
             if (state == State.SELECTCATEGORY){
+                CustomBack.visible = true;
                 controlCategoryButtons(true);
             }
             }

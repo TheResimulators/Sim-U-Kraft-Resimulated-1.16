@@ -205,6 +205,8 @@ public class SimEntity extends AgeableEntity implements INPC {
             compound.put("job", this.job.writeToNbt(new ListNBT()));
         }
 
+
+
         if (controller != null) {
             compound.put("working controller", controller.serializeNBT());
         }
@@ -236,8 +238,9 @@ public class SimEntity extends AgeableEntity implements INPC {
        ListNBT nbt = compound.getList("job", Constants.NBT.TAG_COMPOUND);
 
         int jobType = nbt.getCompound(0).getInt("id");
-        job = ModJobs.JOB_LOOKUP.get(jobType).apply(this);
-
+        if (jobType != 0) {
+            job = ModJobs.JOB_LOOKUP.get(jobType).apply(this);
+        }
         if (compound.contains("job") && job != null){
             this.job.readFromNbt((ListNBT) compound.get("job"));
         }

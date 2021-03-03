@@ -111,10 +111,11 @@ public class EntitySimRender extends LivingRenderer<SimEntity, EntitySimModel> {
         double d = this.renderManager.squareDistanceTo(simEntity);
         matrix.push();
             if (d < 100.0d) {
-                matrix.translate(0, (9.0F * 1.2f * 0.025F), 0);
-
 
                 if (!simEntity.getStatus().equals("")){
+                    matrix.translate(0, (9.0F * 1.2f * 0.025F), 0);
+
+
                     matrix.scale(.9f,.9f,.9f);
                     super.renderName(simEntity, new StringTextComponent(TextFormatting.YELLOW  + simEntity.getActivity().name + TextFormatting.RESET), matrix, renderBuffer, light);
                     matrix.translate(0, (double) (9.0F *1.2f* 0.025F), 0);
