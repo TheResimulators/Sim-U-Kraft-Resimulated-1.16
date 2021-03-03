@@ -42,6 +42,7 @@ public class GuiBaseJob extends Screen {
     int hiredId;
     int job;
     private int pageIndex;
+    private int maxButtons;
     ArrayList<Button> mainMenu = new ArrayList<Button>() {{
     }};
 
@@ -71,7 +72,7 @@ public class GuiBaseJob extends Screen {
         })));
         addButton(ShowEmployees = new Button(width - 120, height - 60, 110, 20, new StringTextComponent("Show Employees"), (ShowEmployees -> {
             hideAll();
-            ShowEmployees();
+            createEmployees();
             state = State.SHOW_EMPLOYEES;
         })));
         ITile tile = ((ITile) SimuKraft.proxy.getClientWorld().getTileEntity(pos));
@@ -96,7 +97,7 @@ public class GuiBaseJob extends Screen {
             }
             if (state == State.SIM_EMPLOYEE_INFO) {
                 state = State.SHOW_EMPLOYEES;
-                ShowEmployees();
+                createEmployees();
             }
             if (state == State.SIM_HIRING_INFO) {
                 state = State.HIRE_INFO;
@@ -120,17 +121,25 @@ public class GuiBaseJob extends Screen {
         }
 
         addButton(nextPage = new Button(width-120,height-60,100,20, new StringTextComponent("Next Page"),nextPage ->{
-            hideAllStructures(currentCategory);
             pageIndex++;
-            controlStructures(true,currentCategory);
+            if (state == State.SHOW_EMPLOYEES){
+                showEmployees();
+            }else if (state == State.HIRE_INFO){
+                showHiring();
+            }
+
         }));
 
         addButton(previousPage = new Button(20,height-60,100,20, new StringTextComponent("Previous Page"), previousPage ->{
-
             pageIndex--;
-            controlStructures(true,currentCategory);
-
-        }
+            if (state == State.SHOW_EMPLOYEES){
+                hideEmployees();
+                showEmployees();
+            }else if (state == State.HIRE_INFO){
+                hideHiring();
+                showHiring();
+            }
+        }));
 
         if (state != State.MAIN){
             hideAll();
@@ -141,6 +150,9 @@ public class GuiBaseJob extends Screen {
         mainMenu.add(Done);
 
 
+    }
+
+    private void ShowHiring() {
     }
 
     public void showMainMenu() {
@@ -162,12 +174,6 @@ public class GuiBaseJob extends Screen {
         Back.visible = true;
 
 
-    }
-
-    private void showHiring(){
-
-
-        
     }
 
     @Override
@@ -201,52 +207,86 @@ public class GuiBaseJob extends Screen {
 
     }
 
+    private void showHiring(){
+        int currentIndex = maxButtons*pageIndex;
+        if (currentIndex < 0){
+            currentIndex = 0;
+            pageIndex = 0;
+        }
+        for (int i = currentIndex; i<maxButtons + currentIndex;i++){
+            if (i >= simButtons.size()) return;
+            SimButton button = simButtons.get(i);
+            button.visible = true;
+        }
+
+
+    }
+
+    private void showEmployees(){
+        int currentIndex = maxButtons*pageIndex;
+        if (currentIndex < 0){
+            currentIndex = 0;
+            pageIndex = 0;
+        }
+        for (int i = currentIndex; i<maxButtons + currentIndex;i++){
+            if (i >= employeeButtons.size()) return;
+            SimButton button = employeeButtons.get(i);
+            button.visible = true;
+        }
+    }
+
+    private void hideHiring(){
+        for(SimButton button: simButtons){
+            button.visible = false;
+        }
+
+    }
+
+    private void hideEmployees(){
+        for(SimButton button: employeeButtons){
+            button.visible = false;
+        }
+
+    }
+
     private void createHiring() {
-        int x = 0;
-        int y = 0;
+
         int ConstantXSpacing = 125;
-        int ConstantYSpacing = height / 4;
-        for (Integer id : ids) {
-            SimEntity sim = (SimEntity) player.getEntityWorld().getEntityByID(id);
+        int ConstantYSpacing = 30;
+        int maxWidth = width/125;
+        maxButtons = maxWidth * height/30;
+        for (int i = 0; i< ids.size();i++) {
+            SimEntity sim = (SimEntity) player.getEntityWorld().getEntityByID(ids.get(i));
             if (sim != null) {
                 UUID uuid = sim.getUniqueID();
                 SavedWorldData data = SavedWorldData.get(player.world);
                 int Id = data.getFactionWithPlayer(player.getUniqueID()).getId();
-                if (!data.getFaction(Id).getHired(uuid)) {
-                    SimButton button = new SimButton(20 + x * ConstantXSpacing, 40 + y * ConstantYSpacing, 100, 20, sim.getName(), id, this, 0);
+                int index = i% maxButtons;
+                if (data.getFaction(Id).getHired(uuid)) {
+                    SimButton button = new SimButton(ConstantXSpacing*(index%maxWidth) + 20,   ConstantYSpacing * (index/maxWidth) + 40, 100, 20, sim.getName(), ids.get(i), this, 1);
                     simButtons.add(addButton(button));
                     button.visible = false;
-                    x++;
-                    if (x > 4) {
-                        x = 0;
-                        y++;
-                    }
                 }
             }
         }
     }
 
-    private void ShowEmployees() {
-
-
-        Back.visible = true;
-        int x = 0;
-        int y = 0;
-        int ConstantXSpacing = (width / 5);
-        int ConstantYSpacing = height / 4;
-        for (Integer id : ids) {
-            SimEntity sim = (SimEntity) player.getEntityWorld().getEntityByID(id);
+    private void createEmployees() {
+        int ConstantXSpacing = 125;
+        int ConstantYSpacing = 30;
+        int maxWidth = width/125;
+        maxButtons = maxWidth * height/30;
+        for (int i = 0; i< ids.size();i++) {
+            SimEntity sim = (SimEntity) player.getEntityWorld().getEntityByID(ids.get(i));
             if (sim != null) {
                 UUID uuid = sim.getUniqueID();
                 SavedWorldData data = SavedWorldData.get(player.world);
                 int Id = data.getFactionWithPlayer(player.getUniqueID()).getId();
+                int index = i% maxButtons;
                 if (data.getFaction(Id).getHired(uuid)) {
-                    simButtons.add(addButton(new SimButton(20 + x * ConstantXSpacing, 40 + y * ConstantYSpacing, 100, 20, sim.getName(), id, this, 1)));
-                    x++;
-                    if (x > 4) {
-                        x = 0;
-                        y++;
-                    }
+                    SimButton button = new SimButton(ConstantXSpacing*(index%maxWidth) + 20,   ConstantYSpacing * (index/maxWidth) + 40, 100, 20, sim.getName(), ids.get(i), this, 1);
+                    employeeButtons.add(addButton(button));
+
                 }
             }
         }
