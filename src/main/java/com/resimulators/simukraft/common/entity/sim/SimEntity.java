@@ -2,6 +2,7 @@ package com.resimulators.simukraft.common.entity.sim;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.resimulators.simukraft.Network;
 import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.common.entity.goals.GoToWorkGoal;
 import com.resimulators.simukraft.common.entity.goals.PickupItemGoal;
@@ -15,6 +16,7 @@ import com.resimulators.simukraft.handlers.FoodStats;
 import com.resimulators.simukraft.init.ModEntities;
 import com.resimulators.simukraft.init.ModJobs;
 import com.resimulators.simukraft.packets.SimFirePacket;
+import com.resimulators.simukraft.packets.SyncSimJobData;
 import com.resimulators.simukraft.utils.TextureUtils;
 import com.resimulators.simukraft.utils.Utils;
 import net.minecraft.entity.*;
@@ -243,6 +245,7 @@ public class SimEntity extends AgeableEntity implements INPC {
         }
         if (compound.contains("job") && job != null){
             this.job.readFromNbt((ListNBT) compound.get("job"));
+            Network.getNetwork().sendToEveryone(new SyncSimJobData(this.getEntityId(),jobType,(ListNBT) compound.get("job")));
         }
         controller = new WorkingController(this);
         if (compound.contains("working controller")) {
@@ -488,6 +491,9 @@ public class SimEntity extends AgeableEntity implements INPC {
             return 0;
         }
     }
+
+
+
 
     public void setFemale(boolean female) {
         this.dataManager.set(FEMALE, female);

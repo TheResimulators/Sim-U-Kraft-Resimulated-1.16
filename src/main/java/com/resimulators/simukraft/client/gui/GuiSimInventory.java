@@ -64,14 +64,15 @@ public class GuiSimInventory extends DisplayEffectsScreen<SimContainer> {
         this.sim = container.getSim();
         this.sim.setCustomName(new StringTextComponent(this.title.getString()));
 
+
     }
 
     @Override
     protected void drawGuiContainerForegroundLayer(MatrixStack stack, int x, int y) {
-        String name = Profession.getNameFromID(sim.getProfession());
+
 
         this.font.drawString(stack, this.title.getString(), 80f, 8f, 4210752);
-        this.font.drawString(stack,"Job: " + StringUtils.capitalize(name),80f, 30f, 4210752);
+        this.font.drawString(stack,"Job: " + StringUtils.capitalize(container.job),80f, 30f, 4210752);
     }
 
     @Override
