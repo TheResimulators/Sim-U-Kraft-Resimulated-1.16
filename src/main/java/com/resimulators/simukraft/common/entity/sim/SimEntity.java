@@ -2,7 +2,6 @@ package com.resimulators.simukraft.common.entity.sim;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.resimulators.simukraft.Network;
 import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.common.entity.goals.GoToWorkGoal;
 import com.resimulators.simukraft.common.entity.goals.PickupItemGoal;
@@ -16,7 +15,6 @@ import com.resimulators.simukraft.handlers.FoodStats;
 import com.resimulators.simukraft.init.ModEntities;
 import com.resimulators.simukraft.init.ModJobs;
 import com.resimulators.simukraft.packets.SimFirePacket;
-import com.resimulators.simukraft.packets.SyncSimJobData;
 import com.resimulators.simukraft.utils.TextureUtils;
 import com.resimulators.simukraft.utils.Utils;
 import net.minecraft.entity.*;
@@ -45,7 +43,6 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.event.world.WorldEvent;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -66,7 +63,7 @@ public class SimEntity extends AgeableEntity implements INPC {
     private static final DataParameter<Integer> NAME_COLOR = EntityDataManager.createKey(SimEntity.class, DataSerializers.VARINT);
     public static final DataParameter<Integer> FOOD_LEVEL = EntityDataManager.createKey(SimEntity.class, DataSerializers.VARINT);
     public static final DataParameter<Float> FOOD_SATURATION_LEVEL = EntityDataManager.createKey(SimEntity.class, DataSerializers.FLOAT);
-
+    public static final DataParameter<CompoundNBT> JOB_DATA = EntityDataManager.createKey(SimEntity.class, DataSerializers.COMPOUND_NBT);
     private final SimInventory inventory;
     private PlayerEntity interactingPlayer;
 
@@ -245,7 +242,7 @@ public class SimEntity extends AgeableEntity implements INPC {
         }
         if (compound.contains("job") && job != null){
             this.job.readFromNbt((ListNBT) compound.get("job"));
-            Network.getNetwork().sendToEveryone(new SyncSimJobData(this.getEntityId(),jobType,(ListNBT) compound.get("job")));
+            setJobData((ListNBT) compound.get("job"),jobType);
         }
         controller = new WorkingController(this);
         if (compound.contains("working controller")) {
@@ -544,6 +541,29 @@ public class SimEntity extends AgeableEntity implements INPC {
         }
     }
 
+    public void setJobData(ListNBT listNBT, int id){
+        CompoundNBT nbt = new CompoundNBT();
+        nbt.putInt("id",id);
+        nbt.put("Data",listNBT);
+        setJobData(nbt);
+
+    }
+
+
+    public void setJobData(CompoundNBT nbt) {
+        if (this.dataManager != null) {
+            this.dataManager.set(JOB_DATA, nbt);
+        }
+    }
+
+    public CompoundNBT getJobData(){
+        try {
+            return this.dataManager.get(JOB_DATA);
+        } catch (NullPointerException e){
+            return null;
+        }
+    }
+
     public void setInteractingPlayer(PlayerEntity player) {
         this.interactingPlayer = player;
     }
@@ -619,6 +639,13 @@ public class SimEntity extends AgeableEntity implements INPC {
     }
 
     public IJob getJob() {
+        if (job == null){
+            CompoundNBT nbt = getJobData();
+            if (nbt != null){
+                ModJobs.JOB_LOOKUP.get(nbt.getInt("id")).apply(this);
+                job.readFromNbt(nbt.getList("Data",Constants.NBT.TAG_COMPOUND));
+            }
+        }
         return job;
     }
 
