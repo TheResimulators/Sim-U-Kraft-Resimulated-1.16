@@ -6,20 +6,15 @@ import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.enums.BuildingType;
 import com.resimulators.simukraft.common.jobs.JobBuilder;
 import com.resimulators.simukraft.common.jobs.core.Activity;
-import com.resimulators.simukraft.common.jobs.core.IJob;
 import com.resimulators.simukraft.common.world.Faction;
 import com.resimulators.simukraft.common.world.SavedWorldData;
 import com.resimulators.simukraft.handlers.StructureHandler;
 import com.resimulators.simukraft.init.ModBlockProperties;
 import com.resimulators.simukraft.init.ModBlocks;
 import com.resimulators.simukraft.utils.BlockUtils;
-import com.resimulators.simukraft.utils.Utils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.entity.ai.goal.MoveToBlockGoal;
-import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.ChestTileEntity;
@@ -28,13 +23,9 @@ import net.minecraft.util.Mirror;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.gen.feature.template.PlacementSettings;
 import net.minecraft.world.gen.feature.template.Template;
-import net.minecraft.world.storage.WorldSavedData;
-import net.minecraftforge.items.ItemHandlerHelper;
-import net.minecraftforge.items.wrapper.InvWrapper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -140,7 +131,7 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
             if (state == State.BUILDING){
                 Template.BlockInfo blockInfo = blocks.get(blockIndex);
                 BlockState blockstate = blockInfo.state;
-                if (blockInfo.state.getBlock() == ModBlocks.CONTROL_BOX.get()) {
+                if (blockInfo.state.getBlock() == ModBlocks.CONTROL_BLOCK.get()) {
                     blockstate = blockInfo.state.with(ModBlockProperties.TYPE, template.getTypeID());
                 }
                 if (sim.getInventory().hasItemStack(new ItemStack(blockInfo.state.getBlock())) || true){ // remove true for official release. for testing purposes

@@ -14,7 +14,7 @@ public class Lang extends LanguageProvider {
     @Override
     protected void addTranslations() {
         add(ModBlocks.CONSTRUCTOR_BOX.get(), "Constructor Box");
-        add(ModBlocks.CONTROL_BOX.get(), "Control Box");
+        add(ModBlocks.CONTROL_BLOCK.get(), "Control Box");
         add(ModBlocks.FARM_BOX.get(), "Farm Box");
         add(ModBlocks.MINE_BOX.get(), "Mine Box");
         add(ModBlocks.CHEESE_BLOCK.get(), "Cheese Block");

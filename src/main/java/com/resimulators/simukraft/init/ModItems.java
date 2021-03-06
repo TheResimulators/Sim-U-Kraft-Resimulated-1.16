@@ -36,7 +36,7 @@ public class ModItems {
     public static final RegistryObject<Item> COMPOSITE_BRICK = REGISTRY.register("composite_brick", () -> new BlockItem(ModBlocks.COMPOSITE_BRICK.get(), new Item.Properties().group(SimUTab.tab)));
     public static final RegistryObject<Item> CHEESE_BLOCK = REGISTRY.register("cheese_block", () -> new BlockItem(ModBlocks.CHEESE_BLOCK.get(), new Item.Properties().group(SimUTab.tab)));
     public static final RegistryObject<Item> CONSTRUCTOR_BOX = REGISTRY.register("constructor_box", () -> new BlockItem(ModBlocks.CONSTRUCTOR_BOX.get(), new Item.Properties().group(SimUTab.tab)));
-    public static final RegistryObject<Item> CONTROL_BOX = REGISTRY.register("control_box", () -> new BlockItem(ModBlocks.CONTROL_BOX.get(), new Item.Properties().group(SimUTab.tab)));
+    public static final RegistryObject<Item> CONTROL_BLOCK = REGISTRY.register("control_block", () -> new BlockItem(ModBlocks.CONTROL_BLOCK.get(), new Item.Properties().group(SimUTab.tab)));
     public static final RegistryObject<Item> FARM_BOX = REGISTRY.register("farm_box", () -> new BlockItem(ModBlocks.FARM_BOX.get(), new Item.Properties().group(SimUTab.tab)));
     public static final RegistryObject<Item> RAINBOW_LIGHT = REGISTRY.register("rainbow_light", () -> new BlockItem(ModBlocks.RAINBOW_LIGHT.get(), new Item.Properties().group(SimUTab.tab)));
     public static final RegistryObject<Item> MINE_BOX = REGISTRY.register("mine_box", () -> new BlockItem(ModBlocks.MINE_BOX.get(), new Item.Properties().group(SimUTab.tab)));

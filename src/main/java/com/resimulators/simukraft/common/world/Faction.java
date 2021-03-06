@@ -22,6 +22,7 @@ import net.minecraftforge.fml.server.ServerLifecycleHooks;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class Faction {
     private final ArrayList<UUID> players = new ArrayList<>();
@@ -229,10 +230,15 @@ public class Faction {
         }
     }
 
-    public HashMap<UUID, SimInfo> getSims() {
+    public HashMap<UUID, SimInfo> getSimsAndInfo() {
         return sims;
     }
 
+    public ArrayList<UUID> getSims(){
+        return new ArrayList<>(sims.keySet());
+
+
+    }
     public ArrayList<UUID> getPlayers() {
         return players;
     }

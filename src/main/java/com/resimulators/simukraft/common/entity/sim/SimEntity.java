@@ -2,6 +2,7 @@ package com.resimulators.simukraft.common.entity.sim;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.resimulators.simukraft.Network;
 import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.common.entity.goals.GoToWorkGoal;
 import com.resimulators.simukraft.common.entity.goals.PickupItemGoal;
@@ -28,6 +29,8 @@ import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.*;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
+import net.minecraft.network.IPacket;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
@@ -43,6 +46,9 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
+import net.minecraftforge.fml.network.NetworkHooks;
+import sun.nio.ch.Net;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -50,7 +56,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.*;
 
-public class SimEntity extends AgeableEntity implements INPC {
+public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalSpawnData {
     private static final EntitySize SIZE = EntitySize.flexible(0.6f, 1.8f);
     private static final Map<Pose, EntitySize> SIZE_BY_POSE = ImmutableMap.<Pose, EntitySize>builder().put(Pose.STANDING, SIZE).put(Pose.SLEEPING, SLEEPING_SIZE).put(Pose.CROUCHING, EntitySize.flexible(0.6F, 1.5F)).put(Pose.DYING, EntitySize.fixed(0.2F, 0.2F)).build();
     private static final DataParameter<Integer> VARIATION = EntityDataManager.createKey(SimEntity.class, DataSerializers.VARINT);
@@ -63,7 +69,6 @@ public class SimEntity extends AgeableEntity implements INPC {
     private static final DataParameter<Integer> NAME_COLOR = EntityDataManager.createKey(SimEntity.class, DataSerializers.VARINT);
     public static final DataParameter<Integer> FOOD_LEVEL = EntityDataManager.createKey(SimEntity.class, DataSerializers.VARINT);
     public static final DataParameter<Float> FOOD_SATURATION_LEVEL = EntityDataManager.createKey(SimEntity.class, DataSerializers.FLOAT);
-    public static final DataParameter<CompoundNBT> JOB_DATA = EntityDataManager.createKey(SimEntity.class, DataSerializers.COMPOUND_NBT);
     private final SimInventory inventory;
     private PlayerEntity interactingPlayer;
 
@@ -98,6 +103,7 @@ public class SimEntity extends AgeableEntity implements INPC {
         this.dataManager.register(NAME_COLOR, 0);
         this.dataManager.register(FOOD_LEVEL, 20);
         this.dataManager.register(FOOD_SATURATION_LEVEL, 5f);
+
     }
 
     @Override
@@ -242,7 +248,6 @@ public class SimEntity extends AgeableEntity implements INPC {
         }
         if (compound.contains("job") && job != null){
             this.job.readFromNbt((ListNBT) compound.get("job"));
-            setJobData((ListNBT) compound.get("job"),jobType);
         }
         controller = new WorkingController(this);
         if (compound.contains("working controller")) {
@@ -254,6 +259,7 @@ public class SimEntity extends AgeableEntity implements INPC {
 
         if (compound.contains("activity"))
             setActivity(Activity.getActivityById(compound.getInt("activity")));
+        //NetworkHooks.getEntitySpawningPacket(this);
     }
 
 
@@ -541,28 +547,7 @@ public class SimEntity extends AgeableEntity implements INPC {
         }
     }
 
-    public void setJobData(ListNBT listNBT, int id){
-        CompoundNBT nbt = new CompoundNBT();
-        nbt.putInt("id",id);
-        nbt.put("Data",listNBT);
-        setJobData(nbt);
 
-    }
-
-
-    public void setJobData(CompoundNBT nbt) {
-        if (this.dataManager != null) {
-            this.dataManager.set(JOB_DATA, nbt);
-        }
-    }
-
-    public CompoundNBT getJobData(){
-        try {
-            return this.dataManager.get(JOB_DATA);
-        } catch (NullPointerException e){
-            return null;
-        }
-    }
 
     public void setInteractingPlayer(PlayerEntity player) {
         this.interactingPlayer = player;
@@ -589,7 +574,7 @@ public class SimEntity extends AgeableEntity implements INPC {
         ArrayList<Faction> factions = sWorld.getFactions();
 
         for (Faction faction : factions) {
-            if (faction.getSims().containsKey(this.entityUniqueID)) {
+            if (faction.getSimsAndInfo().containsKey(this.entityUniqueID)) {
                 sWorld.removeSimFromFaction(faction.getId(), this);
                 if (job != null){
                 if (job.getWorkSpace() != null) { //only temporary until we get the job system done
@@ -639,13 +624,6 @@ public class SimEntity extends AgeableEntity implements INPC {
     }
 
     public IJob getJob() {
-        if (job == null){
-            CompoundNBT nbt = getJobData();
-            if (nbt != null){
-                ModJobs.JOB_LOOKUP.get(nbt.getInt("id")).apply(this);
-                job.readFromNbt(nbt.getList("Data",Constants.NBT.TAG_COMPOUND));
-            }
-        }
         return job;
     }
 
@@ -741,5 +719,41 @@ public class SimEntity extends AgeableEntity implements INPC {
 
     public boolean isHomeless(){
         return houseID == null;
+    }
+
+    @Override
+    public void writeSpawnData(PacketBuffer buffer) {
+        buffer.writeBoolean(job != null);
+        if (job != null){
+            buffer.writeInt(this.getProfession());
+            CompoundNBT nbt = new CompoundNBT();
+            ListNBT list = job.writeToNbt(new ListNBT());
+            buffer.writeBoolean(list !=null);
+            if (list != null) nbt.put("nbt",list);
+            buffer.writeCompoundTag(nbt);
+        }
+    }
+
+    @Override
+    public void readSpawnData(PacketBuffer additionalData) {
+        if (additionalData.readBoolean()){
+            int id = additionalData.readInt();
+            if(id > 0 && additionalData.readBoolean()) {
+                job = ModJobs.JOB_LOOKUP.get(id).apply(this);
+                ListNBT nbt = additionalData.readCompoundTag().getList("nbt",Constants.NBT.TAG_COMPOUND);
+                job.readFromNbt(nbt);
+            }
+        }
+    }
+
+    @Override
+    protected void updateAITasks() {
+        super.updateAITasks();
+    }
+
+    @Override
+    public IPacket<?> createSpawnPacket() {
+        return NetworkHooks.getEntitySpawningPacket(this);
+        //return super.createSpawnPacket();
     }
 }

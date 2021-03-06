@@ -40,7 +40,7 @@ public final class ModBlocks {
     public static final RegistryObject<Block> LIGHT_RED = REGISTRY.register("light_red", () -> new BlockLight(Block.Properties.create(Material.WOOL)));
     public static final RegistryObject<Block> LIGHT_BLACK = REGISTRY.register("light_black", () -> new BlockLight(Block.Properties.create(Material.WOOL)));
     public static final RegistryObject<Block> CONSTRUCTOR_BOX = REGISTRY.register("constructor_box", () -> new BlockConstructor(Block.Properties.create(Material.WOOD, MaterialColor.BROWN).harvestTool(ToolType.AXE)));
-    public static final RegistryObject<Block> CONTROL_BOX = REGISTRY.register("control_block", () -> new BlockControlBlock(Block.Properties.create(Material.ROCK,MaterialColor.GRAY).harvestTool(ToolType.PICKAXE)));
+    public static final RegistryObject<Block> CONTROL_BLOCK = REGISTRY.register("control_block", () -> new BlockControlBlock(Block.Properties.create(Material.ROCK,MaterialColor.GRAY).harvestTool(ToolType.PICKAXE)));
     public static final RegistryObject<Block> FARM_BOX = REGISTRY.register("farm_box", () -> new BlockFarmBox(Block.Properties.create(Material.ROCK,MaterialColor.GRAY)));
     public static final RegistryObject<Block> RAINBOW_LIGHT = REGISTRY.register("rainbow_light", () -> new BlockLight(Block.Properties.create(Material.WOOL)));
     public static final RegistryObject<Block> MINE_BOX = REGISTRY.register("mine_box", () -> new BlockMineBox(Block.Properties.create(Material.WOOD)));
