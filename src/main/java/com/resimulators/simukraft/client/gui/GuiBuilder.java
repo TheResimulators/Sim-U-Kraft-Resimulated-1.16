@@ -3,7 +3,6 @@ package com.resimulators.simukraft.client.gui;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.datafixers.functions.PointFreeRule;
 import com.resimulators.simukraft.Network;
 import com.resimulators.simukraft.Reference;
 import com.resimulators.simukraft.SimuKraft;
@@ -12,7 +11,6 @@ import com.resimulators.simukraft.common.enums.BuildingType;
 import com.resimulators.simukraft.common.enums.Category;
 import com.resimulators.simukraft.common.jobs.Profession;
 import com.resimulators.simukraft.packets.StartBuildingPacket;
-import com.sun.org.apache.xpath.internal.operations.String;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.widget.button.Button;
@@ -21,7 +19,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
-import org.lwjgl.system.CallbackI;
 
 import javax.annotation.Nullable;
 import java.awt.*;
@@ -128,7 +125,7 @@ public class GuiBuilder extends GuiBaseJob {
 
             addButton(nextPage = new Button(width-120,height-60,100,20, new StringTextComponent("Next Page"),nextPage ->{
                 hideAllStructures(currentCategory);
-                if ((pageIndex + 1) * maxButtons < structureButtons.size())
+                if ((pageIndex + 1) * maxButtons < structureButtons.get(currentCategory).size())
                 {pageIndex++;}
                 controlStructures(true,currentCategory);
             }));
