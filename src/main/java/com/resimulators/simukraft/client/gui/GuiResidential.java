@@ -13,6 +13,8 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.UUID;
 
 
 public class GuiResidential extends Screen {
@@ -22,6 +24,7 @@ public class GuiResidential extends Screen {
     BlockPos pos;
     String name;
     Button Done;
+    ArrayList<UUID> occupants;
     protected GuiResidential(ITextComponent titleIn, BlockPos pos) {
         super(titleIn);
         faction = SavedWorldData.get(SimuKraft.proxy.getClientWorld()).getFactionWithPlayer(SimuKraft.proxy.getClientPlayer().getUniqueID());
@@ -37,6 +40,8 @@ public class GuiResidential extends Screen {
         super.render(stack, mouseX, mouseY, partialTicks);
         font.drawString(stack,getTitle().getString(),width/2 - font.getStringWidth(getTitle().getString())/2,height/6, Color.WHITE.getRGB());
         font.drawString(stack,"Name: " + name.replace("_"," "),60 - font.getStringWidth("Name: " + name)/2,height/2-50, Color.WHITE.getRGB());
+        font.drawString(stack,"Occupants: ",60-font.getStringWidth("Occupants")/2,height/2-30,Color.WHITE.getRGB());
+
     }
 
     @Override
@@ -46,5 +51,11 @@ public class GuiResidential extends Screen {
         addButton(Done = new Button(width-120,height-30,100,20,new StringTextComponent("Done"), Done ->{
             minecraft.displayGuiScreen(null);
         }));
+    }
+
+
+    public void setOccupants(){
+
+
     }
 }
