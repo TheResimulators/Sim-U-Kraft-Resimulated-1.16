@@ -45,6 +45,8 @@ public class GuiHandler {
             case FISHER_MAN:
                 Minecraft.getInstance().displayGuiScreen(new GuiFisher(new StringTextComponent(string), ints,pos,id));
                 break;
+            case RESIDENTIAL:
+                Minecraft.getInstance().displayGuiScreen(new GuiResidential(new StringTextComponent(string),pos));
         }
     }
 }

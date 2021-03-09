@@ -12,7 +12,6 @@ import com.resimulators.simukraft.common.world.SavedWorldData;
 import com.resimulators.simukraft.handlers.StructureHandler;
 import com.resimulators.simukraft.init.ModBlockProperties;
 import com.resimulators.simukraft.init.ModBlocks;
-import com.resimulators.simukraft.packets.NewHouseTileEntity;
 import com.resimulators.simukraft.utils.BlockUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
