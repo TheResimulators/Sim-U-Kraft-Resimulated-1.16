@@ -75,8 +75,7 @@ public class BlockControlBlock extends BlockBase {
             int typeId = state.get(ModBlockProperties.TYPE);
             BuildingType type = BuildingType.getById(typeId);
             if (type != null){
-                TileEntity entity = type.type.get().create();
-                return entity;
+                return type.type.get().create();
 
             }
         }

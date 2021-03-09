@@ -32,7 +32,6 @@ public class Faction {
     private double credits = 0d;
     private int id;
     private final World world;
-    //TODO: add Housing to this
 
     public Faction(int id, World world) {
         this.id = id;
@@ -313,11 +312,12 @@ public class Faction {
     }
 
 
-    public void addNewHouse(BlockPos pos,String name, float rent){
+    public UUID addNewHouse(BlockPos pos,String name, float rent){
         UUID id = UUID.randomUUID();
         House house = new House(pos,name,rent);
         houses.put(id,house);
         sendPacketToFaction(new NewHousePacket(house,id,this.id));
+        return id;
     }
 
     public boolean removeHouse(UUID id,ServerWorld world){
@@ -346,10 +346,6 @@ public class Faction {
 
     public House getHouseByID(UUID uuid){
         return houses.get(uuid);
-    }
-
-    public ArrayList<UUID> getHouseOccupants(UUID id){
-        return houses.get(id).simOccupants;
     }
 
     public ArrayList<UUID> getOccupants(UUID houseID){

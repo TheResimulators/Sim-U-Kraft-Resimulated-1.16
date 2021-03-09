@@ -12,7 +12,7 @@ import net.minecraft.tileentity.TileEntityType;
 import java.util.UUID;
 
 public class TileResidential extends TileEntity implements IControlBlock {
-    private UUID factionID;
+    private int factionID;
     private UUID houseID;
     public TileResidential() {
         super(ModTileEntities.RESIDENTIAL.get());
@@ -48,12 +48,13 @@ public class TileResidential extends TileEntity implements IControlBlock {
         return "Residential";
     }
 
-    public UUID getFactionID() {
+    public int getFactionID() {
         return factionID;
     }
 
-    public void setFactionID(UUID factionID) {
+    public void setFactionID(int factionID) {
         this.factionID = factionID;
+        markDirty();
     }
 
     public UUID getHouseID() {
@@ -62,6 +63,7 @@ public class TileResidential extends TileEntity implements IControlBlock {
 
     public void setHouseID(UUID houseID) {
         this.houseID = houseID;
+        markDirty();
     }
 
     @Override
@@ -76,15 +78,20 @@ public class TileResidential extends TileEntity implements IControlBlock {
     @Override
     public CompoundNBT write(CompoundNBT compound) {
         super.write(compound);
-        compound.putUniqueId("house id",houseID);
-        compound.putUniqueId("faction id",factionID);
+        if (houseID != null){
+            compound.putUniqueId("house id",houseID);
+            compound.putInt("faction id",factionID);
+
+        }
         return compound;
     }
 
     @Override
     public void read(BlockState state, CompoundNBT nbt) {
-        houseID = nbt.getUniqueId("house id");
-        nbt.getUniqueId("faction id");
+        if (nbt.contains("house id")){
+            houseID = nbt.getUniqueId("house id");
+            factionID = nbt.getInt("faction id");
+        }
         super.read(state, nbt);
     }
 }

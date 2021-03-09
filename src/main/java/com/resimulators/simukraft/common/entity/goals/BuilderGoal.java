@@ -6,11 +6,13 @@ import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.enums.BuildingType;
 import com.resimulators.simukraft.common.jobs.JobBuilder;
 import com.resimulators.simukraft.common.jobs.core.Activity;
+import com.resimulators.simukraft.common.tileentity.TileResidential;
 import com.resimulators.simukraft.common.world.Faction;
 import com.resimulators.simukraft.common.world.SavedWorldData;
 import com.resimulators.simukraft.handlers.StructureHandler;
 import com.resimulators.simukraft.init.ModBlockProperties;
 import com.resimulators.simukraft.init.ModBlocks;
+import com.resimulators.simukraft.packets.NewHouseTileEntity;
 import com.resimulators.simukraft.utils.BlockUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -30,6 +32,7 @@ import net.minecraft.world.gen.feature.template.Template;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class BuilderGoal extends BaseGoal<JobBuilder> {
@@ -133,6 +136,7 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
                 BlockState blockstate = blockInfo.state;
                 if (blockInfo.state.getBlock() == ModBlocks.CONTROL_BLOCK.get()) {
                     blockstate = blockInfo.state.with(ModBlockProperties.TYPE, template.getTypeID());
+                    template.setControlBlock(blockInfo.pos);
                 }
                 if (sim.getInventory().hasItemStack(new ItemStack(blockInfo.state.getBlock())) || true){ // remove true for official release. for testing purposes
 
@@ -164,14 +168,20 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
         }
         if (blockIndex >= blocks.size()){
             sim.getJob().setState(Activity.FORCE_STOP);
+
             Faction faction = SavedWorldData.get(sim.getEntityWorld()).getFactionWithSim(sim.getUniqueID());
-            faction.sendFactionChatMessage("Builder " + sim.getName().getString() + "has finished building " + template.getName().replace("_" ," "), sim.getEntityWorld());
-            if (template.getTypeID() == BuildingType.RESIDENTIAL.id)
-            faction.addNewHouse(template.getControlBlock(),template.getName(),template.getRent());
-            blockIndex = 0;
+            faction.sendFactionChatMessage("Builder " + sim.getName().getString() + "has finished building " + template.getName(), sim.getEntityWorld());
+            if (template.getTypeID() == BuildingType.RESIDENTIAL.id) {
+                BlockPos controlBlock = template.getControlBlock();
+                UUID id = faction.addNewHouse(controlBlock, template.getName(), template.getRent());
+                TileResidential tile =(TileResidential) sim.getEntityWorld().getTileEntity(controlBlock);
+                tile.setFactionID(faction.getId());
+                tile.setHouseID(id);
 
-            template = null;
+                blockIndex = 0;
 
+                template = null;
+            }
         }
     }
 
