@@ -125,6 +125,9 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
                 }
             }
             if (state == State.TRAVELING){
+                if(sim.getEntityWorld().getBlockState(destinationBlock) ==blocks.get(blockIndex).state){
+                    destinationBlock = blocks.get(blockIndex).pos;
+                }
                 if (sim.getDistanceSq(destinationBlock.getX(),destinationBlock.getY(),destinationBlock.getZ()) < 20){
                     state = State.BUILDING;
                     return;

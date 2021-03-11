@@ -5,6 +5,7 @@ import com.resimulators.simukraft.common.enums.BuildingType;
 import com.resimulators.simukraft.common.tileentity.IControlBlock;
 import com.resimulators.simukraft.common.tileentity.ITile;
 import com.resimulators.simukraft.common.tileentity.TileCustomData;
+import com.resimulators.simukraft.common.tileentity.TileResidential;
 import com.resimulators.simukraft.common.world.Faction;
 import com.resimulators.simukraft.common.world.SavedWorldData;
 import com.resimulators.simukraft.handlers.SimUKraftPacketHandler;
@@ -52,6 +53,8 @@ public class BlockControlBlock extends BlockBase {
                     if (entity != null){
                         int hiredId = entity.getEntityId();
                         SimUKraftPacketHandler.INSTANCE.sendTo(new OpenJobGuiPacket(simids,pos,hiredId, controlBlock.getGui(), controlBlock.getName()),((ServerPlayerEntity) player).connection.netManager, NetworkDirection.PLAY_TO_CLIENT);// used when there is a sim hired
+                        if (world.getTileEntity(pos) instanceof TileResidential){
+                            ((TileResidential) world.getTileEntity(pos)).sendOccupantsIds((ServerPlayerEntity)player);                        }
                     }
                 } else {
                     SimUKraftPacketHandler.INSTANCE.sendTo(new OpenJobGuiPacket(simids,pos,controlBlock.getGui(),controlBlock.getName()),((ServerPlayerEntity) player).connection.netManager, NetworkDirection.PLAY_TO_CLIENT);//used when there is no sim employed at this block

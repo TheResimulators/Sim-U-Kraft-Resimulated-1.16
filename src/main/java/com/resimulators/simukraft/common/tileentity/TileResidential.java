@@ -1,14 +1,25 @@
 package com.resimulators.simukraft.common.tileentity;
 
+import com.resimulators.simukraft.Network;
 import com.resimulators.simukraft.client.gui.GuiHandler;
+import com.resimulators.simukraft.common.world.Faction;
+import com.resimulators.simukraft.common.world.SavedWorldData;
+import com.resimulators.simukraft.handlers.SimUKraftPacketHandler;
 import com.resimulators.simukraft.init.ModTileEntities;
+import com.resimulators.simukraft.packets.HouseOccupantIdsPacket;
 import net.minecraft.block.BlockState;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SUpdateTileEntityPacket;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
+import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.storage.WorldSavedData;
+import net.minecraftforge.fml.network.NetworkDirection;
 
+import java.util.ArrayList;
 import java.util.UUID;
 
 public class TileResidential extends TileEntity implements IControlBlock {
@@ -93,5 +104,16 @@ public class TileResidential extends TileEntity implements IControlBlock {
             factionID = nbt.getInt("faction id");
         }
         super.read(state, nbt);
+    }
+
+    public void sendOccupantsIds(ServerPlayerEntity player){
+        ArrayList<Integer> ids = new ArrayList<>();
+        Faction faction = SavedWorldData.get(this.getWorld()).getFaction(factionID);
+        ArrayList<UUID> occupants = faction.getOccupants(getHouseID());
+        for(UUID uuid: occupants){
+            ids.add(((ServerWorld)world).getEntityByUuid(uuid).getEntityId());
+        }
+        SimUKraftPacketHandler.INSTANCE.sendTo(new HouseOccupantIdsPacket(ids),player.connection.netManager, NetworkDirection.PLAY_TO_CLIENT);
+
     }
 }
