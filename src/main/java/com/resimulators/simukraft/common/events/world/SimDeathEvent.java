@@ -18,6 +18,9 @@ public class SimDeathEvent {
                 SimEntity sim = (SimEntity) entity;
                 Faction faction = SavedWorldData.get(sim.world).getFactionWithSim(sim.getUniqueID());
                 if (faction != null) {
+                    if (sim.getHouseID() != null){
+                        sim.removeFromHouse(faction);
+                    }
                     sim.fireSim(sim, faction.getId(), true);
                 }
             }

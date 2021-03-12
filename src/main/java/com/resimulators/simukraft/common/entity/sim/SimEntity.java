@@ -67,6 +67,7 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
     private static final DataParameter<Integer> NAME_COLOR = EntityDataManager.createKey(SimEntity.class, DataSerializers.VARINT);
     public static final DataParameter<Integer> FOOD_LEVEL = EntityDataManager.createKey(SimEntity.class, DataSerializers.VARINT);
     public static final DataParameter<Float> FOOD_SATURATION_LEVEL = EntityDataManager.createKey(SimEntity.class, DataSerializers.FLOAT);
+    public static final DataParameter<Optional<UUID>> HOUSE_ID = EntityDataManager.createKey(SimEntity.class,DataSerializers.OPTIONAL_UNIQUE_ID);
     private final SimInventory inventory;
     private PlayerEntity interactingPlayer;
 
@@ -75,7 +76,6 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
     private Activity activity;
     private WorkingController controller = new WorkingController(this);
     private Random rand = new Random();
-    private UUID houseID;
     private int houseHuntDelay = 200;
     public SimEntity(World worldIn) {
         this(ModEntities.ENTITY_SIM, worldIn);
@@ -101,6 +101,7 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
         this.dataManager.register(NAME_COLOR, 0);
         this.dataManager.register(FOOD_LEVEL, 20);
         this.dataManager.register(FOOD_SATURATION_LEVEL, 5f);
+        this.dataManager.register(HOUSE_ID,Optional.empty());
 
     }
 
@@ -282,7 +283,7 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
         if (!world.isRemote()) {
             this.foodStats.tick(this);
             this.controller.tick();
-            if (houseID == null){
+            if (getHouseID() == null){
                 if (houseHuntDelay <= 0){
                     findHouseToLive();
                 }else{
@@ -681,25 +682,43 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
     }
 
     public void setHouseID(UUID id){
-        this.houseID = id;
+        if (id != null){
+            this.dataManager.set(HOUSE_ID,Optional.of(id));
+        }else{
+            this.dataManager.set(HOUSE_ID,Optional.empty());
+        }
     }
 
+    public UUID getHouseID(){
+        try{
+            return this.dataManager.get(HOUSE_ID).get();
+        } catch (Exception e){
+            return null;
+        }
+
+
+    }
     public void removeHouse(){
-        this.houseID = null;
+        setHouseID(null);
     }
 
     public List<UUID> getOtherHouseOccupants(){
-        ArrayList<UUID> list = SavedWorldData.get(world).getFactionWithSim(this.getUniqueID()).getOccupants(houseID);
+        ArrayList<UUID> list = SavedWorldData.get(world).getFactionWithSim(this.getUniqueID()).getOccupants(getHouseID());
         list.remove(this.getUniqueID());
         return list;
 
     }
     public void moveHouse(UUID currentHouseID,UUID newHouseID){
         Faction faction = SavedWorldData.get(world).getFactionWithSim(this.getUniqueID());
-        faction.removeSimFromHouse(currentHouseID,this.getUniqueID());
+        removeFromHouse(faction);
         faction.addSimToHouse(newHouseID,getUniqueID());
-        houseID = newHouseID;
+        setHouseID(newHouseID);
 
+    }
+
+    public void removeFromHouse(Faction faction){
+        faction.removeSimFromHouse(getHouseID(),this.getUniqueID());
+        removeHouse();
     }
 
     public void findHouseToLive(){
@@ -710,13 +729,13 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
             faction.addSimToHouse(house,getUniqueID());
             faction.sendFactionChatMessage("Sim " + this.getName().getString() + " Has Moved into " + faction.getHouseByID(house).getName().replace("_"," "),world);
 
-            houseID = house;
+            setHouseID(house);
             }
         }
     }
 
     public boolean isHomeless(){
-        return houseID == null;
+        return getHouseID() == null;
     }
 
     @Override

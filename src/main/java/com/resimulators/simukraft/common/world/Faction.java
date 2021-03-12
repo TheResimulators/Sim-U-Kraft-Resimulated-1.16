@@ -336,10 +336,12 @@ public class Faction {
 
     public void addSimToHouse(UUID houseID, UUID simID){
         House house = houses.get(houseID);
+        sims.get(simID).homeless = false;
         house.simOccupants.add(simID);
     }
     public boolean removeSimFromHouse(UUID houseID, UUID simID){
         House house = houses.get(houseID);
+        sims.get(simID).homeless = true;
         return house.simOccupants.remove(simID);
 
     }
@@ -362,6 +364,26 @@ public class Faction {
         return null;
     }
 
+    public int getFreeHousesCount(){
+        int size = 0;
+        for (UUID house: houses.keySet()){
+            if (houses.get(house).simOccupants.isEmpty()){
+                size++;
+            }
+
+        }
+        return size;
+    }
+
+    public int getHomelessSimCount(){
+        int count = 0;
+        for (SimInfo info: sims.values()){
+            if (info.homeless){
+                count++;
+            }
+        }
+        return count;
+    }
     public void addHouse(House house,UUID houseID){
         houses.put(houseID,house);
 
@@ -389,7 +411,7 @@ public class Faction {
     static class SimInfo {
         private UUID sim;
         private boolean hired;
-        private boolean homeless;
+        private boolean homeless = true;
 
         SimInfo(UUID sim) {
             this.sim = sim;

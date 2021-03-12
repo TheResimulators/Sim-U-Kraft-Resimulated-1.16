@@ -40,13 +40,25 @@ public class NewDayEvent implements INBTSerializable<CompoundNBT> {
             if (day != previousDay) {
 
                 payRent(world);
-                spawnSims(world);
+
                 previousDay = day;
                 }
             }
         }
     }
 
+    @SubscribeEvent
+    public void CheckForSpawnSim(TickEvent.WorldTickEvent event){
+        if (event.phase == TickEvent.Phase.END){
+            if (!event.world.isRemote){
+                World world = event.world;
+                double time = world.getDayTime();
+                if (time % 1200 == 0){
+                    spawnSims(world);
+                }
+            }
+
+    }}
     @Override
     public CompoundNBT serializeNBT() {
         CompoundNBT nbt = new CompoundNBT();
@@ -89,7 +101,7 @@ public class NewDayEvent implements INBTSerializable<CompoundNBT> {
 
         if (sWorld.getPlayers().size() == 0) return;
         for (Faction faction : factions) {
-            if (faction.getUnemployedSims().isEmpty() || true) { // temporary for testing and until residential system is done
+            if (faction.getHomelessSimCount() < 1 && faction.getOnlineFactionPlayer() != null) { // temporary for testing and until residential system is done
                 ArrayList<SimEntity> simsToSpawn = new ArrayList<>();
                 simsToSpawn.add(new SimEntity(ModEntities.ENTITY_SIM, world));
                 for (SimEntity sim : simsToSpawn) {

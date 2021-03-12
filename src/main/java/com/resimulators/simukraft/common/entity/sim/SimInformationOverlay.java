@@ -6,6 +6,8 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.client.gui.GuiSimInventory;
 import com.resimulators.simukraft.common.jobs.Profession;
+import com.resimulators.simukraft.common.world.Faction;
+import com.resimulators.simukraft.common.world.SavedWorldData;
 import com.resimulators.simukraft.utils.ColorHelper;
 import com.resimulators.simukraft.utils.Icons;
 import com.resimulators.simukraft.utils.RayTraceHelper;
@@ -40,7 +42,8 @@ public class SimInformationOverlay {
     protected static int depthFunc;
 
     private Entity pastEntity;
-
+    private Faction faction;
+    private Faction.House house;
     @SubscribeEvent
     public void renderSimOverlay(TickEvent.RenderTickEvent event) {
         RayTraceHelper.INSTANCE.ray();
@@ -54,7 +57,8 @@ public class SimInformationOverlay {
 
             if (entity instanceof SimEntity) {
                 SimEntity sim = (SimEntity) entity;
-
+                faction = SavedWorldData.get(sim.getEntityWorld()).getFactionWithSim(sim.getUniqueID());
+                house = faction.getHouseByID(sim.getHouseID());
                 RenderSystem.pushMatrix();
                 saveGLState();
 
@@ -78,8 +82,12 @@ public class SimInformationOverlay {
                 RenderHelper.disableStandardItemLighting();
                 RenderSystem.disableLighting();
                 RenderSystem.disableDepthTest();
+                int rectangleHeight = 86;
+                if (house != null){
+                    rectangleHeight = 99;
 
-                Rectangle rectangle = new Rectangle(posX, posY, 90, 86);
+                }
+                Rectangle rectangle = new Rectangle(posX, posY, 90, rectangleHeight);
                 drawTooltipBox(rectangle.x, rectangle.y, rectangle.width, rectangle.height, new Color(0, 0 , 0, 150).getRGB(), ColorHelper.getColorFromDye(sim.getNameColor()).getRGB(), Color.BLACK.getRGB());
 
                 RenderSystem.enableBlend();
@@ -158,7 +166,7 @@ public class SimInformationOverlay {
                 RenderSystem.enableRescaleNormal();
                 loadGLState();
                 RenderSystem.enableDepthTest();
-
+                int jobYPos = 76;
                 minecraft.fontRenderer.drawString(new MatrixStack(), (SimuKraft.config.getSims().coloredNames.get() ? TextFormatting.fromColorIndex(ColorHelper.convertDyeToTF(sim.getNameColor())) : TextFormatting.WHITE) + sim.getName().getString(), posX + 5, posY + 5, Color.WHITE.getRGB());
 
                 //TODO: WIP Couple Status (Temp)
@@ -166,15 +174,20 @@ public class SimInformationOverlay {
 
 
                 //TODO:WIP HOUSE STATUS (TEMP)
-                minecraft.fontRenderer.drawString(new MatrixStack(), "Homeless (WIP)" + TextFormatting.RESET,posX + 5,posY + 63,Color.WHITE.getRGB());
-
+                if (house != null) {
+                    minecraft.fontRenderer.drawString(new MatrixStack(), "Lives in " + TextFormatting.RESET, posX + 5, posY + 63, Color.WHITE.getRGB());
+                    minecraft.fontRenderer.drawString(new MatrixStack(), house.getName().replace("_"," ") + TextFormatting.RESET, posX + 5, posY + 76, Color.WHITE.getRGB());
+                    jobYPos = 89;
+                }else{
+                    minecraft.fontRenderer.drawString(new MatrixStack(), "Homeless" + TextFormatting.RESET,posX + 5,posY + 63,Color.WHITE.getRGB());
+                }
                 if (sim.getJob() == null){
 
-                   minecraft.fontRenderer.drawString(new MatrixStack(), "Unemployed" + TextFormatting.RESET,posX + 5,posY + 76,Color.WHITE.getRGB());
+                   minecraft.fontRenderer.drawString(new MatrixStack(), "Unemployed" + TextFormatting.RESET,posX + 5,posY + jobYPos,Color.WHITE.getRGB());
                 }else{
                     String profession = Profession.getNameFromID(sim.getProfession());
 
-                    minecraft.fontRenderer.drawString(new MatrixStack(),StringUtils.capitalize(profession) + TextFormatting.RESET,posX + 5,posY + 76,Color.WHITE.getRGB());
+                    minecraft.fontRenderer.drawString(new MatrixStack(),StringUtils.capitalize(profession) + TextFormatting.RESET,posX + 5,posY + jobYPos,Color.WHITE.getRGB());
 
                 }
                 RenderSystem.popMatrix();
