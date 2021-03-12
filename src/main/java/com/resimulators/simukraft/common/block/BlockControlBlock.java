@@ -47,21 +47,20 @@ public class BlockControlBlock extends BlockBase {
             Faction faction = SavedWorldData.get(world).getFactionWithPlayer(player.getUniqueID());
             ArrayList<Integer> simids = faction.getSimIds((ServerWorld) world);
             IControlBlock controlBlock = (IControlBlock) world.getTileEntity(pos);
-            if (controlBlock != null){
-                if (controlBlock.getHired()){
-                    Entity entity = ((ServerWorld) world).getEntityByUuid(controlBlock.getSimId());
-                    if (entity != null){
-                        int hiredId = entity.getEntityId();
-                        SimUKraftPacketHandler.INSTANCE.sendTo(new OpenJobGuiPacket(simids,pos,hiredId, controlBlock.getGui(), controlBlock.getName()),((ServerPlayerEntity) player).connection.netManager, NetworkDirection.PLAY_TO_CLIENT);// used when there is a sim hired
-                        if (world.getTileEntity(pos) instanceof TileResidential){
-                            ((TileResidential) world.getTileEntity(pos)).sendOccupantsIds((ServerPlayerEntity)player);                        }
+
+                if (controlBlock != null){
+                    if (controlBlock.getHired()){
+                        Entity entity = ((ServerWorld) world).getEntityByUuid(controlBlock.getSimId());
+                        if (entity != null){
+                            int hiredId = entity.getEntityId();
+                            SimUKraftPacketHandler.INSTANCE.sendTo(new OpenJobGuiPacket(simids,pos,hiredId, controlBlock.getGui(), controlBlock.getName()),((ServerPlayerEntity) player).connection.netManager, NetworkDirection.PLAY_TO_CLIENT);// used when there is a sim hired
+                        }
+                    }else {
+                        SimUKraftPacketHandler.INSTANCE.sendTo(new OpenJobGuiPacket(simids, pos, controlBlock.getGui(), controlBlock.getName()), ((ServerPlayerEntity) player).connection.netManager, NetworkDirection.PLAY_TO_CLIENT);//used when there is no sim employed at this block
                     }
-                } else {
-                    SimUKraftPacketHandler.INSTANCE.sendTo(new OpenJobGuiPacket(simids,pos,controlBlock.getGui(),controlBlock.getName()),((ServerPlayerEntity) player).connection.netManager, NetworkDirection.PLAY_TO_CLIENT);//used when there is no sim employed at this block
                 }
             }
 
-        }
         return ActionResultType.SUCCESS;
     }
 

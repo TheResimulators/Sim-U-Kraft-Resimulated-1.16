@@ -1,11 +1,13 @@
 package com.resimulators.simukraft.client.gui;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
+import com.resimulators.simukraft.Network;
 import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.tileentity.TileResidential;
 import com.resimulators.simukraft.common.world.Faction;
 import com.resimulators.simukraft.common.world.SavedWorldData;
+import com.resimulators.simukraft.packets.RequestHouseOccupantsPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.button.Button;
@@ -32,6 +34,7 @@ public class GuiResidential extends Screen {
         tile =(TileResidential) SimuKraft.proxy.getClientWorld().getTileEntity(pos);
         this.pos = pos;
         name = faction.getHouseByID(tile.getHouseID()).getName();
+        Network.getNetwork().sendToServer(new RequestHouseOccupantsPacket(pos,SimuKraft.proxy.getClientPlayer().getUniqueID()));
     }
 
 
@@ -39,14 +42,14 @@ public class GuiResidential extends Screen {
     public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
         renderBackground(stack);
         super.render(stack, mouseX, mouseY, partialTicks);
-        font.drawString(stack,getTitle().getString(),(width/2)- font.getStringWidth(getTitle().getString())/2,height/6, Color.WHITE.getRGB());
-        font.drawString(stack,"Name: " + name.replace("_"," "),60 - font.getStringWidth("Name: " + name)/2,height/2-50, Color.WHITE.getRGB());
-        font.drawString(stack,"Occupants: ",60,height/2-30,Color.WHITE.getRGB());
+        font.drawString(stack,getTitle().getString(),(width/2)- font.getStringWidth(getTitle().getString())/2,height/6-20, Color.WHITE.getRGB());
+        font.drawString(stack,"Name: " + name.replace("_"," "),30,height/2-50, Color.WHITE.getRGB());
+        font.drawString(stack,"Occupants: ",30,height/2-30,Color.WHITE.getRGB());
         if (occupants != null){
             int i = 0;
             for (int id: occupants){
                 SimEntity sim = (SimEntity) SimuKraft.proxy.getClientWorld().getEntityByID(id);
-                font.drawString(stack,sim.getCustomName().getString(),60,height/2 + i*20,Color.WHITE.getRGB());
+                font.drawString(stack,sim.getCustomName().getString(),40,height/2-10 + i*20,Color.WHITE.getRGB());
             }
         }
     }
