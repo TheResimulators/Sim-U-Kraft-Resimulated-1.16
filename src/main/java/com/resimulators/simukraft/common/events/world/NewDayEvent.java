@@ -53,7 +53,7 @@ public class NewDayEvent implements INBTSerializable<CompoundNBT> {
             if (!event.world.isRemote){
                 World world = event.world;
                 double time = world.getDayTime();
-                if (time % 1200 == 0){
+                if (time % 600 == 0){
                     spawnSims(world);
                 }
             }

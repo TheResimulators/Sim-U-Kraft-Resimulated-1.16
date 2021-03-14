@@ -57,8 +57,10 @@ public class SimInformationOverlay {
 
             if (entity instanceof SimEntity) {
                 SimEntity sim = (SimEntity) entity;
-                faction = SavedWorldData.get(sim.getEntityWorld()).getFactionWithSim(sim.getUniqueID());
-                house = faction.getHouseByID(sim.getHouseID());
+                if (faction == null){
+                    faction = SavedWorldData.get(sim.getEntityWorld()).getFactionWithSim(sim.getUniqueID());
+                    house = faction.getHouseByID(sim.getHouseID());
+                }
                 RenderSystem.pushMatrix();
                 saveGLState();
 

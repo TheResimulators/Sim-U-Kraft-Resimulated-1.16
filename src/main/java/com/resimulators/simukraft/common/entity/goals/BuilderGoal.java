@@ -141,8 +141,9 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
                     template.setControlBlock(blockInfo.pos);
                 }
                 if (sim.getInventory().hasItemStack(new ItemStack(blockInfo.state.getBlock())) || true){ // remove true for official release. for testing purposes
-
-                    sim.world.setBlockState(blockInfo.pos, blockstate.rotate(sim.world,blockInfo.pos,rotation));
+                    //BlockState blockState = sim.world.getBlockState(blockInfo.pos);
+                    sim.world.destroyBlock(blockInfo.pos,true);
+                    sim.world.setBlockState(blockInfo.pos, blockstate.rotate(sim.world,blockInfo.pos,rotation), 3);
                     int index = sim.getInventory().findSlotMatchingUnusedItem(new ItemStack(blockInfo.state.getBlock()));
                     if (index >= 0){
                     sim.getInventory().decrStackSize(index,1);}
@@ -183,6 +184,7 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
                 blockIndex = 0;
 
                 template = null;
+                sim.fireSim(sim, faction.getId(), false);
             }
         }
     }

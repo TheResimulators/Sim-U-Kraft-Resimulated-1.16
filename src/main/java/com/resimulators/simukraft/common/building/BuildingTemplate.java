@@ -100,7 +100,11 @@ public class BuildingTemplate extends Template {
         rent = compound.getFloat("rent");
         cost = compound.getFloat("cost");
         typeID = compound.getInt("typeID");
-        direction = Direction.byHorizontalIndex(compound.getInt("direction"));
+        if (compound.contains("direction")){
+        direction = Direction.byHorizontalIndex(compound.getInt("direction"));}
+        else{
+            direction =  Direction.byHorizontalIndex(3);
+        }
         if (compound.contains("name"))
         {name = compound.getString("name");}else{
             name = "Placeholder";

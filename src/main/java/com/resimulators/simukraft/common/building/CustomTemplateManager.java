@@ -165,7 +165,7 @@ public class CustomTemplateManager extends TemplateManager {
             else {
                 for (Category category: Category.values()){
                     Path path2 = path1.resolve(category.category);
-                    if(Files.exists(path2)){
+                    if(Files.exists(path2.resolve(locationIn.getPath() + ".nbt"))){
                         path1 = path2;
                         break;
                     }
