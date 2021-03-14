@@ -61,7 +61,7 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
         if (sim.getActivity() == Activity.GOING_TO_WORK){
             if (sim.getPosition().withinDistance(new Vector3d(job.getWorkSpace().getX(),job.getWorkSpace().getY(),job.getWorkSpace().getZ()),5)){
                 sim.setActivity(Activity.WORKING);
-                findChestAroundBlock(job.getWorkSpace());
+                findChestAroundTargetBlock(job.getWorkSpace(), 5, world);
                 findFurnaceAroundBlock(job.getWorkSpace());
                 return validateWorkArea();
             }
@@ -227,16 +227,6 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
     @Override
     protected boolean shouldMoveTo(IWorldReader worldIn, BlockPos pos) {
         return sim.getDistanceSq(destinationBlock.getX(),destinationBlock.getY(),destinationBlock.getZ()) > getTargetDistanceSq();
-    }
-
-
-    public void findChestAroundBlock(BlockPos workPos){
-        ArrayList<BlockPos> blocks =  BlockUtils.getBlocksAroundAndBelowPosition(workPos,5);
-        for (BlockPos pos: blocks){
-            if (world.getTileEntity(pos) instanceof ChestTileEntity){
-                chests.add(pos);
-            }
-        }
     }
 
     public void findFurnaceAroundBlock(BlockPos workPos){

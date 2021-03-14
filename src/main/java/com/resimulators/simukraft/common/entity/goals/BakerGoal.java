@@ -52,7 +52,7 @@ public class BakerGoal extends BaseGoal<JobBaker> {
         if (sim.getActivity() == Activity.GOING_TO_WORK) {
             if (sim.getPosition().withinDistance(new Vector3d(job.getWorkSpace().getX(), job.getWorkSpace().getY(), job.getWorkSpace().getZ()), 2)) {
                 sim.setActivity(Activity.WORKING);
-                findChestAroundBlock(job.getWorkSpace());
+                findChestAroundTargetBlock(job.getWorkSpace(), 5, world);
                 return true;
             }
         }
@@ -76,7 +76,7 @@ public class BakerGoal extends BaseGoal<JobBaker> {
         tick++;
         delay++;
         navigation++;
-        findChestAroundBlock(job.getWorkSpace());
+        findChestAroundTargetBlock(job.getWorkSpace(), 5, world);
         putSimInvInChest();
         if (!validateWorkArea()) {
             validateSentence = false;
@@ -302,15 +302,6 @@ public class BakerGoal extends BaseGoal<JobBaker> {
                 }
             }
             farmChestsHashMap.put(farmBox, chestArrayList);
-        }
-    }
-
-    private void findChestAroundBlock(BlockPos workPos) {
-        ArrayList<BlockPos> blocks = BlockUtils.getBlocksAroundAndBelowPosition(workPos, 5);
-        for (BlockPos pos: blocks) {
-            if (world.getTileEntity(pos) instanceof ChestTileEntity && !chests.contains(pos)) {
-                chests.add(pos);
-            }
         }
     }
 

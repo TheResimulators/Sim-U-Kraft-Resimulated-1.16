@@ -67,8 +67,7 @@ public class FarmerGoal extends BaseGoal<JobFarmer> {
         job = (JobFarmer) sim.getJob();
 
         if (job != null) {
-            chests = new ArrayList<>();
-            findChests();
+            chests = findChestAroundTargetBlock(job.getWorkSpace(), 5, world);
             if (sim.getActivity() == Activity.GOING_TO_WORK) {
                 if (sim.getPosition().withinDistance(new Vector3d(job.getWorkSpace().getX(), job.getWorkSpace().getY(), job.getWorkSpace().getZ()), 5)) {
                     farmerTile = (TileFarmer) world.getTileEntity(job.getWorkSpace());
@@ -95,7 +94,7 @@ public class FarmerGoal extends BaseGoal<JobFarmer> {
         state = State.RESOURCES;
 
         offset = BlockPos.ZERO.offset(dir).offset(dir.rotateY()).add(0, -1, 0);
-        findChests();
+        chests = findChestAroundTargetBlock(job.getWorkSpace(), 5, world);
         progress = job.getProgress();
         width = farmerTile.getWidth()-1;
         depth = farmerTile.getDepth();
@@ -293,15 +292,6 @@ public class FarmerGoal extends BaseGoal<JobFarmer> {
             }
         }
         return amount > 0;
-    }
-
-    private void findChests() {
-        ArrayList<BlockPos> blocks = BlockUtils.getBlocksAroundAndBelowPosition(job.getWorkSpace(), 5);
-        for (BlockPos pos : blocks) {
-            if (world.getTileEntity(pos) instanceof ChestTileEntity) {
-                chests.add(pos);
-            }
-        }
     }
 
 

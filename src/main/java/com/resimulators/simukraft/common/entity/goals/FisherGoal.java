@@ -49,7 +49,7 @@ public class FisherGoal extends BaseGoal<JobFisher> {
         if (sim.getActivity() == Activity.GOING_TO_WORK) {
             if (sim.getPosition().withinDistance(new Vector3d(job.getWorkSpace().getX(), job.getWorkSpace().getY(), job.getWorkSpace().getZ()), 5)) {
                 sim.setActivity(Activity.WORKING);
-                findChestAroundBlock(job.getWorkSpace());
+                findChestAroundTargetBlock(job.getWorkSpace(), 5, world);
                 return true;
             }
         }
@@ -77,7 +77,7 @@ public class FisherGoal extends BaseGoal<JobFisher> {
         tick++;
         fishTrigger++;
         state = State.WAITING;
-        findChestAroundBlock(job.getWorkSpace());
+        findChestAroundTargetBlock(job.getWorkSpace(), 5, world);
         if (!validateWorkArea()) {
             sim.getJob().setState(Activity.NOT_WORKING);
             validateSentence = false;
@@ -150,16 +150,6 @@ public class FisherGoal extends BaseGoal<JobFisher> {
     @Override
     protected boolean shouldMoveTo(IWorldReader worldIn, BlockPos pos) {
         return sim.getDistanceSq(destinationBlock.getX(),destinationBlock.getY(),destinationBlock.getZ()) > getTargetDistanceSq();
-    }
-
-    private void findChestAroundBlock(BlockPos workPos) {
-        ArrayList<BlockPos> blocks = BlockUtils.getBlocksAroundAndBelowPosition(workPos, 5);
-        for (BlockPos pos: blocks) {
-            if (world.getTileEntity(pos) instanceof ChestTileEntity && !chests.contains(pos)) {
-                chests.add(pos);
-            }
-        }
-        
     }
 
     private BlockPos findWater(){
