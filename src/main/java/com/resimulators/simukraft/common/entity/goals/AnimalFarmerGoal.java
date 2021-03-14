@@ -74,7 +74,7 @@ public class AnimalFarmerGoal extends BaseGoal<JobAnimalFarmer>{
     public void startExecuting() {
         super.startExecuting();
         sim.setHeldItem(Hand.MAIN_HAND,new ItemStack(Items.DIAMOND_SWORD));
-        findChestAroundBlock(sim.getJob().getWorkSpace());
+        findChestAroundTargetBlock(sim.getJob().getWorkSpace(), 5, world);
         if (farm == null){
             farm = (TileAnimalFarm) world.getTileEntity(job.getWorkSpace());
             ResourceLocation resourcelocation = farm.getAnimal().getAnimal().getLootTable();
@@ -156,15 +156,6 @@ public class AnimalFarmerGoal extends BaseGoal<JobAnimalFarmer>{
             farm.spawnAnimal();
         }
 
-    }
-
-    public void findChestAroundBlock(BlockPos workPos){
-        ArrayList<BlockPos> blocks =  BlockUtils.getBlocksAroundAndBelowPosition(workPos,5);
-        for (BlockPos pos: blocks){
-            if (world.getTileEntity(pos) instanceof ChestTileEntity){
-                chests.add(pos);
-            }
-        }
     }
 
     private boolean addItemsToChests(){

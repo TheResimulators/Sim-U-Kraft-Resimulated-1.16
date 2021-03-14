@@ -4,9 +4,15 @@ import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.jobs.core.IJob;
 import com.resimulators.simukraft.common.world.Faction;
 import com.resimulators.simukraft.common.world.SavedWorldData;
+import com.resimulators.simukraft.utils.BlockUtils;
+import jdk.nashorn.internal.ir.Block;
 import net.minecraft.entity.ai.goal.MoveToBlockGoal;
+import net.minecraft.tileentity.ChestTileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IWorldReader;
+import net.minecraft.world.World;
+
+import java.util.ArrayList;
 
 public class BaseGoal<JobType extends IJob>  extends MoveToBlockGoal{
     JobType job;
@@ -54,5 +60,16 @@ public class BaseGoal<JobType extends IJob>  extends MoveToBlockGoal{
     public void resetTask() {
         super.resetTask();
         sim.setStatus("");
+    }
+
+    public ArrayList<BlockPos> findChestAroundTargetBlock(BlockPos targetBlock, int distance, World world) {
+        ArrayList<BlockPos> blockPoses = BlockUtils.getBlocksAroundAndBelowPosition(targetBlock, distance);
+        ArrayList<BlockPos> blocks = new ArrayList<>();
+        for (BlockPos blockPos : blockPoses) {
+            if (world.getTileEntity(blockPos) instanceof ChestTileEntity) {
+                blocks.add(blockPos);
+            }
+        }
+        return blocks;
     }
 }
