@@ -85,13 +85,14 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
 
         if (template != null) {
 
-            Direction orgDir = template.getDirection();
-            Direction facing = job.getDirection();
+            Rotation orgDir = getRotation(template.getDirection());
+            Rotation facing = getRotation(job.getDirection());
             rotation = getRotationCalculated(orgDir,facing);
+
             PlacementSettings settings = new PlacementSettings()
                 .setRotation(rotation)
                 .setMirror(Mirror.NONE);
-            blocks = StructureHandler.modifyAndConvertTemplate(template, sim.world, sim.getJob().getWorkSpace().offset(facing),settings);
+            blocks = StructureHandler.modifyAndConvertTemplate(template, sim.world, sim.getJob().getWorkSpace().offset(job.getDirection()),settings);
             SimuKraft.LOGGER().debug("cost: " + template.getCost());
             setBlocksNeeded();
             /*for (Template.BlockInfo blockInfo : blocks) {
@@ -227,24 +228,40 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
                 return Rotation.COUNTERCLOCKWISE_90;
 
         }
-        return null;
+        return Rotation.NONE;
 
     }
 
-    private Rotation getRotationCalculated(Direction org, Direction cur) {
-        if (org == cur.rotateY()){
+    private Rotation getRotationCalculated(Rotation org, Rotation cur) {
+        if (org == cur.add(Rotation.CLOCKWISE_90)){
             return Rotation.COUNTERCLOCKWISE_90;
         }
-        if (org == cur.rotateYCCW()){
+        if (org == cur.add(Rotation.COUNTERCLOCKWISE_90)){
             return Rotation.CLOCKWISE_90;
         }
-        if (org == cur.getOpposite()){
+        if (org == cur.add(Rotation.CLOCKWISE_180)){
             return Rotation.CLOCKWISE_180;
         }
 
         return Rotation.NONE;
     }
 
+
+    private Direction rotateDirection(Direction dir, Rotation rotation){
+        switch (rotation){
+            case NONE:
+                return dir;
+            case CLOCKWISE_90:
+                return dir.rotateY();
+            case CLOCKWISE_180:
+                return dir.getOpposite();
+            case COUNTERCLOCKWISE_90:
+                return dir.rotateYCCW();
+
+        }
+
+        return Direction.SOUTH;
+    }
     //Checks for inventories around position.
     private void checkForInventories() {
         ArrayList<BlockPos> blocks =  BlockUtils.getBlocksAroundAndBelowPosition(job.getWorkSpace(),5);
