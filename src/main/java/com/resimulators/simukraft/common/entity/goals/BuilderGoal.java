@@ -87,7 +87,7 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
 
             Direction orgDir = template.getDirection();
             Direction facing = job.getDirection();
-            rotation = getRotation(orgDir,facing);
+            rotation = getRotationCalculated(orgDir,facing);
             PlacementSettings settings = new PlacementSettings()
                 .setRotation(rotation)
                 .setMirror(Mirror.NONE);
@@ -215,7 +215,23 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
         return false;
     }
 
-    private Rotation getRotation(Direction org, Direction cur) {
+    private Rotation getRotation(Direction dir){
+        switch (dir){
+            case NORTH:
+                return Rotation.CLOCKWISE_180;
+            case SOUTH:
+                return Rotation.NONE;
+            case WEST:
+                return Rotation.CLOCKWISE_90;
+            case EAST:
+                return Rotation.COUNTERCLOCKWISE_90;
+
+        }
+        return null;
+
+    }
+
+    private Rotation getRotationCalculated(Direction org, Direction cur) {
         if (org == cur.rotateY()){
             return Rotation.COUNTERCLOCKWISE_90;
         }

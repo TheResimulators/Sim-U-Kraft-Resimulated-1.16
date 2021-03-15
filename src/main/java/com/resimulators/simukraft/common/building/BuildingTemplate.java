@@ -1,7 +1,9 @@
 package com.resimulators.simukraft.common.building;
 
+import com.google.common.collect.Lists;
 import com.resimulators.simukraft.common.tileentity.TileCustomData;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
@@ -15,6 +17,10 @@ import net.minecraft.world.gen.feature.template.PlacementSettings;
 import net.minecraft.world.gen.feature.template.Template;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Random;
 
@@ -31,7 +37,8 @@ public class BuildingTemplate extends Template {
     public BuildingTemplate(){}
     @Override
     public void takeBlocksFromWorld(World worldIn, BlockPos startPos, BlockPos size, boolean takeEntities, Block toIgnore) {
-        super.takeBlocksFromWorld(worldIn, startPos, size, takeEntities, toIgnore);
+        super.takeBlocksFromWorld(worldIn,startPos,size,takeEntities,toIgnore);
+
     }
 
     @Override
@@ -119,6 +126,9 @@ public class BuildingTemplate extends Template {
         return ObfuscationReflectionHelper.getPrivateValue(Template.class,this, "field_204769_a");
     }
 
+    public List<BuildingTemplate.Palette> getEntities(){
+        return ObfuscationReflectionHelper.getPrivateValue(Template.class,this, "field_186271_b");
+    }
     public BlockPos getControlBlock() {
         return controlBlock;
     }
