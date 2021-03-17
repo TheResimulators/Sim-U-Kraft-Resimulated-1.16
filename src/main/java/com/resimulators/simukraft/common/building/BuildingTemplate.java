@@ -24,6 +24,8 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Random;
 
+import net.minecraft.world.gen.feature.template.Template.BlockInfo;
+
 public class BuildingTemplate extends Template {
     private BlockPos controlBlock = BlockPos.ZERO;
     private float rent; // if applicable
@@ -36,44 +38,44 @@ public class BuildingTemplate extends Template {
 
     public BuildingTemplate(){}
     @Override
-    public void takeBlocksFromWorld(World worldIn, BlockPos startPos, BlockPos size, boolean takeEntities, Block toIgnore) {
-        super.takeBlocksFromWorld(worldIn,startPos,size,takeEntities,toIgnore);
+    public void fillFromWorld(World worldIn, BlockPos startPos, BlockPos size, boolean takeEntities, Block toIgnore) {
+        super.fillFromWorld(worldIn,startPos,size,takeEntities,toIgnore);
 
     }
 
     @Override
-    public List<BlockInfo> func_215381_a(BlockPos p_215381_1_, PlacementSettings p_215381_2_, Block p_215381_3_) {
-        return super.func_215381_a(p_215381_1_, p_215381_2_, p_215381_3_);
+    public List<BlockInfo> filterBlocks(BlockPos p_215381_1_, PlacementSettings p_215381_2_, Block p_215381_3_) {
+        return super.filterBlocks(p_215381_1_, p_215381_2_, p_215381_3_);
     }
 
     @Override
-    public List<BlockInfo> func_215386_a(BlockPos p_215386_1_, PlacementSettings p_215386_2_, Block p_215386_3_, boolean p_215386_4_) {
-        return super.func_215386_a(p_215386_1_, p_215386_2_, p_215386_3_, p_215386_4_);
+    public List<BlockInfo> filterBlocks(BlockPos p_215386_1_, PlacementSettings p_215386_2_, Block p_215386_3_, boolean p_215386_4_) {
+        return super.filterBlocks(p_215386_1_, p_215386_2_, p_215386_3_, p_215386_4_);
     }
 
     @Override
-    public BlockPos calculateConnectedPos(PlacementSettings placementIn, BlockPos p_186262_2_, PlacementSettings p_186262_3_, BlockPos p_186262_4_) {
-        return super.calculateConnectedPos(placementIn, p_186262_2_, p_186262_3_, p_186262_4_);
+    public BlockPos calculateConnectedPosition(PlacementSettings placementIn, BlockPos p_186262_2_, PlacementSettings p_186262_3_, BlockPos p_186262_4_) {
+        return super.calculateConnectedPosition(placementIn, p_186262_2_, p_186262_3_, p_186262_4_);
     }
 
     @Override
-    public void func_237144_a_(IServerWorld p_237144_1_, BlockPos p_237144_2_, PlacementSettings p_237144_3_, Random p_237144_4_) {
-        super.func_237144_a_(p_237144_1_, p_237144_2_, p_237144_3_, p_237144_4_);
+    public void placeInWorldChunk(IServerWorld p_237144_1_, BlockPos p_237144_2_, PlacementSettings p_237144_3_, Random p_237144_4_) {
+        super.placeInWorldChunk(p_237144_1_, p_237144_2_, p_237144_3_, p_237144_4_);
     }
 
     @Override
-    public void func_237152_b_(IServerWorld p_237152_1_, BlockPos p_237152_2_, PlacementSettings p_237152_3_, Random p_237152_4_) {
-        super.func_237152_b_(p_237152_1_, p_237152_2_, p_237152_3_, p_237152_4_);
+    public void placeInWorld(IServerWorld p_237152_1_, BlockPos p_237152_2_, PlacementSettings p_237152_3_, Random p_237152_4_) {
+        super.placeInWorld(p_237152_1_, p_237152_2_, p_237152_3_, p_237152_4_);
     }
 
     @Override
-    public boolean func_237146_a_(IServerWorld p_237146_1_, BlockPos p_237146_2_, BlockPos p_237146_3_, PlacementSettings p_237146_4_, Random p_237146_5_, int p_237146_6_) {
-        return super.func_237146_a_(p_237146_1_, p_237146_2_, p_237146_3_, p_237146_4_, p_237146_5_, p_237146_6_);
+    public boolean placeInWorld(IServerWorld p_237146_1_, BlockPos p_237146_2_, BlockPos p_237146_3_, PlacementSettings p_237146_4_, Random p_237146_5_, int p_237146_6_) {
+        return super.placeInWorld(p_237146_1_, p_237146_2_, p_237146_3_, p_237146_4_, p_237146_5_, p_237146_6_);
     }
 
     @Override
-    public BlockPos transformedSize(Rotation rotationIn) {
-        return super.transformedSize(rotationIn);
+    public BlockPos getSize(Rotation rotationIn) {
+        return super.getSize(rotationIn);
     }
 
     @Override
@@ -82,35 +84,35 @@ public class BuildingTemplate extends Template {
     }
 
     @Override
-    public MutableBoundingBox getMutableBoundingBox(PlacementSettings p_215388_1_, BlockPos p_215388_2_) {
-        return super.getMutableBoundingBox(p_215388_1_, p_215388_2_);
+    public MutableBoundingBox getBoundingBox(PlacementSettings p_215388_1_, BlockPos p_215388_2_) {
+        return super.getBoundingBox(p_215388_1_, p_215388_2_);
     }
 
     @Override
-    public MutableBoundingBox func_237150_a_(BlockPos p_237150_1_, Rotation p_237150_2_, BlockPos p_237150_3_, Mirror p_237150_4_) {
-        return super.func_237150_a_(p_237150_1_, p_237150_2_, p_237150_3_, p_237150_4_);
+    public MutableBoundingBox getBoundingBox(BlockPos p_237150_1_, Rotation p_237150_2_, BlockPos p_237150_3_, Mirror p_237150_4_) {
+        return super.getBoundingBox(p_237150_1_, p_237150_2_, p_237150_3_, p_237150_4_);
     }
 
     @Override
-    public CompoundNBT writeToNBT(CompoundNBT nbt) {
+    public CompoundNBT save(CompoundNBT nbt) {
         nbt.putFloat("rent", rent);
         nbt.putFloat("cost", cost);
         nbt.putInt("typeID",typeID);
-        nbt.putInt("direction",direction.getHorizontalIndex());
+        nbt.putInt("direction",direction.get2DDataValue());
         nbt.putString("name",name);
         nbt.putString("author",this.getAuthor());
-        return super.writeToNBT(nbt);
+        return super.save(nbt);
     }
 
     @Override
-    public void read(CompoundNBT compound) {
+    public void load(CompoundNBT compound) {
         rent = compound.getFloat("rent");
         cost = compound.getFloat("cost");
         typeID = compound.getInt("typeID");
         if (compound.contains("direction")){
-        direction = Direction.byHorizontalIndex(compound.getInt("direction"));}
+        direction = Direction.from2DDataValue(compound.getInt("direction"));}
         else{
-            direction =  Direction.byHorizontalIndex(3);
+            direction =  Direction.from2DDataValue(3);
         }
         if (compound.contains("name"))
         {name = compound.getString("name");}else{
@@ -118,15 +120,15 @@ public class BuildingTemplate extends Template {
         }
         setAuthor(compound.getString("author"));
         System.out.println(name);
-        super.read(compound);
+        super.load(compound);
     }
 
 
-    public List<BuildingTemplate.Palette> getBlocks(){
+    public List<Template.Palette> getBlocks(){
         return ObfuscationReflectionHelper.getPrivateValue(Template.class,this, "field_204769_a");
     }
 
-    public List<BuildingTemplate.Palette> getEntities(){
+    public List<Template.Palette> getEntities(){
         return ObfuscationReflectionHelper.getPrivateValue(Template.class,this, "field_186271_b");
     }
     public BlockPos getControlBlock() {
@@ -138,13 +140,13 @@ public class BuildingTemplate extends Template {
     }
 
     public void findControlBox(World worldIn, BlockPos startPos, BlockPos size){
-        BlockPos blockpos = startPos.add(size).add(-1, -1, -1);
+        BlockPos blockpos = startPos.offset(size).offset(-1, -1, -1);
         BlockPos blockpos1 = new BlockPos(Math.min(startPos.getX(), blockpos.getX()), Math.min(startPos.getY(), blockpos.getY()), Math.min(startPos.getZ(), blockpos.getZ()));
         BlockPos blockpos2 = new BlockPos(Math.max(startPos.getX(), blockpos.getX()), Math.max(startPos.getY(), blockpos.getY()), Math.max(startPos.getZ(), blockpos.getZ()));
 
-        for(BlockPos blockpos3 : BlockPos.getAllInBoxMutable(blockpos1, blockpos2)) {
-                TileEntity entity =worldIn.getTileEntity(blockpos3);
-                if (worldIn.getTileEntity(blockpos3) instanceof TileCustomData){
+        for(BlockPos blockpos3 : BlockPos.betweenClosed(blockpos1, blockpos2)) {
+                TileEntity entity =worldIn.getBlockEntity(blockpos3);
+                if (worldIn.getBlockEntity(blockpos3) instanceof TileCustomData){
                     if (entity != null){
                         TileCustomData data = (TileCustomData) entity;
                         setControlBlock(blockpos3);

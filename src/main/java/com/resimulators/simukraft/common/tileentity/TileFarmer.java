@@ -13,26 +13,26 @@ public class TileFarmer extends TileBaseMarker {
 
 
     @Override
-    public CompoundNBT write(CompoundNBT compound) {
+    public CompoundNBT save(CompoundNBT compound) {
         if (seed != null){
             compound.putInt("seed",seed.getId());
         }
-        return super.write(compound);
+        return super.save(compound);
     }
 
 
     @Override
-    public void read(BlockState state, CompoundNBT compound) { // read
+    public void load(BlockState state, CompoundNBT compound) { // read
         if (compound.contains("seed")){
             seed = Seed.getSeedById(compound.getInt("seed"));
         }
-        super.read(state, compound);
+        super.load(state, compound);
     }
 
 
     public void setSeed(Seed seed) {
         this.seed = seed;
-        markDirty();
+        setChanged();
     }
 
     public Seed getSeed(){

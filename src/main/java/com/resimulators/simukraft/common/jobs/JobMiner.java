@@ -91,7 +91,7 @@ public class JobMiner implements IJob {
         nbt.add(ints);
         CompoundNBT other = new CompoundNBT(); // other info that is unique to the miner
         if (workSpace != null) {
-            other.putLong("jobpos", workSpace.toLong());
+            other.putLong("jobpos", workSpace.asLong());
         }
         other.putInt("progress",progress);
         other.putBoolean("finished",finished);
@@ -115,7 +115,7 @@ public class JobMiner implements IJob {
                 setProgress(0);
             }
             if (list.contains("jobpos")){
-                setWorkSpace(BlockPos.fromLong(list.getLong("jobpos")));
+                setWorkSpace(BlockPos.of(list.getLong("jobpos")));
             }
             if (list.contains("finished")){
                 finished = list.getBoolean("finished");

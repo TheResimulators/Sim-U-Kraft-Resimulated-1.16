@@ -13,7 +13,7 @@ public class SimUTab extends ItemGroup {
     }
 
     @Override
-    public ItemStack createIcon() {
+    public ItemStack makeIcon() {
         return new ItemStack(ModBlocks.CONSTRUCTOR_BOX.get());
     }
 }

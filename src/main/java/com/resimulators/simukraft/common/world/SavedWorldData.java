@@ -47,12 +47,12 @@ public class SavedWorldData extends WorldSavedData {
 
         ServerWorld overworld = (ServerWorld) world;
 
-        DimensionSavedDataManager storage = overworld.getSavedData();
-        return storage.getOrCreate(() -> new SavedWorldData(world), DATA_NAME);
+        DimensionSavedDataManager storage = overworld.getDataStorage();
+        return storage.computeIfAbsent(() -> new SavedWorldData(world), DATA_NAME);
     }
 
     @Override
-    public void read(CompoundNBT nbt) {
+    public void load(CompoundNBT nbt) {
         ListNBT list = nbt.getList("factions", Constants.NBT.TAG_COMPOUND);
         for (INBT factionNBT:list){
             CompoundNBT compound = (CompoundNBT)factionNBT;
@@ -66,7 +66,7 @@ public class SavedWorldData extends WorldSavedData {
     }
 
     @Override
-    public CompoundNBT write(CompoundNBT compound) {
+    public CompoundNBT save(CompoundNBT compound) {
         ListNBT list = new ListNBT();
         for (int i :factions.keySet()){
             CompoundNBT nbt = new CompoundNBT();
@@ -87,7 +87,7 @@ public class SavedWorldData extends WorldSavedData {
         }
         Faction faction = new Faction(id,world);
         factions.put(id, faction);
-        markDirty();
+        setDirty();
         return faction;
     }
     /**deletes faction from list and removes all players and sims from that faction, leaving now reference*/
@@ -95,19 +95,19 @@ public class SavedWorldData extends WorldSavedData {
         factions.get(id).removeAllSims();
         factions.get(id).removeAllPlayers();
         factions.remove(id);
-        markDirty();
+        setDirty();
 
     }
 
     /** adds a premade faction to faction list. mostly used to update client*/
     public void addFaction(Faction faction){
         setFaction(faction.getId(),faction);
-        markDirty();
+        setDirty();
     }
 
     /** set faction in list with given id*/
     public void setFaction(int id, Faction faction){
-        markDirty();
+        setDirty();
         this.factions.put(id,faction);
     }
     /**returns faction */
@@ -148,12 +148,12 @@ public class SavedWorldData extends WorldSavedData {
     /**adds sim to given faction with id, uses sim instance for usefulness*/
     public void addSimToFaction(int id, SimEntity sim){
         factions.get(id).addSim(sim);
-        markDirty();
+        setDirty();
     }
     /**adds player to certain faction with given id, uses playerEntity object to add player */
     public void addPlayerToFaction(int id, PlayerEntity player){
-        factions.get(id).addPlayer(player.getUniqueID());
-        markDirty();
+        factions.get(id).addPlayer(player.getUUID());
+        setDirty();
     }
     /**WIP*/
     public void removePlayerFromFaction(int id, PlayerEntity player){
@@ -163,7 +163,7 @@ public class SavedWorldData extends WorldSavedData {
     /**removes sim from faction, all references removes, used for when sim dies.*/
     public void removeSimFromFaction(int id, SimEntity sim){
         this.getFaction(id).removeSim(sim);
-        markDirty();
+        setDirty();
     }
 
     /** sets sim to be hired, used to see which sims are unemployed*/

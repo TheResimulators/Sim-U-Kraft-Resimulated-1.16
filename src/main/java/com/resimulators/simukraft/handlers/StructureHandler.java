@@ -27,10 +27,10 @@ public class StructureHandler {
             field.setAccessible(true);
             SaveFormat.LevelSave levelSave = (SaveFormat.LevelSave) field.get(server);
             field.setAccessible(false);
-            templateManager = new CustomTemplateManager(server.getDataPackRegistries().getResourceManager(), levelSave, server.getDataFixer());
+            templateManager = new CustomTemplateManager(server.getDataPackRegistries().getResourceManager(), levelSave, server.getFixerUpper());
         } catch (IllegalAccessException e) {
             //FIXME fabbe50: Make own instance of TemplateManager
-            templateManager = (CustomTemplateManager) server.func_241755_D_().getStructureTemplateManager(); // gets servers template manager
+            templateManager = (CustomTemplateManager) server.overworld().getStructureManager(); // gets servers template manager
         }
     }
     /**gets instance of template manager*/
@@ -40,16 +40,16 @@ public class StructureHandler {
     /**saves the structure to file using built-in template manager*/
     public static boolean saveStructure(World world, BlockPos origin, BlockPos size, String name, String author, Direction dir) {
         if (templateManager == null && world.getServer() != null)
-            templateManager = (CustomTemplateManager) world.getServer().func_241755_D_().getStructureTemplateManager();
+            templateManager = (CustomTemplateManager) world.getServer().overworld().getStructureManager();
 
         if (templateManager != null) {
-            BuildingTemplate template = templateManager.getTemplateDefaulted(new ResourceLocation(Reference.MODID, name)); //gets default empty template
-            template.takeBlocksFromWorld(world, origin, size, false, null); //gets all the blocks that are in the world
+            BuildingTemplate template = templateManager.getOrCreate(new ResourceLocation(Reference.MODID, name)); //gets default empty template
+            template.fillFromWorld(world, origin, size, false, null); //gets all the blocks that are in the world
             template.setAuthor(author); //sets the author to the person saving the structure
             template.findControlBox(world,origin,size);
             template.setDirection(dir);
             template.setName(name);
-            templateManager.writeToFile(new ResourceLocation(Reference.MODID, name)); // writes the template to file at given location
+            templateManager.save(new ResourceLocation(Reference.MODID, name)); // writes the template to file at given location
             return true; // returns true if successful
         }
         return false;
@@ -58,13 +58,13 @@ public class StructureHandler {
     public static BuildingTemplate loadStructure(String name) {
         if (templateManager != null) {
             System.out.println(name);
-            return templateManager.getTemplate(new ResourceLocation(Reference.MODID, name));
+            return templateManager.get(new ResourceLocation(Reference.MODID, name));
         }
         return null;
     }
 
     public static List<Template.BlockInfo> modifyAndConvertTemplate(BuildingTemplate template, World world, BlockPos pos,PlacementSettings settings) {
             List<Template.Palette> blockInfos = template.getBlocks();
-            return BuildingTemplate.processBlockInfos(world, pos, pos, settings, blockInfos.get(0).func_237157_a_(), template);
+            return BuildingTemplate.processBlockInfos(world, pos, pos, settings, blockInfos.get(0).blocks(), template);
     }
 }

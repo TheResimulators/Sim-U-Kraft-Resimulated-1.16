@@ -49,7 +49,7 @@ public class LootTableGen extends LootTableProvider implements IDataProvider {
     @Override
     protected void validate(Map<ResourceLocation, LootTable> map, ValidationTracker validationtracker) {
         map.forEach((p_218436_2_, p_218436_3_) -> {
-            LootTableManager.validateLootTable(validationtracker, p_218436_2_, p_218436_3_);
+            LootTableManager.validate(validationtracker, p_218436_2_, p_218436_3_);
         });
     }
 
@@ -59,7 +59,7 @@ public class LootTableGen extends LootTableProvider implements IDataProvider {
         @Override
         protected void addTables(){
             for (Block block : getKnownBlocks()) {
-                super.registerDropSelfLootTable(block);
+                super.dropSelf(block);
             }
 
         }
@@ -77,7 +77,7 @@ public class LootTableGen extends LootTableProvider implements IDataProvider {
 
         @Override
         protected void addTables(){
-           super.registerLootTable(ModEntities.ENTITY_SIM,LootTable.builder());
+           super.add(ModEntities.ENTITY_SIM,LootTable.lootTable());
 
         }
 

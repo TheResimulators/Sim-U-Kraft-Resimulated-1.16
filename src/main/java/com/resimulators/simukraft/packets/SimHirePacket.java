@@ -51,10 +51,10 @@ public class SimHirePacket implements IMessage{
 
     @Override
     public void onExecute(NetworkEvent.Context ctxIn, boolean isLogicalServer) {
-        SimEntity sim = (SimEntity) Minecraft.getInstance().world.getEntityByID(simId);
-        SavedWorldData.get(SimuKraft.proxy.getClientWorld()).getFaction(factionId).hireSim(sim.getUniqueID());
-        ((ITile)Minecraft.getInstance().world.getTileEntity(pos)).setHired(true);
-        ((ITile)Minecraft.getInstance().world.getTileEntity(pos)).setSimId(sim.getUniqueID());
+        SimEntity sim = (SimEntity) Minecraft.getInstance().level.getEntity(simId);
+        SavedWorldData.get(SimuKraft.proxy.getClientWorld()).getFaction(factionId).hireSim(sim.getUUID());
+        ((ITile)Minecraft.getInstance().level.getBlockEntity(pos)).setHired(true);
+        ((ITile)Minecraft.getInstance().level.getBlockEntity(pos)).setSimId(sim.getUUID());
         sim.setJob(ModJobs.JOB_LOOKUP.get(job).apply(sim));
         sim.setProfession(job);
         sim.getProfession();

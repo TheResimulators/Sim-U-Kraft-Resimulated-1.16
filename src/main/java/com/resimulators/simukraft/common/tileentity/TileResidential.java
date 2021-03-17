@@ -65,7 +65,7 @@ public class TileResidential extends TileEntity implements IControlBlock {
 
     public void setFactionID(int factionID) {
         this.factionID = factionID;
-        markDirty();
+        setChanged();
     }
 
     public UUID getHouseID() {
@@ -74,23 +74,23 @@ public class TileResidential extends TileEntity implements IControlBlock {
 
     public void setHouseID(UUID houseID) {
         this.houseID = houseID;
-        markDirty();
+        setChanged();
     }
 
     @Override
     public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
-        read(this.getBlockState(),pkt.getNbtCompound());
+        load(this.getBlockState(),pkt.getTag());
     }
     @Override
     public CompoundNBT getUpdateTag() {
-        return write(new CompoundNBT());
+        return save(new CompoundNBT());
     }
 
     @Override
-    public CompoundNBT write(CompoundNBT compound) {
-        super.write(compound);
+    public CompoundNBT save(CompoundNBT compound) {
+        super.save(compound);
         if (houseID != null){
-            compound.putUniqueId("house id",houseID);
+            compound.putUUID("house id",houseID);
             compound.putInt("faction id",factionID);
 
         }
@@ -98,22 +98,22 @@ public class TileResidential extends TileEntity implements IControlBlock {
     }
 
     @Override
-    public void read(BlockState state, CompoundNBT nbt) {
+    public void load(BlockState state, CompoundNBT nbt) {
         if (nbt.contains("house id")){
-            houseID = nbt.getUniqueId("house id");
+            houseID = nbt.getUUID("house id");
             factionID = nbt.getInt("faction id");
         }
-        super.read(state, nbt);
+        super.load(state, nbt);
     }
 
     public void sendOccupantsIds(ServerPlayerEntity player){
         ArrayList<Integer> ids = new ArrayList<>();
-        Faction faction = SavedWorldData.get(this.getWorld()).getFaction(factionID);
+        Faction faction = SavedWorldData.get(this.getLevel()).getFaction(factionID);
         ArrayList<UUID> occupants = faction.getOccupants(getHouseID());
         for(UUID uuid: occupants){
-            ids.add(((ServerWorld)world).getEntityByUuid(uuid).getEntityId());
+            ids.add(((ServerWorld)level).getEntity(uuid).getId());
         }
-        SimUKraftPacketHandler.INSTANCE.sendTo(new HouseOccupantIdsPacket(ids),player.connection.netManager, NetworkDirection.PLAY_TO_CLIENT);
+        SimUKraftPacketHandler.INSTANCE.sendTo(new HouseOccupantIdsPacket(ids),player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
 
     }
 }

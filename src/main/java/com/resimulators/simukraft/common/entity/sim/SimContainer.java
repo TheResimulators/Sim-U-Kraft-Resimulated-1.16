@@ -43,21 +43,21 @@ public class SimContainer extends Container {
         for (int i = 0; i < 4; i++) {
             final EquipmentSlotType equipmentSlotType = VALID_EQUIPMENT_SLOTS[i];
             this.addSlot(new Slot(inventory, 30 - i, 8, 8 + i * 18) {
-                public int getSlotStackLimit() {
+                public int getMaxStackSize() {
                     return 1;
                 }
 
-                public boolean isItemValid(ItemStack stack) {
+                public boolean mayPlace(ItemStack stack) {
                     return stack.canEquip(equipmentSlotType, sim);
                 }
 
-                public boolean canTakeStack(PlayerEntity player) {
-                    ItemStack itemStack = this.getStack();
-                    return (itemStack.isEmpty() || player.isCreative() || !EnchantmentHelper.hasBindingCurse(itemStack)) && super.canTakeStack(player);
+                public boolean mayPickup(PlayerEntity player) {
+                    ItemStack itemStack = this.getItem();
+                    return (itemStack.isEmpty() || player.isCreative() || !EnchantmentHelper.hasBindingCurse(itemStack)) && super.mayPickup(player);
                 }
 
                 @OnlyIn(Dist.CLIENT)
-                public Pair<ResourceLocation, ResourceLocation> func_225517_c_() {
+                public Pair<ResourceLocation, ResourceLocation> getNoItemIcon() {
                     return Pair.of(SimContainer.blocks, SimContainer.ARMOR_SLOT_TEXTURES[equipmentSlotType.getIndex()]);
                 }
             });
@@ -81,12 +81,12 @@ public class SimContainer extends Container {
 
         this.addSlot(new Slot(inventory, 31, 77, 62) {
             @OnlyIn(Dist.CLIENT)
-            public Pair<ResourceLocation, ResourceLocation> func_225517_c_() {
+            public Pair<ResourceLocation, ResourceLocation> getNoItemIcon() {
                 return Pair.of(SimContainer.blocks, SimContainer.shield);
             }
         });
 
-        trackIntArray(new IIntArray() {
+        addDataSlots(new IIntArray() {
             @Override
             public int get(int index) {
                 switch (index) {
@@ -116,12 +116,12 @@ public class SimContainer extends Container {
             }
 
             @Override
-            public int size() {
+            public int getCount() {
                 return 3;
             }
         });
 
-        trackInt(new IntReferenceHolder() {
+        addDataSlot(new IntReferenceHolder() {
             @Override
             public int get() {
                 if (sim.getJob() != null){
@@ -140,57 +140,57 @@ public class SimContainer extends Container {
 
 
     @Override
-    public boolean canInteractWith(PlayerEntity playerIn) {
+    public boolean stillValid(PlayerEntity playerIn) {
         return true;
     }
 
     @Override
-    public ItemStack transferStackInSlot(PlayerEntity playerIn, int index) {
+    public ItemStack quickMoveStack(PlayerEntity playerIn, int index) {
         ItemStack itemstack = ItemStack.EMPTY;
-        Slot slot = this.inventorySlots.get(index);
-        if (slot != null && slot.getHasStack()) {
-            ItemStack itemstack1 = slot.getStack();
+        Slot slot = this.slots.get(index);
+        if (slot != null && slot.hasItem()) {
+            ItemStack itemstack1 = slot.getItem();
             itemstack = itemstack1.copy();
-            EquipmentSlotType equipmentslottype = MobEntity.getSlotForItemStack(itemstack);
+            EquipmentSlotType equipmentslottype = MobEntity.getEquipmentSlotForItem(itemstack);
             if (index == 0) {
-                if (!this.mergeItemStack(itemstack1, 31, 67, false)) {
+                if (!this.moveItemStackTo(itemstack1, 31, 67, false)) {
                     return ItemStack.EMPTY;
                 }
 
-                slot.onSlotChange(itemstack1, itemstack);
+                slot.onQuickCraft(itemstack1, itemstack);
             } else if (index < 5) {
-                if (!this.mergeItemStack(itemstack1, 31, 67, false)) {
+                if (!this.moveItemStackTo(itemstack1, 31, 67, false)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (equipmentslottype.getSlotType() == EquipmentSlotType.Group.ARMOR && !this.inventorySlots.get(equipmentslottype.getIndex()).getHasStack()) {
+            } else if (equipmentslottype.getType() == EquipmentSlotType.Group.ARMOR && !this.slots.get(equipmentslottype.getIndex()).hasItem()) {
                 int i = Utils.getReversedInt(4, equipmentslottype.getIndex());
-                if (!this.mergeItemStack(itemstack1, i, i + 1, false)) {
+                if (!this.moveItemStackTo(itemstack1, i, i + 1, false)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (equipmentslottype == EquipmentSlotType.OFFHAND && !this.inventorySlots.get(67).getHasStack()) {
-                if (!this.mergeItemStack(itemstack1, 67, 68, false)) {
+            } else if (equipmentslottype == EquipmentSlotType.OFFHAND && !this.slots.get(67).hasItem()) {
+                if (!this.moveItemStackTo(itemstack1, 67, 68, false)) {
                     return ItemStack.EMPTY;
                 }
             } else if (index == 67) {
-                if (!this.mergeItemStack(itemstack1, 31, 67, false)) {
+                if (!this.moveItemStackTo(itemstack1, 31, 67, false)) {
                     return ItemStack.EMPTY;
                 }
             } else if (index < 31) {
-                if (!this.mergeItemStack(itemstack1, 31, 67, false)) {
+                if (!this.moveItemStackTo(itemstack1, 31, 67, false)) {
                     return ItemStack.EMPTY;
                 }
             } else if (index < 67) {
-                if (!this.mergeItemStack(itemstack1, 0, 31, false)) {
+                if (!this.moveItemStackTo(itemstack1, 0, 31, false)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (!this.mergeItemStack(itemstack1, 31, 67, false)) {
+            } else if (!this.moveItemStackTo(itemstack1, 31, 67, false)) {
                 return ItemStack.EMPTY;
             }
 
             if (itemstack1.isEmpty()) {
-                slot.putStack(ItemStack.EMPTY);
+                slot.set(ItemStack.EMPTY);
             } else {
-                slot.onSlotChanged();
+                slot.setChanged();
             }
 
             if (itemstack1.getCount() == itemstack.getCount()) {
@@ -199,7 +199,7 @@ public class SimContainer extends Container {
 
             ItemStack itemstack2 = slot.onTake(playerIn, itemstack1);
             if (index == 0) {
-                playerIn.dropItem(itemstack2, false);
+                playerIn.drop(itemstack2, false);
             }
         }
 

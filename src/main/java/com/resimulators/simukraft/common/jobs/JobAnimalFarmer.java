@@ -84,7 +84,7 @@ public class JobAnimalFarmer implements IJob {
         nbt.add(ints);
         CompoundNBT other = new CompoundNBT(); // other info that is unique to the miner
         if (workSpace != null) {
-            other.putLong("jobpos", workSpace.toLong());
+            other.putLong("jobpos", workSpace.asLong());
         }
         other.putBoolean("finished",finished);
         nbt.add(other);
@@ -99,7 +99,7 @@ public class JobAnimalFarmer implements IJob {
                 periodsworked = list.getInt("periodsworked");
             }
             if (list.contains("jobpos")) {
-                setWorkSpace(BlockPos.fromLong(list.getLong("jobpos")));
+                setWorkSpace(BlockPos.of(list.getLong("jobpos")));
             }
             if (list.contains("finished")){
                 finished = list.getBoolean("finished");

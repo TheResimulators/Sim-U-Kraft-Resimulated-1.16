@@ -44,8 +44,8 @@ public class HouseOccupantIdsPacket implements IMessage{
 
     @Override
     public void onExecute(NetworkEvent.Context ctxIn, boolean isLogicalServer) {
-        if (Minecraft.getInstance().currentScreen instanceof GuiResidential){
-            ((GuiResidential)Minecraft.getInstance().currentScreen).setOccupants(ids);
+        if (Minecraft.getInstance().screen instanceof GuiResidential){
+            ((GuiResidential)Minecraft.getInstance().screen).setOccupants(ids);
         }
     }
 }

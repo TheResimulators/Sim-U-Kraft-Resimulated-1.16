@@ -38,17 +38,17 @@ public class StartBuildingPacket implements IMessage {
     @Override
     public void toBytes(PacketBuffer buf) {
         buf.writeBlockPos(pos);
-        buf.writeInt(direction.getHorizontalIndex());
-        buf.writeString(name);
-        buf.writeUniqueId(playerId);
+        buf.writeInt(direction.get2DDataValue());
+        buf.writeUtf(name);
+        buf.writeUUID(playerId);
     }
 
     @Override
     public void fromBytes(PacketBuffer buf) {
         pos = buf.readBlockPos();
-        direction = Direction.byHorizontalIndex(buf.readInt());
-        name = buf.readString(32767);
-        playerId = buf.readUniqueId();
+        direction = Direction.from2DDataValue(buf.readInt());
+        name = buf.readUtf(32767);
+        playerId = buf.readUUID();
     }
 
     @Nullable
@@ -59,12 +59,12 @@ public class StartBuildingPacket implements IMessage {
 
     @Override
     public void onExecute(NetworkEvent.Context ctxIn, boolean isLogicalServer) {
-        if (ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayerByUUID(playerId) != null) {
-            PlayerEntity player = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayerByUUID(playerId);
+        if (ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayer(playerId) != null) {
+            PlayerEntity player = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayer(playerId);
             if (player != null) {
-                SavedWorldData data = SavedWorldData.get(player.world);
-                TileConstructor constructor = (TileConstructor)player.getEntityWorld().getTileEntity(pos);
-                SimEntity sim = (SimEntity) ((ServerWorld)player.getEntityWorld()).getEntityByUuid(constructor.getSimId());
+                SavedWorldData data = SavedWorldData.get(player.level);
+                TileConstructor constructor = (TileConstructor)player.getCommandSenderWorld().getBlockEntity(pos);
+                SimEntity sim = (SimEntity) ((ServerWorld)player.getCommandSenderWorld()).getEntity(constructor.getSimId());
                 JobBuilder builder =(JobBuilder) sim.getJob();
                 builder.setDirection(direction);
                 BuildingTemplate template = StructureHandler.loadStructure(name);

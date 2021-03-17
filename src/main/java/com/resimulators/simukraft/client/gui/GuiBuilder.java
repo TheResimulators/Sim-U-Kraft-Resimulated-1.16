@@ -25,6 +25,8 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import net.minecraft.client.gui.widget.button.Button.IPressable;
+
 public class GuiBuilder extends GuiBaseJob {
     private Button Build;
     private Button CustomBack;
@@ -177,8 +179,8 @@ public class GuiBuilder extends GuiBaseJob {
     }
 
     private void startBuilding() {
-        Network.getNetwork().sendToServer(new StartBuildingPacket(pos,Minecraft.getInstance().player.getAdjustedHorizontalFacing(),selected.getName(),Minecraft.getInstance().player.getUniqueID()));
-        Minecraft.getInstance().displayGuiScreen(null);
+        Network.getNetwork().sendToServer(new StartBuildingPacket(pos,Minecraft.getInstance().player.getMotionDirection(),selected.getName(),Minecraft.getInstance().player.getUUID()));
+        Minecraft.getInstance().setScreen(null);
     }
 
     public void setStructures(ArrayList<BuildingTemplate> structures) {
@@ -258,10 +260,10 @@ public class GuiBuilder extends GuiBaseJob {
         if (loaded) {
             super.render(stack, p_render_1_, p_render_2_, p_render_3_);
             if (state == State.BUILDINGINFO){
-                font.drawString(stack, "Building Name: " + selected.getName(), (float) width / 6, (float) height / 4, Color.WHITE.getRGB());
-                font.drawString(stack, "Author: " + selected.getAuthor(), (float) width / 6, (float) height / 4+20, Color.WHITE.getRGB());
-                font.drawString(stack, "Price: " + selected.getCost(), (float) width / 6, (float) height / 4+40, Color.WHITE.getRGB());
-                font.drawString(stack, "Rent: " + selected.getRent(), (float) width / 6 , (float) height / 4+60, Color.WHITE.getRGB());
+                font.draw(stack, "Building Name: " + selected.getName(), (float) width / 6, (float) height / 4, Color.WHITE.getRGB());
+                font.draw(stack, "Author: " + selected.getAuthor(), (float) width / 6, (float) height / 4+20, Color.WHITE.getRGB());
+                font.draw(stack, "Price: " + selected.getCost(), (float) width / 6, (float) height / 4+40, Color.WHITE.getRGB());
+                font.draw(stack, "Rent: " + selected.getRent(), (float) width / 6 , (float) height / 4+60, Color.WHITE.getRGB());
 
             }
 
@@ -271,7 +273,7 @@ public class GuiBuilder extends GuiBaseJob {
 
         }
         else {
-            font.drawString(stack, "Loading", (float) width / 2 - font.getStringWidth("Loading") / 2, (float) height / 2, Color.WHITE.getRGB());
+            font.draw(stack, "Loading", (float) width / 2 - font.width("Loading") / 2, (float) height / 2, Color.WHITE.getRGB());
         }
 
     }
@@ -353,8 +355,8 @@ public class GuiBuilder extends GuiBaseJob {
         @Override
         public void renderButton(MatrixStack stack, int p_renderButton_1_, int p_renderButton_2_, float p_renderButton_3_) {
             Minecraft minecraft = Minecraft.getInstance();
-            FontRenderer fontrenderer = minecraft.fontRenderer;
-            minecraft.getTextureManager().bindTexture(LARGE_BUTTON);
+            FontRenderer fontrenderer = minecraft.font;
+            minecraft.getTextureManager().bind(LARGE_BUTTON);
             RenderSystem.color4f(1.0F, 1.0F, 1.0F, this.alpha);
             int i = this.getYImage(this.isHovered);
             RenderSystem.enableBlend();

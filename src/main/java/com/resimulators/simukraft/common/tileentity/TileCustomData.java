@@ -57,36 +57,36 @@ public class TileCustomData extends TileEntity implements IControlBlock{
     }
 
     @Override
-    public CompoundNBT write(CompoundNBT compound) {
+    public CompoundNBT save(CompoundNBT compound) {
         compound.putInt("building type",type.id);
         compound.putFloat("price",this.price);
         compound.putFloat("rent",this.rent);
 
-        return super.write(compound);
+        return super.save(compound);
 
     }
 
     @Override
-    public void read(BlockState blockState, CompoundNBT compoundNBT) {
+    public void load(BlockState blockState, CompoundNBT compoundNBT) {
         setBuildingType(BuildingType.getById(compoundNBT.getInt("building type")));
         setPrice(compoundNBT.getFloat("price"));
         setRent(compoundNBT.getFloat("rent"));
-        super.read(blockState,compoundNBT);
+        super.load(blockState,compoundNBT);
     }
 
     public void setBuildingType(BuildingType type){
         this.type = type;
-        markDirty();
+        setChanged();
     }
 
     public void setPrice(float price){
         this.price = price;
-        markDirty();
+        setChanged();
     }
 
     public void setRent(float rent){
         this.rent = rent;
-        markDirty();
+        setChanged();
     }
 
 
@@ -116,17 +116,17 @@ public class TileCustomData extends TileEntity implements IControlBlock{
 
     public void setWidth(int width){
         this.width = width;
-        markDirty();
+        setChanged();
     }
 
     public void setHeight(int height){
         this.height = height;
-        markDirty();
+        setChanged();
     }
 
     public void setDepth(int depth){
         this.depth = depth;
-        markDirty();
+        setChanged();
     }
 
     public int getWidth() {
@@ -143,11 +143,11 @@ public class TileCustomData extends TileEntity implements IControlBlock{
 
     @Override
     public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
-        read(this.getBlockState(),pkt.getNbtCompound());
+        load(this.getBlockState(),pkt.getTag());
     }
 
     @Override
     public CompoundNBT getUpdateTag() {
-        return write(new CompoundNBT());
+        return save(new CompoundNBT());
     }
 }

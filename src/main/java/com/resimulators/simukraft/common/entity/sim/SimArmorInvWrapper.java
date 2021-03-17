@@ -20,7 +20,7 @@ public class SimArmorInvWrapper extends RangedWrapper {
     public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
         EquipmentSlotType equipmentSlotType = null;
         for (EquipmentSlotType s : EquipmentSlotType.values()) {
-            if (s.getSlotType() == EquipmentSlotType.Group.ARMOR && s.getIndex() == slot) {
+            if (s.getType() == EquipmentSlotType.Group.ARMOR && s.getIndex() == slot) {
                 equipmentSlotType = s;
                 break;
             }

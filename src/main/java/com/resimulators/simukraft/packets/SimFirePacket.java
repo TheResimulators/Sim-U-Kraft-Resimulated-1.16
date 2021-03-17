@@ -47,7 +47,7 @@ public class SimFirePacket implements IMessage {
     public void onExecute(NetworkEvent.Context ctxIn, boolean isLogicalServer) {
         World world = SimuKraft.proxy.getClientWorld();
         if (world != null) {
-            SimEntity sim = (SimEntity) world.getEntityByID(simId);
+            SimEntity sim = (SimEntity) world.getEntity(simId);
             if (sim != null) {
                 sim.fireSim(sim,factionId,false);
 

@@ -44,7 +44,7 @@ public class OpenJobGuiPacket implements IMessage {
         for (int id : ints) {
             buf.writeInt(id);
         }
-        buf.writeString(string);
+        buf.writeUtf(string);
 
     }
 
@@ -59,7 +59,7 @@ public class OpenJobGuiPacket implements IMessage {
             ids.add(buf.readInt());
         }
         ints = ids;
-        string = buf.readString();
+        string = buf.readUtf();
     }
 
     @Nullable

@@ -22,6 +22,8 @@ import net.minecraft.world.World;
 import javax.annotation.Nullable;
 import java.util.List;
 
+import net.minecraft.item.Item.Properties;
+
 public class ItemStructureTest extends Item implements IStructureStorage {
     private BlockPos placementArea;
     private Direction direction;
@@ -30,13 +32,13 @@ public class ItemStructureTest extends Item implements IStructureStorage {
     }
 
     @Override
-    public ActionResultType onItemUse(ItemUseContext context) {
+    public ActionResultType useOn(ItemUseContext context) {
         if (context.getPlayer() != null) {
             //sets placement position for building
             if (context.getPlayer().isCrouching()) {
-                placementArea = context.getPos();
-                direction = context.getPlacementHorizontalFacing();
-                context.getPlayer().sendStatusMessage(new StringTextComponent("Set Placement Area: " + placementArea), false);
+                placementArea = context.getClickedPos();
+                direction = context.getHorizontalDirection();
+                context.getPlayer().displayClientMessage(new StringTextComponent("Set Placement Area: " + placementArea), false);
             }
         }
 
@@ -44,16 +46,16 @@ public class ItemStructureTest extends Item implements IStructureStorage {
     }
 
     @Override
-    public ActionResult<ItemStack> onItemRightClick(World worldIn, PlayerEntity playerIn, Hand handIn) {
+    public ActionResult<ItemStack> use(World worldIn, PlayerEntity playerIn, Hand handIn) {
         if (playerIn.isCrouching()) { // if crouching reset placement area so a new area can be set
             placementArea = null;
         }
 
-        return ActionResult.resultSuccess(playerIn.getHeldItem(handIn));
+        return ActionResult.success(playerIn.getItemInHand(handIn));
     }
 
     @Override
-    public ActionResultType itemInteractionForEntity(ItemStack stack, PlayerEntity playerIn, LivingEntity target, Hand hand) {
+    public ActionResultType interactLivingEntity(ItemStack stack, PlayerEntity playerIn, LivingEntity target, Hand hand) {
         BuildingTemplate temp = this.getTemplate(this.getStructure(stack));
         System.out.println(temp != null);
         //sets sims job to builder and relevant info needed for it to work
@@ -63,7 +65,7 @@ public class ItemStructureTest extends Item implements IStructureStorage {
             if (((SimEntity) target).getJob() instanceof JobBuilder) {
                 ((JobBuilder) ((SimEntity) target).getJob()).setTemplate(temp);
                 ((JobBuilder) ((SimEntity) target).getJob()).setDirection(direction);
-                ((SimEntity) target).getJob().setWorkSpace(placementArea.offset(direction.getOpposite()));
+                ((SimEntity) target).getJob().setWorkSpace(placementArea.relative(direction.getOpposite()));
             }
         }
 
@@ -71,8 +73,8 @@ public class ItemStructureTest extends Item implements IStructureStorage {
     }
 
     @Override
-    public void addInformation(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
-        super.addInformation(stack, worldIn, tooltip, flagIn);
+    public void appendHoverText(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
+        super.appendHoverText(stack, worldIn, tooltip, flagIn);
         //adds info to tooltip when structure is loaded
         tooltip.add(new StringTextComponent(((ItemStructureTest)stack.getItem()).getStructure(stack) + "   " + placementArea));
     }

@@ -24,6 +24,8 @@ import net.minecraftforge.fml.network.NetworkDirection;
 
 import java.util.ArrayList;
 
+import net.minecraft.block.AbstractBlock.Properties;
+
 public class BlockConstructor extends BlockBase {
     public BlockConstructor(final Properties properties) {
         super(properties);
@@ -35,20 +37,20 @@ public class BlockConstructor extends BlockBase {
     }
 
     @Override
-    public ActionResultType onBlockActivated(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTrace) {
-        if (!world.isRemote) {
-            Faction faction = SavedWorldData.get(world).getFactionWithPlayer(player.getUniqueID());
+    public ActionResultType use(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTrace) {
+        if (!world.isClientSide) {
+            Faction faction = SavedWorldData.get(world).getFactionWithPlayer(player.getUUID());
             ArrayList<Integer> simids = faction.getSimIds((ServerWorld) world);
-            System.out.println(world.getTileEntity(pos));
+            System.out.println(world.getBlockEntity(pos));
 
-            if (((ITile)world.getTileEntity(pos)).getHired()){
-                int hiredId = ((ServerWorld) world).getEntityByUuid(((ITile)world.getTileEntity(pos)).getSimId()).getEntityId();
-                SimUKraftPacketHandler.INSTANCE.sendTo(new OpenJobGuiPacket(simids,pos,hiredId, GuiHandler.BUILDER, "Constructor"),((ServerPlayerEntity) player).connection.netManager, NetworkDirection.PLAY_TO_CLIENT);// used when there is a sim hired
+            if (((ITile)world.getBlockEntity(pos)).getHired()){
+                int hiredId = ((ServerWorld) world).getEntity(((ITile)world.getBlockEntity(pos)).getSimId()).getId();
+                SimUKraftPacketHandler.INSTANCE.sendTo(new OpenJobGuiPacket(simids,pos,hiredId, GuiHandler.BUILDER, "Constructor"),((ServerPlayerEntity) player).connection.connection, NetworkDirection.PLAY_TO_CLIENT);// used when there is a sim hired
             } else {
-                SimUKraftPacketHandler.INSTANCE.sendTo(new OpenJobGuiPacket(simids,pos,GuiHandler.BUILDER, "Constructor"),((ServerPlayerEntity) player).connection.netManager, NetworkDirection.PLAY_TO_CLIENT);//used when there is no sim employed at this block
+                SimUKraftPacketHandler.INSTANCE.sendTo(new OpenJobGuiPacket(simids,pos,GuiHandler.BUILDER, "Constructor"),((ServerPlayerEntity) player).connection.connection, NetworkDirection.PLAY_TO_CLIENT);//used when there is no sim employed at this block
             }
-            if (world.getTileEntity(pos) instanceof TileConstructor){
-                ((TileConstructor)world.getTileEntity(pos)).FindAndLoadBuilding(player);
+            if (world.getBlockEntity(pos) instanceof TileConstructor){
+                ((TileConstructor)world.getBlockEntity(pos)).FindAndLoadBuilding(player);
         }
 
         }
@@ -62,15 +64,15 @@ public class BlockConstructor extends BlockBase {
     }
 
     @Override
-    public void onBlockHarvested(World worldIn, BlockPos pos, BlockState state, PlayerEntity player) {
-        super.onBlockHarvested(worldIn, pos, state, player);
-        if (!worldIn.isRemote){
+    public void playerWillDestroy(World worldIn, BlockPos pos, BlockState state, PlayerEntity player) {
+        super.playerWillDestroy(worldIn, pos, state, player);
+        if (!worldIn.isClientSide){
 
-            ITile tile = ((ITile) worldIn.getTileEntity(pos));
+            ITile tile = ((ITile) worldIn.getBlockEntity(pos));
 
-            SimEntity sim = (SimEntity) ((ServerWorld)worldIn).getEntityByUuid(tile.getSimId());
+            SimEntity sim = (SimEntity) ((ServerWorld)worldIn).getEntity(tile.getSimId());
             if (sim != null){
-                int id = SavedWorldData.get(worldIn).getFactionWithPlayer(player.getUniqueID()).getId();
+                int id = SavedWorldData.get(worldIn).getFactionWithPlayer(player.getUUID()).getId();
                 sim.fireSim(sim,id,false);
 
             }

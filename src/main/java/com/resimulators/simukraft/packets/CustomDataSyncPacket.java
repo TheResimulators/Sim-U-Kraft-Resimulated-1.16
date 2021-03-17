@@ -51,9 +51,9 @@ public class CustomDataSyncPacket  implements IMessage{
     @Override
     public void onExecute(NetworkEvent.Context ctxIn, boolean isLogicalServer) {
         if (ctxIn.getSender() != null) {
-            World world = ctxIn.getSender().world;
+            World world = ctxIn.getSender().level;
             if (world != null){
-                TileCustomData tile = (TileCustomData) world.getTileEntity(pos);
+                TileCustomData tile = (TileCustomData) world.getBlockEntity(pos);
                 if (tile != null){
                     tile.setPrice(price);
                     tile.setRent(rent);

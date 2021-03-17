@@ -34,7 +34,7 @@ public class SimHireRequest implements IMessage {
     public void toBytes(PacketBuffer buf) {
         buf.writeBlockPos(pos);
         buf.writeInt(simId);
-        buf.writeUniqueId(playerId);
+        buf.writeUUID(playerId);
         buf.writeInt(job);
     }
 
@@ -42,7 +42,7 @@ public class SimHireRequest implements IMessage {
     public void fromBytes(PacketBuffer buf) {
         this.pos = buf.readBlockPos();
         this.simId = buf.readInt();
-        this.playerId = buf.readUniqueId();
+        this.playerId = buf.readUUID();
         this.job = buf.readInt();
     }
 
@@ -54,21 +54,21 @@ public class SimHireRequest implements IMessage {
 
     @Override
     public void onExecute(NetworkEvent.Context ctxIn, boolean isLogicalServer) {
-        if (ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayerByUUID(playerId) != null) {
-            PlayerEntity player = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayerByUUID(playerId);
+        if (ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayer(playerId) != null) {
+            PlayerEntity player = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayer(playerId);
             if (player != null) {
-                SavedWorldData data = SavedWorldData.get(player.world);
-                int id = data.getFactionWithPlayer(player.getUniqueID()).getId();
-                data.hireSim(id, (SimEntity) player.world.getEntityByID(simId));
-                ((ITile) player.world.getTileEntity(pos)).setHired(true);
-                SimEntity sim = ((SimEntity) player.world.getEntityByID(simId));
+                SavedWorldData data = SavedWorldData.get(player.level);
+                int id = data.getFactionWithPlayer(player.getUUID()).getId();
+                data.hireSim(id, (SimEntity) player.level.getEntity(simId));
+                ((ITile) player.level.getBlockEntity(pos)).setHired(true);
+                SimEntity sim = ((SimEntity) player.level.getEntity(simId));
                 if (sim != null){
                     sim.setJob(ModJobs.JOB_LOOKUP.get(job).apply(sim));
                     sim.setProfession(job);
 
-                    ITile tile = (ITile) player.world.getTileEntity(pos);
+                    ITile tile = (ITile) player.level.getBlockEntity(pos);
                     if (tile != null){
-                    tile.setSimId(sim.getUniqueID());
+                    tile.setSimId(sim.getUUID());
 
                     sim.getJob().setWorkSpace(pos);
                     data.getFaction(id).subCredits(sim.getJob().getWage() + 4);

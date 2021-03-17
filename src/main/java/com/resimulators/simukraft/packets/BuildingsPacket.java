@@ -23,11 +23,11 @@ public class BuildingsPacket implements IMessage {
     public void toBytes(PacketBuffer buf) {
         buf.writeInt(templates.size());
         for (BuildingTemplate template: templates){
-            buf.writeString(template.getName());
+            buf.writeUtf(template.getName());
             buf.writeInt(template.getTypeID());
             buf.writeFloat(template.getCost());
             buf.writeFloat(template.getRent());
-            buf.writeString(template.getAuthor());
+            buf.writeUtf(template.getAuthor());
         }
     }
 
@@ -37,11 +37,11 @@ public class BuildingsPacket implements IMessage {
         int size = buf.readInt();
         for (int i = 0; i< size;i++){
             BuildingTemplate template = new BuildingTemplate();
-            template.setName(buf.readString());
+            template.setName(buf.readUtf());
             template.setTypeID(buf.readInt());
             template.setCost(buf.readFloat());
             template.setRent(buf.readFloat());
-            template.setAuthor(buf.readString());
+            template.setAuthor(buf.readUtf());
             templates.add(template);
         }
     }
@@ -53,8 +53,8 @@ public class BuildingsPacket implements IMessage {
 
     @Override
     public void onExecute(NetworkEvent.Context ctxIn, boolean isLogicalServer) {
-        if (Minecraft.getInstance().currentScreen instanceof GuiBuilder){
-            GuiBuilder gui = (GuiBuilder)Minecraft.getInstance().currentScreen;
+        if (Minecraft.getInstance().screen instanceof GuiBuilder){
+            GuiBuilder gui = (GuiBuilder)Minecraft.getInstance().screen;
             gui.setStructures(templates);
         }
     }

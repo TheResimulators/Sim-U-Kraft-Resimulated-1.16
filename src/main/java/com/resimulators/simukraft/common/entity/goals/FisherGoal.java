@@ -37,17 +37,17 @@ public class FisherGoal extends BaseGoal<JobFisher> {
     //TODO: Fisher Mechanics (Swing) - CrAzyScreamX
 
     public FisherGoal(SimEntity sim) {
-        super(sim, sim.getAIMoveSpeed()* 2, 20);
+        super(sim, sim.getSpeed()* 2, 20);
         this.sim = sim;
-        this.world = sim.world;
+        this.world = sim.level;
     }
 
     @Override
-    public boolean shouldExecute() {
+    public boolean canUse() {
         job = (JobFisher) sim.getJob();
         if (job == null) return  false;
         if (sim.getActivity() == Activity.GOING_TO_WORK) {
-            if (sim.getPosition().withinDistance(new Vector3d(job.getWorkSpace().getX(), job.getWorkSpace().getY(), job.getWorkSpace().getZ()), 5)) {
+            if (sim.blockPosition().closerThan(new Vector3d(job.getWorkSpace().getX(), job.getWorkSpace().getY(), job.getWorkSpace().getZ()), 5)) {
                 sim.setActivity(Activity.WORKING);
                 findChestAroundTargetBlock(job.getWorkSpace(), 5, world);
                 return true;
@@ -58,11 +58,11 @@ public class FisherGoal extends BaseGoal<JobFisher> {
     }
 
     @Override
-    public void startExecuting() {
-        sim.setHeldItem(sim.getActiveHand(),Items.FISHING_ROD.getDefaultInstance());
+    public void start() {
+        sim.setItemInHand(sim.getUsedItemHand(),Items.FISHING_ROD.getDefaultInstance());
         if (!chests.isEmpty()) {
             state = State.CHEST_INTERACTION;
-            destinationBlock = chests.get(0);
+            blockPos = chests.get(0);
         }
         else {
             if (!validateWorkArea()) {
@@ -103,21 +103,21 @@ public class FisherGoal extends BaseGoal<JobFisher> {
             }
             state = State.CHEST_INTERACTION;
             for (BlockPos chest: chests) {
-                ChestTileEntity chestEntity = (ChestTileEntity) world.getTileEntity(chest);
+                ChestTileEntity chestEntity = (ChestTileEntity) world.getBlockEntity(chest);
                 if (chestEntity != null) {
-                    for (int i = 0; i < chestEntity.getSizeInventory(); i++) {
-                        ItemStack fishItem = chestEntity.getStackInSlot(i);
+                    for (int i = 0; i < chestEntity.getContainerSize(); i++) {
+                        ItemStack fishItem = chestEntity.getItem(i);
                         if (!fishItem.isEmpty()) {
                             if (fishItem.getItem().equals(fish[index])) {
                                 if (fishItem.getCount() != 64) {
                                     fishItem.setCount(fishItem.getCount()+1);
-                                    chestEntity.setInventorySlotContents(i, fishItem);
+                                    chestEntity.setItem(i, fishItem);
                                     break;
                                 }
                             }
                         }
                         else {
-                            chestEntity.setInventorySlotContents(i, new ItemStack(fish[index]));
+                            chestEntity.setItem(i, new ItemStack(fish[index]));
                             break;
                         }
                     }
@@ -130,12 +130,12 @@ public class FisherGoal extends BaseGoal<JobFisher> {
     }
 
     @Override
-    public double getTargetDistanceSq() {
+    public double acceptedDistance() {
         return 1.0d;
     }
 
     @Override
-    public boolean shouldContinueExecuting() {
+    public boolean canContinueToUse() {
         if (sim.getJob() != null) {
             if (sim.getJob().getState() == Activity.FORCE_STOP) {
                 return false;
@@ -144,23 +144,23 @@ public class FisherGoal extends BaseGoal<JobFisher> {
                 return true;
             }
         }
-        return shouldExecute() && super.shouldContinueExecuting();
+        return canUse() && super.canContinueToUse();
     }
 
     @Override
-    protected boolean shouldMoveTo(IWorldReader worldIn, BlockPos pos) {
-        return sim.getDistanceSq(destinationBlock.getX(),destinationBlock.getY(),destinationBlock.getZ()) > getTargetDistanceSq();
+    protected boolean isValidTarget(IWorldReader worldIn, BlockPos pos) {
+        return sim.distanceToSqr(blockPos.getX(),blockPos.getY(),blockPos.getZ()) > acceptedDistance();
     }
 
     private BlockPos findWater(){
         final BlockPos[] water = {BlockPos.ZERO};
-        Iterable<BlockPos> blockPoses = BlockPos.getAllInBox(job.getWorkSpace().add(-5,-5,-5), job.getWorkSpace().add(5,0,5))
-                .filter(blockPos -> world.getFluidState(blockPos).getFluid().isEquivalentTo(Fluids.WATER))
-                .map(BlockPos::toImmutable)
-                .sorted(Comparator.comparingDouble(blockPos ->job.getWorkSpace().distanceSq(blockPos)))
+        Iterable<BlockPos> blockPoses = BlockPos.betweenClosedStream(job.getWorkSpace().offset(-5,-5,-5), job.getWorkSpace().offset(5,0,5))
+                .filter(blockPos -> world.getFluidState(blockPos).getType().isSame(Fluids.WATER))
+                .map(BlockPos::immutable)
+                .sorted(Comparator.comparingDouble(blockPos ->job.getWorkSpace().distSqr(blockPos)))
                 .collect(Collectors.toCollection(ArrayList::new));
         for (BlockPos blockPos: blockPoses){
-            if (world.getFluidState(blockPos).getFluid().isEquivalentTo(Fluids.WATER)){
+            if (world.getFluidState(blockPos).getType().isSame(Fluids.WATER)){
                 water[0] = blockPos;
                 break;
 
@@ -171,7 +171,7 @@ public class FisherGoal extends BaseGoal<JobFisher> {
     }
 
     private boolean validateWorkArea() {
-        Faction faction = SavedWorldData.get(world).getFactionWithSim(sim.getUniqueID());
+        Faction faction = SavedWorldData.get(world).getFactionWithSim(sim.getUUID());
         if (job.getWorkSpace() != null) {
             if (chests.isEmpty()) {
                 if (!validateSentence) faction.sendFactionChatMessage(sim.getDisplayName().getString() + " (Fisherman) has no inventory at " + job.getWorkSpace(), world);

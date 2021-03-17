@@ -45,9 +45,9 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
     private ArrayList<Integer> itemsToBeMoved = new ArrayList<>();
 
     public GlassFactoryGoal(SimEntity sim) {
-        super(sim,sim.getAIMoveSpeed()*2,20);
+        super(sim,sim.getSpeed()*2,20);
         this.sim = sim;
-        this.world = sim.world;
+        this.world = sim.level;
 
     }
 
@@ -55,11 +55,11 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
 
 
     @Override
-    public boolean shouldExecute() {
+    public boolean canUse() {
         job = (JobGlassFactory) sim.getJob();
         if (job == null) return  false;
         if (sim.getActivity() == Activity.GOING_TO_WORK){
-            if (sim.getPosition().withinDistance(new Vector3d(job.getWorkSpace().getX(),job.getWorkSpace().getY(),job.getWorkSpace().getZ()),5)){
+            if (sim.blockPosition().closerThan(new Vector3d(job.getWorkSpace().getX(),job.getWorkSpace().getY(),job.getWorkSpace().getZ()),5)){
                 sim.setActivity(Activity.WORKING);
                 findChestAroundTargetBlock(job.getWorkSpace(), 5, world);
                 findFurnaceAroundBlock(job.getWorkSpace());
@@ -71,10 +71,10 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
 
 
     @Override
-    public void startExecuting() {
-        sim.setHeldItem(sim.getActiveHand(),Items.DIAMOND_SHOVEL.getDefaultInstance());
+    public void start() {
+        sim.setItemInHand(sim.getUsedItemHand(),Items.DIAMOND_SHOVEL.getDefaultInstance());
         if (!furnaces.isEmpty()){
-            destinationBlock = furnaces.get(0);
+            blockPos = furnaces.get(0);
             ValidateFurnaces();
             state = State.FURNACE_INTERACTION;
 
@@ -98,7 +98,7 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
                     getItemsToMove();
                     ValidateChests();
                     if (!chests.isEmpty()) {
-                        destinationBlock = chests.get(0);
+                        blockPos = chests.get(0);
                     } else {
                         if (!validateWorkArea()) {
                             sim.getJob().setState(Activity.NOT_WORKING);
@@ -114,7 +114,7 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
                         BlockPos sand = findSand();
                         if (sand != BlockPos.ZERO) {
                             targetPos = sand;
-                            destinationBlock = sand;
+                            blockPos = sand;
                         }
                     }
                 } else {
@@ -125,18 +125,18 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
                         BlockPos sand = findSand();
                         if (sand != BlockPos.ZERO) {
                             targetPos = sand;
-                            destinationBlock = sand;
+                            blockPos = sand;
                         }
                     }
                 }
             }
             if (state == State.TRAVELING) {
                 if (targetPos != null) {
-                    if (targetPos.withinDistance(sim.getPositionVec(),6)) {
+                    if (targetPos.closerThan(sim.position(),6)) {
                         state = State.COLLECTING;
                     } else {
-                        destinationBlock = targetPos;
-                        if (sim.getDistanceSq(targetPos.getX(), targetPos.getY(), targetPos.getZ()) > 50) {
+                        blockPos = targetPos;
+                        if (sim.distanceToSqr(targetPos.getX(), targetPos.getY(), targetPos.getZ()) > 50) {
                             targetPos = null;
                         }
                     }
@@ -144,19 +144,19 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
                     BlockPos sand = findSand();
                     if (sand != BlockPos.ZERO) {
                         targetPos = sand;
-                        destinationBlock = sand;
+                        blockPos = sand;
                     }
                 }
             }
             if (state == State.COLLECTING) {
                 if (targetPos != null) {
-                    if (targetPos.withinDistance(sim.getPositionVec(),6)) {
+                    if (targetPos.closerThan(sim.position(),6)) {
                         if (world.getBlockState(targetPos).getBlock() == Blocks.SAND) {
                             addItemToInventoryFromWorld(targetPos);
-                            world.setBlockState(targetPos,Blocks.AIR.getDefaultState());
+                            world.setBlockAndUpdate(targetPos,Blocks.AIR.defaultBlockState());
                             if (!findNextSand()) {
                                 state = State.RETURNING;
-                                destinationBlock = job.getWorkSpace();
+                                blockPos = job.getWorkSpace();
                                 targetPos = null;
                                 collected = true;
                             }
@@ -164,14 +164,14 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
                             findNextSand();
                         }
                     }else {
-                        destinationBlock = targetPos;
+                        blockPos = targetPos;
                     }
                 } else {
                     //state = State.TRAVELING;
                 }
             }
             if (state == State.RETURNING) {
-                if (sim.getDistanceSq(job.getWorkSpace().getX(), job.getWorkSpace().getY(), job.getWorkSpace().getZ()) < 4) {
+                if (sim.distanceToSqr(job.getWorkSpace().getX(), job.getWorkSpace().getY(), job.getWorkSpace().getZ()) < 4) {
                     state = State.SMELTING;
                 }
             }
@@ -196,7 +196,7 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
             }
             if (state == State.NOTHING) {
                 state = State.FURNACE_INTERACTION;
-                destinationBlock = furnaces.get(0);
+                blockPos = furnaces.get(0);
             }
 
         } else {
@@ -207,12 +207,12 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
 
 
     @Override
-    public double getTargetDistanceSq() {
+    public double acceptedDistance() {
         return 1.0d;
     }
 
     @Override
-    public boolean shouldContinueExecuting() {
+    public boolean canContinueToUse() {
         if (sim.getJob() != null) {
             if (sim.getJob().getState() == Activity.FORCE_STOP) {
                 return false;
@@ -221,18 +221,18 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
                 return true;
             }
         }
-        return shouldExecute() && super.shouldContinueExecuting();
+        return canUse() && super.canContinueToUse();
     }
 
     @Override
-    protected boolean shouldMoveTo(IWorldReader worldIn, BlockPos pos) {
-        return sim.getDistanceSq(destinationBlock.getX(),destinationBlock.getY(),destinationBlock.getZ()) > getTargetDistanceSq();
+    protected boolean isValidTarget(IWorldReader worldIn, BlockPos pos) {
+        return sim.distanceToSqr(blockPos.getX(),blockPos.getY(),blockPos.getZ()) > acceptedDistance();
     }
 
     public void findFurnaceAroundBlock(BlockPos workPos){
         ArrayList<BlockPos> blocks =  BlockUtils.getBlocksAroundAndBelowPosition(workPos,5);
         for (BlockPos pos: blocks){
-            if (world.getTileEntity(pos) instanceof FurnaceTileEntity){
+            if (world.getBlockEntity(pos) instanceof FurnaceTileEntity){
                 furnaces.add(pos);
             }
         }
@@ -240,12 +240,12 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
 
     private boolean interactWithFurnace(){
         BlockPos furnace = furnaces.get(furnaceIndex);
-            if (world.getTileEntity(furnace) instanceof FurnaceTileEntity) {
-                FurnaceTileEntity tileEntity = (FurnaceTileEntity) world.getTileEntity(furnace);
+            if (world.getBlockEntity(furnace) instanceof FurnaceTileEntity) {
+                FurnaceTileEntity tileEntity = (FurnaceTileEntity) world.getBlockEntity(furnace);
                 if (tileEntity != null) {
-                    ItemStack stack = tileEntity.getStackInSlot(2);
+                    ItemStack stack = tileEntity.getItem(2);
                     if (stack != ItemStack.EMPTY) {
-                        tileEntity.setInventorySlotContents(2, ItemStack.EMPTY);
+                        tileEntity.setItem(2, ItemStack.EMPTY);
                         sim.getInventory().addItemStackToInventory(stack);
                     }
                 }
@@ -266,15 +266,15 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
         ItemStack newItem;
         ItemStack newChestStack;
         if (itemsToBeMoved.size() > 0){
-        if (world.getTileEntity(chest) instanceof ChestTileEntity){
-            ChestTileEntity chestEntity = (ChestTileEntity) world.getTileEntity(chest);
+        if (world.getBlockEntity(chest) instanceof ChestTileEntity){
+            ChestTileEntity chestEntity = (ChestTileEntity) world.getBlockEntity(chest);
             if (chestEntity != null){
-            for (int i = 0; i < chestEntity.getSizeInventory(); i++ ){
-                ItemStack item = sim.getInventory().getStackInSlot(itemsToBeMoved.get(0));
-                ItemStack chestStack = chestEntity.getStackInSlot(i);
+            for (int i = 0; i < chestEntity.getContainerSize(); i++ ){
+                ItemStack item = sim.getInventory().getItem(itemsToBeMoved.get(0));
+                ItemStack chestStack = chestEntity.getItem(i);
                 if(chestStack == ItemStack.EMPTY){
-                    chestEntity.setInventorySlotContents(i,item);
-                    sim.getInventory().setInventorySlotContents(itemsToBeMoved.get(0),ItemStack.EMPTY);
+                    chestEntity.setItem(i,item);
+                    sim.getInventory().setItem(itemsToBeMoved.get(0),ItemStack.EMPTY);
                     break;
                 }else if(chestStack.getItem() == item.getItem()) {
                     int chestSize = chestStack.getCount();
@@ -290,8 +290,8 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
                         newChestStack = chestStack.copy();
                         newChestStack.grow(itemSize);
                     }
-                    chestEntity.setInventorySlotContents(i,newChestStack);
-                    sim.getInventory().setInventorySlotContents(itemsToBeMoved.get(0),newItem);
+                    chestEntity.setItem(i,newChestStack);
+                    sim.getInventory().setItem(itemsToBeMoved.get(0),newItem);
 
                     break;
                         }
@@ -310,8 +310,8 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
 
     private void getItemsToMove(){
 
-        for (int i = 0; i < sim.getInventory().getSizeInventory(); i++){
-            ItemStack stack = sim.getInventory().getStackInSlot(i);
+        for (int i = 0; i < sim.getInventory().getContainerSize(); i++){
+            ItemStack stack = sim.getInventory().getItem(i);
             if (stack.getItem() == Items.GLASS){
                 itemsToBeMoved.add(i);
             }
@@ -320,8 +320,8 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
 
     }
     private void getSandToMove(){
-        for (int i = 0; i < sim.getInventory().getSizeInventory(); i++){
-            ItemStack stack = sim.getInventory().getStackInSlot(i);
+        for (int i = 0; i < sim.getInventory().getContainerSize(); i++){
+            ItemStack stack = sim.getInventory().getItem(i);
             if (stack.getItem() == Items.SAND){
                 itemsToBeMoved.add(i);
             }
@@ -336,10 +336,10 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
 
     private BlockPos findSand(){
         final BlockPos[] sand = {BlockPos.ZERO};
-        Iterable<BlockPos> blockPoses = BlockPos.getAllInBox(job.getWorkSpace().add(-10,-3,-10), job.getWorkSpace().add(10,5,10))
+        Iterable<BlockPos> blockPoses = BlockPos.betweenClosedStream(job.getWorkSpace().offset(-10,-3,-10), job.getWorkSpace().offset(10,5,10))
                 .filter(blockPos -> world.getBlockState(blockPos).getBlock() == Blocks.SAND)
-                .map(BlockPos::toImmutable)
-                .sorted(Comparator.comparingDouble(blockPos ->job.getWorkSpace().distanceSq(blockPos)))
+                .map(BlockPos::immutable)
+                .sorted(Comparator.comparingDouble(blockPos ->job.getWorkSpace().distSqr(blockPos)))
                 .collect(Collectors.toCollection(ArrayList::new));
         for (BlockPos blockPos: blockPoses){
             if (world.getBlockState(blockPos).getBlock() == Blocks.SAND){
@@ -355,15 +355,15 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
 
     private boolean findNextSand() {
         BlockPos sand = BlockPos.ZERO;
-        ArrayList<BlockPos> blockPoses = BlockPos.getAllInBox(job.getWorkSpace().add(-5,-3,-5), job.getWorkSpace().add(5,5,5))
+        ArrayList<BlockPos> blockPoses = BlockPos.betweenClosedStream(job.getWorkSpace().offset(-5,-3,-5), job.getWorkSpace().offset(5,5,5))
                 .filter(blockPos -> world.getBlockState(blockPos).getBlock() == Blocks.SAND)
-                .map(BlockPos::toImmutable)
-                .sorted(Comparator.comparingDouble(blockPos ->sim.getPositionVec().squareDistanceTo(blockPos.getX(),blockPos.getY(),blockPos.getZ())))
+                .map(BlockPos::immutable)
+                .sorted(Comparator.comparingDouble(blockPos ->sim.position().distanceToSqr(blockPos.getX(),blockPos.getY(),blockPos.getZ())))
                 .collect(Collectors.toCollection(ArrayList::new));
         if (blockPoses.size() > 0) {
             sand = blockPoses.get(0);
-            destinationBlock = sand;
-            targetPos = destinationBlock;
+            blockPos = sand;
+            targetPos = blockPos;
         }
         return sand != BlockPos.ZERO;
     }
@@ -373,8 +373,8 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
     private void ValidateFurnaces(){
         ArrayList<BlockPos> furnacesToBeRemoved = new ArrayList<>();
         for (BlockPos furnace: furnaces){
-            if (world.getTileEntity(furnace) instanceof FurnaceTileEntity){
-                FurnaceTileEntity tileEntity = (FurnaceTileEntity) world.getTileEntity(furnace);
+            if (world.getBlockEntity(furnace) instanceof FurnaceTileEntity){
+                FurnaceTileEntity tileEntity = (FurnaceTileEntity) world.getBlockEntity(furnace);
                 if (tileEntity == null){
                     furnacesToBeRemoved.remove(furnace);
                 }
@@ -390,8 +390,8 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
     private void ValidateChests(){
         ArrayList<BlockPos> chestsToBeRemoved = new ArrayList<>();
         for (BlockPos furnace: chests){
-            if (world.getTileEntity(furnace) instanceof FurnaceTileEntity){
-                FurnaceTileEntity tileEntity = (FurnaceTileEntity) world.getTileEntity(furnace);
+            if (world.getBlockEntity(furnace) instanceof FurnaceTileEntity){
+                FurnaceTileEntity tileEntity = (FurnaceTileEntity) world.getBlockEntity(furnace);
                 if (tileEntity == null){
                     chestsToBeRemoved.remove(furnace);
                 }
@@ -405,8 +405,8 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
 
     private ArrayList<Integer> getSandInventory(){
         ArrayList<Integer> sandStacks = new ArrayList<>();
-        for (int i = 0; i < sim.getInventory().getSizeInventory(); i++){
-            ItemStack stack = sim.getInventory().getStackInSlot(i);
+        for (int i = 0; i < sim.getInventory().getContainerSize(); i++){
+            ItemStack stack = sim.getInventory().getItem(i);
             if (stack.getItem() == Items.SAND){
                 sandStacks.add(i);
             }
@@ -420,13 +420,13 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
         int stackIndex = -1;
         BlockPos chestSlot = BlockPos.ZERO;
         for (BlockPos pos: chests){
-            ChestTileEntity chest = (ChestTileEntity) world.getTileEntity(pos);
+            ChestTileEntity chest = (ChestTileEntity) world.getBlockEntity(pos);
             if (chest != null){
-                for (int i = 0; i < chest.getSizeInventory(); i++){
-                    ItemStack chestStack = chest.getStackInSlot(i);
+                for (int i = 0; i < chest.getContainerSize(); i++){
+                    ItemStack chestStack = chest.getItem(i);
                     ItemStack currentStack;
                     if (stack != -1){
-                        currentStack = chest.getStackInSlot(stack);
+                        currentStack = chest.getItem(stack);
 
                         if (ForgeHooks.getBurnTime(chestStack) > ForgeHooks.getBurnTime(currentStack) && ForgeHooks.getBurnTime(chestStack) > 0){
                             stack = i;
@@ -442,20 +442,20 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
             }
         }
         if (chestSlot != BlockPos.ZERO){
-            ChestTileEntity chest = ((ChestTileEntity)world.getTileEntity(chestSlot));
+            ChestTileEntity chest = ((ChestTileEntity)world.getBlockEntity(chestSlot));
 
             if (chest != null){
-                ItemStack chestStack = chest.getStackInSlot(stack);
+                ItemStack chestStack = chest.getItem(stack);
                 while (chestStack.getCount() > 0){
-                    for (int i = 0; i < sim.getInventory().getSizeInventory(); i++){
-                        if (sim.getInventory().getStackInSlot(i).isEmpty()) {
-                            sim.getInventory().setInventorySlotContents(i, chestStack.copy());
+                    for (int i = 0; i < sim.getInventory().getContainerSize(); i++){
+                        if (sim.getInventory().getItem(i).isEmpty()) {
+                            sim.getInventory().setItem(i, chestStack.copy());
                             chestStack.shrink(chestStack.getCount());
                             stackIndex = i;
                             break;
                         }else{
-                            if (chestStack.getItem() == sim.getInventory().getStackInSlot(i).getItem() && sim.getInventory().getStackInSlot(i).getCount() < sim.getInventory().getStackInSlot(i).getMaxStackSize()){
-                                ItemStack simItem = sim.getInventory().getStackInSlot(i);
+                            if (chestStack.getItem() == sim.getInventory().getItem(i).getItem() && sim.getInventory().getItem(i).getCount() < sim.getInventory().getItem(i).getMaxStackSize()){
+                                ItemStack simItem = sim.getInventory().getItem(i);
                                 int space = simItem.getMaxStackSize() - simItem.getCount();
                                 if (chestStack.getCount() > space){
                                     simItem.setCount(simItem.getMaxStackSize());
@@ -482,24 +482,24 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
     private boolean smeltSand(ArrayList<Integer> indexs,int burnable){
         boolean success = false;
         for (BlockPos pos: furnaces){
-            if (world.getTileEntity(pos) instanceof FurnaceTileEntity){
-                FurnaceTileEntity tile = (FurnaceTileEntity) world.getTileEntity(pos);
+            if (world.getBlockEntity(pos) instanceof FurnaceTileEntity){
+                FurnaceTileEntity tile = (FurnaceTileEntity) world.getBlockEntity(pos);
                 if (tile != null){
-                    if (tile.getStackInSlot(0).isEmpty()){
-                        tile.setInventorySlotContents(0,sim.getInventory().getStackInSlot(indexs.get(0)));
-                        sim.getInventory().setInventorySlotContents(indexs.get(0),ItemStack.EMPTY);
+                    if (tile.getItem(0).isEmpty()){
+                        tile.setItem(0,sim.getInventory().getItem(indexs.get(0)));
+                        sim.getInventory().setItem(indexs.get(0),ItemStack.EMPTY);
                         indexs.remove(indexs.get(0));
                         success = true;
-                    }else if(tile.getStackInSlot(0).getItem() == Items.SAND){
-                        ItemStack tileStack = tile.getStackInSlot(0);
+                    }else if(tile.getItem(0).getItem() == Items.SAND){
+                        ItemStack tileStack = tile.getItem(0);
                         if (tileStack.getCount() < tileStack.getMaxStackSize()){
                             int space = tileStack.getMaxStackSize() - tileStack.getCount();
-                            if (sim.getInventory().getStackInSlot(indexs.get(0)).getCount() < space){
-                                tileStack.grow(sim.getInventory().getStackInSlot(indexs.get(0)).getCount());
-                                sim.getInventory().setInventorySlotContents(indexs.get(0),ItemStack.EMPTY);
+                            if (sim.getInventory().getItem(indexs.get(0)).getCount() < space){
+                                tileStack.grow(sim.getInventory().getItem(indexs.get(0)).getCount());
+                                sim.getInventory().setItem(indexs.get(0),ItemStack.EMPTY);
                             }else {
                                 tileStack.grow(space);
-                                sim.getInventory().getStackInSlot(indexs.get(0)).shrink(space);
+                                sim.getInventory().getItem(indexs.get(0)).shrink(space);
                             }
 
                             success = true;
@@ -510,8 +510,8 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
                             burnable = checkInventoryBurnables();
                         }
                         if (burnable >= 0) {
-                            tile.setInventorySlotContents(1, sim.getInventory().getStackInSlot(burnable));
-                            sim.getInventory().setInventorySlotContents(burnable, ItemStack.EMPTY);
+                            tile.setItem(1, sim.getInventory().getItem(burnable));
+                            sim.getInventory().setItem(burnable, ItemStack.EMPTY);
                         }
                     }
                 }
@@ -523,9 +523,9 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
 
     private boolean checkFuelStatus(){ // return true if needs fuel
         for (BlockPos pos: furnaces){
-            FurnaceTileEntity furnace = (FurnaceTileEntity) world.getTileEntity(pos);
+            FurnaceTileEntity furnace = (FurnaceTileEntity) world.getBlockEntity(pos);
             if (furnace != null){
-                if (furnace.getStackInSlot(1).isEmpty()){
+                if (furnace.getItem(1).isEmpty()){
                     return true;
                 }
 
@@ -537,7 +537,7 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
 
     }
     private boolean validateWorkArea(){
-        Faction faction = SavedWorldData.get(world).getFactionWithSim(sim.getUniqueID());
+        Faction faction = SavedWorldData.get(world).getFactionWithSim(sim.getUUID());
         boolean valid = true;
         if (job.getWorkSpace() != null){
         if (chests.isEmpty()){
@@ -560,11 +560,11 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
     private int checkInventoryBurnables(){
         int stack = -1;
         SimInventory inv = sim.getInventory();
-                for (int i = 0; i < inv.getSizeInventory(); i++){
-                    ItemStack invStack = inv.getStackInSlot(i);
+                for (int i = 0; i < inv.getContainerSize(); i++){
+                    ItemStack invStack = inv.getItem(i);
                     ItemStack currentStack;
                     if (stack != -1){
-                        currentStack = inv.getStackInSlot(stack);
+                        currentStack = inv.getItem(stack);
                         if (ForgeHooks.getBurnTime(invStack) > ForgeHooks.getBurnTime(currentStack) && ForgeHooks.getBurnTime(invStack) > 0){
                             stack = i;
                         }
@@ -579,17 +579,17 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
 
     private void addItemToInventoryFromWorld(BlockPos pos){
         SimInventory inventory = sim.getInventory();
-        BlockState above = world.getBlockState(pos.up());
+        BlockState above = world.getBlockState(pos.above());
 
         if (above.getBlock() == Blocks.AIR){
-            pos = pos.up();
+            pos = pos.above();
         }
         Block block = world.getBlockState(pos).getBlock();
-        LootContext.Builder builder = new LootContext.Builder((ServerWorld) sim.getEntityWorld())
-                .withRandom(world.rand)
-                .withParameter(LootParameters.TOOL, sim.getActiveItemStack())
-                .withNullableParameter(LootParameters.BLOCK_ENTITY, world.getTileEntity(pos));
-        List<ItemStack> drops = block.getDefaultState().getDrops(builder);
+        LootContext.Builder builder = new LootContext.Builder((ServerWorld) sim.getCommandSenderWorld())
+                .withRandom(world.random)
+                .withParameter(LootParameters.TOOL, sim.getUseItem())
+                .withOptionalParameter(LootParameters.BLOCK_ENTITY, world.getBlockEntity(pos));
+        List<ItemStack> drops = block.defaultBlockState().getDrops(builder);
 
         for (ItemStack stack : drops) {
             sim.getInventory().addItemStackToInventory(stack);
@@ -597,8 +597,8 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
     }
 
     @Override
-    public void resetTask() {
-        sim.setHeldItem(sim.getActiveHand(),ItemStack.EMPTY);
+    public void stop() {
+        sim.setItemInHand(sim.getUsedItemHand(),ItemStack.EMPTY);
     }
 
     private enum State {

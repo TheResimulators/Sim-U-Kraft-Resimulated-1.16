@@ -30,28 +30,28 @@ public class TileConstructor extends TileEntity implements ITile {
 
 
     @Override
-    public CompoundNBT write(CompoundNBT nbt) {
-        super.write(nbt);
+    public CompoundNBT save(CompoundNBT nbt) {
+        super.save(nbt);
         nbt.putBoolean("hired", hired);
         if (simId != null) {
-            nbt.putUniqueId("simid", simId);
+            nbt.putUUID("simid", simId);
         }
         return nbt;
     }
 
     @Override
-    public void read(BlockState state, CompoundNBT nbt) {
-        super.read(state,nbt);
+    public void load(BlockState state, CompoundNBT nbt) {
+        super.load(state,nbt);
         hired = nbt.getBoolean("hired");
         if (nbt.contains("simid")) {
-            simId = nbt.getUniqueId("simid");
+            simId = nbt.getUUID("simid");
         }
     }
 
     @Override
     public void setHired(boolean hired) {
         this.hired = hired;
-        markDirty();
+        setChanged();
     }
 
     @Override
@@ -67,19 +67,19 @@ public class TileConstructor extends TileEntity implements ITile {
     @Override
     public void setSimId(UUID id) {
         this.simId = id;
-        markDirty();
+        setChanged();
     }
 
 
     @Override
     public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
-        read(this.getBlockState(),pkt.getNbtCompound());
+        load(this.getBlockState(),pkt.getTag());
     }
 
 
     @Override
     public CompoundNBT getUpdateTag() {
-        return write(new CompoundNBT());
+        return save(new CompoundNBT());
     }
 
     public void FindAndLoadBuilding(PlayerEntity playerEntity){

@@ -70,11 +70,11 @@ public class SimInventory implements IInventory, INamedContainerProvider {
     }
 
     private boolean canMergeStacks(ItemStack stack1, ItemStack stack2) {
-        return !stack1.isEmpty() && this.stackEqualExact(stack1, stack2) && stack1.isStackable() && stack1.getCount() < stack1.getMaxStackSize() && stack1.getCount() < this.getInventoryStackLimit();
+        return !stack1.isEmpty() && this.stackEqualExact(stack1, stack2) && stack1.isStackable() && stack1.getCount() < stack1.getMaxStackSize() && stack1.getCount() < this.getMaxStackSize();
     }
 
     private boolean stackEqualExact(ItemStack stack1, ItemStack stack2) {
-        return stack1.getItem() == stack2.getItem() && ItemStack.areItemStackTagsEqual(stack1, stack2);
+        return stack1.getItem() == stack2.getItem() && ItemStack.tagMatches(stack1, stack2);
     }
 
     public int getFirstEmptyStack() {
@@ -135,7 +135,7 @@ public class SimInventory implements IInventory, INamedContainerProvider {
     public int findSlotMatchingUnusedItem(ItemStack p_194014_1_) {
         for(int i = 0; i < this.mainInventory.size(); ++i) {
             ItemStack itemstack = this.mainInventory.get(i);
-            if (!this.mainInventory.get(i).isEmpty() && this.stackEqualExact(p_194014_1_, this.mainInventory.get(i)) && !this.mainInventory.get(i).isDamaged() && !itemstack.isEnchanted() && !itemstack.hasDisplayName()) {
+            if (!this.mainInventory.get(i).isEmpty() && this.stackEqualExact(p_194014_1_, this.mainInventory.get(i)) && !this.mainInventory.get(i).isDamaged() && !itemstack.isEnchanted() && !itemstack.hasCustomHoverName()) {
                 return i;
             }
         }
@@ -184,15 +184,15 @@ public class SimInventory implements IInventory, INamedContainerProvider {
     public int clearMatchingItems(Predicate<ItemStack> p_195408_1_, int count) {
         int i = 0;
 
-        for(int j = 0; j < this.getSizeInventory(); ++j) {
-            ItemStack itemstack = this.getStackInSlot(j);
+        for(int j = 0; j < this.getContainerSize(); ++j) {
+            ItemStack itemstack = this.getItem(j);
             if (!itemstack.isEmpty() && p_195408_1_.test(itemstack)) {
                 int k = count <= 0 ? itemstack.getCount() : Math.min(count - i, itemstack.getCount());
                 i += k;
                 if (count != 0) {
                     itemstack.shrink(k);
                     if (itemstack.isEmpty()) {
-                        this.setInventorySlotContents(j, ItemStack.EMPTY);
+                        this.setItem(j, ItemStack.EMPTY);
                     }
 
                     if (count > 0 && i >= count) {
@@ -232,7 +232,7 @@ public class SimInventory implements IInventory, INamedContainerProvider {
     private int addResource(int index, ItemStack itemStack) {
         Item item = itemStack.getItem();
         int i = itemStack.getCount();
-        ItemStack itemstack = this.getStackInSlot(index);
+        ItemStack itemstack = this.getItem(index);
         if (itemstack.isEmpty()) {
             itemstack = itemStack.copy();
             itemstack.setCount(0);
@@ -240,7 +240,7 @@ public class SimInventory implements IInventory, INamedContainerProvider {
                 itemstack.setTag(itemStack.getTag().copy());
             }
 
-            this.setInventorySlotContents(index, itemstack);
+            this.setItem(index, itemstack);
         }
 
         int j = i;
@@ -248,8 +248,8 @@ public class SimInventory implements IInventory, INamedContainerProvider {
             j = itemstack.getMaxStackSize() - itemstack.getCount();
         }
 
-        if (j > this.getInventoryStackLimit() - itemstack.getCount()) {
-            j = this.getInventoryStackLimit() - itemstack.getCount();
+        if (j > this.getMaxStackSize() - itemstack.getCount()) {
+            j = this.getMaxStackSize() - itemstack.getCount();
         }
 
         if (j == 0) {
@@ -257,15 +257,15 @@ public class SimInventory implements IInventory, INamedContainerProvider {
         } else {
             i = i - j;
             itemstack.grow(j);
-            itemstack.setAnimationsToGo(5);
+            itemstack.setPopTime(5);
             return i;
         }
     }
 
     public int storeItemStack(ItemStack itemStackIn) {
-        if (this.canMergeStacks(this.getStackInSlot(this.currentItem), itemStackIn)) {
+        if (this.canMergeStacks(this.getItem(this.currentItem), itemStackIn)) {
             return this.currentItem;
-        } else if (this.canMergeStacks(this.getStackInSlot(40), itemStackIn)) {
+        } else if (this.canMergeStacks(this.getItem(40), itemStackIn)) {
             return 40;
         } else {
             for(int i = 0; i < this.mainInventory.size(); ++i) {
@@ -282,7 +282,7 @@ public class SimInventory implements IInventory, INamedContainerProvider {
         for(NonNullList<ItemStack> nonnulllist : this.allInventories) {
             for(int i = 0; i < nonnulllist.size(); ++i) {
                 if (!nonnulllist.get(i).isEmpty()) {
-                    nonnulllist.get(i).inventoryTick(this.sim.world, this.sim, i, this.currentItem == i);
+                    nonnulllist.get(i).inventoryTick(this.sim.level, this.sim, i, this.currentItem == i);
                 }
             }
         }
@@ -305,7 +305,7 @@ public class SimInventory implements IInventory, INamedContainerProvider {
 
                     if (slotIn >= 0) {
                         this.mainInventory.set(slotIn, stack.copy());
-                        this.mainInventory.get(slotIn).setAnimationsToGo(5);
+                        this.mainInventory.get(slotIn).setPopTime(5);
                         stack.setCount(0);
                         return true;
                     } else {
@@ -329,20 +329,20 @@ public class SimInventory implements IInventory, INamedContainerProvider {
                     return stack.getCount() < i;
                 }
             } catch (Throwable throwable) {
-                CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Adding item to inventory");
-                CrashReportCategory crashreportcategory = crashreport.makeCategory("Item being added");
-                crashreportcategory.addDetail("Registry Name", () -> String.valueOf(stack.getItem().getRegistryName()));
-                crashreportcategory.addDetail("Item Class", () -> stack.getItem().getClass().getName());
-                crashreportcategory.addDetail("Item ID", Item.getIdFromItem(stack.getItem()));
-                crashreportcategory.addDetail("Item data", stack.getDamage());
-                crashreportcategory.addDetail("Item name", () -> stack.getDisplayName().getString());
+                CrashReport crashreport = CrashReport.forThrowable(throwable, "Adding item to inventory");
+                CrashReportCategory crashreportcategory = crashreport.addCategory("Item being added");
+                crashreportcategory.setDetail("Registry Name", () -> String.valueOf(stack.getItem().getRegistryName()));
+                crashreportcategory.setDetail("Item Class", () -> stack.getItem().getClass().getName());
+                crashreportcategory.setDetail("Item ID", Item.getId(stack.getItem()));
+                crashreportcategory.setDetail("Item data", stack.getDamageValue());
+                crashreportcategory.setDetail("Item name", () -> stack.getHoverName().getString());
                 throw new ReportedException(crashreport);
             }
         }
     }
 
     public void placeItemBackInInventory(World worldIn, ItemStack stack) {
-        if (!worldIn.isRemote) {
+        if (!worldIn.isClientSide) {
             while(!stack.isEmpty()) {
                 int i = this.storeItemStack(stack);
                 if (i == -1) {
@@ -354,7 +354,7 @@ public class SimInventory implements IInventory, INamedContainerProvider {
                     break;
                 }
 
-                int j = stack.getMaxStackSize() - this.getStackInSlot(i).getCount();
+                int j = stack.getMaxStackSize() - this.getItem(i).getCount();
                 if (this.add(i, stack.split(j))) {
                     //((EntitySim)this.sim).connection.sendPacket(new SSetSlotPacket(-2, i, this.getStackInSlot(i)));
                 }
@@ -366,7 +366,7 @@ public class SimInventory implements IInventory, INamedContainerProvider {
     /**
      * Removes up to a specified number of items from an inventory slot and returns them in a new stack.
      */
-    public ItemStack decrStackSize(int index, int count) {
+    public ItemStack removeItem(int index, int count) {
         List<ItemStack> list = null;
 
         for(NonNullList<ItemStack> nonnulllist : this.allInventories) {
@@ -378,7 +378,7 @@ public class SimInventory implements IInventory, INamedContainerProvider {
             index -= nonnulllist.size();
         }
 
-        return list != null && !list.get(index).isEmpty() ? ItemStackHelper.getAndSplit(list, index, count) : ItemStack.EMPTY;
+        return list != null && !list.get(index).isEmpty() ? ItemStackHelper.removeItem(list, index, count) : ItemStack.EMPTY;
     }
 
     public void deleteStack(ItemStack stack) {
@@ -396,7 +396,7 @@ public class SimInventory implements IInventory, INamedContainerProvider {
     /**
      * Removes a stack from the given slot and returns it.
      */
-    public ItemStack removeStackFromSlot(int index) {
+    public ItemStack removeItemNoUpdate(int index) {
         NonNullList<ItemStack> nonnulllist = null;
 
         for(NonNullList<ItemStack> nonnulllist1 : this.allInventories) {
@@ -420,7 +420,7 @@ public class SimInventory implements IInventory, INamedContainerProvider {
     /**
      * Sets the given item stack to the specified slot in the inventory (can be crafting or armor sections).
      */
-    public void setInventorySlotContents(int index, ItemStack stack) {
+    public void setItem(int index, ItemStack stack) {
         NonNullList<ItemStack> nonnulllist = null;
 
         for(NonNullList<ItemStack> nonnulllist1 : this.allInventories) {
@@ -451,7 +451,7 @@ public class SimInventory implements IInventory, INamedContainerProvider {
             if (!this.mainInventory.get(i).isEmpty()) {
                 CompoundNBT compoundnbt = new CompoundNBT();
                 compoundnbt.putByte("Slot", (byte)i);
-                this.mainInventory.get(i).write(compoundnbt);
+                this.mainInventory.get(i).save(compoundnbt);
                 nbtTagListIn.add(compoundnbt);
             }
         }
@@ -460,7 +460,7 @@ public class SimInventory implements IInventory, INamedContainerProvider {
             if (!this.armorInventory.get(j).isEmpty()) {
                 CompoundNBT compoundnbt1 = new CompoundNBT();
                 compoundnbt1.putByte("Slot", (byte)(j + 100));
-                this.armorInventory.get(j).write(compoundnbt1);
+                this.armorInventory.get(j).save(compoundnbt1);
                 nbtTagListIn.add(compoundnbt1);
             }
         }
@@ -469,7 +469,7 @@ public class SimInventory implements IInventory, INamedContainerProvider {
             if (!this.handInventory.get(k).isEmpty()) {
                 CompoundNBT compoundnbt2 = new CompoundNBT();
                 compoundnbt2.putByte("Slot", (byte)(k + 150));
-                this.handInventory.get(k).write(compoundnbt2);
+                this.handInventory.get(k).save(compoundnbt2);
                 nbtTagListIn.add(compoundnbt2);
             }
         }
@@ -488,7 +488,7 @@ public class SimInventory implements IInventory, INamedContainerProvider {
         for(int i = 0; i < nbtTagListIn.size(); ++i) {
             CompoundNBT compoundnbt = nbtTagListIn.getCompound(i);
             int j = compoundnbt.getByte("Slot") & 255;
-            ItemStack itemstack = ItemStack.read(compoundnbt);
+            ItemStack itemstack = ItemStack.of(compoundnbt);
             if (!itemstack.isEmpty()) {
                 if (j >= 0 && j < this.mainInventory.size()) {
                     this.mainInventory.set(j, itemstack);
@@ -505,7 +505,7 @@ public class SimInventory implements IInventory, INamedContainerProvider {
     /**
      * Returns the number of slots in the inventory.
      */
-    public int getSizeInventory() {
+    public int getContainerSize() {
         return this.mainInventory.size() + this.armorInventory.size() + this.handInventory.size();
     }
 
@@ -534,7 +534,7 @@ public class SimInventory implements IInventory, INamedContainerProvider {
     /**
      * Returns the stack in the given slot.
      */
-    public ItemStack getStackInSlot(int index) {
+    public ItemStack getItem(int index) {
         List<ItemStack> list = null;
 
         for(NonNullList<ItemStack> nonnulllist : this.allInventories) {
@@ -554,7 +554,7 @@ public class SimInventory implements IInventory, INamedContainerProvider {
     }
 
     public boolean canHarvestBlock(BlockState state) {
-        return this.getStackInSlot(this.currentItem).canHarvestBlock(state);
+        return this.getItem(this.currentItem).isCorrectToolForDrops(state);
     }
 
     /**
@@ -579,8 +579,8 @@ public class SimInventory implements IInventory, INamedContainerProvider {
                 ItemStack itemstack = this.armorInventory.get(i);
                 if (itemstack.getItem() instanceof ArmorItem) {
                     int j = i;
-                    itemstack.damageItem((int)damage, this.sim, (p_214023_1_) -> {
-                        p_214023_1_.sendBreakAnimation(EquipmentSlotType.fromSlotTypeAndIndex(EquipmentSlotType.Group.ARMOR, j));
+                    itemstack.hurtAndBreak((int)damage, this.sim, (p_214023_1_) -> {
+                        p_214023_1_.broadcastBreakEvent(EquipmentSlotType.byTypeAndIndex(EquipmentSlotType.Group.ARMOR, j));
                     });
                 }
             }
@@ -608,7 +608,7 @@ public class SimInventory implements IInventory, INamedContainerProvider {
      * For tile entities, ensures the chunk containing the tile entity is saved to disk later - the game won't think it
      * hasn't changed and skip it.
      */
-    public void markDirty() {
+    public void setChanged() {
         ++this.timesChanged;
     }
 
@@ -634,11 +634,11 @@ public class SimInventory implements IInventory, INamedContainerProvider {
     /**
      * Don't rename this method to canInteractWith due to conflicts with Container
      */
-    public boolean isUsableByPlayer(PlayerEntity player) {
+    public boolean stillValid(PlayerEntity player) {
         if (this.sim.removed) {
             return false;
         } else {
-            return !(player.getDistanceSq(this.sim) > 64.0D);
+            return !(player.distanceToSqr(this.sim) > 64.0D);
         }
     }
 
@@ -656,7 +656,7 @@ public class SimInventory implements IInventory, INamedContainerProvider {
                 }
 
                 ItemStack itemstack = (ItemStack)iterator.next();
-                if (!itemstack.isEmpty() && itemstack.isItemEqual(itemStackIn)) {
+                if (!itemstack.isEmpty() && itemstack.sameItem(itemStackIn)) {
                     break;
                 }
             }
@@ -678,7 +678,7 @@ public class SimInventory implements IInventory, INamedContainerProvider {
                 }
 
                 ItemStack itemstack = (ItemStack)iterator.next();
-                if (!itemstack.isEmpty() && itemstack.getItem().isFood()) {
+                if (!itemstack.isEmpty() && itemstack.getItem().isEdible()) {
                     return itemstack;
                 }
             }
@@ -714,14 +714,14 @@ public class SimInventory implements IInventory, INamedContainerProvider {
      * Copy the ItemStack contents from another Inventorysim instance
      */
     public void copyInventory(SimInventory simInventory) {
-        for(int i = 0; i < this.getSizeInventory(); ++i) {
-            this.setInventorySlotContents(i, simInventory.getStackInSlot(i));
+        for(int i = 0; i < this.getContainerSize(); ++i) {
+            this.setItem(i, simInventory.getItem(i));
         }
 
         this.currentItem = simInventory.currentItem;
     }
 
-    public void clear() {
+    public void clearContent() {
         for(List<ItemStack> list : this.allInventories) {
             list.clear();
         }
@@ -731,7 +731,7 @@ public class SimInventory implements IInventory, INamedContainerProvider {
     @Nullable
     @Override
     public Container createMenu(int i, PlayerInventory playerInventory, PlayerEntity player) {
-        return new SimContainer(i, player.world.isRemote(), sim, playerInventory);
+        return new SimContainer(i, player.level.isClientSide(), sim, playerInventory);
     }
 
     public IItemHandlerModifiable getHandler() {

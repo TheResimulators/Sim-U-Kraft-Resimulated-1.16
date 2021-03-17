@@ -27,106 +27,106 @@ public class EntitySimModel extends BipedModel<SimEntity> {
     public EntitySimModel(float modelSize) {
         super(modelSize, 0.0F, 64, 64);
         this.smallArms = false;
-        this.isChild = false;
+        this.young = false;
         this.femaleArmLeft = new ModelRenderer(this, 32, 48);
         this.femaleArmLeft.addBox(-1.0F, -2.0F, -2.0F, 3, 12, 4, modelSize);
-        this.femaleArmLeft.setRotationPoint(5.0F, 2.5F, 0.0F);
+        this.femaleArmLeft.setPos(5.0F, 2.5F, 0.0F);
         this.femaleArmRight = new ModelRenderer(this, 40, 16);
         this.femaleArmRight.addBox(-2.0F, -2.0F, -2.0F, 3, 12, 4, modelSize);
-        this.femaleArmRight.setRotationPoint(-5.0F, 2.5F, 0.0F);
+        this.femaleArmRight.setPos(-5.0F, 2.5F, 0.0F);
         this.femaleLeftArmwear = new ModelRenderer(this, 48, 48);
         this.femaleLeftArmwear.addBox(-1.0F, -2.0F, -2.0F, 3, 12, 4, modelSize + 0.25F);
-        this.femaleLeftArmwear.setRotationPoint(5.0F, 2.5F, 0.0F);
+        this.femaleLeftArmwear.setPos(5.0F, 2.5F, 0.0F);
         this.femaleRightArmwear = new ModelRenderer(this, 40, 32);
         this.femaleRightArmwear.addBox(-2.0F, -2.0F, -2.0F, 3, 12, 4, modelSize + 0.25F);
-        this.femaleRightArmwear.setRotationPoint(-5.0F, 2.5F, 10.0F);
+        this.femaleRightArmwear.setPos(-5.0F, 2.5F, 10.0F);
 
         this.maleArmRight = new ModelRenderer(this, 40, 16);
         this.maleArmRight.addBox(-3.0F, -2.0F, -2.0F, 4, 12, 4, modelSize);
-        this.maleArmRight.setRotationPoint(-5.0F, 2.0F, 0.0F);
+        this.maleArmRight.setPos(-5.0F, 2.0F, 0.0F);
         this.maleArmLeft = new ModelRenderer(this, 32, 48);
         this.maleArmLeft.addBox(-1.0F, -2.0F, -2.0F, 4, 12, 4, modelSize);
-        this.maleArmLeft.setRotationPoint(5.0F, 2.0F, 0.0F);
+        this.maleArmLeft.setPos(5.0F, 2.0F, 0.0F);
         this.maleArmLeft.mirror = true;
         this.bipedLeftArmwear = new ModelRenderer(this, 48, 48);
         this.bipedLeftArmwear.addBox(-1.0F, -2.0F, -2.0F, 4, 12, 4, modelSize + 0.25F);
-        this.bipedLeftArmwear.setRotationPoint(5.0F, 2.0F, 0.0F);
+        this.bipedLeftArmwear.setPos(5.0F, 2.0F, 0.0F);
         this.bipedRightArmwear = new ModelRenderer(this, 40, 32);
         this.bipedRightArmwear.addBox(-3.0F, -2.0F, -2.0F, 4, 12, 4, modelSize + 0.25F);
-        this.bipedRightArmwear.setRotationPoint(-5.0F, 2.0F, 10.0F);
+        this.bipedRightArmwear.setPos(-5.0F, 2.0F, 10.0F);
 
-        this.bipedLeftLeg = new ModelRenderer(this, 16, 48);
-        this.bipedLeftLeg.addBox(-2.0F, 0.0F, -2.0F, 4, 12, 4, modelSize);
-        this.bipedLeftLeg.setRotationPoint(1.9F, 12.0F, 0.0F);
+        this.leftLeg = new ModelRenderer(this, 16, 48);
+        this.leftLeg.addBox(-2.0F, 0.0F, -2.0F, 4, 12, 4, modelSize);
+        this.leftLeg.setPos(1.9F, 12.0F, 0.0F);
         this.bipedLeftLegwear = new ModelRenderer(this, 0, 48);
         this.bipedLeftLegwear.addBox(-2.0F, 0.0F, -2.0F, 4, 12, 4, modelSize + 0.25F);
-        this.bipedLeftLegwear.setRotationPoint(1.9F, 12.0F, 0.0F);
+        this.bipedLeftLegwear.setPos(1.9F, 12.0F, 0.0F);
         this.bipedRightLegwear = new ModelRenderer(this, 0, 32);
         this.bipedRightLegwear.addBox(-2.0F, 0.0F, -2.0F, 4, 12, 4, modelSize + 0.25F);
-        this.bipedRightLegwear.setRotationPoint(-1.9F, 12.0F, 0.0F);
+        this.bipedRightLegwear.setPos(-1.9F, 12.0F, 0.0F);
         this.bipedBodyWear = new ModelRenderer(this, 16, 32);
         this.bipedBodyWear.addBox(-4.0F, 0.0F, -2.0F, 8, 12, 4, modelSize + 0.25F);
-        this.bipedBodyWear.setRotationPoint(0.0F, 0.0F, 0.0F);
+        this.bipedBodyWear.setPos(0.0F, 0.0F, 0.0F);
         setVisible(true,true);
     }
 
     @Override
-    protected Iterable<ModelRenderer> getBodyParts() {
-        return Iterables.concat(super.getBodyParts(), ImmutableList.of(this.bipedLeftLegwear, this.bipedRightLegwear, this.bipedLeftArmwear, this.bipedRightArmwear, this.bipedBodyWear));
+    protected Iterable<ModelRenderer> bodyParts() {
+        return Iterables.concat(super.bodyParts(), ImmutableList.of(this.bipedLeftLegwear, this.bipedRightLegwear, this.bipedLeftArmwear, this.bipedRightArmwear, this.bipedBodyWear));
     }
 
     @Override
-    public void setRotationAngles(SimEntity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-        super.setRotationAngles(entityIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-        this.bipedLeftLegwear.copyModelAngles(this.bipedLeftLeg);
-        this.bipedRightLegwear.copyModelAngles(this.bipedRightLeg);
-        this.bipedLeftArmwear.copyModelAngles(this.bipedLeftArm);
-        this.bipedRightArmwear.copyModelAngles(this.bipedRightArm);
-        this.bipedBodyWear.copyModelAngles(this.bipedBody);
-        this.femaleArmLeft.copyModelAngles(this.bipedLeftArm);
-        this.femaleArmRight.copyModelAngles(this.bipedRightArm);
-        this.maleArmLeft.copyModelAngles(this.bipedLeftArm);
-        this.maleArmRight.copyModelAngles(this.bipedRightArm);
+    public void setupAnim(SimEntity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
+        super.setupAnim(entityIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
+        this.bipedLeftLegwear.copyFrom(this.leftLeg);
+        this.bipedRightLegwear.copyFrom(this.rightLeg);
+        this.bipedLeftArmwear.copyFrom(this.leftArm);
+        this.bipedRightArmwear.copyFrom(this.rightArm);
+        this.bipedBodyWear.copyFrom(this.body);
+        this.femaleArmLeft.copyFrom(this.leftArm);
+        this.femaleArmRight.copyFrom(this.rightArm);
+        this.maleArmLeft.copyFrom(this.leftArm);
+        this.maleArmRight.copyFrom(this.rightArm);
     }
 
     public void setVisible(boolean visible, boolean female) {
         if (female) {
-            this.bipedLeftArm = this.femaleArmLeft;
-            this.bipedRightArm = this.femaleArmRight;
-            this.femaleArmLeft.showModel = visible;
-            this.femaleArmRight.showModel = visible;
-            this.bipedLeftArmwear.showModel = !visible;
-            this.bipedRightArmwear.showModel = !visible;
-            this.femaleLeftArmwear.showModel = visible;
-            this.femaleRightArmwear.showModel = visible;
+            this.leftArm = this.femaleArmLeft;
+            this.rightArm = this.femaleArmRight;
+            this.femaleArmLeft.visible = visible;
+            this.femaleArmRight.visible = visible;
+            this.bipedLeftArmwear.visible = !visible;
+            this.bipedRightArmwear.visible = !visible;
+            this.femaleLeftArmwear.visible = visible;
+            this.femaleRightArmwear.visible = visible;
             this.smallArms = true;
         } else {
-            this.bipedLeftArm = this.maleArmLeft;
-            this.bipedRightArm = this.maleArmRight;
-            this.femaleArmLeft.showModel = !visible;
-            this.femaleArmRight.showModel = !visible;
-            this.femaleLeftArmwear.showModel = !visible;
-            this.femaleRightArmwear.showModel = !visible;
-            this.bipedLeftArmwear.showModel = visible;
-            this.bipedRightArmwear.showModel = visible;
+            this.leftArm = this.maleArmLeft;
+            this.rightArm = this.maleArmRight;
+            this.femaleArmLeft.visible = !visible;
+            this.femaleArmRight.visible = !visible;
+            this.femaleLeftArmwear.visible = !visible;
+            this.femaleRightArmwear.visible = !visible;
+            this.bipedLeftArmwear.visible = visible;
+            this.bipedRightArmwear.visible = visible;
             this.smallArms = false;
         }
-        setVisible(visible);
-        this.bipedLeftLegwear.showModel = visible;
-        this.bipedRightLegwear.showModel = visible;
-        this.bipedBodyWear.showModel = visible;
+        setAllVisible(visible);
+        this.bipedLeftLegwear.visible = visible;
+        this.bipedRightLegwear.visible = visible;
+        this.bipedBodyWear.visible = visible;
     }
 
     @Override
-    public void translateHand(HandSide side, MatrixStack matrix) {
-        ModelRenderer modelrenderer = this.getArmForSide(side);
+    public void translateToHand(HandSide side, MatrixStack matrix) {
+        ModelRenderer modelrenderer = this.getArm(side);
         if (this.smallArms) {
             float f = 0.5F * (float) (side == HandSide.RIGHT ? 1 : -1);
-            modelrenderer.rotationPointX += f;
-            modelrenderer.translateRotate(matrix);
-            modelrenderer.rotationPointX -= f;
+            modelrenderer.x += f;
+            modelrenderer.translateAndRotate(matrix);
+            modelrenderer.x -= f;
         } else {
-          modelrenderer.translateRotate(matrix);
+          modelrenderer.translateAndRotate(matrix);
         }
     }
 }
