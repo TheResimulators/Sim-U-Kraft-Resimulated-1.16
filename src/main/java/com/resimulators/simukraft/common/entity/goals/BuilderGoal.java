@@ -25,14 +25,12 @@ import net.minecraft.util.Mirror;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.world.IServerWorld;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.gen.feature.template.PlacementSettings;
 import net.minecraft.world.gen.feature.template.Template;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class BuilderGoal extends BaseGoal<JobBuilder> {
@@ -96,13 +94,7 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
             blocks = StructureHandler.modifyAndConvertTemplate(template, sim.level, sim.getJob().getWorkSpace().relative(job.getDirection()),settings);
             SimuKraft.LOGGER().debug("cost: " + template.getCost());
             setBlocksNeeded();
-            /*for (Template.BlockInfo blockInfo : blocks) {
-                BlockState state = blockInfo.state;
-                if (blockInfo.state.getBlock() == ModBlocks.CONTROL_BOX.get()) {
-                    state = blockInfo.state.with(ModBlockProperties.TYPE, template.getTypeID());
-                }
-                if(blockInfo.state.getBlock() != Blocks.AIR) sim.world.setBlockState(blockInfo.pos, Blocks.COBBLESTONE.getDefaultState());
-            }*/
+            template.placeInWorld((IServerWorld) sim.level,sim.getJob().getWorkSpace().relative(job.getDirection()),settings,new Random());
         }
     }
 
@@ -120,12 +112,12 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
                 */
                 state = State.TRAVELING;
                 blockPos = blocks.get(blockIndex).pos;
-                while (sim.getCommandSenderWorld().getBlockState(blockPos) ==blocks.get(blockIndex).state){
-                    blockIndex++;
-                    if (blockIndex < blocks.size()) {
-                        blockPos = blocks.get(blockIndex).pos;
-                    }
-                }
+//                while (sim.getCommandSenderWorld().getBlockState(blockPos) ==blocks.get(blockIndex).state){
+//                    blockIndex++;
+//                    if (blockIndex < blocks.size()) {
+//                        blockPos = blocks.get(blockIndex).pos;
+//                    }
+//                }
             }
             if (state == State.TRAVELING){
                 if(sim.getCommandSenderWorld().getBlockState(blockPos) ==blocks.get(blockIndex).state){
@@ -221,13 +213,13 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
     private Rotation getRotation(Direction dir){
         switch (dir){
             case NORTH:
-                return Rotation.CLOCKWISE_180;
-            case SOUTH:
-                return Rotation.NONE;
-            case WEST:
                 return Rotation.CLOCKWISE_90;
-            case EAST:
+            case SOUTH:
                 return Rotation.COUNTERCLOCKWISE_90;
+            case WEST:
+                return Rotation.CLOCKWISE_180;
+            case EAST:
+                return Rotation.NONE;
 
         }
         return Rotation.NONE;
@@ -236,16 +228,16 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
 
     private Rotation getRotationCalculated(Rotation org, Rotation cur) {
         if (org == cur.getRotated(Rotation.CLOCKWISE_90)){
-            return Rotation.COUNTERCLOCKWISE_90;
+            return org.getRotated(Rotation.COUNTERCLOCKWISE_90);
         }
         if (org == cur.getRotated(Rotation.COUNTERCLOCKWISE_90)){
-            return Rotation.CLOCKWISE_90;
+            return org.getRotated(Rotation.CLOCKWISE_90);
         }
         if (org == cur.getRotated(Rotation.CLOCKWISE_180)){
-            return Rotation.CLOCKWISE_180;
+            return org.getRotated(Rotation.CLOCKWISE_180);
         }
 
-        return Rotation.NONE;
+        return org;
     }
 
 
