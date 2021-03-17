@@ -27,6 +27,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.IServerWorld;
 import net.minecraft.world.IWorldReader;
+import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraft.world.gen.feature.template.PlacementSettings;
 import net.minecraft.world.gen.feature.template.Template;
 
@@ -129,28 +130,30 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
                 }
             }
             if (state == State.BUILDING){
-                Template.BlockInfo blockInfo = blocks.get(blockIndex);
-                BlockState blockstate = blockInfo.state;
-                if (blockInfo.state.getBlock() == ModBlocks.CONTROL_BLOCK.get()) {
-                    blockstate = blockInfo.state.setValue(ModBlockProperties.TYPE, template.getTypeID());
-                    template.setControlBlock(blockInfo.pos);
-                }
-                if (sim.getInventory().hasItemStack(new ItemStack(blockInfo.state.getBlock())) || true){ // remove true for official release. for testing purposes
-                    //BlockState blockState = sim.world.getBlockState(blockInfo.pos);
-                    sim.level.destroyBlock(blockInfo.pos,true);
-                    sim.level.setBlock(blockInfo.pos, blockstate.rotate(sim.level,blockInfo.pos,rotation), 3);
-                    int index = sim.getInventory().findSlotMatchingUnusedItem(new ItemStack(blockInfo.state.getBlock()));
-                    if (index >= 0){
-                    sim.getInventory().removeItem(index,1);}
-                    blockIndex++;
-                    if (blockIndex < blocks.size() - 1) {
-                        blockPos = blocks.get(blockIndex).pos;
-                        sim.getNavigation().moveTo((Path)null, 7d);
-                        state = State.TRAVELING;
+                if (blockIndex < blocks.size()){
+                    Template.BlockInfo blockInfo = blocks.get(blockIndex);
+                    BlockState blockstate = blockInfo.state;
+                    if (blockInfo.state.getBlock() == ModBlocks.CONTROL_BLOCK.get()) {
+                        blockstate = blockInfo.state.with(ModBlockProperties.TYPE, template.getTypeID());
+                        template.setControlBlock(blockInfo.pos);
                     }
-                }else{
-                    state = State.COLLECTING;
-                    blockPos = job.getWorkSpace();
+                    if (sim.getInventory().hasItemStack(new ItemStack(blockInfo.state.getBlock())) || true){ // remove true for official release. for testing purposes
+                        //BlockState blockState = sim.world.getBlockState(blockInfo.pos);
+                        sim.world.destroyBlock(blockInfo.pos,true);
+                        sim.world.setBlockState(blockInfo.pos, blockstate.rotate(sim.world,blockInfo.pos,rotation), 3);
+                        int index = sim.getInventory().findSlotMatchingUnusedItem(new ItemStack(blockInfo.state.getBlock()));
+                        if (index >= 0){
+                        sim.getInventory().decrStackSize(index,1);}
+                        blockIndex++;
+                        if (blockIndex < blocks.size() - 1) {
+                            destinationBlock = blocks.get(blockIndex).pos;
+                            sim.getNavigator().setPath(null, 7d);
+                            state = State.TRAVELING;
+                        }
+                    }else{
+                        state = State.COLLECTING;
+                        destinationBlock = job.getWorkSpace();
+                    }
                 }
             }
 
@@ -227,14 +230,14 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
     }
 
     private Rotation getRotationCalculated(Rotation org, Rotation cur) {
-        if (org == cur.getRotated(Rotation.CLOCKWISE_90)){
-            return org.getRotated(Rotation.COUNTERCLOCKWISE_90);
+        if (org == cur.add(Rotation.CLOCKWISE_90)){
+            return org.add(Rotation.COUNTERCLOCKWISE_90);
         }
-        if (org == cur.getRotated(Rotation.COUNTERCLOCKWISE_90)){
-            return org.getRotated(Rotation.CLOCKWISE_90);
+        if (org == cur.add(Rotation.COUNTERCLOCKWISE_90)){
+            return org.add(Rotation.CLOCKWISE_90);
         }
-        if (org == cur.getRotated(Rotation.CLOCKWISE_180)){
-            return org.getRotated(Rotation.CLOCKWISE_180);
+        if (org == cur.add(Rotation.CLOCKWISE_180)){
+            return org.add(Rotation.CLOCKWISE_180);
         }
 
         return org;
