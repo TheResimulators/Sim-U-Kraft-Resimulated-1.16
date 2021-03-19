@@ -31,6 +31,8 @@ public class BuildingTemplate extends Template {
     private float rent; // if applicable
     private float cost;
     private int typeID;
+    private BlockPos offSet = BlockPos.ZERO;
+    private Mirror mirror = Mirror.NONE;
     private String name = "";
     private Direction direction;
 
@@ -101,6 +103,9 @@ public class BuildingTemplate extends Template {
         nbt.putInt("direction",direction.get2DDataValue());
         nbt.putString("name",name);
         nbt.putString("author",this.getAuthor());
+        nbt.putLong("offset",offSet.asLong());
+        nbt.putString("mirror",mirror.toString());
+
         return super.save(nbt);
     }
 
@@ -117,6 +122,17 @@ public class BuildingTemplate extends Template {
         if (compound.contains("name"))
         {name = compound.getString("name");}else{
             name = "Placeholder";
+        }
+        if (compound.contains("offset")){
+            offSet = BlockPos.of(compound.getLong("offset"));
+        }else {
+            offSet = BlockPos.ZERO;
+        }
+
+        if (compound.contains("mirror")){
+            mirror = Mirror.valueOf(compound.getString("mirror"));
+        } else{
+            mirror = Mirror.LEFT_RIGHT;
         }
         setAuthor(compound.getString("author"));
         System.out.println(name);
@@ -195,6 +211,23 @@ public class BuildingTemplate extends Template {
 
     public void setTypeID(int typeID) {
         this.typeID = typeID;
+    }
+
+    public void setOffSet(BlockPos offset){
+        this.offSet = offset;
+    }
+
+    public void setMirror(Mirror mirror){
+        this.mirror = mirror;
+    }
+
+
+    public BlockPos getOffSet(){
+        return offSet;
+    }
+
+    public Mirror getMirror(){
+        return mirror;
     }
 }
 

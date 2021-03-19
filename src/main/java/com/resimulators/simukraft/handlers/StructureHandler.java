@@ -38,7 +38,7 @@ public class StructureHandler {
         return templateManager;
     }
     /**saves the structure to file using built-in template manager*/
-    public static boolean saveStructure(World world, BlockPos origin, BlockPos size, String name, String author, Direction dir) {
+    public static boolean saveStructure(World world, BlockPos origin,BlockPos corner, BlockPos size, String name, String author, Direction dir) {
         if (templateManager == null && world.getServer() != null)
             templateManager = (CustomTemplateManager) world.getServer().overworld().getStructureManager();
 
@@ -49,6 +49,8 @@ public class StructureHandler {
             template.findControlBox(world,origin,size);
             template.setDirection(dir);
             template.setName(name);
+            template.setOffSet(origin.subtract(corner).);
+            template.setMirror(Mirror.NONE);
             templateManager.save(new ResourceLocation(Reference.MODID, name)); // writes the template to file at given location
             return true; // returns true if successful
         }

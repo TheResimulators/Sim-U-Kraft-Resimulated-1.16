@@ -91,11 +91,13 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
 
             PlacementSettings settings = new PlacementSettings()
                 .setRotation(rotation)
-                .setMirror(Mirror.NONE);
-            blocks = StructureHandler.modifyAndConvertTemplate(template, sim.level, sim.getJob().getWorkSpace().relative(job.getDirection()),settings);
+                .setMirror(template.getMirror());
+            BlockPos origin = sim.getJob().getWorkSpace().offset(template.getOffSet().rotate(rotation).offset(job.getDirection().getNormal()));
+            blocks = StructureHandler.modifyAndConvertTemplate(template, sim.level, origin,settings);
+            blocks.sort(Comparator.comparingDouble((block) -> sim.getJob().getWorkSpace().distSqr(block.pos)));
             SimuKraft.LOGGER().debug("cost: " + template.getCost());
             setBlocksNeeded();
-            template.placeInWorld((IServerWorld) sim.level,sim.getJob().getWorkSpace().relative(job.getDirection()),settings,new Random());
+            template.placeInWorld((IServerWorld) sim.level,origin,settings,new Random());
         }
     }
 
@@ -134,25 +136,25 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
                     Template.BlockInfo blockInfo = blocks.get(blockIndex);
                     BlockState blockstate = blockInfo.state;
                     if (blockInfo.state.getBlock() == ModBlocks.CONTROL_BLOCK.get()) {
-                        blockstate = blockInfo.state.with(ModBlockProperties.TYPE, template.getTypeID());
+                        blockstate = blockInfo.state.setValue(ModBlockProperties.TYPE, template.getTypeID());
                         template.setControlBlock(blockInfo.pos);
                     }
                     if (sim.getInventory().hasItemStack(new ItemStack(blockInfo.state.getBlock())) || true){ // remove true for official release. for testing purposes
                         //BlockState blockState = sim.world.getBlockState(blockInfo.pos);
-                        sim.world.destroyBlock(blockInfo.pos,true);
-                        sim.world.setBlockState(blockInfo.pos, blockstate.rotate(sim.world,blockInfo.pos,rotation), 3);
+                        sim.level.destroyBlock(blockInfo.pos,true);
+                        sim.level.setBlock(blockInfo.pos, blockstate.rotate(sim.level,blockInfo.pos,rotation), 3);
                         int index = sim.getInventory().findSlotMatchingUnusedItem(new ItemStack(blockInfo.state.getBlock()));
                         if (index >= 0){
-                        sim.getInventory().decrStackSize(index,1);}
+                        sim.getInventory().removeItem(index,1);}
                         blockIndex++;
                         if (blockIndex < blocks.size() - 1) {
-                            destinationBlock = blocks.get(blockIndex).pos;
-                            sim.getNavigator().setPath(null, 7d);
+                            blockPos = blocks.get(blockIndex).pos;
+                            sim.getNavigation().moveTo((Path)null, 7d);
                             state = State.TRAVELING;
                         }
                     }else{
                         state = State.COLLECTING;
-                        destinationBlock = job.getWorkSpace();
+                        blockPos = job.getWorkSpace();
                     }
                 }
             }
@@ -230,14 +232,14 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
     }
 
     private Rotation getRotationCalculated(Rotation org, Rotation cur) {
-        if (org == cur.add(Rotation.CLOCKWISE_90)){
-            return org.add(Rotation.COUNTERCLOCKWISE_90);
+        if (org == cur.getRotated(Rotation.CLOCKWISE_90)){
+            return org.getRotated(Rotation.COUNTERCLOCKWISE_90);
         }
-        if (org == cur.add(Rotation.COUNTERCLOCKWISE_90)){
-            return org.add(Rotation.CLOCKWISE_90);
+        if (org == cur.getRotated(Rotation.COUNTERCLOCKWISE_90)){
+            return org.getRotated(Rotation.CLOCKWISE_90);
         }
-        if (org == cur.add(Rotation.CLOCKWISE_180)){
-            return org.add(Rotation.CLOCKWISE_180);
+        if (org == cur.getRotated(Rotation.CLOCKWISE_180)){
+            return org.getRotated(Rotation.CLOCKWISE_180);
         }
 
         return org;

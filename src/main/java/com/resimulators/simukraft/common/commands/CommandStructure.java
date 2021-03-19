@@ -33,11 +33,12 @@ public class CommandStructure {
     private static int save(CommandSource source, BlockPos pos1, BlockPos pos2, String name) throws CommandSyntaxException {
         MutableBoundingBox bounds = new MutableBoundingBox(pos1, pos2);
         BlockPos minPos = new BlockPos(bounds.x0, bounds.y0, bounds.z0);
+        BlockPos maxPos = new BlockPos(bounds.x1, bounds.y1, bounds.z1);
         BlockPos size = new BlockPos(bounds.getXSpan(), bounds.getYSpan(), bounds.getZSpan());
         int i = bounds.getXSpan() * bounds.getYSpan() * bounds.getZSpan();
         if (i == 0)
             throw FAILED_EXCEPTION.create();
-        if (StructureHandler.saveStructure(source.getLevel(), minPos, size, name, source.getTextName(),source.getPlayerOrException().getDirection()))
+        if (StructureHandler.saveStructure(source.getLevel(), minPos,maxPos, size, name, source.getTextName(),source.getPlayerOrException().getDirection()))
             source.sendSuccess(new StringTextComponent("Saved " + name), true);
         else
             source.sendSuccess(new StringTextComponent("Couldn't save " + name), true);
