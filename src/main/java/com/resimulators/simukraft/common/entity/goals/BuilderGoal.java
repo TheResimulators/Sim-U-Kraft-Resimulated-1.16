@@ -55,22 +55,24 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
     public boolean canUse() {
         job = ((JobBuilder) sim.getJob());
         //System.out.println("startExecuting");
-        if (job != null) {
-            template = job.getTemplate();
-            if (sim.getActivity() == Activity.GOING_TO_WORK) {
-                checkForInventories();
-                if (chests.size() != 0){
-                    if (sim.blockPosition().closerThan(new Vector3d(job.getWorkSpace().getX(), job.getWorkSpace().getY(), job.getWorkSpace().getZ()), 5)) {
-                        sim.setActivity(Activity.WORKING);
-                        return template != null;
+        if (SavedWorldData.get(sim.level).getFactionWithSim(sim.getUUID()) != null){
+            if (job != null) {
+                template = job.getTemplate();
+                if (sim.getActivity() == Activity.GOING_TO_WORK) {
+                    checkForInventories();
+                    if (chests.size() != 0){
+                        if (sim.blockPosition().closerThan(new Vector3d(job.getWorkSpace().getX(), job.getWorkSpace().getY(), job.getWorkSpace().getZ()), 5)) {
+                            sim.setActivity(Activity.WORKING);
+                            return template != null;
+                        }
                     }
-                }
-                else {
-                    if (notifyDelay <= 0) {
-                        SavedWorldData.get(sim.level).getFactionWithSim(sim.getUUID()).sendFactionChatMessage(sim.getName().getString() + " Builder needs a chest to start Building",sim.level);
-                        notifyDelay = 2000;
-                    }else{
-                        notifyDelay--;
+                    else {
+                        if (notifyDelay <= 0) {
+                            SavedWorldData.get(sim.level).getFactionWithSim(sim.getUUID()).sendFactionChatMessage(sim.getName().getString() + " Builder needs a chest to start Building",sim.level);
+                            notifyDelay = 2000;
+                        }else{
+                            notifyDelay--;
+                        }
                     }
                 }
             }
@@ -92,12 +94,14 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
             PlacementSettings settings = new PlacementSettings()
                 .setRotation(rotation)
                 .setMirror(template.getMirror());
-            BlockPos origin = sim.getJob().getWorkSpace().offset(template.getOffSet().rotate(rotation).offset(job.getDirection().getNormal()));
+            System.out.println(template.getOffSet());
+            BlockPos origin = sim.getJob().getWorkSpace().offset(job.getDirection().getNormal());
             blocks = StructureHandler.modifyAndConvertTemplate(template, sim.level, origin,settings);
             blocks.sort(Comparator.comparingDouble((block) -> sim.getJob().getWorkSpace().distSqr(block.pos)));
             SimuKraft.LOGGER().debug("cost: " + template.getCost());
             setBlocksNeeded();
             template.placeInWorld((IServerWorld) sim.level,origin,settings,new Random());
+            sim.level.setBlock(origin,Blocks.COBBLESTONE.getBlock().defaultBlockState(),3);
         }
     }
 
@@ -218,9 +222,9 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
     private Rotation getRotation(Direction dir){
         switch (dir){
             case NORTH:
-                return Rotation.CLOCKWISE_90;
-            case SOUTH:
                 return Rotation.COUNTERCLOCKWISE_90;
+            case SOUTH:
+                return Rotation.CLOCKWISE_90;
             case WEST:
                 return Rotation.CLOCKWISE_180;
             case EAST:
@@ -233,16 +237,16 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
 
     private Rotation getRotationCalculated(Rotation org, Rotation cur) {
         if (org == cur.getRotated(Rotation.CLOCKWISE_90)){
-            return org.getRotated(Rotation.COUNTERCLOCKWISE_90);
+            return Rotation.COUNTERCLOCKWISE_90;
         }
         if (org == cur.getRotated(Rotation.COUNTERCLOCKWISE_90)){
-            return org.getRotated(Rotation.CLOCKWISE_90);
+            return Rotation.CLOCKWISE_90;
         }
         if (org == cur.getRotated(Rotation.CLOCKWISE_180)){
-            return org.getRotated(Rotation.CLOCKWISE_180);
+            return Rotation.CLOCKWISE_180;
         }
 
-        return org;
+        return Rotation.NONE;
     }
 
 
