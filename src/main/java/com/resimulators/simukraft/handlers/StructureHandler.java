@@ -39,7 +39,7 @@ public class StructureHandler {
         return templateManager;
     }
     /**saves the structure to file using built-in template manager*/
-    public static boolean saveStructure(World world, BlockPos origin,BlockPos corner, BlockPos size, String name, String author, Direction dir) {
+    public static boolean saveStructure(World world, BlockPos origin,BlockPos min, BlockPos size, String name, String author, Direction dir) {
         if (templateManager == null && world.getServer() != null)
             templateManager = (CustomTemplateManager) world.getServer().overworld().getStructureManager();
 
@@ -50,16 +50,17 @@ public class StructureHandler {
             template.findControlBox(world,origin,size);
             template.setDirection(dir);
             template.setName(name);
-            Vector3i xAxis;
-            Vector3i zAxis;
-            if (dir.getAxis() == Direction.Axis.X){
-                xAxis = dir.getNormal();
-                zAxis= dir.getClockWise().getNormal();
-            }else{
-                xAxis = dir.getClockWise().getNormal();
-                zAxis = dir.getNormal();
-            }
-            BlockPos offset = calculateOffset(size, xAxis,zAxis);
+//            Vector3i xAxis;
+//            Vector3i zAxis;
+//            if (dir.getAxis() == Direction.Axis.X){
+//                xAxis = dir.getNormal();
+//                zAxis= dir.getClockWise().getNormal();
+//            }else{
+//                xAxis = dir.getClockWise().getNormal();
+//                zAxis = dir.getNormal();
+//            }
+//            BlockPos offset = calculateOffset(size, xAxis,zAxis);
+            BlockPos offset = min.subtract(origin);
             System.out.println(offset);
 
             System.out.println(size);
