@@ -127,6 +127,7 @@ public class GuiBuilder extends GuiBaseJob {
 
             addButton(nextPage = new Button(width-120,height-60,100,20, new StringTextComponent("Next Page"),nextPage ->{
                 hideAllStructures(currentCategory);
+                structureButtons.computeIfAbsent(currentCategory, k -> new ArrayList<>());
                 if ((pageIndex + 1) * maxButtons < structureButtons.get(currentCategory).size())
                 {pageIndex++;}
                 controlStructures(true,currentCategory);
@@ -199,7 +200,11 @@ public class GuiBuilder extends GuiBaseJob {
         int index;
         for (BuildingTemplate template: structures) {
             BuildingType type = BuildingType.getById(template.getTypeID());
-            if (type != null){
+
+            if (type == null){
+                type = BuildingType.SPECIAL;
+                SimuKraft.LOGGER().error("structure " + template.getName() + " is missing building type and Has been added as a special building");
+            }
             StructureButton button = new StructureButton();
             structureButtons.computeIfAbsent(type.category, k -> new ArrayList<>());
             index = (structureButtons.get(type.category)).size() %maxButtons;
@@ -207,10 +212,7 @@ public class GuiBuilder extends GuiBaseJob {
             ArrayList<StructureButton> list = structureButtons.get(type.category);
             list.add(button);
             structureButtons.put(type.category,list);
-            } else {
-                SimuKraft.LOGGER().error("structure " + template.getName() + " is missing building type and cannot be added to the UI");
 
-            }
         }
 
 

@@ -45,25 +45,12 @@ public class StructureHandler {
 
         if (templateManager != null) {
             BuildingTemplate template = templateManager.getOrCreate(new ResourceLocation(Reference.MODID, name)); //gets default empty template
-            template.fillFromWorld(world, origin, size, false, null); //gets all the blocks that are in the world
+            template.fillFromWorld(world, min, size, false, null); //gets all the blocks that are in the world
             template.setAuthor(author); //sets the author to the person saving the structure
-            template.findControlBox(world,origin,size);
+            template.findControlBox(world,min,size);
             template.setDirection(dir);
             template.setName(name);
-//            Vector3i xAxis;
-//            Vector3i zAxis;
-//            if (dir.getAxis() == Direction.Axis.X){
-//                xAxis = dir.getNormal();
-//                zAxis= dir.getClockWise().getNormal();
-//            }else{
-//                xAxis = dir.getClockWise().getNormal();
-//                zAxis = dir.getNormal();
-//            }
-//            BlockPos offset = calculateOffset(size, xAxis,zAxis);
             BlockPos offset = min.subtract(origin);
-            System.out.println(offset);
-
-            System.out.println(size);
             template.setOffSet(offset);
             template.setMirror(Mirror.NONE);
             templateManager.save(new ResourceLocation(Reference.MODID, name)); // writes the template to file at given location

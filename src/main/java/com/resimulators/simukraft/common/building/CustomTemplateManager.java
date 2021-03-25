@@ -160,17 +160,12 @@ public class CustomTemplateManager extends TemplateManager {
         try {
             Path path = this.pathGenerated.resolve(locationIn.getNamespace());
             Path path1 = path.resolve("structures");
-            if (category != null){
-            path1 = path1.resolve(category.category);}
-            else {
-                for (Category category: Category.values()){
-                    Path path2 = path1.resolve(category.category);
-                    if(Files.exists(path2.resolve(locationIn.getPath() + ".nbt"))){
-                        path1 = path2;
-                        break;
+            for (Category category: Category.values()){
+                Path path2 = path1.resolve(category.category);
+                if(Files.exists(path2.resolve(locationIn.getPath() + ".nbt"))){
+                    path1 = path2;
+                    break;
                     }
-                }
-
             }
             return FileUtil.createPathToResource(path1, locationIn.getPath(), extIn);
         } catch (InvalidPathException invalidpathexception) {

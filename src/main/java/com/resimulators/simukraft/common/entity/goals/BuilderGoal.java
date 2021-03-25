@@ -95,7 +95,7 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
                 .setRotation(rotation)
                 .setMirror(template.getMirror());
             System.out.println(template.getOffSet());
-            BlockPos origin = sim.getJob().getWorkSpace().offset(job.getDirection().getNormal());
+            BlockPos origin = sim.getJob().getWorkSpace().offset(template.getOffSet().rotate(rotation).offset(job.getDirection().getNormal()));
             blocks = StructureHandler.modifyAndConvertTemplate(template, sim.level, origin,settings);
             blocks.sort(Comparator.comparingDouble((block) -> sim.getJob().getWorkSpace().distSqr(block.pos)));
             SimuKraft.LOGGER().debug("cost: " + template.getCost());

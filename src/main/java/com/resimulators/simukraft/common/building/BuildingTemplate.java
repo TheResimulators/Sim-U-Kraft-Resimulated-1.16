@@ -117,7 +117,7 @@ public class BuildingTemplate extends Template {
         if (compound.contains("direction")){
         direction = Direction.from2DDataValue(compound.getInt("direction"));}
         else{
-            direction =  Direction.from2DDataValue(3);
+            direction =  Direction.from2DDataValue(2);
         }
         if (compound.contains("name"))
         {name = compound.getString("name");}else{
