@@ -19,23 +19,23 @@ public class TileGlassFactory extends TileEntity implements IControlBlock {
 
     @Override
     public CompoundNBT getUpdateTag() {
-        return write(new CompoundNBT());
+        return save(new CompoundNBT());
     }
 
     @Override
-    public CompoundNBT write(CompoundNBT nbt) {
+    public CompoundNBT save(CompoundNBT nbt) {
         nbt.putBoolean("hired", hired);
         if (simID != null) {
-            nbt.putUniqueId("simid", simID);
+            nbt.putUUID("simid", simID);
         }
         return nbt;
     }
 
     @Override
-    public void read(BlockState state, CompoundNBT nbt) {
+    public void load(BlockState state, CompoundNBT nbt) {
         hired = nbt.getBoolean("hired");
         if (nbt.contains("simid")) {
-            simID = nbt.getUniqueId("simid");
+            simID = nbt.getUUID("simid");
         }
     }
 
@@ -47,7 +47,7 @@ public class TileGlassFactory extends TileEntity implements IControlBlock {
     @Override
     public void setHired(boolean hired) {
         this.hired = hired;
-        markDirty();
+        setChanged();
     }
 
     @Override
@@ -72,6 +72,6 @@ public class TileGlassFactory extends TileEntity implements IControlBlock {
 
     @Override
     public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
-        read(this.getBlockState(),pkt.getNbtCompound());
+        load(this.getBlockState(),pkt.getTag());
     }
 }

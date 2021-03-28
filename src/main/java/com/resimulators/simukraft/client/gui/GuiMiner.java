@@ -12,6 +12,8 @@ import net.minecraft.world.World;
 import java.awt.*;
 import java.util.ArrayList;
 
+import com.resimulators.simukraft.client.gui.GuiBaseJob.State;
+
 public class GuiMiner extends GuiBaseJob {
 
 
@@ -31,17 +33,17 @@ public class GuiMiner extends GuiBaseJob {
         World world = SimuKraft.proxy.getClientWorld();
         if (world != null) {
             if (state == State.MAIN) {
-            TileMiner tileEntity = (TileMiner)world.getTileEntity(pos);
+            TileMiner tileEntity = (TileMiner)world.getBlockEntity(pos);
             if (tileEntity !=null) {
                 if (tileEntity.getMarker() != null) {
                     BlockPos marker = tileEntity.getMarker();
-                        font.drawString(stack, "Markers Position:", 20, 90, Color.WHITE.getRGB());
-                        font.drawString(stack, String.format("X: %d, Y: %d, Z: %d", marker.getX(), marker.getY(), marker.getZ()), 20, 110, Color.WHITE.getRGB());
+                        font.draw(stack, "Markers Position:", 20, 90, Color.WHITE.getRGB());
+                        font.draw(stack, String.format("X: %d, Y: %d, Z: %d", marker.getX(), marker.getY(), marker.getZ()), 20, 110, Color.WHITE.getRGB());
                     }
                 if(tileEntity.getWidth() != 0){
-                    font.drawString(stack, "Width: " + tileEntity.getWidth(), width-80, 90, Color.WHITE.getRGB());
-                    font.drawString(stack, "Depth: " + tileEntity.getDepth(), width-80, 120, Color.WHITE.getRGB());
-                    font.drawString(stack, "Height: " + tileEntity.getYpos(), width-80, 150, Color.WHITE.getRGB());
+                    font.draw(stack, "Width: " + tileEntity.getWidth(), width-80, 90, Color.WHITE.getRGB());
+                    font.draw(stack, "Depth: " + tileEntity.getDepth(), width-80, 120, Color.WHITE.getRGB());
+                    font.draw(stack, "Height: " + tileEntity.getYpos(), width-80, 150, Color.WHITE.getRGB());
                     }
                 }
             }

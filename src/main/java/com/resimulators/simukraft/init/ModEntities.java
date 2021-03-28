@@ -32,10 +32,10 @@ public class ModEntities {
 
     private static <T extends Entity> EntityType<T> createEntity(Class<T> entityClass, EntityType.IFactory<T> factory, EntityClassification classification, float width, float height, int eggPrimary, int eggSecondary) {
         ResourceLocation location = new ResourceLocation(Reference.MODID, classToString(entityClass));
-        EntityType<T> entity = EntityType.Builder.create(factory, classification).size(width, height).setTrackingRange(64).setUpdateInterval(1).build(location.toString());
+        EntityType<T> entity = EntityType.Builder.of(factory, classification).sized(width, height).setTrackingRange(64).setUpdateInterval(1).build(location.toString());
         entity.setRegistryName(location);
         entities.add(entity);
-        Item spawnEgg = new SpawnEggItem(entity, eggPrimary, eggSecondary, (new Item.Properties()).group(ItemGroup.MISC));
+        Item spawnEgg = new SpawnEggItem(entity, eggPrimary, eggSecondary, (new Item.Properties()).tab(ItemGroup.TAB_MISC));
         spawnEgg.setRegistryName(new ResourceLocation(Reference.MODID, classToString(entityClass) + "_spawn_egg"));
         spawmEggs.add(spawnEgg);
         return entity;
@@ -71,6 +71,6 @@ public class ModEntities {
     }
 
     public static void registerAttributes() {
-        GlobalEntityTypeAttributes.put(ENTITY_SIM, SimEntity.getAttributes().create());
+        GlobalEntityTypeAttributes.put(ENTITY_SIM, SimEntity.createAttributes().build());
     }
 }

@@ -26,15 +26,15 @@ public class FoodStats {
     }
 
     public void consume(Item item, ItemStack itemStack) {
-        if (item.isFood()) {
-            Food food = item.getFood();
-            this.addStats(food.getHealing(), food.getSaturation());
+        if (item.isEdible()) {
+            Food food = item.getFoodProperties();
+            this.addStats(food.getNutrition(), food.getSaturationModifier());
         }
 
     }
 
     public void tick(SimEntity simEntity) {
-        Difficulty difficulty = simEntity.world.getDifficulty();
+        Difficulty difficulty = simEntity.level.getDifficulty();
         this.prevFoodLevel = this.getFoodLevel();
         if (this.foodExhaustionLevel > 4.0F) {
             this.foodExhaustionLevel -= 4.0F;
@@ -45,7 +45,7 @@ public class FoodStats {
             }
         }
 
-        boolean naturalRegen = simEntity.world.getGameRules().getBoolean(GameRules.NATURAL_REGENERATION);
+        boolean naturalRegen = simEntity.level.getGameRules().getBoolean(GameRules.RULE_NATURAL_REGENERATION);
         if (naturalRegen && this.getSaturationLevel() > 0.0F && simEntity.shouldHeal() && this.getFoodLevel() >= 20) {
             ++this.foodTimer;
             if (this.foodTimer >= 10) {
@@ -65,7 +65,7 @@ public class FoodStats {
             ++this.foodTimer;
             if (this.foodTimer >= 80) {
                 if (simEntity.getHealth() > 10.0F || difficulty == Difficulty.HARD || simEntity.getHealth() > 1.0F && difficulty == Difficulty.NORMAL) {
-                    simEntity.attackEntityFrom(DamageSource.STARVE, 1.0F);
+                    simEntity.hurt(DamageSource.STARVE, 1.0F);
                 }
 
                 this.foodTimer = 0;
@@ -94,15 +94,15 @@ public class FoodStats {
     }
 
     public int getFoodLevel() {
-        return sim.getDataManager().get(SimEntity.FOOD_LEVEL);
+        return sim.getEntityData().get(SimEntity.FOOD_LEVEL);
     }
 
     public boolean needFood() {
-        return sim.getDataManager().get(SimEntity.FOOD_LEVEL) < 20;
+        return sim.getEntityData().get(SimEntity.FOOD_LEVEL) < 20;
     }
 
     public boolean shouldEat() {
-        return sim.getDataManager().get(SimEntity.FOOD_LEVEL) < 15;
+        return sim.getEntityData().get(SimEntity.FOOD_LEVEL) < 15;
     }
 
     public void addExhaustion(float exhaustion) {
@@ -110,15 +110,15 @@ public class FoodStats {
     }
 
     public float getSaturationLevel() {
-        return sim.getDataManager().get(SimEntity.FOOD_SATURATION_LEVEL);
+        return sim.getEntityData().get(SimEntity.FOOD_SATURATION_LEVEL);
     }
 
     public void setFoodLevel(int foodLevel) {
-        sim.getDataManager().set(SimEntity.FOOD_LEVEL, foodLevel);
+        sim.getEntityData().set(SimEntity.FOOD_LEVEL, foodLevel);
     }
 
     public void setFoodSaturationLevel(float foodSaturationLevel) {
-        sim.getDataManager().set(SimEntity.FOOD_SATURATION_LEVEL, foodSaturationLevel);
+        sim.getEntityData().set(SimEntity.FOOD_SATURATION_LEVEL, foodSaturationLevel);
     }
 
 

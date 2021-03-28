@@ -23,6 +23,6 @@ public class ModContainers {
     public static RegistryObject<ContainerType<SimContainer>> SIM_CONTAINER = CONTAINERS.register("sim", () -> IForgeContainerType.create(((windowId, inv, data) -> new SimContainer(windowId, false, new SimEntity(SimuKraft.proxy.getClientWorld()), inv))));
 
     public static void registerScreens() {
-        ScreenManager.registerFactory(SIM_CONTAINER.get(), GuiSimInventory::new);
+        ScreenManager.register(SIM_CONTAINER.get(), GuiSimInventory::new);
     }
 }

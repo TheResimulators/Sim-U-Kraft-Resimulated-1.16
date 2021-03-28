@@ -45,15 +45,15 @@ public class EntitySimRender extends LivingRenderer<SimEntity, EntitySimModel> {
 
 
     private void setModelVisibilities(SimEntity simEntity) {
-        EntitySimModel model = this.getEntityModel();
+        EntitySimModel model = this.getModel();
         model.setVisible(true, simEntity.getFemale());
-        model.isSneak = simEntity.isCrouching();
+        model.crouching = simEntity.isCrouching();
         BipedModel.ArmPose bipedmodel$armpose = this.getArmpose(simEntity, Hand.MAIN_HAND);
         BipedModel.ArmPose bipedmodel$armpose1 = this.getArmpose(simEntity, Hand.OFF_HAND);
-        if (bipedmodel$armpose.func_241657_a_())
-            bipedmodel$armpose1 = simEntity.getHeldItemOffhand().isEmpty() ? BipedModel.ArmPose.EMPTY : BipedModel.ArmPose.ITEM;
+        if (bipedmodel$armpose.isTwoHanded())
+            bipedmodel$armpose1 = simEntity.getOffhandItem().isEmpty() ? BipedModel.ArmPose.EMPTY : BipedModel.ArmPose.ITEM;
 
-        if (simEntity.getPrimaryHand() == HandSide.RIGHT) {
+        if (simEntity.getMainArm() == HandSide.RIGHT) {
             model.rightArmPose = bipedmodel$armpose;
             model.leftArmPose = bipedmodel$armpose1;
         } else {
@@ -62,17 +62,17 @@ public class EntitySimRender extends LivingRenderer<SimEntity, EntitySimModel> {
         }
     }
     @Override
-    protected boolean canRenderName(SimEntity entity){
+    protected boolean shouldShowName(SimEntity entity){
         return true;
     }
 
     private BipedModel.ArmPose getArmpose(SimEntity simEntity, Hand hand) {
-        ItemStack itemstack = simEntity.getHeldItem(hand);
+        ItemStack itemstack = simEntity.getItemInHand(hand);
         if (itemstack.isEmpty()) {
             return BipedModel.ArmPose.EMPTY;
         } else {
-            if (simEntity.getActiveHand() == hand && simEntity.getItemInUseCount() > 0) {
-                UseAction useaction = itemstack.getUseAction();
+            if (simEntity.getUsedItemHand() == hand && simEntity.getUseItemRemainingTicks() > 0) {
+                UseAction useaction = itemstack.getUseAnimation();
                 if (useaction == UseAction.BLOCK) {
                     return BipedModel.ArmPose.BLOCK;
                 }
@@ -85,10 +85,10 @@ public class EntitySimRender extends LivingRenderer<SimEntity, EntitySimModel> {
                     return BipedModel.ArmPose.THROW_SPEAR;
                 }
 
-                if (useaction == UseAction.CROSSBOW && hand == simEntity.getActiveHand()) {
+                if (useaction == UseAction.CROSSBOW && hand == simEntity.getUsedItemHand()) {
                     return BipedModel.ArmPose.CROSSBOW_CHARGE;
                 }
-            } else if (!simEntity.isSwingInProgress && itemstack.getItem() == Items.CROSSBOW && CrossbowItem.isCharged(itemstack)) {
+            } else if (!simEntity.swinging && itemstack.getItem() == Items.CROSSBOW && CrossbowItem.isCharged(itemstack)) {
                 return BipedModel.ArmPose.CROSSBOW_HOLD;
             }
 
@@ -97,7 +97,7 @@ public class EntitySimRender extends LivingRenderer<SimEntity, EntitySimModel> {
     }
 
     @Override
-    public ResourceLocation getEntityTexture(SimEntity simEntity) {
+    public ResourceLocation getTextureLocation(SimEntity simEntity) {
         ResourceLocation location = new ResourceLocation(Reference.MODID, DIR + (simEntity.getFemale() ? "female/" : "male/") + "entity_sim" + simEntity.getVariation() + ".png");
         if (simEntity.getSpecial())
             location = SkinCacher.getSkinForSim(simEntity.getName().getString());
@@ -107,9 +107,9 @@ public class EntitySimRender extends LivingRenderer<SimEntity, EntitySimModel> {
     }
 
     @Override
-    protected void renderName(SimEntity simEntity, ITextComponent text, MatrixStack matrix, IRenderTypeBuffer renderBuffer, int light) {
-        double d = this.renderManager.squareDistanceTo(simEntity);
-        matrix.push();
+    protected void renderNameTag(SimEntity simEntity, ITextComponent text, MatrixStack matrix, IRenderTypeBuffer renderBuffer, int light) {
+        double d = this.entityRenderDispatcher.distanceToSqr(simEntity);
+        matrix.pushPose();
             if (d < 100.0d) {
 
                 if (!simEntity.getStatus().equals("")){
@@ -117,7 +117,7 @@ public class EntitySimRender extends LivingRenderer<SimEntity, EntitySimModel> {
 
 
                     matrix.scale(.9f,.9f,.9f);
-                    super.renderName(simEntity, new StringTextComponent(TextFormatting.YELLOW  + simEntity.getActivity().name + TextFormatting.RESET), matrix, renderBuffer, light);
+                    super.renderNameTag(simEntity, new StringTextComponent(TextFormatting.YELLOW  + simEntity.getActivity().name + TextFormatting.RESET), matrix, renderBuffer, light);
                     matrix.translate(0, (double) (9.0F *1.2f* 0.025F), 0);
                 }
                 //matrix.translate(0, (double) (9.0F * 1F * 0.025F), 0);
@@ -127,9 +127,9 @@ public class EntitySimRender extends LivingRenderer<SimEntity, EntitySimModel> {
 
         }
 
-        super.renderName(simEntity, new StringTextComponent((SimuKraft.config.getSims().coloredNames.get() ? TextFormatting.fromColorIndex(ColorHelper.convertDyeToTF(simEntity.getNameColor())) : TextFormatting.WHITE) + text.getString() + TextFormatting.RESET), matrix, renderBuffer, light);
+        super.renderNameTag(simEntity, new StringTextComponent((SimuKraft.config.getSims().coloredNames.get() ? TextFormatting.getById(ColorHelper.convertDyeToTF(simEntity.getNameColor())) : TextFormatting.WHITE) + text.getString() + TextFormatting.RESET), matrix, renderBuffer, light);
 
-        matrix.pop();
+        matrix.popPose();
     }
 }
 

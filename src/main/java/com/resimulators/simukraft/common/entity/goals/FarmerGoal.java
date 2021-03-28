@@ -53,24 +53,24 @@ public class FarmerGoal extends BaseGoal<JobFarmer> {
     private int progress;
 
 
-    private static final Map<Block, BlockState> HOE_LOOKUP = Maps.newHashMap(ImmutableMap.of(Blocks.GRASS_BLOCK, Blocks.FARMLAND.getDefaultState(), Blocks.DIRT, Blocks.FARMLAND.getDefaultState()));
+    private static final Map<Block, BlockState> HOE_LOOKUP = Maps.newHashMap(ImmutableMap.of(Blocks.GRASS_BLOCK, Blocks.FARMLAND.defaultBlockState(), Blocks.DIRT, Blocks.FARMLAND.defaultBlockState()));
 
     public FarmerGoal(SimEntity sim) {
-        super(sim, 2 * sim.getAIMoveSpeed(), 20);
+        super(sim, 2 * sim.getSpeed(), 20);
         this.sim = sim;
-        this.world = sim.getEntityWorld();
+        this.world = sim.getCommandSenderWorld();
 
     }
 
     @Override
-    public boolean shouldExecute() {
+    public boolean canUse() {
         job = (JobFarmer) sim.getJob();
 
         if (job != null) {
             chests = findChestAroundTargetBlock(job.getWorkSpace(), 5, world);
             if (sim.getActivity() == Activity.GOING_TO_WORK) {
-                if (sim.getPosition().withinDistance(new Vector3d(job.getWorkSpace().getX(), job.getWorkSpace().getY(), job.getWorkSpace().getZ()), 5)) {
-                    farmerTile = (TileFarmer) world.getTileEntity(job.getWorkSpace());
+                if (sim.blockPosition().closerThan(new Vector3d(job.getWorkSpace().getX(), job.getWorkSpace().getY(), job.getWorkSpace().getZ()), 5)) {
+                    farmerTile = (TileFarmer) world.getBlockEntity(job.getWorkSpace());
                     if (farmerTile != null) {
                         dir = farmerTile.getDir();
                     }
@@ -78,7 +78,7 @@ public class FarmerGoal extends BaseGoal<JobFarmer> {
                         sim.setActivity(Activity.WORKING);
                         return true;
                     } else {
-                        SavedWorldData.get(world).getFactionWithSim(sim.getUniqueID()).sendFactionChatMessage((sim.getDisplayName().getString() + " does not have the seeds required to work" + "(" + farmerTile.getSeed().getName() + ")"), world);
+                        SavedWorldData.get(world).getFactionWithSim(sim.getUUID()).sendFactionChatMessage((sim.getDisplayName().getString() + " does not have the seeds required to work" + "(" + farmerTile.getSeed().getName() + ")"), world);
                     }
                 }
             }
@@ -88,12 +88,12 @@ public class FarmerGoal extends BaseGoal<JobFarmer> {
 
 
     @Override
-    public void startExecuting() {
-        sim.setHeldItem(sim.getActiveHand(), Items.DIAMOND_HOE.getDefaultInstance());
+    public void start() {
+        sim.setItemInHand(sim.getUsedItemHand(), Items.DIAMOND_HOE.getDefaultInstance());
 
         state = State.RESOURCES;
 
-        offset = BlockPos.ZERO.offset(dir).offset(dir.rotateY()).add(0, -1, 0);
+        offset = BlockPos.ZERO.relative(dir).relative(dir.getClockWise()).offset(0, -1, 0);
         chests = findChestAroundTargetBlock(job.getWorkSpace(), 5, world);
         progress = job.getProgress();
         width = farmerTile.getWidth()-1;
@@ -111,7 +111,7 @@ public class FarmerGoal extends BaseGoal<JobFarmer> {
     public void tick() {
         super.tick();
         if (delay <= 0) {
-            SavedWorldData.get(world).getFactionWithSim(sim.getUniqueID()).subCredits(0.2);
+            SavedWorldData.get(world).getFactionWithSim(sim.getUUID()).subCredits(0.2);
             delay = 5;
             if (state == State.RESOURCES) {
                 if (hasSeeds()) {
@@ -126,10 +126,10 @@ public class FarmerGoal extends BaseGoal<JobFarmer> {
             }
             if (state == State.PLANTING) {
                 if (targetPos != null) {
-                    if (targetPos.withinDistance(sim.getPositionVec(), 5)) {
+                    if (targetPos.closerThan(sim.position(), 5)) {
 
                         if ((row % 4 == 0 && column % 4 == 0) && (row > 0 || column > 0)) {
-                            world.setBlockState(targetPos, Blocks.WATER.getDefaultState());
+                            world.setBlockAndUpdate(targetPos, Blocks.WATER.defaultBlockState());
                             if (findNextTarget()) {
                                 job.setProgress(progress++);
                                 setDestination();
@@ -137,10 +137,10 @@ public class FarmerGoal extends BaseGoal<JobFarmer> {
                         } else {
                             BlockState blockstate = HOE_LOOKUP.get(world.getBlockState(targetPos).getBlock());
                             if (blockstate != null) {
-                                world.playSound(null, targetPos, SoundEvents.ITEM_HOE_TILL, SoundCategory.BLOCKS, 1.0F, 1.0F);
-                                if (!world.isRemote) {
-                                    world.setBlockState(targetPos, blockstate, 11);
-                                    world.setBlockState(targetPos.up(), farmerTile.getSeed().getBlock().getDefaultState());
+                                world.playSound(null, targetPos, SoundEvents.HOE_TILL, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                                if (!world.isClientSide) {
+                                    world.setBlock(targetPos, blockstate, 11);
+                                    world.setBlockAndUpdate(targetPos.above(), farmerTile.getSeed().getBlock().defaultBlockState());
                                     if (findNextTarget()) {
                                         job.setProgress(progress++);
                                         setDestination();
@@ -176,20 +176,20 @@ public class FarmerGoal extends BaseGoal<JobFarmer> {
 
         if (state == State.HARVESTING) {
             if (world.getBlockState(targetPos).getBlock() instanceof CropsBlock){
-            if (targetPos.withinDistance(sim.getPositionVec(), 3)) {
+            if (targetPos.closerThan(sim.position(), 3)) {
 
-                LootContext.Builder builder = new LootContext.Builder((ServerWorld) sim.getEntityWorld())
-                        .withRandom(world.rand)
-                        .withParameter(LootParameters.TOOL, sim.getActiveItemStack())
-                        .withNullableParameter(LootParameters.BLOCK_ENTITY, world.getTileEntity(targetPos))
-                        .withParameter(LootParameters.field_237457_g_,Vector3d.copyCenteredHorizontally(targetPos));
+                LootContext.Builder builder = new LootContext.Builder((ServerWorld) sim.getCommandSenderWorld())
+                        .withRandom(world.random)
+                        .withParameter(LootParameters.TOOL, sim.getUseItem())
+                        .withOptionalParameter(LootParameters.BLOCK_ENTITY, world.getBlockEntity(targetPos))
+                        .withParameter(LootParameters.ORIGIN,Vector3d.atBottomCenterOf(targetPos));
                 List<ItemStack> drops = world.getBlockState(targetPos).getDrops(builder);
 
                 for (ItemStack stack : drops) {
-                    stack.setTagInfo("harvested",new CompoundNBT());
+                    stack.addTagElement("harvested",new CompoundNBT());
                     sim.getInventory().addItemStackToInventory(stack);
                 }
-                world.setBlockState(targetPos, farmerTile.getSeed().getBlock().getDefaultState());
+                world.setBlockAndUpdate(targetPos, farmerTile.getSeed().getBlock().defaultBlockState());
                 sim.getInventory().getItemStack();
                 if (checkForHarvestable()){
                     getNextHarvestable();
@@ -207,7 +207,7 @@ public class FarmerGoal extends BaseGoal<JobFarmer> {
             }
         }
         if (state == State.STORING){
-            if (job.getWorkSpace().withinDistance(sim.getPositionVec(),5)){
+            if (job.getWorkSpace().closerThan(sim.position(),5)){
                 ArrayList<Integer> itemIndex = getHarvestItems();
                 if (itemIndex.size() > 0){
                     if (!addItemToInventory(itemIndex)){
@@ -235,12 +235,12 @@ public class FarmerGoal extends BaseGoal<JobFarmer> {
     }
 
     @Override
-    public double getTargetDistanceSq() {
+    public double acceptedDistance() {
         return 2.0d;
     }
 
     @Override
-    public boolean shouldContinueExecuting() {
+    public boolean canContinueToUse() {
         if (sim.getJob() != null) {
             if (sim.getJob().getState() == Activity.FORCE_STOP) {
                 return false;
@@ -250,17 +250,17 @@ public class FarmerGoal extends BaseGoal<JobFarmer> {
             }
         }
 
-        return shouldExecute() && super.shouldContinueExecuting();
+        return canUse() && super.canContinueToUse();
     }
 
     private void getSeeds() {
         int needed = farmerTile.getWidth() * farmerTile.getDepth();
-        ItemStack seed = ((CropsBlock) (farmerTile.getSeed().getBlock())).getItem(world, job.getWorkSpace(), world.getBlockState(job.getWorkSpace()));
+        ItemStack seed = ((CropsBlock) (farmerTile.getSeed().getBlock())).getCloneItemStack(world, job.getWorkSpace(), world.getBlockState(job.getWorkSpace()));
         for (BlockPos pos : chests) {
-            ChestTileEntity chest = (ChestTileEntity) world.getTileEntity(pos);
+            ChestTileEntity chest = (ChestTileEntity) world.getBlockEntity(pos);
             if (chest != null) {
-                for (int i = 0; i < chest.getSizeInventory(); i++) {
-                    ItemStack stack = chest.getStackInSlot(i);
+                for (int i = 0; i < chest.getContainerSize(); i++) {
+                    ItemStack stack = chest.getItem(i);
                     if (stack.getItem() == seed.getItem()) {
                         int count = stack.getCount();
                         if (count <= needed) {
@@ -278,12 +278,12 @@ public class FarmerGoal extends BaseGoal<JobFarmer> {
 
     private boolean hasSeeds() {
         int amount = 0;
-        ItemStack seed = ((CropsBlock) (farmerTile.getSeed().getBlock())).getItem(world, job.getWorkSpace(), world.getBlockState(job.getWorkSpace()));
+        ItemStack seed = ((CropsBlock) (farmerTile.getSeed().getBlock())).getCloneItemStack(world, job.getWorkSpace(), world.getBlockState(job.getWorkSpace()));
         for (BlockPos pos : chests) {
-            ChestTileEntity chest = (ChestTileEntity) world.getTileEntity(pos);
+            ChestTileEntity chest = (ChestTileEntity) world.getBlockEntity(pos);
             if (chest != null) {
-                for (int i = 0; i < chest.getSizeInventory(); i++) {
-                    ItemStack stack = chest.getStackInSlot(i);
+                for (int i = 0; i < chest.getContainerSize(); i++) {
+                    ItemStack stack = chest.getItem(i);
 
                     if (stack.getItem() == seed.getItem()) {
                         amount += stack.getCount();
@@ -296,15 +296,15 @@ public class FarmerGoal extends BaseGoal<JobFarmer> {
 
 
     @Override
-    protected boolean shouldMoveTo(IWorldReader worldIn, BlockPos pos) {
-        return sim.getDistanceSq(pos.getX(), pos.getY(), pos.getZ()) < getTargetDistanceSq();
+    protected boolean isValidTarget(IWorldReader worldIn, BlockPos pos) {
+        return sim.distanceToSqr(pos.getX(), pos.getY(), pos.getZ()) < acceptedDistance();
     }
 
 
     private void setDestination() {
-        targetPos = farmerTile.getPos().down().offset(dir, row);
-        targetPos = targetPos.offset(dir).offset(dir.rotateY(), column);
-        destinationBlock = targetPos;
+        targetPos = farmerTile.getBlockPos().below().relative(dir, row);
+        targetPos = targetPos.relative(dir).relative(dir.getClockWise(), column);
+        blockPos = targetPos;
     }
 
     private boolean findNextTarget() {
@@ -330,8 +330,8 @@ public class FarmerGoal extends BaseGoal<JobFarmer> {
         SimInventory inventory = sim.getInventory();
 
         if (inventory != null){
-            for (int i = 0; i < inventory.getSizeInventory();i++){
-                ItemStack stack = inventory.getStackInSlot(i);
+            for (int i = 0; i < inventory.getContainerSize();i++){
+                ItemStack stack = inventory.getItem(i);
                 CompoundNBT nbt = stack.getTag();
                 if (nbt != null){
                 if (stack.getTag().contains("harvested")){
@@ -346,20 +346,20 @@ public class FarmerGoal extends BaseGoal<JobFarmer> {
     }
 
     private boolean addItemToInventory(ArrayList<Integer> itemsIndex){
-        ItemStack stack = sim.getInventory().getStackInSlot(itemsIndex.get(0));
+        ItemStack stack = sim.getInventory().getItem(itemsIndex.get(0));
 
         if (stack != null){
             if (stack.getTag() != null){
                 stack.getTag().remove("harvested");
             }
-            sim.getInventory().removeStackFromSlot(itemsIndex.get(0));
+            sim.getInventory().removeItemNoUpdate(itemsIndex.get(0));
             for (BlockPos pos: chests){
-                ChestTileEntity tileEntity = (ChestTileEntity) world.getTileEntity(pos);
+                ChestTileEntity tileEntity = (ChestTileEntity) world.getBlockEntity(pos);
                 if (tileEntity != null){
-                    for (int i = 0; i < tileEntity.getSizeInventory();i++){
+                    for (int i = 0; i < tileEntity.getContainerSize();i++){
                         int count = stack.getCount();
-                        if (tileEntity.getStackInSlot(i).getItem() == stack.getItem()){
-                            ItemStack chestStack = tileEntity.getStackInSlot(i);
+                        if (tileEntity.getItem(i).getItem() == stack.getItem()){
+                            ItemStack chestStack = tileEntity.getItem(i);
                             if (chestStack.getCount() < chestStack.getMaxStackSize()){
                                 if (chestStack.getCount() + count >= chestStack.getMaxStackSize()){
                                 int difference = chestStack.getMaxStackSize() - chestStack.getCount();
@@ -375,8 +375,8 @@ public class FarmerGoal extends BaseGoal<JobFarmer> {
                                 return true;
                                 }
                             }
-                        } else if (tileEntity.getStackInSlot(i).getItem() == Items.AIR) {
-                                tileEntity.setInventorySlotContents(i, stack);
+                        } else if (tileEntity.getItem(i).getItem() == Items.AIR) {
+                                tileEntity.setItem(i, stack);
                                 return true;
 
                         }
@@ -390,32 +390,32 @@ public class FarmerGoal extends BaseGoal<JobFarmer> {
 
 
     private boolean checkForHarvestable() {
-        ArrayList<BlockPos> harvestable = BlockPos.getAllInBox(job.getWorkSpace().offset(dir), job.getWorkSpace().offset(dir, depth).offset(dir.rotateY(), width))
+        ArrayList<BlockPos> harvestable = BlockPos.betweenClosedStream(job.getWorkSpace().relative(dir), job.getWorkSpace().relative(dir, depth).relative(dir.getClockWise(), width))
                 .filter(blockPos -> world.getBlockState(blockPos).getBlock() instanceof CropsBlock)
                 .filter(blockPos -> ((CropsBlock)world.getBlockState(blockPos).getBlock()).isMaxAge(world.getBlockState(blockPos)))
-                .map(BlockPos::toImmutable)
-                .sorted(Comparator.comparingDouble(blockPos -> sim.getPositionVec().squareDistanceTo(blockPos.getX(), blockPos.getY(), blockPos.getZ())))
+                .map(BlockPos::immutable)
+                .sorted(Comparator.comparingDouble(blockPos -> sim.position().distanceToSqr(blockPos.getX(), blockPos.getY(), blockPos.getZ())))
                 .collect(Collectors.toCollection(ArrayList::new));
         return harvestable.size() > 0;
     }
 
     private boolean getNextHarvestable() {
         BlockPos pos = null;
-        ArrayList<BlockPos> harvestable = BlockPos.getAllInBox(job.getWorkSpace().offset(dir), job.getWorkSpace().offset(dir, depth+1).offset(dir.rotateY(), width+1))
+        ArrayList<BlockPos> harvestable = BlockPos.betweenClosedStream(job.getWorkSpace().relative(dir), job.getWorkSpace().relative(dir, depth+1).relative(dir.getClockWise(), width+1))
                 .filter(blockPos -> {
                     if (world.getBlockState(blockPos).getBlock() instanceof CropsBlock) {
                         return ((CropsBlock) world.getBlockState(blockPos).getBlock()).isMaxAge(world.getBlockState(blockPos));
                     }
                     return false;
                 })
-                .map(BlockPos::toImmutable)
-                .sorted(Comparator.comparingDouble(blockPos -> sim.getPositionVec().squareDistanceTo(blockPos.getX(), blockPos.getY(), blockPos.getZ())))
+                .map(BlockPos::immutable)
+                .sorted(Comparator.comparingDouble(blockPos -> sim.position().distanceToSqr(blockPos.getX(), blockPos.getY(), blockPos.getZ())))
                 .collect(Collectors.toCollection(ArrayList::new));
 
         if (harvestable.size() > 0) {
             pos = harvestable.get(0);
             targetPos = pos;
-            destinationBlock = pos;
+            blockPos = pos;
         }
         return pos != null;
     }

@@ -22,31 +22,31 @@ public class GuiHandler {
     public static void openGui(ArrayList<Integer> ints, BlockPos pos, int id,int guiId, String string){
         switch (guiId){
             case BUILDER:
-                Minecraft.getInstance().displayGuiScreen(new GuiBuilder(new StringTextComponent(string),ints,pos,id));
+                Minecraft.getInstance().setScreen(new GuiBuilder(new StringTextComponent(string),ints,pos,id));
                 break;
             case MINER:
-                Minecraft.getInstance().displayGuiScreen(new GuiMiner(new StringTextComponent(string),ints,pos,id));
+                Minecraft.getInstance().setScreen(new GuiMiner(new StringTextComponent(string),ints,pos,id));
                 break;
             case GLASS_FACTORY:
-                Minecraft.getInstance().displayGuiScreen(new GuiGlassFactory(new StringTextComponent(string),ints,pos,id));
+                Minecraft.getInstance().setScreen(new GuiGlassFactory(new StringTextComponent(string),ints,pos,id));
                 break;
             case FARMER:
-                Minecraft.getInstance().displayGuiScreen(new GuiFarmer(new StringTextComponent(string),ints,pos,id));
+                Minecraft.getInstance().setScreen(new GuiFarmer(new StringTextComponent(string),ints,pos,id));
                 break;
             case CUSTOM_DATA:
-                Minecraft.getInstance().displayGuiScreen(new GuiCustomData(new StringTextComponent(string),pos));
+                Minecraft.getInstance().setScreen(new GuiCustomData(new StringTextComponent(string),pos));
                 break;
             case ANIMAL_FARM:
-                Minecraft.getInstance().displayGuiScreen(new GuiAnimal(new StringTextComponent(string),ints,pos,id));
+                Minecraft.getInstance().setScreen(new GuiAnimal(new StringTextComponent(string),ints,pos,id));
                 break;
             case BAKER:
-                Minecraft.getInstance().displayGuiScreen(new GuiBaker(new StringTextComponent(string), ints, pos, id));
+                Minecraft.getInstance().setScreen(new GuiBaker(new StringTextComponent(string), ints, pos, id));
                 break;
             case FISHER_MAN:
-                Minecraft.getInstance().displayGuiScreen(new GuiFisher(new StringTextComponent(string), ints,pos,id));
+                Minecraft.getInstance().setScreen(new GuiFisher(new StringTextComponent(string), ints,pos,id));
                 break;
             case RESIDENTIAL:
-                Minecraft.getInstance().displayGuiScreen(new GuiResidential(new StringTextComponent(string),pos));
+                Minecraft.getInstance().setScreen(new GuiResidential(new StringTextComponent(string),pos));
         }
     }
 }

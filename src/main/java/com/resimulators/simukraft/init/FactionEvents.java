@@ -26,10 +26,10 @@ public class FactionEvents {
     public void PlayerJoinEvent(PlayerEvent.PlayerLoggedInEvent event){
 
         if (event.getPlayer() != null){
-            if(!event.getPlayer().world.isRemote){
-                World world = event.getPlayer().world;
+            if(!event.getPlayer().level.isClientSide){
+                World world = event.getPlayer().level;
                 SavedWorldData data = SavedWorldData.get(world);
-                Faction faction = data.getFactionWithPlayer(event.getPlayer().getUniqueID());
+                Faction faction = data.getFactionWithPlayer(event.getPlayer().getUUID());
                 if (faction == null){
                     faction = data.createNewFaction();
                     data.addPlayerToFaction(faction.getId(),event.getPlayer());

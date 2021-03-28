@@ -26,13 +26,13 @@ public class RequestHouseOccupantsPacket implements IMessage{
 
     @Override
     public void toBytes(PacketBuffer buf) {
-        buf.writeUniqueId(playerId);
+        buf.writeUUID(playerId);
         buf.writeBlockPos(pos);
     }
 
     @Override
     public void fromBytes(PacketBuffer buf) {
-        playerId = buf.readUniqueId();
+        playerId = buf.readUUID();
         pos = buf.readBlockPos();
     }
 
@@ -45,7 +45,7 @@ public class RequestHouseOccupantsPacket implements IMessage{
     @Override
     public void onExecute(NetworkEvent.Context ctxIn, boolean isLogicalServer) {
         ServerPlayerEntity playerEntity = ctxIn.getSender();
-        TileResidential tile = (TileResidential) ctxIn.getSender().world.getTileEntity(pos);
+        TileResidential tile = (TileResidential) ctxIn.getSender().level.getBlockEntity(pos);
         tile.sendOccupantsIds(playerEntity);
     }
 }

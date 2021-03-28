@@ -40,7 +40,7 @@ public class FarmerSeedPacket implements IMessage {
         ctxIn.enqueueWork(() -> {
             ServerPlayerEntity player = ctxIn.getSender();
             if (player != null){
-                TileFarmer farmer = (TileFarmer) player.world.getTileEntity(pos);
+                TileFarmer farmer = (TileFarmer) player.level.getBlockEntity(pos);
                 if (farmer != null){
                     farmer.setSeed(seed);
                 }

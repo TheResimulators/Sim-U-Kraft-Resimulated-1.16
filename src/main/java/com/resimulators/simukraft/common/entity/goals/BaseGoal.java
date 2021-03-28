@@ -25,7 +25,7 @@ public class BaseGoal<JobType extends IJob>  extends MoveToBlockGoal{
     }
 
     @Override
-    protected boolean shouldMoveTo(IWorldReader worldIn, BlockPos pos) {
+    protected boolean isValidTarget(IWorldReader worldIn, BlockPos pos) {
         return false;
     }
 
@@ -35,7 +35,7 @@ public class BaseGoal<JobType extends IJob>  extends MoveToBlockGoal{
         super.tick();
         if (delay <= 0){
             delay = 60;
-            Faction faction = SavedWorldData.get(sim.getEntityWorld()).getFactionWithSim(sim.getUniqueID());
+            Faction faction = SavedWorldData.get(sim.getCommandSenderWorld()).getFactionWithSim(sim.getUUID());
             if(faction != null){
                 if (faction.hasEnoughCredits(job.getWage())){
                     faction.subCredits(job.getWage());
@@ -48,8 +48,8 @@ public class BaseGoal<JobType extends IJob>  extends MoveToBlockGoal{
 
 
     @Override
-    public boolean shouldContinueExecuting() {
-        Faction faction = SavedWorldData.get(sim.getEntityWorld()).getFactionWithSim(sim.getUniqueID());
+    public boolean canContinueToUse() {
+        Faction faction = SavedWorldData.get(sim.getCommandSenderWorld()).getFactionWithSim(sim.getUUID());
         if (faction != null) {
             return faction.hasEnoughCredits(job.getWage());
         }
@@ -57,8 +57,8 @@ public class BaseGoal<JobType extends IJob>  extends MoveToBlockGoal{
     }
 
     @Override
-    public void resetTask() {
-        super.resetTask();
+    public void stop() {
+        super.stop();
         sim.setStatus("");
     }
 
@@ -66,7 +66,7 @@ public class BaseGoal<JobType extends IJob>  extends MoveToBlockGoal{
         ArrayList<BlockPos> blockPoses = BlockUtils.getBlocksAroundAndBelowPosition(targetBlock, distance);
         ArrayList<BlockPos> blocks = new ArrayList<>();
         for (BlockPos blockPos : blockPoses) {
-            if (world.getTileEntity(blockPos) instanceof ChestTileEntity) {
+            if (world.getBlockEntity(blockPos) instanceof ChestTileEntity) {
                 blocks.add(blockPos);
             }
         }

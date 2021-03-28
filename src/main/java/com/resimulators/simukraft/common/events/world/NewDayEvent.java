@@ -31,7 +31,7 @@ public class NewDayEvent implements INBTSerializable<CompoundNBT> {
     @SubscribeEvent
     public void OnNewDayEvent(TickEvent.WorldTickEvent event) {
         if (event.phase == TickEvent.Phase.END) {
-            if (!event.world.isRemote){
+            if (!event.world.isClientSide){
             World world = event.world;
             double time = world.getDayTime();
             day = Math.floor(time / 24000);
@@ -50,7 +50,7 @@ public class NewDayEvent implements INBTSerializable<CompoundNBT> {
     @SubscribeEvent
     public void CheckForSpawnSim(TickEvent.WorldTickEvent event){
         if (event.phase == TickEvent.Phase.END){
-            if (!event.world.isRemote){
+            if (!event.world.isClientSide){
                 World world = event.world;
                 double time = world.getDayTime();
                 if (time % 600 == 0){
@@ -99,20 +99,20 @@ public class NewDayEvent implements INBTSerializable<CompoundNBT> {
         ServerWorld sWorld = (ServerWorld) world;
 
 
-        if (sWorld.getPlayers().size() == 0) return;
+        if (sWorld.players().size() == 0) return;
         for (Faction faction : factions) {
             if (faction.getHomelessSimCount() < 1 && faction.getOnlineFactionPlayer() != null) { // temporary for testing and until residential system is done
                 ArrayList<SimEntity> simsToSpawn = new ArrayList<>();
                 simsToSpawn.add(new SimEntity(ModEntities.ENTITY_SIM, world));
                 for (SimEntity sim : simsToSpawn) {
                     UUID id = faction.getPlayers().get(random.nextInt(faction.getPlayers().size()));
-                    PlayerEntity player = world.getPlayerByUuid(id);
+                    PlayerEntity player = world.getPlayerByUUID(id);
                     if (player != null) {
                         //gets blocks around player to spawn sim at
-                        ArrayList<BlockPos> blocks = BlockUtils.getBlocksAroundPosition(player.getPosition(), 10);
+                        ArrayList<BlockPos> blocks = BlockUtils.getBlocksAroundPosition(player.blockPosition(), 10);
                         if (spawn(sWorld, sim, blocks)) {
                             worldData.addSimToFaction(faction.getId(), sim);
-                            faction.sendPacketToFaction(new UpdateSimPacket(sim.getUniqueID(), faction.getSimInfo(sim.getUniqueID()), faction.getId()));
+                            faction.sendPacketToFaction(new UpdateSimPacket(sim.getUUID(), faction.getSimInfo(sim.getUUID()), faction.getId()));
                         }
                     }
                 }
@@ -155,9 +155,9 @@ public class NewDayEvent implements INBTSerializable<CompoundNBT> {
             double y = spawnPos.getY();
             double z = spawnPos.getZ();
             // set the sim's position
-            sim.setPosition(x, y, z);
-            world.addEntity(sim);// spawn entity
-            sim.onInitialSpawn(world, world.getDifficultyForLocation(spawnPos), SpawnReason.TRIGGERED, null, null);
+            sim.setPos(x, y, z);
+            world.addFreshEntity(sim);// spawn entity
+            sim.finalizeSpawn(world, world.getCurrentDifficultyAt(spawnPos), SpawnReason.TRIGGERED, null, null);
             SimuKraft.LOGGER().debug("entity spawned");
             return true;
         }
@@ -188,7 +188,7 @@ public class NewDayEvent implements INBTSerializable<CompoundNBT> {
         // If the ground block is valid and the blocks around it are valid, return the block above
         if (BlockUtils.blocksAreValid(world, blocksAroundGroundBlock, sim)) {
             SimuKraft.LOGGER().debug("Block is valid");
-            return groundBlockPos.up();
+            return groundBlockPos.above();
         }
         SimuKraft.LOGGER().debug("Blocks are NOT valid");
         return null;

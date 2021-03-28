@@ -25,21 +25,21 @@ public class WorkingController {
                 //TODO add if idling condition to make sure that we don't interrupt anything else like eating or socializing add to the one below
 
                 if (job.getPeriodsWorked() < job.maximumWorkPeriods() || job.maximumWorkPeriods() < 0) {
-                    if (sim.getEntityWorld().isDaytime() || job.nightShift()) {
+                    if (sim.getCommandSenderWorld().isDay() || job.nightShift()) {
                         if (job.getWorkSpace() != null) {
                             sim.setActivity(Activity.GOING_TO_WORK);
 
                             BlockPos pos = new BlockPos(job.getWorkSpace());
-                            sim.getNavigator().tryMoveToXYZ(pos.getX(), pos.getY(), pos.getZ(), sim.getAIMoveSpeed()*2);
+                            sim.getNavigation().moveTo(pos.getX(), pos.getY(), pos.getZ(), sim.getSpeed()*2);
                             }
                         }
                     }
                 }
             } else if (sim.getActivity() == Activity.GOING_TO_WORK){
             BlockPos pos = new BlockPos(job.getWorkSpace());
-            sim.getNavigator().tryMoveToXYZ(pos.getX(), pos.getY(), pos.getZ(), sim.getAIMoveSpeed()*2);
+            sim.getNavigation().moveTo(pos.getX(), pos.getY(), pos.getZ(), sim.getSpeed()*2);
         } else {
-            if (!sim.world.isDaytime()) {
+            if (!sim.level.isDay()) {
                 if (!job.nightShift()) {
                     sim.setActivity(Activity.FORCE_STOP);
                     }

@@ -30,14 +30,14 @@ public class TileAnimalFarm extends TileEntity implements IControlBlock{
         this.entity = entity;
         maxAnimals = 5;
         this.name = name;
-        markDirty();
+        setChanged();
 
     }
 
     @Override
     public void setHired(boolean hired) {
         this.hired = hired;
-        markDirty();
+        setChanged();
     }
 
     @Override
@@ -53,7 +53,7 @@ public class TileAnimalFarm extends TileEntity implements IControlBlock{
     @Override
     public void setSimId(UUID id) {
         this.simId = id;
-        markDirty();
+        setChanged();
     }
 
     @Override
@@ -63,16 +63,16 @@ public class TileAnimalFarm extends TileEntity implements IControlBlock{
 
 
     public void spawnAnimal(){
-        if (world != null){
-            entity.getAnimal().spawn((ServerWorld) world,null,null,pos.add(0,1,0), SpawnReason.TRIGGERED,false , false);
+        if (level != null){
+            entity.getAnimal().spawn((ServerWorld) level,null,null,worldPosition.offset(0,1,0), SpawnReason.TRIGGERED,false , false);
         }
 
     }
 
     public int checkForAnimals(){
-        if (world != null){
-        AxisAlignedBB area = new AxisAlignedBB(this.pos.add(-4,-1,-4),this.pos.add(4,2,4));
-        List<AnimalEntity> entities = world.getEntitiesWithinAABB(AnimalEntity.class,area);
+        if (level != null){
+        AxisAlignedBB area = new AxisAlignedBB(this.worldPosition.offset(-4,-1,-4),this.worldPosition.offset(4,2,4));
+        List<AnimalEntity> entities = level.getEntitiesOfClass(AnimalEntity.class,area);
         entities = entities
                 .stream()
                 .filter(animal -> animal.getType() == entity.getAnimal())
@@ -101,20 +101,20 @@ public class TileAnimalFarm extends TileEntity implements IControlBlock{
 
     @Override
     public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
-        read(this.getBlockState(),pkt.getNbtCompound());
+        load(this.getBlockState(),pkt.getTag());
     }
     @Override
     public CompoundNBT getUpdateTag() {
-        return write(new CompoundNBT());
+        return save(new CompoundNBT());
     }
 
 
     @Override
-    public CompoundNBT write(CompoundNBT nbt) {
-        super.write(nbt);
+    public CompoundNBT save(CompoundNBT nbt) {
+        super.save(nbt);
         nbt.putBoolean("hired", this.hired);
         if (simId != null) {
-            nbt.putUniqueId("simid", simId);
+            nbt.putUUID("simid", simId);
         }
         return nbt;
     }
@@ -122,11 +122,11 @@ public class TileAnimalFarm extends TileEntity implements IControlBlock{
 
 
     @Override
-    public void read(BlockState state, CompoundNBT nbt) {
-        super.read(state,nbt);
+    public void load(BlockState state, CompoundNBT nbt) {
+        super.load(state,nbt);
         hired = nbt.getBoolean("hired");
         if (nbt.contains("simid")) {
-            simId = nbt.getUniqueId("simid");
+            simId = nbt.getUUID("simid");
         }
     }
 }

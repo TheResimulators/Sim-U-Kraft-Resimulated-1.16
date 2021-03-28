@@ -31,17 +31,17 @@ public class CustomTemplateManager extends TemplateManager {
     private static final Logger LOGGER = LogManager.getLogger();
     private final Map<ResourceLocation, BuildingTemplate> templates = Maps.newHashMap();
     private final DataFixer fixer;
-    private IResourceManager field_237130_d_;
+    private IResourceManager resourceManager;
     private final Path pathGenerated;
     private Category category;
 
 
     public CustomTemplateManager(IResourceManager p_i232119_1_, SaveFormat.LevelSave p_i232119_2_, DataFixer p_i232119_3_) {
         super(p_i232119_1_, p_i232119_2_, p_i232119_3_);
-        this.field_237130_d_ = p_i232119_1_;
+        this.resourceManager = p_i232119_1_;
         this.fixer = p_i232119_3_;
         //this.pathGenerated = p_i232119_2_.resolveFilePath(FolderName.GENERATED).normalize();
-        this.pathGenerated = new File(ServerLifecycleHooks.getCurrentServer().getDataDirectory(),"resources").toPath().normalize();
+        this.pathGenerated = new File(ServerLifecycleHooks.getCurrentServer().getServerDirectory(),"resources").toPath().normalize();
         try {
             Files.createDirectories(Files.exists(pathGenerated) ? this.pathGenerated.toRealPath() : this.pathGenerated);
         } catch (IOException e) {
@@ -49,8 +49,8 @@ public class CustomTemplateManager extends TemplateManager {
         }
     }
 
-    public BuildingTemplate getTemplateDefaulted(ResourceLocation p_200220_1_) {
-        BuildingTemplate template = this.getTemplate(p_200220_1_);
+    public BuildingTemplate getOrCreate(ResourceLocation p_200220_1_) {
+        BuildingTemplate template = this.get(p_200220_1_);
         if (template == null) {
             template = new BuildingTemplate();
             this.templates.put(p_200220_1_, template);
@@ -60,7 +60,7 @@ public class CustomTemplateManager extends TemplateManager {
     }
 
     @Nullable
-    public BuildingTemplate getTemplate(ResourceLocation p_200219_1_) {
+    public BuildingTemplate get(ResourceLocation p_200219_1_) {
         return this.templates.computeIfAbsent(p_200219_1_, (p_209204_1_) -> {
             BuildingTemplate template = this.loadTemplateFile(p_209204_1_);
             return template != null ? template : this.loadTemplateResource(p_209204_1_);
@@ -68,7 +68,7 @@ public class CustomTemplateManager extends TemplateManager {
     }
 
     public void onResourceManagerReload(IResourceManager resourceManager) {
-        this.field_237130_d_ = resourceManager;
+        this.resourceManager = resourceManager;
         this.templates.clear();
     }
 
@@ -76,7 +76,7 @@ public class CustomTemplateManager extends TemplateManager {
     private BuildingTemplate loadTemplateResource(ResourceLocation p_209201_1_) {
         ResourceLocation resourcelocation = new ResourceLocation(p_209201_1_.getNamespace(), "structures/" + p_209201_1_.getPath() + ".nbt");
 
-        try (IResource iresource = this.field_237130_d_.getResource(resourcelocation)) {
+        try (IResource iresource = this.resourceManager.getResource(resourcelocation)) {
             return this.loadTemplate(iresource.getInputStream());
         } catch (FileNotFoundException filenotfoundexception) {
             return null;
@@ -106,20 +106,20 @@ public class CustomTemplateManager extends TemplateManager {
 
     private BuildingTemplate loadTemplate(InputStream inputStreamIn) throws IOException {
         CompoundNBT compoundnbt = CompressedStreamTools.readCompressed(inputStreamIn);
-        return this.func_227458_a_(compoundnbt);
+        return this.readStructure(compoundnbt);
     }
 
-    public BuildingTemplate func_227458_a_(CompoundNBT p_227458_1_) {
+    public BuildingTemplate readStructure(CompoundNBT p_227458_1_) {
         if (!p_227458_1_.contains("DataVersion", 99)) {
             p_227458_1_.putInt("DataVersion", 500);
         }
 
         BuildingTemplate template = new BuildingTemplate();
-        template.read(NBTUtil.update(this.fixer, DefaultTypeReferences.STRUCTURE, p_227458_1_, p_227458_1_.getInt("DataVersion")));
+        template.load(NBTUtil.update(this.fixer, DefaultTypeReferences.STRUCTURE, p_227458_1_, p_227458_1_.getInt("DataVersion")));
         return template;
     }
 
-    public boolean writeToFile(ResourceLocation templateName) {
+    public boolean save(ResourceLocation templateName) {
         BuildingTemplate template = this.templates.get(templateName);
         if (template == null) {
             return false;
@@ -144,7 +144,7 @@ public class CustomTemplateManager extends TemplateManager {
                     LOGGER.error("Failed to create parent directory: {}", (Object)path1);
                     return false;
                 }
-                CompoundNBT compoundnbt = template.writeToNBT(new CompoundNBT());
+                CompoundNBT compoundnbt = template.save(new CompoundNBT());
 
                 try (OutputStream outputstream = new FileOutputStream(path.toFile())) {
                     CompressedStreamTools.writeCompressed(compoundnbt, outputstream);
@@ -156,23 +156,18 @@ public class CustomTemplateManager extends TemplateManager {
         }
     }
 
-    public Path resolvePathStructures(ResourceLocation locationIn, String extIn) {
+    public Path createPathToStructure(ResourceLocation locationIn, String extIn) {
         try {
             Path path = this.pathGenerated.resolve(locationIn.getNamespace());
             Path path1 = path.resolve("structures");
-            if (category != null){
-            path1 = path1.resolve(category.category);}
-            else {
-                for (Category category: Category.values()){
-                    Path path2 = path1.resolve(category.category);
-                    if(Files.exists(path2.resolve(locationIn.getPath() + ".nbt"))){
-                        path1 = path2;
-                        break;
+            for (Category category: Category.values()){
+                Path path2 = path1.resolve(category.category);
+                if(Files.exists(path2.resolve(locationIn.getPath() + ".nbt"))){
+                    path1 = path2;
+                    break;
                     }
-                }
-
             }
-            return FileUtil.resolveResourcePath(path1, locationIn.getPath(), extIn);
+            return FileUtil.createPathToResource(path1, locationIn.getPath(), extIn);
         } catch (InvalidPathException invalidpathexception) {
             throw new ResourceLocationException("Invalid resource path: " + locationIn, invalidpathexception);
         }
@@ -182,8 +177,8 @@ public class CustomTemplateManager extends TemplateManager {
         if (locationIn.getPath().contains("//")) {
             throw new ResourceLocationException("Invalid resource path: " + locationIn);
         } else {
-            Path path = this.resolvePathStructures(locationIn, extIn);
-            if (path.startsWith(this.pathGenerated) && FileUtil.isNormalized(path) && FileUtil.containsReservedName(path)) {
+            Path path = this.createPathToStructure(locationIn, extIn);
+            if (path.startsWith(this.pathGenerated) && FileUtil.isPathNormalized(path) && FileUtil.isPathPortable(path)) {
                 return path;
             } else {
                 throw new ResourceLocationException("Invalid resource path: " + path);

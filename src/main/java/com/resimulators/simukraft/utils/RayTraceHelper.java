@@ -16,13 +16,13 @@ public class RayTraceHelper {
     private RayTraceHelper() {}
 
     public void ray() {
-        if (minecraft.objectMouseOver != null && minecraft.objectMouseOver.getType() == RayTraceResult.Type.ENTITY) {
-            this.target = minecraft.objectMouseOver;
+        if (minecraft.hitResult != null && minecraft.hitResult.getType() == RayTraceResult.Type.ENTITY) {
+            this.target = minecraft.hitResult;
             return;
         } else
             this.target = null;
 
-        Entity entity = minecraft.getRenderViewEntity();
+        Entity entity = minecraft.getCameraEntity();
         if (entity == null)
             return;
     }

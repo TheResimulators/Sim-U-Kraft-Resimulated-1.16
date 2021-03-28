@@ -27,19 +27,19 @@ public class NewHousePacket implements IMessage{
     @Override
     public void toBytes(PacketBuffer buf) {
         buf.writeInt(faction);
-        buf.writeCompoundTag(house.write());
-        buf.writeUniqueId(houseId);
+        buf.writeNbt(house.write());
+        buf.writeUUID(houseId);
     }
 
     @Override
     public void fromBytes(PacketBuffer buf) {
         faction = buf.readInt();
         house = new House();
-        CompoundNBT nbt = buf.readCompoundTag();
+        CompoundNBT nbt = buf.readNbt();
         if (nbt != null){
         house.read(nbt);
         }
-        houseId = buf.readUniqueId();
+        houseId = buf.readUUID();
     }
 
     @Nullable

@@ -43,7 +43,7 @@ public class Faction {
         ListNBT list = new ListNBT();
         for (UUID uuid : players) {
             CompoundNBT compound = new CompoundNBT();
-            compound.putUniqueId("player", uuid);
+            compound.putUUID("player", uuid);
             list.add(compound);
         }
         nbt.put("players", list);
@@ -51,7 +51,7 @@ public class Faction {
         list = new ListNBT();
         for (UUID id : sims.keySet()) {
             CompoundNBT compound = new CompoundNBT();
-            compound.putUniqueId("sim", id);
+            compound.putUUID("sim", id);
             compound.put("siminfo", sims.get(id).write());
             list.add(compound);
         }
@@ -60,7 +60,7 @@ public class Faction {
         list = new ListNBT();
         for (UUID uuid: houses.keySet()){
             CompoundNBT compound = new CompoundNBT();
-            compound.putUniqueId("houseID",uuid);
+            compound.putUUID("houseID",uuid);
             compound.put("house nbt",houses.get(uuid).write());
             list.add(compound);
         }
@@ -74,13 +74,13 @@ public class Faction {
         ListNBT players = nbt.getList("players", Constants.NBT.TAG_COMPOUND);
         for (INBT player : players) {
             CompoundNBT compound = (CompoundNBT) player;
-            this.players.add(compound.getUniqueId("player"));
+            this.players.add(compound.getUUID("player"));
         }
         ListNBT sims = nbt.getList("sims", Constants.NBT.TAG_COMPOUND);
 
         for (INBT sim : sims) {
             CompoundNBT compound = (CompoundNBT) sim;
-            UUID id = compound.getUniqueId("sim");
+            UUID id = compound.getUUID("sim");
             SimInfo info = new SimInfo(id);
             info.read(compound.getCompound("siminfo"));
             this.sims.put(id, info);
@@ -88,7 +88,7 @@ public class Faction {
         ListNBT houses = nbt.getList("houses", Constants.NBT.TAG_COMPOUND);
         for (INBT house: houses){
             CompoundNBT compound = (CompoundNBT) house;
-            UUID id = compound.getUniqueId("houseID");
+            UUID id = compound.getUUID("houseID");
             House newHouse = new House();
             newHouse.read(compound.getCompound("house nbt"));
             this.houses.put(id,newHouse);
@@ -99,8 +99,8 @@ public class Faction {
     }
 
     public void addSim(SimEntity sim) {
-        validateSims((ServerWorld) sim.world);
-        addSim(sim.getUniqueID());
+        validateSims((ServerWorld) sim.level);
+        addSim(sim.getUUID());
     }
 
     private void updateCredits() {
@@ -112,13 +112,13 @@ public class Faction {
     }
 
     public void removeSim(SimEntity sim) {
-        sims.remove(sim.getUniqueID());
+        sims.remove(sim.getUUID());
     }
 
     public void setCredits(double credits) {
         this.credits = credits;
         if (world != null){
-            if (!world.isRemote){
+            if (!world.isClientSide){
                 updateCredits();
                 }
             }
@@ -174,7 +174,7 @@ public class Faction {
     }
 
     public void hireSim(SimEntity sim) {
-        this.hireSim(sim.getUniqueID());
+        this.hireSim(sim.getUUID());
     }
 
     public void fireSim(UUID id) {
@@ -182,7 +182,7 @@ public class Faction {
     }
 
     public void fireSim(SimEntity sim) {
-        this.fireSim(sim.getUniqueID());
+        this.fireSim(sim.getUUID());
     }
 
     public int getAmountOfSims() {
@@ -192,9 +192,9 @@ public class Faction {
     public ArrayList<Integer> getSimIds(ServerWorld world) {
         ArrayList<Integer> simids = new ArrayList<>();
         for (UUID id : sims.keySet()) {
-            Entity entity = world.getEntityByUuid(id);
+            Entity entity = world.getEntity(id);
             if (entity != null) {
-                simids.add(entity.getEntityId());
+                simids.add(entity.getId());
             } else {
                 SimuKraft.LOGGER().error("Error: Entity doesn't exist in faction. Please contact the author.");
             }
@@ -205,10 +205,10 @@ public class Faction {
     public ArrayList<Integer> getSimUnemployedIds(ServerWorld world) {
         ArrayList<Integer> simids = new ArrayList<>();
         for (UUID id : sims.keySet()) {
-           Entity entity = world.getEntityByUuid(id);
+           Entity entity = world.getEntity(id);
             if (entity != null) {
                 if (!sims.get(id).hired) {
-                    simids.add(entity.getEntityId());
+                    simids.add(entity.getId());
                 }
             } else {
                 SimuKraft.LOGGER().error("Error: Unemployed entity doesn't exist in faction while trying to get Unemployed Sims. Please contact the author.");
@@ -220,7 +220,7 @@ public class Faction {
     public void validateSims(ServerWorld world) {
         List<UUID> temp = Lists.newArrayList();
         for (UUID id : sims.keySet()) {
-            Entity entity = world.getEntityByUuid(id);
+            Entity entity = world.getEntity(id);
             if (entity == null)
                 temp.add(id);
         }
@@ -261,7 +261,7 @@ public class Faction {
     public void sendPacketToFaction(IMessage message) {
         for (UUID id : players) {
             if (ServerLifecycleHooks.getCurrentServer() != null){
-                ServerPlayerEntity player = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayerByUUID(id);
+                ServerPlayerEntity player = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayer(id);
                 if (player != null) {
                     Network.handler.sendToPlayer(message, player);
                     }
@@ -274,7 +274,7 @@ public class Faction {
     public UUID getOnlineFactionPlayer(){
         for (UUID id : players) {
             if (ServerLifecycleHooks.getCurrentServer() != null){
-                ServerPlayerEntity player = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayerByUUID(id);
+                ServerPlayerEntity player = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayer(id);
                 if (player != null){
                 return id;
                 }
@@ -298,7 +298,7 @@ public class Faction {
 
     public void sendFactionChatMessage(String string, World world){
         for (UUID id: getPlayers()){
-            PlayerEntity entity = world.getPlayerByUuid(id);
+            PlayerEntity entity = world.getPlayerByUUID(id);
             if (entity != null){
                 entity.sendMessage(new StringTextComponent(string),id);
 
@@ -323,7 +323,7 @@ public class Faction {
     public boolean removeHouse(UUID id,ServerWorld world){
         if (houses.get(id) == null) return false;
         for (UUID simID: houses.get(id).simOccupants){
-            SimEntity entity = (SimEntity) world.getEntityByUuid(simID);
+            SimEntity entity = (SimEntity) world.getEntity(simID);
             if (entity != null) {
                 entity.removeHouse();
             }
@@ -463,7 +463,7 @@ public class Faction {
             ListNBT simIds = new ListNBT();
             for (UUID uuid: simOccupants){
                 CompoundNBT id = new CompoundNBT();
-                id.putUniqueId("uuid",uuid);
+                id.putUUID("uuid",uuid);
                 simIds.add(id);
 
             }
@@ -482,7 +482,7 @@ public class Faction {
 
             for (INBT inbt: ids){
                 CompoundNBT simId = (CompoundNBT)inbt;
-                simOccupants.add(simId.getUniqueId("uuid"));
+                simOccupants.add(simId.getUUID("uuid"));
 
 
             }

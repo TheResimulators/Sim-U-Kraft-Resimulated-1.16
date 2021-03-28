@@ -13,7 +13,7 @@ public class BlockUtils {
         ArrayList<BlockPos> blocks = new ArrayList<>();
         for (int x = -radius; x <= radius; x++) {
             for (int z = -radius; z <= radius; z++) {
-                BlockPos blockPos = startingPos.add(x, 0, z);
+                BlockPos blockPos = startingPos.offset(x, 0, z);
                 blocks.add(blockPos);
             }
         }
@@ -24,7 +24,7 @@ public class BlockUtils {
         for (int y = -1; y <=1;y++){
             for (int x = -radius; x <= radius; x++) {
                 for (int z = -radius; z <= radius; z++) {
-                    BlockPos blockPos = startingPos.add(x, y, z);
+                    BlockPos blockPos = startingPos.offset(x, y, z);
                     blocks.add(blockPos);
                 }
             }
@@ -34,27 +34,27 @@ public class BlockUtils {
     }
     public static boolean aboveBlocksValid(World world, BlockPos startingPos) {
         for (int y = 0; y <= 3; y++) {
-            BlockPos blockAbovePos = startingPos.add(0, y, 0);
+            BlockPos blockAbovePos = startingPos.offset(0, y, 0);
             BlockState blockAboveState = world.getBlockState(blockAbovePos);
-            if (blockAboveState.isSolid()) return false;
+            if (blockAboveState.canOcclude()) return false;
         }
         return true;
     }
 
     public static BlockPos getGroundBlock(World world, BlockPos startingPos) {
         BlockPos newPos = startingPos;
-        if (isBlockSolid(world, newPos)) return newPos.up();
+        if (isBlockSolid(world, newPos)) return newPos.above();
         if (isBlockAboveSolid(world, newPos)) {
             // Keep going up until they don't have a block above anymore
             do {
-                newPos = newPos.up();
+                newPos = newPos.above();
             } while (isBlockAboveSolid(world, newPos));
             return newPos;
         }
         if (!isBlockBelowSolid(world, newPos)) {
             // Keep going down until it reaches a block
             do {
-                newPos = newPos.down();
+                newPos = newPos.below();
             } while (!isBlockBelowSolid(world, newPos));
             return newPos;
         }
@@ -62,15 +62,15 @@ public class BlockUtils {
     }
 
     private static boolean isBlockSolid(World world, BlockPos pos) {
-        return world.getBlockState(pos).isSolid();
+        return world.getBlockState(pos).canOcclude();
     }
 
     private static boolean isBlockAboveSolid(World world, BlockPos pos) {
-        return world.getBlockState(pos.up()).isSolid();
+        return world.getBlockState(pos.above()).canOcclude();
     }
 
     private static boolean isBlockBelowSolid(World world, BlockPos pos) {
-        return world.getBlockState(pos.down()).isSolid();
+        return world.getBlockState(pos.below()).canOcclude();
     }
 
     public static boolean blocksAreValid(World world, ArrayList<BlockPos> blocksPos, SimEntity sim) {

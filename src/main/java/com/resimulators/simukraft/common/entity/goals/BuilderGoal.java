@@ -18,20 +18,20 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.pathfinding.Path;
 import net.minecraft.tileentity.ChestTileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.world.IServerWorld;
 import net.minecraft.world.IWorldReader;
+import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraft.world.gen.feature.template.PlacementSettings;
 import net.minecraft.world.gen.feature.template.Template;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class BuilderGoal extends BaseGoal<JobBuilder> {
@@ -52,25 +52,27 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
     }
 
     @Override
-    public boolean shouldExecute() {
+    public boolean canUse() {
         job = ((JobBuilder) sim.getJob());
         //System.out.println("startExecuting");
-        if (job != null) {
-            template = job.getTemplate();
-            if (sim.getActivity() == Activity.GOING_TO_WORK) {
-                checkForInventories();
-                if (chests.size() != 0){
-                    if (sim.getPosition().withinDistance(new Vector3d(job.getWorkSpace().getX(), job.getWorkSpace().getY(), job.getWorkSpace().getZ()), 5)) {
-                        sim.setActivity(Activity.WORKING);
-                        return template != null;
+        if (SavedWorldData.get(sim.level).getFactionWithSim(sim.getUUID()) != null){
+            if (job != null) {
+                template = job.getTemplate();
+                if (sim.getActivity() == Activity.GOING_TO_WORK) {
+                    checkForInventories();
+                    if (chests.size() != 0){
+                        if (sim.blockPosition().closerThan(new Vector3d(job.getWorkSpace().getX(), job.getWorkSpace().getY(), job.getWorkSpace().getZ()), 5)) {
+                            sim.setActivity(Activity.WORKING);
+                            return template != null;
+                        }
                     }
-                }
-                else {
-                    if (notifyDelay <= 0) {
-                        SavedWorldData.get(sim.world).getFactionWithSim(sim.getUniqueID()).sendFactionChatMessage(sim.getName().getString() + " Builder needs a chest to start Building",sim.world);
-                        notifyDelay = 2000;
-                    }else{
-                        notifyDelay--;
+                    else {
+                        if (notifyDelay <= 0) {
+                            SavedWorldData.get(sim.level).getFactionWithSim(sim.getUUID()).sendFactionChatMessage(sim.getName().getString() + " Builder needs a chest to start Building",sim.level);
+                            notifyDelay = 2000;
+                        }else{
+                            notifyDelay--;
+                        }
                     }
                 }
             }
@@ -80,7 +82,7 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
 
 
     @Override
-    public void startExecuting() {
+    public void start() {
         template = job.getTemplate();
 
         if (template != null) {
@@ -91,17 +93,15 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
 
             PlacementSettings settings = new PlacementSettings()
                 .setRotation(rotation)
-                .setMirror(Mirror.NONE);
-            blocks = StructureHandler.modifyAndConvertTemplate(template, sim.world, sim.getJob().getWorkSpace().offset(job.getDirection()),settings);
+                .setMirror(template.getMirror());
+            System.out.println(template.getOffSet());
+            BlockPos origin = sim.getJob().getWorkSpace().offset(template.getOffSet().rotate(rotation).offset(job.getDirection().getNormal()));
+            blocks = StructureHandler.modifyAndConvertTemplate(template, sim.level, origin,settings);
+            blocks.sort(Comparator.comparingDouble((block) -> sim.getJob().getWorkSpace().distSqr(block.pos)));
             SimuKraft.LOGGER().debug("cost: " + template.getCost());
             setBlocksNeeded();
-            /*for (Template.BlockInfo blockInfo : blocks) {
-                BlockState state = blockInfo.state;
-                if (blockInfo.state.getBlock() == ModBlocks.CONTROL_BOX.get()) {
-                    state = blockInfo.state.with(ModBlockProperties.TYPE, template.getTypeID());
-                }
-                if(blockInfo.state.getBlock() != Blocks.AIR) sim.world.setBlockState(blockInfo.pos, Blocks.COBBLESTONE.getDefaultState());
-            }*/
+            template.placeInWorld((IServerWorld) sim.level,origin,settings,new Random());
+            sim.level.setBlock(origin,Blocks.COBBLESTONE.getBlock().defaultBlockState(),3);
         }
     }
 
@@ -118,51 +118,53 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
                  un-comment for official release
                 */
                 state = State.TRAVELING;
-                destinationBlock = blocks.get(blockIndex).pos;
-                while (sim.getEntityWorld().getBlockState(destinationBlock) ==blocks.get(blockIndex).state){
-                    blockIndex++;
-                    if (blockIndex < blocks.size()) {
-                        destinationBlock = blocks.get(blockIndex).pos;
-                    }
-                }
+                blockPos = blocks.get(blockIndex).pos;
+//                while (sim.getCommandSenderWorld().getBlockState(blockPos) ==blocks.get(blockIndex).state){
+//                    blockIndex++;
+//                    if (blockIndex < blocks.size()) {
+//                        blockPos = blocks.get(blockIndex).pos;
+//                    }
+//                }
             }
             if (state == State.TRAVELING){
-                if(sim.getEntityWorld().getBlockState(destinationBlock) ==blocks.get(blockIndex).state){
-                    destinationBlock = blocks.get(blockIndex).pos;
+                if(sim.getCommandSenderWorld().getBlockState(blockPos) ==blocks.get(blockIndex).state){
+                    blockPos = blocks.get(blockIndex).pos;
                 }
-                if (sim.getDistanceSq(destinationBlock.getX(),destinationBlock.getY(),destinationBlock.getZ()) < 20){
+                if (sim.distanceToSqr(blockPos.getX(),blockPos.getY(),blockPos.getZ()) < 20){
                     state = State.BUILDING;
                     return;
                 }
             }
             if (state == State.BUILDING){
-                Template.BlockInfo blockInfo = blocks.get(blockIndex);
-                BlockState blockstate = blockInfo.state;
-                if (blockInfo.state.getBlock() == ModBlocks.CONTROL_BLOCK.get()) {
-                    blockstate = blockInfo.state.with(ModBlockProperties.TYPE, template.getTypeID());
-                    template.setControlBlock(blockInfo.pos);
-                }
-                if (sim.getInventory().hasItemStack(new ItemStack(blockInfo.state.getBlock())) || true){ // remove true for official release. for testing purposes
-                    //BlockState blockState = sim.world.getBlockState(blockInfo.pos);
-                    sim.world.destroyBlock(blockInfo.pos,true);
-                    sim.world.setBlockState(blockInfo.pos, blockstate.rotate(sim.world,blockInfo.pos,rotation), 3);
-                    int index = sim.getInventory().findSlotMatchingUnusedItem(new ItemStack(blockInfo.state.getBlock()));
-                    if (index >= 0){
-                    sim.getInventory().decrStackSize(index,1);}
-                    blockIndex++;
-                    if (blockIndex < blocks.size() - 1) {
-                        destinationBlock = blocks.get(blockIndex).pos;
-                        sim.getNavigator().setPath(null, 7d);
-                        state = State.TRAVELING;
+                if (blockIndex < blocks.size()){
+                    Template.BlockInfo blockInfo = blocks.get(blockIndex);
+                    BlockState blockstate = blockInfo.state;
+                    if (blockInfo.state.getBlock() == ModBlocks.CONTROL_BLOCK.get()) {
+                        blockstate = blockInfo.state.setValue(ModBlockProperties.TYPE, template.getTypeID());
+                        template.setControlBlock(blockInfo.pos);
                     }
-                }else{
-                    state = State.COLLECTING;
-                    destinationBlock = job.getWorkSpace();
+                    if (sim.getInventory().hasItemStack(new ItemStack(blockInfo.state.getBlock())) || true){ // remove true for official release. for testing purposes
+                        //BlockState blockState = sim.world.getBlockState(blockInfo.pos);
+                        sim.level.destroyBlock(blockInfo.pos,true);
+                        sim.level.setBlock(blockInfo.pos, blockstate.rotate(sim.level,blockInfo.pos,rotation), 3);
+                        int index = sim.getInventory().findSlotMatchingUnusedItem(new ItemStack(blockInfo.state.getBlock()));
+                        if (index >= 0){
+                        sim.getInventory().removeItem(index,1);}
+                        blockIndex++;
+                        if (blockIndex < blocks.size() - 1) {
+                            blockPos = blocks.get(blockIndex).pos;
+                            sim.getNavigation().moveTo((Path)null, 7d);
+                            state = State.TRAVELING;
+                        }
+                    }else{
+                        state = State.COLLECTING;
+                        blockPos = job.getWorkSpace();
+                    }
                 }
             }
 
             if (state == State.COLLECTING){
-                if (sim.getDistanceSq(destinationBlock.getX(),destinationBlock.getY(),destinationBlock.getZ()) < 10){
+                if (sim.distanceToSqr(blockPos.getX(),blockPos.getY(),blockPos.getZ()) < 10){
                     retrieveItemsFromChest();
                     state = State.STARTING;
                 }
@@ -174,12 +176,12 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
         if (blockIndex >= blocks.size()){
             sim.getJob().setState(Activity.FORCE_STOP);
 
-            Faction faction = SavedWorldData.get(sim.getEntityWorld()).getFactionWithSim(sim.getUniqueID());
-            faction.sendFactionChatMessage("Builder " + sim.getName().getString() + "has finished building " + template.getName(), sim.getEntityWorld());
+            Faction faction = SavedWorldData.get(sim.getCommandSenderWorld()).getFactionWithSim(sim.getUUID());
+            faction.sendFactionChatMessage("Builder " + sim.getName().getString() + "has finished building " + template.getName(), sim.getCommandSenderWorld());
             if (template.getTypeID() == BuildingType.RESIDENTIAL.id) {
                 BlockPos controlBlock = template.getControlBlock();
                 UUID id = faction.addNewHouse(controlBlock, template.getName(), template.getRent());
-                TileResidential tile =(TileResidential) sim.getEntityWorld().getTileEntity(controlBlock);
+                TileResidential tile =(TileResidential) sim.getCommandSenderWorld().getBlockEntity(controlBlock);
                 tile.setFactionID(faction.getId());
                 tile.setHouseID(id);
 
@@ -192,17 +194,17 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
     }
 
     @Override
-    public boolean shouldMove() {
-        return sim.getDistanceSq(destinationBlock.getX(),destinationBlock.getY(),destinationBlock.getZ()) > getTargetDistanceSq();
+    public boolean shouldRecalculatePath() {
+        return sim.distanceToSqr(blockPos.getX(),blockPos.getY(),blockPos.getZ()) > acceptedDistance();
     }
 
     @Override
-    protected boolean shouldMoveTo(IWorldReader iWorldReader, BlockPos blockPos) {
+    protected boolean isValidTarget(IWorldReader iWorldReader, BlockPos blockPos) {
         return false;
     }
 
     @Override
-    public boolean shouldContinueExecuting() {
+    public boolean canContinueToUse() {
         if (sim.getJob() != null){
         if (sim.getJob().getState() == Activity.FORCE_STOP) {
             return false;
@@ -220,13 +222,13 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
     private Rotation getRotation(Direction dir){
         switch (dir){
             case NORTH:
-                return Rotation.CLOCKWISE_180;
-            case SOUTH:
-                return Rotation.NONE;
-            case WEST:
-                return Rotation.CLOCKWISE_90;
-            case EAST:
                 return Rotation.COUNTERCLOCKWISE_90;
+            case SOUTH:
+                return Rotation.CLOCKWISE_90;
+            case WEST:
+                return Rotation.CLOCKWISE_180;
+            case EAST:
+                return Rotation.NONE;
 
         }
         return Rotation.NONE;
@@ -234,13 +236,13 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
     }
 
     private Rotation getRotationCalculated(Rotation org, Rotation cur) {
-        if (org == cur.add(Rotation.CLOCKWISE_90)){
+        if (org == cur.getRotated(Rotation.CLOCKWISE_90)){
             return Rotation.COUNTERCLOCKWISE_90;
         }
-        if (org == cur.add(Rotation.COUNTERCLOCKWISE_90)){
+        if (org == cur.getRotated(Rotation.COUNTERCLOCKWISE_90)){
             return Rotation.CLOCKWISE_90;
         }
-        if (org == cur.add(Rotation.CLOCKWISE_180)){
+        if (org == cur.getRotated(Rotation.CLOCKWISE_180)){
             return Rotation.CLOCKWISE_180;
         }
 
@@ -253,11 +255,11 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
             case NONE:
                 return dir;
             case CLOCKWISE_90:
-                return dir.rotateY();
+                return dir.getClockWise();
             case CLOCKWISE_180:
                 return dir.getOpposite();
             case COUNTERCLOCKWISE_90:
-                return dir.rotateYCCW();
+                return dir.getCounterClockWise();
 
         }
 
@@ -266,10 +268,10 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
     //Checks for inventories around position.
     private void checkForInventories() {
         ArrayList<BlockPos> blocks =  BlockUtils.getBlocksAroundAndBelowPosition(job.getWorkSpace(),5);
-        blocks.addAll(BlockUtils.getBlocksAroundAndBelowPosition(job.getWorkSpace().up(),5));
-        blocks = (ArrayList<BlockPos>) blocks.stream().filter(pos -> sim.world.getTileEntity(pos) != null).collect(Collectors.toList());
+        blocks.addAll(BlockUtils.getBlocksAroundAndBelowPosition(job.getWorkSpace().above(),5));
+        blocks = (ArrayList<BlockPos>) blocks.stream().filter(pos -> sim.level.getBlockEntity(pos) != null).collect(Collectors.toList());
         for (BlockPos pos: blocks){
-            if (sim.world.getTileEntity(pos) instanceof ChestTileEntity){
+            if (sim.level.getBlockEntity(pos) instanceof ChestTileEntity){
                 chests.add(pos);
             }
         }
@@ -296,9 +298,9 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
     //Scans inventories and makes Sim go get items from chest that contains it.
     private void retrieveItemsFromChest() {
         for (BlockPos pos: chests){
-            ChestTileEntity entity = (ChestTileEntity) sim.world.getTileEntity(pos);
-            for (int i = 0; i< entity.getSizeInventory();i++){
-                ItemStack stack = entity.getStackInSlot(i);
+            ChestTileEntity entity = (ChestTileEntity) sim.level.getBlockEntity(pos);
+            for (int i = 0; i< entity.getContainerSize();i++){
+                ItemStack stack = entity.getItem(i);
                 if (blocksNeeded.containsKey(stack.getItem())){
                     int amountNeeded = blocksNeeded.get(stack.getItem());
 
@@ -313,7 +315,7 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
                     ItemStack result = stack.copy();
                     result.setCount(amountNeeded);
                     sim.getInventory().addItemStackToInventory(result);
-                    entity.setInventorySlotContents(i,stack);
+                    entity.setItem(i,stack);
 
                 }
             }
@@ -326,7 +328,7 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
 
         });
             if (!string[0].equals("")){
-        SavedWorldData.get(sim.world).getFactionWithSim(sim.getUniqueID()).sendFactionChatMessage(sim.getName().getString() + " still needs " + string[0],sim.world);
+        SavedWorldData.get(sim.level).getFactionWithSim(sim.getUUID()).sendFactionChatMessage(sim.getName().getString() + " still needs " + string[0],sim.level);
         delay = 2000;
     }}
 

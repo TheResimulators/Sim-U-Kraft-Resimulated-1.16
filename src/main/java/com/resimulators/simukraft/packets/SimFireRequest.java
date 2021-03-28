@@ -33,15 +33,15 @@ public class SimFireRequest implements IMessage {
     @Override
     public void toBytes(PacketBuffer buf) {
         buf.writeBlockPos(pos);
-        buf.writeUniqueId(simId);
-        buf.writeUniqueId(playerId);
+        buf.writeUUID(simId);
+        buf.writeUUID(playerId);
     }
 
     @Override
     public void fromBytes(PacketBuffer buf) {
         this.pos = buf.readBlockPos();
-        this.simId = buf.readUniqueId();
-        this.playerId = buf.readUniqueId();
+        this.simId = buf.readUUID();
+        this.playerId = buf.readUUID();
     }
 
     @Nullable
@@ -52,12 +52,12 @@ public class SimFireRequest implements IMessage {
 
     @Override
     public void onExecute(NetworkEvent.Context ctxIn, boolean isLogicalServer) {
-        if (ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayerByUUID(playerId) != null) {
-            PlayerEntity player = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayerByUUID(playerId);
+        if (ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayer(playerId) != null) {
+            PlayerEntity player = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayer(playerId);
             if (player != null){
-            SavedWorldData data = SavedWorldData.get(player.world);
-            int id = data.getFactionWithPlayer(player.getUniqueID()).getId();
-            SimEntity sim = (SimEntity) ((ServerWorld)player.world).getEntityByUuid(simId);
+            SavedWorldData data = SavedWorldData.get(player.level);
+            int id = data.getFactionWithPlayer(player.getUUID()).getId();
+            SimEntity sim = (SimEntity) ((ServerWorld)player.level).getEntity(simId);
             if (sim != null) {
                 sim.fireSim(sim, id, false);
                 }

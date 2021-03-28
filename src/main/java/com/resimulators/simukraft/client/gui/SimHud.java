@@ -20,19 +20,19 @@ public class SimHud extends AbstractGui {
     private double credits;
     @SubscribeEvent
     public void render(RenderGameOverlayEvent.Text event){
-        if (Minecraft.getInstance().currentScreen == null) {
+        if (Minecraft.getInstance().screen == null) {
             World world = SimuKraft.proxy.getClientWorld();
             PlayerEntity player = SimuKraft.proxy.getClientPlayer();
             if (world != null && player != null) {
                 SavedWorldData data = SavedWorldData.get(world);
-                Faction faction = data.getFactionWithPlayer(player.getUniqueID());
+                Faction faction = data.getFactionWithPlayer(player.getUUID());
                 if (faction != null){
-                num = data.getFactionWithPlayer(player.getUniqueID()).getAmountOfSims();
-                credits = data.getFactionWithPlayer(player.getUniqueID()).getCredits();
+                num = data.getFactionWithPlayer(player.getUUID()).getAmountOfSims();
+                credits = data.getFactionWithPlayer(player.getUUID()).getCredits();
                 String day = DayOfWeek.of((int) (1 + (Math.floor(world.getDayTime() / 24000f) % 7))).getDisplayName(TextStyle.FULL, Locale.ENGLISH);
-                Minecraft.getInstance().fontRenderer.drawString(new MatrixStack(), "Sims: " + num, 10, 10, 16777215);
-                Minecraft.getInstance().fontRenderer.drawString(new MatrixStack(), "Credits: " + String.format("%.2f", credits), 10, 30, 16777215);
-                Minecraft.getInstance().fontRenderer.drawString(new MatrixStack(), "Day: " + day, 60, 10, 16777215);
+                Minecraft.getInstance().font.draw(new MatrixStack(), "Sims: " + num, 10, 10, 16777215);
+                Minecraft.getInstance().font.draw(new MatrixStack(), "Credits: " + String.format("%.2f", credits), 10, 30, 16777215);
+                Minecraft.getInstance().font.draw(new MatrixStack(), "Day: " + day, 60, 10, 16777215);
                 }
             }
         }

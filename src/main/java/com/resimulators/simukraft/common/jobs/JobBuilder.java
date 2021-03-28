@@ -88,7 +88,7 @@ public class JobBuilder implements IJob {
     @Override
     public void addJobAi() {
         sim.goalSelector.addGoal(3, goal1);
-        System.out.println("Added " + goal1 + " to sim " + sim.getUniqueID());
+        System.out.println("Added " + goal1 + " to sim " + sim.getUUID());
     }
 
     @Override
@@ -106,7 +106,7 @@ public class JobBuilder implements IJob {
         nbt.add(ints);
         CompoundNBT other = new CompoundNBT(); // other info that is unique to the miner
         if (workSpace != null) {
-            other.putLong("jobpos", workSpace.toLong());
+            other.putLong("jobpos", workSpace.asLong());
         }
         other.putBoolean("finished",finished);
         nbt.add(other);
@@ -122,7 +122,7 @@ public class JobBuilder implements IJob {
                 periodsworked = list.getInt("periodsworked");
             }
             if (list.contains("jobpos")) {
-                setWorkSpace(BlockPos.fromLong(list.getLong("jobpos")));
+                setWorkSpace(BlockPos.of(list.getLong("jobpos")));
             }
             if (list.contains("finished")){
                 finished = list.getBoolean("finished");

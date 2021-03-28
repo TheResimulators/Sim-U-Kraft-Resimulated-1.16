@@ -13,12 +13,12 @@ public class GoToWorkGoal extends MoveToBlockGoal {
     IJob job;
 
     public GoToWorkGoal(SimEntity sim){
-        super(sim,sim.getAIMoveSpeed()*2,20);
+        super(sim,sim.getSpeed()*2,20);
         this.sim = sim;
 
     }
     @Override
-    public boolean shouldExecute() {
+    public boolean canUse() {
         if (sim.getJob() == null)return false;
         if (sim.getJob().getState() == Activity.GOING_TO_WORK){
             this.job = sim.getJob();
@@ -31,15 +31,15 @@ public class GoToWorkGoal extends MoveToBlockGoal {
 
 
     @Override
-    public void startExecuting(){
+    public void start(){
 
-        destinationBlock = sim.getJob().getWorkSpace();
-        func_220725_g();
+        blockPos = sim.getJob().getWorkSpace();
+        moveMobToBlock();
     }
 
     @Override
-    protected boolean shouldMoveTo(IWorldReader worldIn, BlockPos pos) {
-        return pos.withinDistance(sim.getPositionVec(),getTargetDistanceSq());
+    protected boolean isValidTarget(IWorldReader worldIn, BlockPos pos) {
+        return pos.closerThan(sim.position(),acceptedDistance());
     }
 
     @Override

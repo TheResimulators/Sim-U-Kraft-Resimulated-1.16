@@ -9,15 +9,17 @@ import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.text.StringTextComponent;
 
+import net.minecraft.item.Item.Properties;
+
 public class ItemTest extends Item {
     public ItemTest(Properties properties) {
         super(properties);
     }
 
     @Override
-    public ActionResultType itemInteractionForEntity(ItemStack stack, PlayerEntity player, LivingEntity entity, Hand hand) {
+    public ActionResultType interactLivingEntity(ItemStack stack, PlayerEntity player, LivingEntity entity, Hand hand) {
         if (entity instanceof SimEntity) {
-            player.sendStatusMessage(new StringTextComponent("" + (((SimEntity) entity).getSelectedSlot())), true);
+            player.displayClientMessage(new StringTextComponent("" + (((SimEntity) entity).getSelectedSlot())), true);
             ((SimEntity) entity).selectSlot(((SimEntity) entity).getSelectedSlot() + 1);
         }
         return ActionResultType.SUCCESS;

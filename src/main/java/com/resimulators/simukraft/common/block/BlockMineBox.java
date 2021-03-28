@@ -24,6 +24,8 @@ import net.minecraftforge.fml.network.NetworkDirection;
 
 import java.util.ArrayList;
 
+import net.minecraft.block.AbstractBlock.Properties;
+
 public class BlockMineBox extends BlockBase {
 
 
@@ -39,26 +41,26 @@ public class BlockMineBox extends BlockBase {
     }
 
     @Override
-    public ActionResultType onBlockActivated(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTrace) {
-        if (!world.isRemote) {
-            Faction faction = SavedWorldData.get(world).getFactionWithPlayer(player.getUniqueID());
+    public ActionResultType use(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTrace) {
+        if (!world.isClientSide) {
+            Faction faction = SavedWorldData.get(world).getFactionWithPlayer(player.getUUID());
             ArrayList<Integer> simids = faction.getSimIds((ServerWorld) world);
-            TileMiner miner = ((TileMiner)world.getTileEntity(pos));
+            TileMiner miner = ((TileMiner)world.getBlockEntity(pos));
             int hiredId;
             if (miner != null){
-            miner.onOpenGui(player.getAdjustedHorizontalFacing());
+            miner.onOpenGui(player.getMotionDirection());
             if (miner.getHired()){
-                SimEntity sim =  (SimEntity) ((ServerWorld) world).getEntityByUuid(miner.getSimId());
+                SimEntity sim =  (SimEntity) ((ServerWorld) world).getEntity(miner.getSimId());
                 if (sim != null){
-                 hiredId = sim.getEntityId();
+                 hiredId = sim.getId();
                 }else{
                     miner.setHired(false);
                     miner.setSimId(null);
                     return ActionResultType.FAIL;
                 }
-                SimUKraftPacketHandler.INSTANCE.sendTo(new OpenJobGuiPacket(simids,pos,hiredId, GuiHandler.MINER, "Miner"),((ServerPlayerEntity) player).connection.netManager, NetworkDirection.PLAY_TO_CLIENT);// used when there is a sim hired
+                SimUKraftPacketHandler.INSTANCE.sendTo(new OpenJobGuiPacket(simids,pos,hiredId, GuiHandler.MINER, "Miner"),((ServerPlayerEntity) player).connection.connection, NetworkDirection.PLAY_TO_CLIENT);// used when there is a sim hired
             } else {
-                SimUKraftPacketHandler.INSTANCE.sendTo(new OpenJobGuiPacket(simids,pos,GuiHandler.MINER, "Miner"),((ServerPlayerEntity) player).connection.netManager, NetworkDirection.PLAY_TO_CLIENT);//used when there is no sim employed at this block
+                SimUKraftPacketHandler.INSTANCE.sendTo(new OpenJobGuiPacket(simids,pos,GuiHandler.MINER, "Miner"),((ServerPlayerEntity) player).connection.connection, NetworkDirection.PLAY_TO_CLIENT);//used when there is no sim employed at this block
             }
 
         }}
@@ -72,15 +74,15 @@ public class BlockMineBox extends BlockBase {
     }
 
     @Override
-    public void onBlockHarvested(World worldIn, BlockPos pos, BlockState state, PlayerEntity player) {
-        super.onBlockHarvested(worldIn, pos, state, player);
-        if (!worldIn.isRemote){
+    public void playerWillDestroy(World worldIn, BlockPos pos, BlockState state, PlayerEntity player) {
+        super.playerWillDestroy(worldIn, pos, state, player);
+        if (!worldIn.isClientSide){
 
-            ITile tile = ((ITile) worldIn.getTileEntity(pos));
+            ITile tile = ((ITile) worldIn.getBlockEntity(pos));
 
-            SimEntity sim = (SimEntity) ((ServerWorld)worldIn).getEntityByUuid(tile.getSimId());
+            SimEntity sim = (SimEntity) ((ServerWorld)worldIn).getEntity(tile.getSimId());
             if (sim != null){
-                int id = SavedWorldData.get(worldIn).getFactionWithPlayer(player.getUniqueID()).getId();
+                int id = SavedWorldData.get(worldIn).getFactionWithPlayer(player.getUUID()).getId();
                 sim.fireSim(sim,id,false);
             }
         }

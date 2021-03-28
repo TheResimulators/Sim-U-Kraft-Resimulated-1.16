@@ -26,9 +26,9 @@ public class TileBaseMarker extends TileEntity implements ITile {
     }
 
     @Override
-    public void read(BlockState state, CompoundNBT compound) {
+    public void load(BlockState state, CompoundNBT compound) {
 
-        dir = Direction.byIndex(compound.getInt("dir"));
+        dir = Direction.from3DDataValue(compound.getInt("dir"));
         if (compound.contains("sim id")) {
             simID = UUID.fromString(compound.getString("sim id"));
         }
@@ -43,15 +43,15 @@ public class TileBaseMarker extends TileEntity implements ITile {
             height = compound.getInt("height");
         }
         if (compound.contains("marker")){
-            marker = BlockPos.fromLong(compound.getLong("marker"));
+            marker = BlockPos.of(compound.getLong("marker"));
         }
-        super.read(state, compound);
+        super.load(state, compound);
     }
 
     @Override
-    public CompoundNBT write(CompoundNBT compound) {
+    public CompoundNBT save(CompoundNBT compound) {
         if (dir != null) {
-            compound.putInt("dir", dir.getIndex());
+            compound.putInt("dir", dir.get3DDataValue());
         }
         if (simID != null) {
             compound.putString("sim id", simID.toString());
@@ -67,16 +67,16 @@ public class TileBaseMarker extends TileEntity implements ITile {
             compound.putInt("height",height);
         }
         if (marker != null){
-            compound.putLong("marker",marker.toLong());
+            compound.putLong("marker",marker.asLong());
         }
-        return super.write(compound);
+        return super.save(compound);
     }
 
 
     @Override
     public void setHired(boolean hired) {
         this.hired = hired;
-        markDirty();
+        setChanged();
     }
 
     @Override
@@ -93,7 +93,7 @@ public class TileBaseMarker extends TileEntity implements ITile {
     @Override
     public void setSimId(UUID id) {
         this.simID = id;
-        markDirty();
+        setChanged();
     }
 
 
@@ -104,7 +104,7 @@ public class TileBaseMarker extends TileEntity implements ITile {
 
     public void onOpenGui(Direction dir) {
         this.dir = dir;
-        markDirty();
+        setChanged();
         Scan();
 
 
@@ -116,12 +116,12 @@ public class TileBaseMarker extends TileEntity implements ITile {
 
     public void Scan() {
         if (dir != null) {
-            if (world != null){
-                if (world.getTileEntity(pos.offset(dir)) instanceof TileMarker) {
-                    setMarker(pos.offset(dir));
+            if (level != null){
+                if (level.getBlockEntity(worldPosition.relative(dir)) instanceof TileMarker) {
+                    setMarker(worldPosition.relative(dir));
                     setDimensions();
-                    markDirty();
-                    world.notifyBlockUpdate(getPos(),getBlockState(),getBlockState(),2);
+                    setChanged();
+                    level.sendBlockUpdated(getBlockPos(),getBlockState(),getBlockState(),2);
                 }
             }
         }
@@ -129,10 +129,10 @@ public class TileBaseMarker extends TileEntity implements ITile {
 
     private void setDimensions() {
         if (marker == null){Scan();}
-        width = marker.manhattanDistance(((TileMarker) this.world.getTileEntity(marker)).getFrontRight());
-        depth = marker.manhattanDistance(((TileMarker) this.world.getTileEntity(marker)).getBackLeft());
+        width = marker.distManhattan(((TileMarker) this.level.getBlockEntity(marker)).getFrontRight());
+        depth = marker.distManhattan(((TileMarker) this.level.getBlockEntity(marker)).getBackLeft());
         height = marker.getY() - 1;
-        markDirty();
+        setChanged();
 
     }
 
@@ -157,12 +157,12 @@ public class TileBaseMarker extends TileEntity implements ITile {
 
     @Override
     public CompoundNBT getUpdateTag() {
-        return write(new CompoundNBT());
+        return save(new CompoundNBT());
     }
 
     public boolean CheckValidity() {
-        if (this.world != null) {
-            TileEntity mark = this.world.getTileEntity(marker);
+        if (this.level != null) {
+            TileEntity mark = this.level.getBlockEntity(marker);
             if (mark instanceof TileMarker) {
                 BlockPos frontRight = ((TileMarker) mark).getFrontRight();
                 BlockPos backLeft = ((TileMarker) mark).getBackLeft();
@@ -174,11 +174,11 @@ public class TileBaseMarker extends TileEntity implements ITile {
 
     @Override
     public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
-        read(this.getBlockState(),pkt.getNbtCompound());
+        load(this.getBlockState(),pkt.getTag());
     }
 
     @Override
     public SUpdateTileEntityPacket getUpdatePacket() {
-        return new SUpdateTileEntityPacket(this.pos, -1, this.getUpdateTag());
+        return new SUpdateTileEntityPacket(this.worldPosition, -1, this.getUpdateTag());
     }
 }

@@ -20,22 +20,22 @@ public class TileFisher extends TileEntity implements IControlBlock {
     }
 
     @Override
-    public CompoundNBT getUpdateTag() { return write(new CompoundNBT());}
+    public CompoundNBT getUpdateTag() { return save(new CompoundNBT());}
 
     @Override
-    public CompoundNBT write(CompoundNBT nbt) {
+    public CompoundNBT save(CompoundNBT nbt) {
         nbt.putBoolean("hired", this.hired);
         if (simId != null) {
-            nbt.putUniqueId("simid", simId);
+            nbt.putUUID("simid", simId);
         }
         return nbt;
     }
 
     @Override
-    public void read(BlockState state, CompoundNBT nbt) {
+    public void load(BlockState state, CompoundNBT nbt) {
         hired = nbt.getBoolean("hired");
         if (nbt.contains("simid")) {
-            simId = nbt.getUniqueId("simid");
+            simId = nbt.getUUID("simid");
         }
     }
 
@@ -45,7 +45,7 @@ public class TileFisher extends TileEntity implements IControlBlock {
     @Override
     public void setHired(boolean hired) {
         this.hired = hired;
-        markDirty();
+        setChanged();
     }
 
     @Override
@@ -70,6 +70,6 @@ public class TileFisher extends TileEntity implements IControlBlock {
 
     @Override
     public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
-        read(this.getBlockState(), pkt.getNbtCompound());
+        load(this.getBlockState(), pkt.getTag());
     }
 }

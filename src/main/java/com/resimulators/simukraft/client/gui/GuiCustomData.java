@@ -41,12 +41,12 @@ public class GuiCustomData extends Screen {
     protected GuiCustomData(ITextComponent titleIn, BlockPos pos) {
         super(titleIn);
         this.pos = pos;
-        stack = Minecraft.getInstance().player.getHeldItemMainhand();
+        stack = Minecraft.getInstance().player.getMainHandItem();
         if ((stack.getItem() != Items.AIR)){
             //set width height and depth
         }
 
-        tile = (TileCustomData) SimuKraft.proxy.getClientWorld().getTileEntity(pos);
+        tile = (TileCustomData) SimuKraft.proxy.getClientWorld().getBlockEntity(pos);
         if (tile != null) {
             buildingHeight = tile.getHeight();
             buildingWidth = tile.getWidth();
@@ -63,24 +63,24 @@ public class GuiCustomData extends Screen {
 
         super.render(stack, p_render_1_, p_render_2_, p_render_3_);
 
-        getMinecraft().fontRenderer.drawString(stack, "Currently Selected",width/2 - 40,height/2 - 100, Color.WHITE.getRGB());
+        getMinecraft().font.draw(stack, "Currently Selected",width/2 - 40,height/2 - 100, Color.WHITE.getRGB());
         if (buildingTypePanel.selection.string != null) {
-            minecraft.fontRenderer.drawString(stack, "Building: " + StringUtils.capitalize(buildingTypePanel.selection.string), width/2 - 40, height/2-80, Color.WHITE.getRGB());
+            minecraft.font.draw(stack, "Building: " + StringUtils.capitalize(buildingTypePanel.selection.string), width/2 - 40, height/2-80, Color.WHITE.getRGB());
         }
         priceInput.render(stack, p_render_1_, p_render_2_, p_render_3_);
         rentInput.render(stack, p_render_1_, p_render_2_, p_render_3_);
         rentInput.renderButton(stack, p_render_1_, p_render_2_, p_render_3_);
 
         if ((buildingWidth != 0 && buildingHeight != 0 && buildingDepth != 0) || rentInput != null){
-            minecraft.fontRenderer.drawString(stack, ("Width: " + buildingWidth), width/2-40,height/2 - 40,Color.WHITE.getRGB());
-            minecraft.fontRenderer.drawString(stack, ("Height: " + buildingHeight), width/2-40,height/2 - 20,Color.WHITE.getRGB());
-            minecraft.fontRenderer.drawString(stack, ("Depth: " + buildingDepth), width/2-40,height/2,Color.WHITE.getRGB());
+            minecraft.font.draw(stack, ("Width: " + buildingWidth), width/2-40,height/2 - 40,Color.WHITE.getRGB());
+            minecraft.font.draw(stack, ("Height: " + buildingHeight), width/2-40,height/2 - 20,Color.WHITE.getRGB());
+            minecraft.font.draw(stack, ("Depth: " + buildingDepth), width/2-40,height/2,Color.WHITE.getRGB());
 
         }
 
         if (buildingTypePanel.selection.getType() != null){
             String category = buildingTypePanel.selection.getType().category.category;
-            minecraft.fontRenderer.drawString(stack, ("Category: " + StringUtils.capitalize(category)),width/2-40, height/2 - 60, Color.WHITE.getRGB());
+            minecraft.font.draw(stack, ("Category: " + StringUtils.capitalize(category)),width/2-40, height/2 - 60, Color.WHITE.getRGB());
         }
 
 
@@ -92,7 +92,7 @@ public class GuiCustomData extends Screen {
         super.init(minecraft, width, height);
 
         addButton(done = new Button(width / 2 - 100, (height / 4) * 3 + 30, 200, 20, new StringTextComponent("Done"), done -> {
-            closeScreen();
+            onClose();
         }));
 
         addButton(calculatePrice = new Button(width - 120, height / 2 - 30, 100, 20, new StringTextComponent("Calculate Price"), priceCalculate -> {
@@ -113,15 +113,15 @@ public class GuiCustomData extends Screen {
 
         this.children.add(buildingTypePanel);
 
-        rentInput = new TextFieldWidget(minecraft.fontRenderer,width-120,(height/2) + 80,100,20, new StringTextComponent("Rent"));
-        priceInput = new TextFieldWidget(minecraft.fontRenderer, width-120,(height/2),100,20, new StringTextComponent("Price"));
+        rentInput = new TextFieldWidget(minecraft.font,width-120,(height/2) + 80,100,20, new StringTextComponent("Rent"));
+        priceInput = new TextFieldWidget(minecraft.font, width-120,(height/2),100,20, new StringTextComponent("Price"));
         rentInput.setVisible(true);
-        rentInput.setFocused2(true);
-        rentInput.setMaxStringLength(6);
-        rentInput.setText(String.valueOf(tile.getRent()));
+        rentInput.setFocus(true);
+        rentInput.setMaxLength(6);
+        rentInput.setValue(String.valueOf(tile.getRent()));
         priceInput.setVisible(true);
-        priceInput.setMaxStringLength(6);
-        priceInput.setText(String.valueOf(tile.getPrice()));
+        priceInput.setMaxLength(6);
+        priceInput.setValue(String.valueOf(tile.getPrice()));
         children.add(rentInput);
         children.add(priceInput);
         buildingTypePanel.selection.type = tile.getBuildingType();
@@ -156,15 +156,15 @@ public class GuiCustomData extends Screen {
     }
 
     @Override
-    public void closeScreen() {
-        super.closeScreen();
+    public void onClose() {
+        super.onClose();
         UpdateServer();
     }
 
     private void UpdateServer() {
         try {
-        tile.setRent(Float.parseFloat(rentInput.getText()));
-        tile.setPrice(Float.parseFloat(priceInput.getText()));
+        tile.setRent(Float.parseFloat(rentInput.getValue()));
+        tile.setPrice(Float.parseFloat(priceInput.getValue()));
 
         } catch (NumberFormatException e){
             SimuKraft.LOGGER().debug("Incorrect input" + e);
@@ -244,7 +244,7 @@ public class GuiCustomData extends Screen {
         }
 
         private boolean disableOuterButton(Button button){
-            return button.y >= this.top && button.y+ button.getHeightRealms() <= this.bottom;
+            return button.y >= this.top && button.y+ button.getHeight() <= this.bottom;
         }
     }
 

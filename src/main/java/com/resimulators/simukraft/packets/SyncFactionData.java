@@ -25,13 +25,13 @@ public class SyncFactionData implements IMessage {
 
     @Override
     public void toBytes(PacketBuffer buf) {
-        buf.writeCompoundTag(nbt);
+        buf.writeNbt(nbt);
         buf.writeInt(id);
     }
 
     @Override
     public void fromBytes(PacketBuffer buf) {
-        this.nbt = buf.readCompoundTag();
+        this.nbt = buf.readNbt();
         id = buf.readInt();
 
     }

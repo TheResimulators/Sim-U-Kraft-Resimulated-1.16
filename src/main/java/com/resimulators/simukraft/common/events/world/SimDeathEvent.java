@@ -12,11 +12,11 @@ public class SimDeathEvent {
 
     @SubscribeEvent
     public void OnSimDeathEvent(LivingDeathEvent event) {
-        if (!event.getEntity().world.isRemote) {
+        if (!event.getEntity().level.isClientSide) {
             LivingEntity entity = event.getEntityLiving();
             if (entity instanceof SimEntity) {
                 SimEntity sim = (SimEntity) entity;
-                Faction faction = SavedWorldData.get(sim.world).getFactionWithSim(sim.getUniqueID());
+                Faction faction = SavedWorldData.get(sim.level).getFactionWithSim(sim.getUUID());
                 if (faction != null) {
                     if (sim.getHouseID() != null){
                         sim.removeFromHouse(faction);

@@ -31,43 +31,43 @@ public class TileMarker extends TileEntity {
     }
 
     @Override
-    public void read(BlockState state, CompoundNBT nbt) {
-        super.read(state, nbt);
-        if (nbt.contains("origin")) origin = BlockPos.fromLong(nbt.getLong("origin"));
-        if (nbt.contains("backleft")) backLeft = BlockPos.fromLong(nbt.getLong("backleft"));
-        if (nbt.contains("frontright")) frontRight = BlockPos.fromLong(nbt.getLong("frontright"));
-        if (nbt.contains("backright")) backRight = BlockPos.fromLong(nbt.getLong("backright"));
+    public void load(BlockState state, CompoundNBT nbt) {
+        super.load(state, nbt);
+        if (nbt.contains("origin")) origin = BlockPos.of(nbt.getLong("origin"));
+        if (nbt.contains("backleft")) backLeft = BlockPos.of(nbt.getLong("backleft"));
+        if (nbt.contains("frontright")) frontRight = BlockPos.of(nbt.getLong("frontright"));
+        if (nbt.contains("backright")) backRight = BlockPos.of(nbt.getLong("backright"));
         if (nbt.contains("used")) used = nbt.getBoolean("used");
         if (nbt.contains("range")) range = nbt.getInt("range");
         if (nbt.contains("corner")) corner = Corner.fromNbt(nbt.getInt("corner"));
     }
 
     @Override
-    public CompoundNBT write(CompoundNBT nbt) {
-        if (origin != null) nbt.putLong("origin",origin.toLong());
-        if (backLeft != null) nbt.putLong("backleft", backLeft.toLong());
-        if (frontRight != null) nbt.putLong("frontright",frontRight.toLong());
-        if (backRight != null) nbt.putLong("backright",backRight.toLong());
+    public CompoundNBT save(CompoundNBT nbt) {
+        if (origin != null) nbt.putLong("origin",origin.asLong());
+        if (backLeft != null) nbt.putLong("backleft", backLeft.asLong());
+        if (frontRight != null) nbt.putLong("frontright",frontRight.asLong());
+        if (backRight != null) nbt.putLong("backright",backRight.asLong());
         nbt.putBoolean("used",used);
         nbt.putInt("range",range);
         if (corner != null) nbt.putInt("corner",Corner.toNbt(corner));
-        return super.write(nbt);
+        return super.save(nbt);
     }
 
 
     @Override
     public AxisAlignedBB getRenderBoundingBox() {
-        AxisAlignedBB area = new AxisAlignedBB(this.pos);
+        AxisAlignedBB area = new AxisAlignedBB(this.worldPosition);
         if (backRight != null) {
-            area = new AxisAlignedBB(this.pos, backRight);
+            area = new AxisAlignedBB(this.worldPosition, backRight);
             return area;
         }else
         if (backLeft != null) {
-            area = new AxisAlignedBB(this.pos, backLeft);
+            area = new AxisAlignedBB(this.worldPosition, backLeft);
             return area;
         }else
         if (frontRight != null) {
-            area = new AxisAlignedBB(this.pos, frontRight);
+            area = new AxisAlignedBB(this.worldPosition, frontRight);
             return area;
         }
         return area;
@@ -79,15 +79,15 @@ public class TileMarker extends TileEntity {
         int z = 0;
         if (!used){
             used = true;
-            origin = this.pos;
+            origin = this.worldPosition;
 
         for (int i = 1; i < range; i++) {
-            BlockPos pos = this.pos.offset(dir, i);
-            if (this.world.getTileEntity(pos) instanceof TileMarker) {
-                TileMarker marker = (TileMarker) this.world.getTileEntity(pos);
+            BlockPos pos = this.worldPosition.relative(dir, i);
+            if (this.level.getBlockEntity(pos) instanceof TileMarker) {
+                TileMarker marker = (TileMarker) this.level.getBlockEntity(pos);
                 marker.used = true;
                 setBackLeft(pos);
-                marker.setOrigin(this.pos);
+                marker.setOrigin(this.worldPosition);
                 marker.setCorner(Corner.BACKLEFT);
                 x = i;
                 break;
@@ -96,34 +96,34 @@ public class TileMarker extends TileEntity {
         }
 
         for (int i = 1; i < range; i++) {
-            BlockPos pos = this.pos.offset(dir.rotateY(), i);
-            if (this.world.getTileEntity(pos) instanceof TileMarker) {
-                TileMarker marker = (TileMarker) this.world.getTileEntity(pos);
+            BlockPos pos = this.worldPosition.relative(dir.getClockWise(), i);
+            if (this.level.getBlockEntity(pos) instanceof TileMarker) {
+                TileMarker marker = (TileMarker) this.level.getBlockEntity(pos);
                 marker.used = true;
                 setFrontRight(pos);
-                marker.setOrigin(this.pos);
+                marker.setOrigin(this.worldPosition);
                 marker.setCorner(Corner.FRONTRIGHT);
 
                 z = i;
                 break;
                 }
             }
-        if (x != 0 && z != 0) {backRight = this.pos.add(x,0,z);
+        if (x != 0 && z != 0) {backRight = this.worldPosition.offset(x,0,z);
 
         }
-        markDirty();
+        setChanged();
 
 
         }if (backLeft != null){
-        if (world.getTileEntity(backLeft) != null){
-            TileMarker marker = (TileMarker) world.getTileEntity(backLeft);
+        if (level.getBlockEntity(backLeft) != null){
+            TileMarker marker = (TileMarker) level.getBlockEntity(backLeft);
             marker.setFrontRight(frontRight);
             marker.setBackLeft(backLeft);
             marker.setBackRight(backRight);
         }}
         if (frontRight != null){
-        if (world.getTileEntity(frontRight) != null){
-            TileMarker marker = (TileMarker) world.getTileEntity(frontRight);
+        if (level.getBlockEntity(frontRight) != null){
+            TileMarker marker = (TileMarker) level.getBlockEntity(frontRight);
             marker.setFrontRight(frontRight);
             marker.setBackLeft(backLeft);
             marker.setBackRight(backRight);
@@ -133,27 +133,27 @@ public class TileMarker extends TileEntity {
 
     public void setBackLeft(BlockPos backLeft) {
         this.backLeft = backLeft;
-        markDirty();
+        setChanged();
     }
 
     public void setBackRight(BlockPos backRight) {
         this.backRight = backRight;
-        markDirty();
+        setChanged();
     }
 
     public void setFrontRight(BlockPos frontRight) {
         this.frontRight = frontRight;
-        markDirty();
+        setChanged();
     }
 
     public void setOrigin(BlockPos origin) {
         this.origin = origin;
-        markDirty();
+        setChanged();
     }
 
     public void setCorner(Corner corner) {
         this.corner = corner;
-        markDirty();
+        setChanged();
     }
     public BlockPos getOrigin() {
         return origin;
@@ -202,45 +202,45 @@ public class TileMarker extends TileEntity {
         if (corner == Corner.ORIGIN) {
             checkcorners();
             if (frontRight != null){
-                ((TileMarker)world.getTileEntity(frontRight)).checkcorners();
+                ((TileMarker)level.getBlockEntity(frontRight)).checkcorners();
             }
             if (backLeft != null){
-                if (world.getTileEntity(backLeft) != null) ((TileMarker)world.getTileEntity(backLeft)).checkcorners();
+                if (level.getBlockEntity(backLeft) != null) ((TileMarker)level.getBlockEntity(backLeft)).checkcorners();
             }
         }else if (corner == Corner.BACKLEFT){
             checkcorners();
             if(origin != null){
-                ((TileMarker)world.getTileEntity(origin)).checkcorners();
+                ((TileMarker)level.getBlockEntity(origin)).checkcorners();
             }
             if (frontRight != null){
-                ((TileMarker)world.getTileEntity(frontRight)).checkcorners();
+                ((TileMarker)level.getBlockEntity(frontRight)).checkcorners();
             }
         } else if (corner == Corner.FRONTRIGHT){
             checkcorners();
             if(origin != null){
-                ((TileMarker)world.getTileEntity(origin)).checkcorners();
+                ((TileMarker)level.getBlockEntity(origin)).checkcorners();
             }
             if (frontRight != null){
-                ((TileMarker)world.getTileEntity(frontRight)).checkcorners();
+                ((TileMarker)level.getBlockEntity(frontRight)).checkcorners();
             }
     }
     }
 
     private void checkcorners(){
         if (frontRight != null){
-            if(world.getTileEntity(frontRight) == null ){
+            if(level.getBlockEntity(frontRight) == null ){
             setFrontRight(null);}
         }
         if (backLeft != null){
-        if (world.getTileEntity(backLeft) == null){
+        if (level.getBlockEntity(backLeft) == null){
             setBackLeft(null);}
         }
         if (origin != null){
-        if (world.getTileEntity(origin) == null){
+        if (level.getBlockEntity(origin) == null){
            setOrigin(null);
         }
         }
-        markDirty();
+        setChanged();
     }
 
 

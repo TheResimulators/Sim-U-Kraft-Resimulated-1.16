@@ -47,9 +47,9 @@ public class SimInformationOverlay {
     @SubscribeEvent
     public void renderSimOverlay(TickEvent.RenderTickEvent event) {
         RayTraceHelper.INSTANCE.ray();
-        if (RayTraceHelper.INSTANCE.getTarget() != null && (minecraft.currentScreen == null || minecraft.currentScreen instanceof ChatScreen) || minecraft.currentScreen instanceof GuiSimInventory) {
+        if (RayTraceHelper.INSTANCE.getTarget() != null && (minecraft.screen == null || minecraft.screen instanceof ChatScreen) || minecraft.screen instanceof GuiSimInventory) {
             Entity entity = null;
-            if (minecraft.currentScreen instanceof GuiSimInventory)
+            if (minecraft.screen instanceof GuiSimInventory)
                 entity = pastEntity;
             if (entity == null)
                 entity = RayTraceHelper.INSTANCE.getTargetEntity();
@@ -58,30 +58,30 @@ public class SimInformationOverlay {
             if (entity instanceof SimEntity) {
                 SimEntity sim = (SimEntity) entity;
                 if (faction == null){
-                    faction = SavedWorldData.get(sim.getEntityWorld()).getFactionWithSim(sim.getUniqueID());
+                    faction = SavedWorldData.get(sim.getCommandSenderWorld()).getFactionWithSim(sim.getUUID());
                     house = faction.getHouseByID(sim.getHouseID());
                 }
                 RenderSystem.pushMatrix();
                 saveGLState();
 
-                int guiScale = minecraft.gameSettings.guiScale;
+                int guiScale = minecraft.options.guiScale;
                 if (guiScale == 0)
                     guiScale = 4;
 
                 float scale = 1;
                 int posX = 0;
-                int posY = (minecraft.getMainWindow().getHeight() / (guiScale)) / 2;
+                int posY = (minecraft.getWindow().getScreenHeight() / (guiScale)) / 2;
 
-                if (minecraft.currentScreen instanceof GuiSimInventory) {
-                    posX = ((minecraft.getMainWindow().getWidth() / guiScale) / 2) - ((GuiSimInventory) minecraft.currentScreen).getXSize() / 2 - 90;
-                    posY = ((minecraft.getMainWindow().getHeight() / (guiScale)) / 2) - ((GuiSimInventory) minecraft.currentScreen).getYSize() / 2;
+                if (minecraft.screen instanceof GuiSimInventory) {
+                    posX = ((minecraft.getWindow().getScreenWidth() / guiScale) / 2) - ((GuiSimInventory) minecraft.screen).getXSize() / 2 - 90;
+                    posY = ((minecraft.getWindow().getScreenHeight() / (guiScale)) / 2) - ((GuiSimInventory) minecraft.screen).getYSize() / 2;
                     scale = 1;
                 }
 
                 RenderSystem.scalef(scale, scale, 1);
 
                 RenderSystem.disableRescaleNormal();
-                RenderHelper.disableStandardItemLighting();
+                RenderHelper.turnOff();
                 RenderSystem.disableLighting();
                 RenderSystem.disableDepthTest();
                 int rectangleHeight = 86;
@@ -123,7 +123,7 @@ public class SimInformationOverlay {
                     }
                 }
 
-                float armor = sim.getTotalArmorValue() / 2;
+                float armor = sim.getArmorValue() / 2;
                 float maxArmor = 20;
                 int armorCount = MathHelper.ceil(maxArmor) / 2;
 
@@ -169,27 +169,27 @@ public class SimInformationOverlay {
                 loadGLState();
                 RenderSystem.enableDepthTest();
                 int jobYPos = 76;
-                minecraft.fontRenderer.drawString(new MatrixStack(), (SimuKraft.config.getSims().coloredNames.get() ? TextFormatting.fromColorIndex(ColorHelper.convertDyeToTF(sim.getNameColor())) : TextFormatting.WHITE) + sim.getName().getString(), posX + 5, posY + 5, Color.WHITE.getRGB());
+                minecraft.font.draw(new MatrixStack(), (SimuKraft.config.getSims().coloredNames.get() ? TextFormatting.getById(ColorHelper.convertDyeToTF(sim.getNameColor())) : TextFormatting.WHITE) + sim.getName().getString(), posX + 5, posY + 5, Color.WHITE.getRGB());
 
                 //TODO: WIP Couple Status (Temp)
-                minecraft.fontRenderer.drawString(new MatrixStack(), "Single (WIP)" + TextFormatting.RESET,posX + 5,posY + 50,Color.WHITE.getRGB());
+                minecraft.font.draw(new MatrixStack(), "Single (WIP)" + TextFormatting.RESET,posX + 5,posY + 50,Color.WHITE.getRGB());
 
 
                 //TODO:WIP HOUSE STATUS (TEMP)
                 if (house != null) {
-                    minecraft.fontRenderer.drawString(new MatrixStack(), "Lives in " + TextFormatting.RESET, posX + 5, posY + 63, Color.WHITE.getRGB());
-                    minecraft.fontRenderer.drawString(new MatrixStack(), house.getName().replace("_"," ") + TextFormatting.RESET, posX + 5, posY + 76, Color.WHITE.getRGB());
+                    minecraft.font.draw(new MatrixStack(), "Lives in " + TextFormatting.RESET, posX + 5, posY + 63, Color.WHITE.getRGB());
+                    minecraft.font.draw(new MatrixStack(), house.getName().replace("_"," ") + TextFormatting.RESET, posX + 5, posY + 76, Color.WHITE.getRGB());
                     jobYPos = 89;
                 }else{
-                    minecraft.fontRenderer.drawString(new MatrixStack(), "Homeless" + TextFormatting.RESET,posX + 5,posY + 63,Color.WHITE.getRGB());
+                    minecraft.font.draw(new MatrixStack(), "Homeless" + TextFormatting.RESET,posX + 5,posY + 63,Color.WHITE.getRGB());
                 }
                 if (sim.getJob() == null){
 
-                   minecraft.fontRenderer.drawString(new MatrixStack(), "Unemployed" + TextFormatting.RESET,posX + 5,posY + jobYPos,Color.WHITE.getRGB());
+                   minecraft.font.draw(new MatrixStack(), "Unemployed" + TextFormatting.RESET,posX + 5,posY + jobYPos,Color.WHITE.getRGB());
                 }else{
                     String profession = Profession.getNameFromID(sim.getProfession());
 
-                    minecraft.fontRenderer.drawString(new MatrixStack(),StringUtils.capitalize(profession) + TextFormatting.RESET,posX + 5,posY + jobYPos,Color.WHITE.getRGB());
+                    minecraft.font.draw(new MatrixStack(),StringUtils.capitalize(profession) + TextFormatting.RESET,posX + 5,posY + jobYPos,Color.WHITE.getRGB());
 
                 }
                 RenderSystem.popMatrix();
@@ -218,9 +218,9 @@ public class SimInformationOverlay {
         else
             RenderSystem.disableLighting();
         if (hasLight0)
-            GlStateManager.enableLight(0);
+            GlStateManager._enableLight(0);
         else if (hasLight1)
-            GlStateManager.enableLight(1);
+            GlStateManager._enableLight(1);
         else if (hasDepthTest)
             RenderSystem.enableDepthTest();
         else
@@ -266,13 +266,13 @@ public class SimInformationOverlay {
         RenderSystem.blendFuncSeparate(770, 771, 1, 0);
         RenderSystem.shadeModel(7425);
         Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder buffer = tessellator.getBuffer();
+        BufferBuilder buffer = tessellator.getBuilder();
         buffer.begin(7, DefaultVertexFormats.POSITION_COLOR);
-        buffer.pos(left + right, top, zLevel).color(f1, f2, f3, f).endVertex();
-        buffer.pos(left, top, zLevel).color(f1, f2, f3, f).endVertex();
-        buffer.pos(left, top + bottom, zLevel).color(f5, f6, f7, f4).endVertex();
-        buffer.pos(left + right, top + bottom, zLevel).color(f5, f6, f7, f4).endVertex();
-        tessellator.draw();
+        buffer.vertex(left + right, top, zLevel).color(f1, f2, f3, f).endVertex();
+        buffer.vertex(left, top, zLevel).color(f1, f2, f3, f).endVertex();
+        buffer.vertex(left, top + bottom, zLevel).color(f5, f6, f7, f4).endVertex();
+        buffer.vertex(left + right, top + bottom, zLevel).color(f5, f6, f7, f4).endVertex();
+        tessellator.end();
         RenderSystem.shadeModel(7424);
         RenderSystem.disableBlend();
         RenderSystem.enableAlphaTest();
@@ -284,18 +284,18 @@ public class SimInformationOverlay {
         float f1 = 0.00390625F;
         float zLevel = 0.0F;
         Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder buffer = tessellator.getBuffer();
+        BufferBuilder buffer = tessellator.getBuilder();
         buffer.begin(7, DefaultVertexFormats.POSITION_TEX);
-        buffer.pos(x, y + height, zLevel).tex( ((float) (textureX) * f), ((float) (textureY + th) * f1)).endVertex();
-        buffer.pos(x + width, y + height, zLevel).tex( ((float) (textureX + tw) * f), ((float) (textureY + th) * f1)).endVertex();
-        buffer.pos(x + width, y, zLevel).tex( ((float) (textureX + tw) * f), ((float) (textureY) * f1)).endVertex();
-        buffer.pos(x, y, zLevel).tex( ((float) (textureX) * f), ((float) (textureY) * f1)).endVertex();
-        tessellator.draw();
+        buffer.vertex(x, y + height, zLevel).uv( ((float) (textureX) * f), ((float) (textureY + th) * f1)).endVertex();
+        buffer.vertex(x + width, y + height, zLevel).uv( ((float) (textureX + tw) * f), ((float) (textureY + th) * f1)).endVertex();
+        buffer.vertex(x + width, y, zLevel).uv( ((float) (textureX + tw) * f), ((float) (textureY) * f1)).endVertex();
+        buffer.vertex(x, y, zLevel).uv( ((float) (textureX) * f), ((float) (textureY) * f1)).endVertex();
+        tessellator.end();
     }
 
     public static void renderIcon(int x, int y, int sx, int sy, Icons icon) {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        Minecraft.getInstance().getTextureManager().bindTexture(AbstractGui.GUI_ICONS_LOCATION);
+        Minecraft.getInstance().getTextureManager().bind(AbstractGui.GUI_ICONS_LOCATION);
 
         if (icon == null)
             return;

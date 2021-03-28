@@ -23,15 +23,15 @@ public class UpdateSimPacket implements IMessage {
     public UpdateSimPacket(){}
     @Override
     public void toBytes(PacketBuffer buf) {
-        buf.writeUniqueId(uuid);
-        buf.writeCompoundTag(nbt);
+        buf.writeUUID(uuid);
+        buf.writeNbt(nbt);
         buf.writeInt(id);
     }
 
     @Override
     public void fromBytes(PacketBuffer buf) {
-        uuid = buf.readUniqueId();
-        nbt = buf.readCompoundTag();
+        uuid = buf.readUUID();
+        nbt = buf.readNbt();
         id = buf.readInt();
     }
 

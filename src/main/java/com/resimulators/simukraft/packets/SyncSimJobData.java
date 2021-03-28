@@ -47,7 +47,7 @@ public class SyncSimJobData implements IMessage{
         }
 
         for(CompoundNBT nbt: nbts){
-        buf.writeCompoundTag(nbt);
+        buf.writeNbt(nbt);
         }
     }
 
@@ -63,7 +63,7 @@ public class SyncSimJobData implements IMessage{
 
         }
         for (int i = 0; i< size; i++){
-            nbts.add(buf.readCompoundTag());
+            nbts.add(buf.readNbt());
         }
     }
 
@@ -80,7 +80,7 @@ public class SyncSimJobData implements IMessage{
             int simID = simIDs.get(i);
             int jobType = jobTypes.get(i);
             CompoundNBT nbt = nbts.get(i);
-            SimEntity sim = (SimEntity) world.getEntityByID(simID);
+            SimEntity sim = (SimEntity) world.getEntity(simID);
             if (sim.getJob() == null) {
                 ModJobs.JOB_LOOKUP.get(jobType).apply(sim);
                 sim.getJob().readFromNbt(nbt.getList("nbt", Constants.NBT.TAG_COMPOUND));

@@ -40,17 +40,17 @@ public class BakerGoal extends BaseGoal<JobBaker> {
     private boolean validateSentence = false;
 
     public BakerGoal(SimEntity sim) {
-        super(sim, sim.getAIMoveSpeed()*2, 20);
+        super(sim, sim.getSpeed()*2, 20);
         this.sim = sim;
-        this.world = sim.world;
+        this.world = sim.level;
     }
 
     @Override
-    public boolean shouldExecute() {
+    public boolean canUse() {
         job = (JobBaker) sim.getJob();
         if (job == null) return  false;
         if (sim.getActivity() == Activity.GOING_TO_WORK) {
-            if (sim.getPosition().withinDistance(new Vector3d(job.getWorkSpace().getX(), job.getWorkSpace().getY(), job.getWorkSpace().getZ()), 2)) {
+            if (sim.blockPosition().closerThan(new Vector3d(job.getWorkSpace().getX(), job.getWorkSpace().getY(), job.getWorkSpace().getZ()), 2)) {
                 sim.setActivity(Activity.WORKING);
                 findChestAroundTargetBlock(job.getWorkSpace(), 5, world);
                 return true;
@@ -60,9 +60,9 @@ public class BakerGoal extends BaseGoal<JobBaker> {
     }
 
     @Override
-    public void startExecuting() {
-        sim.setHeldItem(sim.getActiveHand(), Items.BREAD.getDefaultInstance());
-        destinationBlock = job.getWorkSpace();
+    public void start() {
+        sim.setItemInHand(sim.getUsedItemHand(), Items.BREAD.getDefaultInstance());
+        blockPos = job.getWorkSpace();
         if (!chests.isEmpty()) {
             state = State.CHEST_INTERACTION;
         } else if (!validateWorkArea()) {
@@ -105,44 +105,44 @@ public class BakerGoal extends BaseGoal<JobBaker> {
         }
         if (!farmerWorkSpace.isEmpty()) {
             state = State.NAVIGATING;
-            destinationBlock = farmerWorkSpace.get(0);
-            sim.getNavigator().tryMoveToXYZ(destinationBlock.getX(), destinationBlock.getY(), destinationBlock.getZ(), sim.getAIMoveSpeed()*2);
-            if (sim.getPosition().withinDistance(new Vector3d(destinationBlock.getX(), destinationBlock.getY(), destinationBlock.getZ()), 3)) {
+            blockPos = farmerWorkSpace.get(0);
+            sim.getNavigation().moveTo(blockPos.getX(), blockPos.getY(), blockPos.getZ(), sim.getSpeed()*2);
+            if (sim.blockPosition().closerThan(new Vector3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()), 3)) {
                 state = State.COLLECTING_WHEAT;
-                for (BlockPos workChests : farmChestsHashMap.get(destinationBlock)) {
-                    ChestTileEntity chestTileEntity = (ChestTileEntity) world.getTileEntity(workChests);
+                for (BlockPos workChests : farmChestsHashMap.get(blockPos)) {
+                    ChestTileEntity chestTileEntity = (ChestTileEntity) world.getBlockEntity(workChests);
                     if (chestTileEntity != null) {
                         int simInvLeftOver;
-                        int farmChestCount = Math.min(chestTileEntity.count(Items.WHEAT), 192);
+                        int farmChestCount = Math.min(chestTileEntity.countItem(Items.WHEAT), 192);
                         int simInvFarmStack = farmChestCount / 64;
                         if (simInvFarmStack >= 1) simInvLeftOver = farmChestCount - (simInvFarmStack * 64);
                         else {
                             simInvFarmStack = 0;
                             simInvLeftOver = farmChestCount;
                         }
-                        for (int i = 0; i < chestTileEntity.getSizeInventory(); i++) {
-                            ItemStack wheatFarmStack = chestTileEntity.getStackInSlot(i);
+                        for (int i = 0; i < chestTileEntity.getContainerSize(); i++) {
+                            ItemStack wheatFarmStack = chestTileEntity.getItem(i);
                             int wheatFarmAmount = wheatFarmStack.getCount();
                             if (wheatFarmStack.getItem().equals(Items.WHEAT)) {
                                 if (farmChestCount >= wheatFarmAmount) {
                                     farmChestCount -= wheatFarmAmount;
-                                    chestTileEntity.setInventorySlotContents(i, ItemStack.EMPTY);
+                                    chestTileEntity.setItem(i, ItemStack.EMPTY);
                                 } else {
                                     int chestLeftOver = wheatFarmAmount - farmChestCount;
-                                    chestTileEntity.setInventorySlotContents(i, new ItemStack(Items.WHEAT, chestLeftOver));
+                                    chestTileEntity.setItem(i, new ItemStack(Items.WHEAT, chestLeftOver));
                                     farmChestCount = 0;
                                 }
                             }
                             if (farmChestCount == 0) break;
                         }
-                        for (int i = 0; i < sim.getInventory().getSizeInventory(); i++) {
-                            ItemStack simInvStack = sim.getInventory().getStackInSlot(i);
+                        for (int i = 0; i < sim.getInventory().getContainerSize(); i++) {
+                            ItemStack simInvStack = sim.getInventory().getItem(i);
                             if (simInvStack.isEmpty()) {
                                 if (simInvFarmStack != 0) {
                                     simInvFarmStack--;
-                                    sim.getInventory().setInventorySlotContents(i, new ItemStack(Items.WHEAT, 64));
+                                    sim.getInventory().setItem(i, new ItemStack(Items.WHEAT, 64));
                                 } else {
-                                    sim.getInventory().setInventorySlotContents(i, new ItemStack(Items.WHEAT, simInvLeftOver));
+                                    sim.getInventory().setItem(i, new ItemStack(Items.WHEAT, simInvLeftOver));
                                     break;
                                 }
                             }
@@ -154,32 +154,32 @@ public class BakerGoal extends BaseGoal<JobBaker> {
                 }
                 if (checkSimFull()) {
                     state = State.NAVIGATING_BACK;
-                    destinationBlock = sim.getJob().getWorkSpace();
+                    blockPos = sim.getJob().getWorkSpace();
                     farmerWorkSpace.clear();
                 } else {
                     farmerWorkSpace.remove(0);
                     if (farmerWorkSpace.isEmpty()) {
-                        destinationBlock = sim.getJob().getWorkSpace();
+                        blockPos = sim.getJob().getWorkSpace();
                         state = State.NAVIGATING_BACK;
                     }
                 }
             }
         }
         if (farmerWorkSpace.isEmpty() && state.equals(State.NAVIGATING_BACK)) {
-            sim.getNavigator().tryMoveToXYZ(destinationBlock.getX(), destinationBlock.getY(), destinationBlock.getZ(), sim.getAIMoveSpeed()*2);
-            if (sim.getPosition().withinDistance(new Vector3d(destinationBlock.getX(), destinationBlock.getY(), destinationBlock.getZ()), 1)) {
+            sim.getNavigation().moveTo(blockPos.getX(), blockPos.getY(), blockPos.getZ(), sim.getSpeed()*2);
+            if (sim.blockPosition().closerThan(new Vector3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()), 1)) {
                 state = State.CHECKING_WHEAT;
             }
         }
     }
 
     @Override
-    public double getTargetDistanceSq() {
+    public double acceptedDistance() {
         return 1.0d;
     }
 
     @Override
-    public boolean shouldContinueExecuting() {
+    public boolean canContinueToUse() {
         if (sim.getJob() != null) {
             if (sim.getJob().getState() == Activity.FORCE_STOP) {
                 return false;
@@ -188,20 +188,20 @@ public class BakerGoal extends BaseGoal<JobBaker> {
                 return true;
             }
         }
-        return shouldExecute() && super.shouldContinueExecuting();
+        return canUse() && super.canContinueToUse();
     }
 
     @Override
-    protected boolean shouldMoveTo(IWorldReader worldIn, BlockPos pos) {
-        return sim.getDistanceSq(destinationBlock.getX(),destinationBlock.getY(),destinationBlock.getZ()) > getTargetDistanceSq();
+    protected boolean isValidTarget(IWorldReader worldIn, BlockPos pos) {
+        return sim.distanceToSqr(blockPos.getX(),blockPos.getY(),blockPos.getZ()) > acceptedDistance();
     }
 
     private void checkForWheat() {
         if (state == State.CHECKING_WHEAT) {
             for (BlockPos chest : chests) {
-                ChestTileEntity chestTileEntity = (ChestTileEntity) world.getTileEntity(chest);
+                ChestTileEntity chestTileEntity = (ChestTileEntity) world.getBlockEntity(chest);
                 if (chestTileEntity != null) {
-                    wheatAmount += chestTileEntity.count(Items.WHEAT);
+                    wheatAmount += chestTileEntity.countItem(Items.WHEAT);
                 }
             }
         }
@@ -212,32 +212,32 @@ public class BakerGoal extends BaseGoal<JobBaker> {
         int wheatToBeRemoved = bread * 3;
         chestLoop:
         for (BlockPos chest : chests) {
-            ChestTileEntity chestTileEntity = (ChestTileEntity) world.getTileEntity(chest);
+            ChestTileEntity chestTileEntity = (ChestTileEntity) world.getBlockEntity(chest);
             if (chestTileEntity != null) {
-                for (int i = chestTileEntity.getSizeInventory()-1; i >= 0; i--) {
-                    ItemStack wheatStack = chestTileEntity.getStackInSlot(i);
+                for (int i = chestTileEntity.getContainerSize()-1; i >= 0; i--) {
+                    ItemStack wheatStack = chestTileEntity.getItem(i);
                     int wheatCount = wheatStack.getCount();
                     if (wheatStack.getItem().equals(Items.WHEAT)) {
                         if (wheatToBeRemoved >= 64) {
                             wheatToBeRemoved -= wheatCount;
-                            chestTileEntity.removeStackFromSlot(i);
+                            chestTileEntity.removeItemNoUpdate(i);
                         } else if (wheatToBeRemoved == 0) { break; } else {
                             if (wheatToBeRemoved >= wheatCount) {
                                 wheatToBeRemoved -= wheatCount;
-                                chestTileEntity.removeStackFromSlot(i);
+                                chestTileEntity.removeItemNoUpdate(i);
                             } else {
                                 int wheatLeft = wheatCount - wheatToBeRemoved;
                                 ItemStack newWheatStack = new ItemStack(Items.WHEAT, wheatLeft);
-                                chestTileEntity.setInventorySlotContents(i, newWheatStack);
+                                chestTileEntity.setItem(i, newWheatStack);
                                 break;
                             }
                         }
                     }
                 }
-                for (int i = 0; i < chestTileEntity.getSizeInventory(); i++)
+                for (int i = 0; i < chestTileEntity.getContainerSize(); i++)
                 {
-                    if (chestTileEntity.getStackInSlot(i).isEmpty()) {
-                        chestTileEntity.setInventorySlotContents(i, new ItemStack(Items.BREAD, bread));
+                    if (chestTileEntity.getItem(i).isEmpty()) {
+                        chestTileEntity.setItem(i, new ItemStack(Items.BREAD, bread));
                         break chestLoop;
                     }
                 }
@@ -247,11 +247,11 @@ public class BakerGoal extends BaseGoal<JobBaker> {
     }
 
     private void getSimFarmers() {
-        Faction faction = SavedWorldData.get(world).getFactionWithSim(sim.getUniqueID());
+        Faction faction = SavedWorldData.get(world).getFactionWithSim(sim.getUUID());
         ArrayList<UUID> simFarmersUUID = faction.getEmployedSims();
         ServerWorld serverWorld = (ServerWorld) this.world;
         for (UUID simFarmerUUID : simFarmersUUID) {
-            SimEntity simEntity = (SimEntity) serverWorld.getEntityByUuid(simFarmerUUID);
+            SimEntity simEntity = (SimEntity) serverWorld.getEntity(simFarmerUUID);
             if (simEntity != null) {
                 if (simEntity.getJob().jobType().equals(Profession.FARMER) && !simFarmers.contains(simEntity)) {
                     simFarmers.add(simEntity);
@@ -264,7 +264,7 @@ public class BakerGoal extends BaseGoal<JobBaker> {
         for (SimEntity simFarmer : simFarmers) {
             JobFarmer jobFarmer = (JobFarmer) simFarmer.getJob();
             if (jobFarmer != null) {
-                TileFarmer tileFarmer = (TileFarmer) world.getTileEntity(jobFarmer.getWorkSpace());
+                TileFarmer tileFarmer = (TileFarmer) world.getBlockEntity(jobFarmer.getWorkSpace());
                 if (tileFarmer != null) {
                     if (tileFarmer.getSeed().equals(Seed.WHEAT) && !farmerWorkSpace.contains(jobFarmer.getWorkSpace()) && tileHasWheat(jobFarmer.getWorkSpace())) {
                         farmerWorkSpace.add(jobFarmer.getWorkSpace());
@@ -277,10 +277,10 @@ public class BakerGoal extends BaseGoal<JobBaker> {
     private boolean tileHasWheat(BlockPos workSpace) {
         ArrayList<BlockPos> blockPosArrayList = BlockUtils.getBlocksAroundPosition(workSpace, 5);
         for (BlockPos blockPos : blockPosArrayList) {
-            if (world.getTileEntity(blockPos) instanceof ChestTileEntity) {
-                ChestTileEntity chestTileEntity = (ChestTileEntity) world.getTileEntity(blockPos);
+            if (world.getBlockEntity(blockPos) instanceof ChestTileEntity) {
+                ChestTileEntity chestTileEntity = (ChestTileEntity) world.getBlockEntity(blockPos);
                 if (chestTileEntity != null) {
-                    if (chestTileEntity.count(Items.WHEAT) > 0) return true;
+                    if (chestTileEntity.countItem(Items.WHEAT) > 0) return true;
                 }
             }
         }
@@ -292,10 +292,10 @@ public class BakerGoal extends BaseGoal<JobBaker> {
             ArrayList<BlockPos> chestArrayList = new ArrayList<>();
             ArrayList<BlockPos> blockPosArrayList = BlockUtils.getBlocksAroundAndBelowPosition(farmBox, 5);
             for (BlockPos blockPos : blockPosArrayList) {
-                if (world.getTileEntity(blockPos) instanceof ChestTileEntity) {
-                    ChestTileEntity chestTileEntity = (ChestTileEntity) world.getTileEntity(blockPos);
+                if (world.getBlockEntity(blockPos) instanceof ChestTileEntity) {
+                    ChestTileEntity chestTileEntity = (ChestTileEntity) world.getBlockEntity(blockPos);
                     if (chestTileEntity != null) {
-                        if (chestTileEntity.count(Items.WHEAT) > 0) {
+                        if (chestTileEntity.countItem(Items.WHEAT) > 0) {
                             chestArrayList.add(blockPos);
                         }
                     }
@@ -306,12 +306,12 @@ public class BakerGoal extends BaseGoal<JobBaker> {
     }
 
     private boolean checkSimFull() {
-        return sim.getInventory().count(Items.WHEAT) >= 192;
+        return sim.getInventory().countItem(Items.WHEAT) >= 192;
     }
 
     private void putSimInvInChest() {
         int simInvLeftOver;
-        int simInvAmount = sim.getInventory().count(Items.WHEAT);
+        int simInvAmount = sim.getInventory().countItem(Items.WHEAT);
         int simInvStack = simInvAmount / 64;
         if (simInvStack >= 1) {
             simInvLeftOver = simInvAmount - (simInvAmount * 64);
@@ -321,40 +321,40 @@ public class BakerGoal extends BaseGoal<JobBaker> {
         }
         ChestLoop:
         for (BlockPos chest : chests) {
-            ChestTileEntity chestTileEntity = (ChestTileEntity) world.getTileEntity(chest);
+            ChestTileEntity chestTileEntity = (ChestTileEntity) world.getBlockEntity(chest);
             if (chestTileEntity != null) {
-                for (int i = 0; i < chestTileEntity.getSizeInventory(); i++) {
-                    ItemStack wheatStack = chestTileEntity.getStackInSlot(i);
+                for (int i = 0; i < chestTileEntity.getContainerSize(); i++) {
+                    ItemStack wheatStack = chestTileEntity.getItem(i);
                     if (wheatStack.isEmpty()) {
                         if (simInvStack != 0) {
                             simInvStack--;
-                            chestTileEntity.setInventorySlotContents(i, new ItemStack(Items.WHEAT, 64));
+                            chestTileEntity.setItem(i, new ItemStack(Items.WHEAT, 64));
                         } else {
-                            chestTileEntity.setInventorySlotContents(i, new ItemStack(Items.WHEAT, simInvLeftOver));
+                            chestTileEntity.setItem(i, new ItemStack(Items.WHEAT, simInvLeftOver));
                             break ChestLoop;
                         }
                     }
                 }
             }
         }
-        for (int i = 0; i < sim.getInventory().getSizeInventory(); i++) {
-            ItemStack simWheatStack = sim.getInventory().getStackInSlot(i);
-            if (simWheatStack.getItem().equals(Items.WHEAT)) sim.getInventory().setInventorySlotContents(i, ItemStack.EMPTY);
+        for (int i = 0; i < sim.getInventory().getContainerSize(); i++) {
+            ItemStack simWheatStack = sim.getInventory().getItem(i);
+            if (simWheatStack.getItem().equals(Items.WHEAT)) sim.getInventory().setItem(i, ItemStack.EMPTY);
         }
     }
 
     private boolean isEmptyChest() {
         for (BlockPos chest : chests) {
-            ChestTileEntity chestTileEntity = (ChestTileEntity) world.getTileEntity(chest);
+            ChestTileEntity chestTileEntity = (ChestTileEntity) world.getBlockEntity(chest);
             if (chestTileEntity != null) {
-                if (chestTileEntity.count(Items.BREAD) == 0) return true;
+                if (chestTileEntity.countItem(Items.BREAD) == 0) return true;
             }
         }
         return false;
     }
 
     private boolean validateWorkArea() {
-        Faction faction = SavedWorldData.get(world).getFactionWithSim(sim.getUniqueID());
+        Faction faction = SavedWorldData.get(world).getFactionWithSim(sim.getUUID());
         if (job.getWorkSpace() != null) {
             if (chests.isEmpty()) {
                 faction.sendFactionChatMessage(sim.getDisplayName().getString() + " (JobBaker) has no inventory at: " + job.getWorkSpace(), world);

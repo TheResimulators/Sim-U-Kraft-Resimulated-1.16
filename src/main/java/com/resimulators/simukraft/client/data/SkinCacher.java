@@ -47,26 +47,26 @@ public class SkinCacher {
         AuthenticationService authenticationservice = new YggdrasilAuthenticationService(proxy, UUID.randomUUID().toString());
         MinecraftSessionService minecraftsessionservice = authenticationservice.createMinecraftSessionService();
         GameProfileRepository gameprofilerepository = authenticationservice.createProfileRepository();
-        PlayerProfileCache playerprofilecache = new PlayerProfileCache(gameprofilerepository, new File(Minecraft.getInstance().gameDir, MinecraftServer.USER_CACHE_FILE.getName()));
+        PlayerProfileCache playerprofilecache = new PlayerProfileCache(gameprofilerepository, new File(Minecraft.getInstance().gameDirectory, MinecraftServer.USERID_CACHE_FILE.getName()));
         SkullTileEntity.setProfileCache(playerprofilecache);
         SkullTileEntity.setSessionService(minecraftsessionservice);
-        PlayerProfileCache.setOnlineMode(false);
+        PlayerProfileCache.setUsesAuthentication(false);
         setProfileCache(playerprofilecache);
         setSessionService(minecraftsessionservice);
     }
 
     GameProfile profile = null;
     private ResourceLocation getPlayerSkin(String playerName) {
-        ResourceLocation playerSkin = DefaultPlayerSkin.getDefaultSkinLegacy();
+        ResourceLocation playerSkin = DefaultPlayerSkin.getDefaultSkin();
         GameProfile profileDirty = new GameProfile((UUID)null, playerName);
         this.profile = updateGameprofile(profileDirty);
         if (this.profile != null) {
             Minecraft minecraft = Minecraft.getInstance();
-            Map<MinecraftProfileTexture.Type, MinecraftProfileTexture> map = minecraft.getSkinManager().loadSkinFromCache(this.profile);
+            Map<MinecraftProfileTexture.Type, MinecraftProfileTexture> map = minecraft.getSkinManager().getInsecureSkinInformation(this.profile);
             if (map.containsKey(MinecraftProfileTexture.Type.SKIN))
-                playerSkin = minecraft.getSkinManager().loadSkin(map.get(MinecraftProfileTexture.Type.SKIN), MinecraftProfileTexture.Type.SKIN);
+                playerSkin = minecraft.getSkinManager().registerTexture(map.get(MinecraftProfileTexture.Type.SKIN), MinecraftProfileTexture.Type.SKIN);
             else {
-                UUID uuid = PlayerEntity.getUUID(this.profile);
+                UUID uuid = PlayerEntity.createPlayerUUID(this.profile);
                 playerSkin = DefaultPlayerSkin.getDefaultSkin(uuid);
             }
         }
@@ -86,7 +86,7 @@ public class SkinCacher {
             if (input.isComplete() && input.getProperties().containsKey("textures")) {
                 return input;
             } else if (profileCache != null && sessionService != null) {
-                GameProfile gameprofile = profileCache.getGameProfileForUsername(input.getName());
+                GameProfile gameprofile = profileCache.get(input.getName());
 
                 if (gameprofile == null) {
                     return input;

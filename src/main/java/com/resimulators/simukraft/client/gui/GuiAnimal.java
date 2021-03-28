@@ -16,7 +16,7 @@ public class GuiAnimal extends GuiBaseJob{
     public GuiAnimal(ITextComponent component, ArrayList<Integer> ids, BlockPos pos, int id) {
         super(component, ids, pos, id, Profession.ANIMAL_FARMER.getId());
         name = component.getString();
-        farm = (IControlBlock) SimuKraft.proxy.getClientWorld().getTileEntity(pos);
+        farm = (IControlBlock) SimuKraft.proxy.getClientWorld().getBlockEntity(pos);
     }
 
     @Override
