@@ -33,7 +33,14 @@ public class GuiResidential extends Screen {
         faction = SavedWorldData.get(SimuKraft.proxy.getClientWorld()).getFactionWithPlayer(SimuKraft.proxy.getClientPlayer().getUUID());
         tile =(TileResidential) SimuKraft.proxy.getClientWorld().getBlockEntity(pos);
         this.pos = pos;
-        name = faction.getHouseByID(tile.getHouseID()).getName();
+        if (tile != null){
+        if (tile.getHouseID() != null){
+            name = faction.getHouseByID(tile.getHouseID()).getName();
+            }
+        }
+        if (name == null) {
+            name = "Under Construction";
+        }
         Network.getNetwork().sendToServer(new RequestHouseOccupantsPacket(pos,SimuKraft.proxy.getClientPlayer().getUUID()));
     }
 

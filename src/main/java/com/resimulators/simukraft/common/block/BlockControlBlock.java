@@ -88,19 +88,24 @@ public class BlockControlBlock extends BlockBase {
 
     @Override
     public void playerWillDestroy(World worldIn, BlockPos pos, BlockState state, PlayerEntity player) {
-        super.playerWillDestroy(worldIn, pos, state, player);
         if (!worldIn.isClientSide){
 
             ITile tile = ((ITile) worldIn.getBlockEntity(pos));
+            if (tile != null){
+                if (!(tile instanceof TileResidential)){
+                    SimEntity sim = (SimEntity) ((ServerWorld)worldIn).getEntity(tile.getSimId());
+                    if (sim != null){
+                        int id = SavedWorldData.get(worldIn).getFactionWithPlayer(player.getUUID()).getId();
+                        SavedWorldData.get(worldIn).fireSim(id,sim);
+                        SavedWorldData.get(worldIn).getFaction(id).sendPacketToFaction(new SimFirePacket(id,sim.getId(),pos));
+                        sim.fireSim(sim,id,false);
+                    }
+                }else {
 
-            SimEntity sim = (SimEntity) ((ServerWorld)worldIn).getEntity(tile.getSimId());
-            if (sim != null){
-                int id = SavedWorldData.get(worldIn).getFactionWithPlayer(player.getUUID()).getId();
-                SavedWorldData.get(worldIn).fireSim(id,sim);
-                SavedWorldData.get(worldIn).getFaction(id).sendPacketToFaction(new SimFirePacket(id,sim.getId(),pos));
-                sim.fireSim(sim,id,false);
+                }
             }
         }
+        super.playerWillDestroy(worldIn, pos, state, player);
     }
 
     @Override

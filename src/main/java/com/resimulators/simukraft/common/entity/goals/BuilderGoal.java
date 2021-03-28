@@ -1,5 +1,6 @@
 package com.resimulators.simukraft.common.entity.goals;
 
+import com.mojang.authlib.GameProfile;
 import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.common.building.BuildingTemplate;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
@@ -30,6 +31,10 @@ import net.minecraft.world.IWorldReader;
 import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraft.world.gen.feature.template.PlacementSettings;
 import net.minecraft.world.gen.feature.template.Template;
+import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.common.util.FakePlayer;
+import net.minecraftforge.common.util.FakePlayerFactory;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -43,12 +48,16 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
     private int blockIndex = 0;
     private int delay = 20;
     private int notifyDelay = 0;
+    private FakePlayer player;
     Rotation rotation;
     private ArrayList<BlockPos> chests = new ArrayList<>();
     private HashMap<Item,Integer> blocksNeeded = new HashMap<>();
     public BuilderGoal(SimEntity sim) {
         super(sim, .7d, 20);
         this.sim = sim;
+        if (!sim.level.isClientSide){
+            player = new FakePlayer((ServerWorld) sim.level,new GameProfile(null,"Builder_"+ UUID.randomUUID()));
+        }
     }
 
     @Override
@@ -97,11 +106,10 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
             System.out.println(template.getOffSet());
             BlockPos origin = sim.getJob().getWorkSpace().offset(template.getOffSet().rotate(rotation).offset(job.getDirection().getNormal()));
             blocks = StructureHandler.modifyAndConvertTemplate(template, sim.level, origin,settings);
-            blocks.sort(Comparator.comparingDouble((block) -> sim.getJob().getWorkSpace().distSqr(block.pos)));
+            //blocks.sort(Comparator.comparingDouble((block) -> block.pos.getX()));
             SimuKraft.LOGGER().debug("cost: " + template.getCost());
             setBlocksNeeded();
-            template.placeInWorld((IServerWorld) sim.level,origin,settings,new Random());
-            sim.level.setBlock(origin,Blocks.COBBLESTONE.getBlock().defaultBlockState(),3);
+            //template.placeInWorld((IServerWorld) sim.level,origin,settings,new Random());
         }
     }
 
@@ -145,7 +153,7 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
                     }
                     if (sim.getInventory().hasItemStack(new ItemStack(blockInfo.state.getBlock())) || true){ // remove true for official release. for testing purposes
                         //BlockState blockState = sim.world.getBlockState(blockInfo.pos);
-                        sim.level.destroyBlock(blockInfo.pos,true);
+                        sim.level.getBlockState(blockPos).getBlock().removedByPlayer(sim.level.getBlockState(blockPos),sim.level,blockPos,player,true,sim.level.getFluidState(blockPos));
                         sim.level.setBlock(blockInfo.pos, blockstate.rotate(sim.level,blockInfo.pos,rotation), 3);
                         int index = sim.getInventory().findSlotMatchingUnusedItem(new ItemStack(blockInfo.state.getBlock()));
                         if (index >= 0){
@@ -176,14 +184,15 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
         if (blockIndex >= blocks.size()){
             sim.getJob().setState(Activity.FORCE_STOP);
 
-            Faction faction = SavedWorldData.get(sim.getCommandSenderWorld()).getFactionWithSim(sim.getUUID());
+            Faction faction = SavedWorldData.get(sim.level).getFactionWithSim(sim.getUUID());
             faction.sendFactionChatMessage("Builder " + sim.getName().getString() + "has finished building " + template.getName(), sim.getCommandSenderWorld());
             if (template.getTypeID() == BuildingType.RESIDENTIAL.id) {
                 BlockPos controlBlock = template.getControlBlock();
                 UUID id = faction.addNewHouse(controlBlock, template.getName(), template.getRent());
-                TileResidential tile =(TileResidential) sim.getCommandSenderWorld().getBlockEntity(controlBlock);
+                TileResidential tile =(TileResidential) sim.level.getBlockEntity(controlBlock);
                 tile.setFactionID(faction.getId());
                 tile.setHouseID(id);
+                sim.level.markAndNotifyBlock(tile.getBlockPos(),sim.level.getChunkAt(tile.getBlockPos()), tile.getBlockState(),tile.getBlockState(), Constants.BlockFlags.DEFAULT,512);
 
                 blockIndex = 0;
 
