@@ -15,10 +15,12 @@ import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SUpdateTileEntityPacket;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
+import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.WorldSavedData;
 import net.minecraftforge.fml.network.NetworkDirection;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -115,5 +117,14 @@ public class TileResidential extends TileEntity implements IControlBlock {
         }
         SimUKraftPacketHandler.INSTANCE.sendTo(new HouseOccupantIdsPacket(ids),player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
 
+    }
+
+    @Override
+    public SUpdateTileEntityPacket getUpdatePacket() {
+        return new SUpdateTileEntityPacket(this.worldPosition, -1, this.getUpdateTag());
+    }
+
+    public void onDestroy(World world){
+        SavedWorldData.get(world).getFaction(factionID).removeHouse(houseID,(ServerWorld) world);
     }
 }

@@ -129,4 +129,11 @@ public class TileAnimalFarm extends TileEntity implements IControlBlock{
             simId = nbt.getUUID("simid");
         }
     }
+
+    @Override
+    public SUpdateTileEntityPacket getUpdatePacket() {
+        return new SUpdateTileEntityPacket(this.worldPosition, -1, this.getUpdateTag());
+    }
+
+
 }

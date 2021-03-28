@@ -150,4 +150,9 @@ public class TileCustomData extends TileEntity implements IControlBlock{
     public CompoundNBT getUpdateTag() {
         return save(new CompoundNBT());
     }
+
+    @Override
+    public SUpdateTileEntityPacket getUpdatePacket() {
+        return new SUpdateTileEntityPacket(this.worldPosition, -1, this.getUpdateTag());
+    }
 }

@@ -72,4 +72,8 @@ public class TileFisher extends TileEntity implements IControlBlock {
     public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
         load(this.getBlockState(), pkt.getTag());
     }
+    @Override
+    public SUpdateTileEntityPacket getUpdatePacket() {
+        return new SUpdateTileEntityPacket(this.worldPosition, -1, this.getUpdateTag());
+    }
 }
