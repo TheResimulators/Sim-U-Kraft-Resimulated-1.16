@@ -88,6 +88,7 @@ public class BlockControlBlock extends BlockBase {
 
     @Override
     public void playerWillDestroy(World worldIn, BlockPos pos, BlockState state, PlayerEntity player) {
+        super.playerWillDestroy(worldIn, pos, state, player);
         if (!worldIn.isClientSide){
 
             ITile tile = ((ITile) worldIn.getBlockEntity(pos));

@@ -102,6 +102,7 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
 
             PlacementSettings settings = new PlacementSettings()
                 .setRotation(rotation)
+            blocks.sort(Comparator.comparingDouble((block) -> sim.getJob().getWorkSpace().distSqr(block.pos)));
                 .setMirror(template.getMirror());
             System.out.println(template.getOffSet());
             BlockPos origin = sim.getJob().getWorkSpace().offset(template.getOffSet().rotate(rotation).offset(job.getDirection().getNormal()));
