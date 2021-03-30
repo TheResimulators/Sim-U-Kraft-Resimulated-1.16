@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[34,)"
+loaderVersion="[36,)"
 issueTrackerURL = "https://github.com/TheResimulators/Sim-U-Kraft-Resimulated-1.15/issues"
 license = "Insert License here"
 
@@ -8,13 +8,13 @@ modId="simukraft"
 version="${file.jarVersion}"
 displayName="Sim-u-Kraft"
 credits="Resimulators" #optional
-authors="Aidie8, Fabbe50, Mcboy, Reprevise" #optional
+authors="Aidie8, Fabbe50, Mcboy, Reprevise,MrStrikor, basmulder03" #optional
 description='''This mod is a remake of the original simukraft. it was updated to 1.7.10 and now being updated to 1.15'''
 
 [[dependencies.suk]] #optional
     modId="forge"
     mandatory=true
-    versionRange="[34,)"
+    versionRange="[36,)"
     ordering="NONE"
 
     side="BOTH"
@@ -22,6 +22,6 @@ description='''This mod is a remake of the original simukraft. it was updated to
 [[dependencies.suk]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.16.3]"
+    versionRange="[1.16.5]"
     ordering="NONE"
     side="BOTH"
