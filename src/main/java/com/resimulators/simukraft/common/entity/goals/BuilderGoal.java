@@ -50,6 +50,7 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
     private int notifyDelay = 0;
     private FakePlayer player;
     Rotation rotation;
+    private PlacementSettings settings;
     private ArrayList<BlockPos> chests = new ArrayList<>();
     private HashMap<Item,Integer> blocksNeeded = new HashMap<>();
     public BuilderGoal(SimEntity sim) {
@@ -100,17 +101,14 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
             Rotation facing = getRotation(job.getDirection());
             rotation = getRotationCalculated(orgDir,facing);
 
-            PlacementSettings settings = new PlacementSettings()
+            settings = new PlacementSettings()
                 .setRotation(rotation)
                 .setMirror(template.getMirror());
             System.out.println(template.getOffSet());
             BlockPos origin = sim.getJob().getWorkSpace().offset(template.getOffSet().rotate(rotation).offset(job.getDirection().getNormal()));
             blocks = StructureHandler.modifyAndConvertTemplate(template, sim.level, origin,settings);
-           // blocks.sort(Comparator.comparingDouble((block) -> sim.getJob().getWorkSpace().distSqr(block.pos)));
-            //blocks.sort(Comparator.comparingDouble((block) -> block.pos.getX()));
-            SimuKraft.LOGGER().debug("cost: " + template.getCost());
             setBlocksNeeded();
-            //template.placeInWorld((IServerWorld) sim.level,origin,settings,new Random());
+            template.placeInWorld((IServerWorld) sim.level,origin.above(10),settings,new Random());
         }
     }
 
@@ -148,6 +146,8 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
                 if (blockIndex < blocks.size()){
                     Template.BlockInfo blockInfo = blocks.get(blockIndex);
                     BlockState blockstate = blockInfo.state;
+                    blockstate = blockstate.rotate(sim.level,blockInfo.pos,rotation.getRotated(template.getBlockRotation()));
+                    System.out.println(blockstate.getBlock() + "rotation " + blockstate);
                     if (blockInfo.state.getBlock() == ModBlocks.CONTROL_BLOCK.get()) {
                         blockstate = blockInfo.state.setValue(ModBlockProperties.TYPE, template.getTypeID());
                         template.setControlBlock(blockInfo.pos);
@@ -155,9 +155,17 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
                     if (sim.getInventory().hasItemStack(new ItemStack(blockInfo.state.getBlock())) || true){ // remove true for official release. for testing purposes
                         //BlockState blockState = sim.world.getBlockState(blockInfo.pos);
                         sim.level.getBlockState(blockPos).getBlock().removedByPlayer(sim.level.getBlockState(blockPos),sim.level,blockPos,player,true,sim.level.getFluidState(blockPos));
-                        sim.level.setBlock(blockInfo.pos, blockstate.rotate(sim.level,blockInfo.pos,rotation.getRotated(Rotation.CLOCKWISE_90)), 3);
-                        sim.level.markAndNotifyBlock(blockPos,sim.level.getChunkAt(blockPos), blockInfo.state,blockInfo.state, Constants.BlockFlags.DEFAULT,512);
-                        int index = sim.getInventory().findSlotMatchingUnusedItem(new ItemStack(blockInfo.state.getBlock()));
+                        sim.level.setBlock(blockInfo.pos, blockstate, 2);
+                        if (!settings.getKnownShape()) {
+                            BlockState blockstate1 = sim.level.getBlockState(blockPos);
+                            BlockState blockstate3 = Block.updateFromNeighbourShapes(blockstate1, sim.level, blockPos);
+                            if (blockstate1 != blockstate3) {
+                                sim.level.setBlock(blockPos, blockstate3, 2 & -2 | 16);
+                            }
+                            sim.level.blockUpdated(blockPos, blockstate3.getBlock());
+                        }
+
+                        int index = sim.getInventory().findSlotMatchingUnusedItem(new ItemStack(blockstate.getBlock()));
                         if (index >= 0){
                         sim.getInventory().removeItem(index,1);}
                         blockIndex++;

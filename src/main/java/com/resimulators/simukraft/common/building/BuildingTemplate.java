@@ -35,6 +35,7 @@ public class BuildingTemplate extends Template {
     private Mirror mirror = Mirror.NONE;
     private String name = "";
     private Direction direction;
+    private Rotation blockRotation = Rotation.NONE;
 
 
 
@@ -118,6 +119,7 @@ public class BuildingTemplate extends Template {
         direction = Direction.from2DDataValue(compound.getInt("direction"));}
         else{
             direction =  Direction.from2DDataValue(2);
+            blockRotation = Rotation.CLOCKWISE_90;
         }
         if (compound.contains("name"))
         {name = compound.getString("name");}else{
@@ -228,6 +230,10 @@ public class BuildingTemplate extends Template {
 
     public Mirror getMirror(){
         return mirror;
+    }
+
+    public Rotation getBlockRotation(){
+        return blockRotation;
     }
 }
 

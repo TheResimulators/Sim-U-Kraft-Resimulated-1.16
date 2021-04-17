@@ -332,7 +332,7 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
     public void die(DamageSource cause) {
         super.die(cause);
         this.dropEquipment();
-        removeFromFaction();
+
     }
 
     //Inventory
@@ -567,23 +567,6 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
 
     public FoodStats getFoodStats() {
         return this.foodStats;
-    }
-
-    public void removeFromFaction() {
-        SavedWorldData sWorld = SavedWorldData.get(level);
-        ArrayList<Faction> factions = sWorld.getFactions();
-
-        for (Faction faction : factions) {
-            if (faction.getSimsAndInfo().containsKey(this.uuid)) {
-                sWorld.removeSimFromFaction(faction.getId(), this);
-                if (job != null){
-                if (job.getWorkSpace() != null) { //only temporary until we get the job system done
-                    ((ITile) level.getBlockEntity(job.getWorkSpace())).setSimId(null);
-                    ((ITile) level.getBlockEntity(job.getWorkSpace())).setHired(false);
-                    }
-                }
-            }
-        }
     }
 
     public boolean canEat(boolean ignoreHunger) {
