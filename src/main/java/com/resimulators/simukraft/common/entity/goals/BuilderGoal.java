@@ -26,12 +26,14 @@ import net.minecraft.util.Mirror;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.world.EmptyBlockReader;
 import net.minecraft.world.IServerWorld;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraft.world.gen.feature.template.PlacementSettings;
 import net.minecraft.world.gen.feature.template.Template;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.client.model.pipeline.BlockInfo;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.common.util.FakePlayerFactory;
@@ -52,13 +54,13 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
     Rotation rotation;
     private PlacementSettings settings;
     private ArrayList<BlockPos> chests = new ArrayList<>();
-    private HashMap<Item,Integer> blocksNeeded = new HashMap<>();
+    private HashMap<Item, Integer> blocksNeeded = new HashMap<>();
 
     public BuilderGoal(SimEntity sim) {
         super(sim, .7d, 20);
         this.sim = sim;
-        if (!sim.level.isClientSide){
-            player = new FakePlayer((ServerWorld) sim.level,new GameProfile(null,"Builder_"+ UUID.randomUUID()));
+        if (!sim.level.isClientSide) {
+            player = new FakePlayer((ServerWorld) sim.level, new GameProfile(null, "Builder_" + UUID.randomUUID()));
         }
     }
 
@@ -66,22 +68,21 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
     public boolean canUse() {
         job = ((JobBuilder) sim.getJob());
         //System.out.println("startExecuting");
-        if (SavedWorldData.get(sim.level).getFactionWithSim(sim.getUUID()) != null){
+        if (SavedWorldData.get(sim.level).getFactionWithSim(sim.getUUID()) != null) {
             if (job != null) {
                 template = job.getTemplate();
                 if (sim.getActivity() == Activity.GOING_TO_WORK) {
                     checkForInventories();
-                    if (chests.size() != 0){
+                    if (chests.size() != 0) {
                         if (sim.blockPosition().closerThan(new Vector3d(job.getWorkSpace().getX(), job.getWorkSpace().getY(), job.getWorkSpace().getZ()), 5)) {
                             sim.setActivity(Activity.WORKING);
                             return template != null;
                         }
-                    }
-                    else {
+                    } else {
                         if (notifyDelay <= 0) {
-                            SavedWorldData.get(sim.level).getFactionWithSim(sim.getUUID()).sendFactionChatMessage(sim.getName().getString() + " Builder needs a chest to start Building",sim.level);
+                            SavedWorldData.get(sim.level).getFactionWithSim(sim.getUUID()).sendFactionChatMessage(sim.getName().getString() + " Builder needs a chest to start Building", sim.level);
                             notifyDelay = 2000;
-                        }else{
+                        } else {
                             notifyDelay--;
                         }
                     }
@@ -100,16 +101,23 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
 
             Rotation orgDir = getRotation(template.getDirection());
             Rotation facing = getRotation(job.getDirection());
-            rotation = getRotationCalculated(orgDir,facing);
+            rotation = getRotationCalculated(orgDir, facing);
 
             settings = new PlacementSettings()
                 .setRotation(rotation)
                 .setMirror(template.getMirror());
             System.out.println(template.getOffSet());
             BlockPos origin = sim.getJob().getWorkSpace().offset(template.getOffSet().rotate(rotation).offset(job.getDirection().getNormal()));
-            blocks = StructureHandler.modifyAndConvertTemplate(template, sim.level, origin,settings);
+            blocks = StructureHandler.modifyAndConvertTemplate(template, sim.level, origin, settings);
+            blocks.sort(Comparator
+                .comparingInt((Template.BlockInfo info) -> !info.state.getBlock().hasDynamicShape() && info.state.isCollisionShapeFullBlock(EmptyBlockReader.INSTANCE, BlockPos.ZERO)? -1 : 1)
+                .thenComparingInt((info) -> info.pos.getY())
+                .thenComparingInt((info) -> info.pos.getZ())
+                .thenComparingInt((info) -> -info.pos.getX())
+            );
+
             setBlocksNeeded();
-            template.placeInWorld((IServerWorld) sim.level,origin.above(10),settings,new Random());
+            template.placeInWorld((IServerWorld) sim.level, origin.above(10), settings, new Random());
         }
     }
 
@@ -117,9 +125,9 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
     public void tick() {
         tick++;
         super.tick();
-        if (delay >= 0){
+        if (delay >= 0) {
             delay = 60;
-            if (state == State.STARTING){
+            if (state == State.STARTING) {
                 /*
                  setBlocksNeeded();
                  retrieveItemsFromChest();
@@ -134,45 +142,47 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
 //                    }
 //                }
             }
-            if (state == State.TRAVELING){
-                if(sim.getCommandSenderWorld().getBlockState(blockPos) ==blocks.get(blockIndex).state){
+            if (state == State.TRAVELING) {
+                if (sim.getCommandSenderWorld().getBlockState(blockPos) == blocks.get(blockIndex).state) {
                     blockPos = blocks.get(blockIndex).pos;
                 }
-                if (sim.distanceToSqr(blockPos.getX(),blockPos.getY(),blockPos.getZ()) < 20){
+                if (sim.distanceToSqr(blockPos.getX(), blockPos.getY(), blockPos.getZ()) < 20) {
                     state = State.BUILDING;
                     return;
                 }
             }
-            if (state == State.BUILDING){
-                if (blockIndex < blocks.size()){
+            if (state == State.BUILDING) {
+                if (blockIndex < blocks.size()) {
                     Template.BlockInfo blockInfo = blocks.get(blockIndex);
                     BlockState blockstate = blockInfo.state;
-                    blockstate = blockstate.rotate(sim.level,blockInfo.pos,rotation.getRotated(template.getBlockRotation()));
+                    blockstate = blockstate.rotate(sim.level, blockInfo.pos, rotation.getRotated(template.getBlockRotation()));
                     System.out.println(blockstate.getBlock() + "rotation " + blockstate);
 
-                    if (sim.getInventory().hasItemStack(new ItemStack(blockInfo.state.getBlock())) || true){ // remove true for official release. for testing purposes
-                        if (placeBlock(blockInfo,blockstate)){
+                    if (sim.getInventory().hasItemStack(new ItemStack(blockInfo.state.getBlock())) || true) { // remove true for official release. for testing purposes
+                        if (placeBlock(blockInfo, blockstate)) {
 
                             int index = sim.getInventory().findSlotMatchingUnusedItem(new ItemStack(blockstate.getBlock()));
-                            if (index >= 0){
-                            sim.getInventory().removeItem(index,1);}
+                            if (index >= 0) {
+                                sim.getInventory().removeItem(index, 1);
+                            }
                             //blockIndex++;
-                        }else{
+                        } else {
                             state = State.COLLECTING;
                             blockPos = job.getWorkSpace();
-                    }
-
-                            if (blockIndex < blocks.size() - 1) {
-                                blockPos = blocks.get(blockIndex).pos;
-                                sim.getNavigation().moveTo((Path)null, 7d);
-                                state = State.TRAVELING;
-                            }}
                         }
+
+                        if (blockIndex < blocks.size() - 1) {
+                            blockPos = blocks.get(blockIndex).pos;
+                            sim.getNavigation().moveTo((Path) null, 7d);
+                            state = State.TRAVELING;
+                        }
+                    }
                 }
+            }
 
 
-            if (state == State.COLLECTING){
-                if (sim.distanceToSqr(blockPos.getX(),blockPos.getY(),blockPos.getZ()) < 10){
+            if (state == State.COLLECTING) {
+                if (sim.distanceToSqr(blockPos.getX(), blockPos.getY(), blockPos.getZ()) < 10) {
                     retrieveItemsFromChest();
                     state = State.STARTING;
                 }
@@ -181,7 +191,7 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
         } else {
             delay--;
         }
-        if (blockIndex >= blocks.size()){
+        if (blockIndex >= blocks.size()) {
             sim.getJob().setState(Activity.FORCE_STOP);
 
             Faction faction = SavedWorldData.get(sim.level).getFactionWithSim(sim.getUUID());
@@ -189,10 +199,10 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
             if (template.getTypeID() == BuildingType.RESIDENTIAL.id) {
                 BlockPos controlBlock = template.getControlBlock();
                 UUID id = faction.addNewHouse(controlBlock, template.getName(), template.getRent());
-                TileResidential tile =(TileResidential) sim.level.getBlockEntity(controlBlock);
+                TileResidential tile = (TileResidential) sim.level.getBlockEntity(controlBlock);
                 tile.setFactionID(faction.getId());
                 tile.setHouseID(id);
-                sim.level.markAndNotifyBlock(tile.getBlockPos(),sim.level.getChunkAt(tile.getBlockPos()), tile.getBlockState(),tile.getBlockState(), Constants.BlockFlags.DEFAULT,512);
+                sim.level.markAndNotifyBlock(tile.getBlockPos(), sim.level.getChunkAt(tile.getBlockPos()), tile.getBlockState(), tile.getBlockState(), Constants.BlockFlags.DEFAULT, 512);
 
                 blockIndex = 0;
 
@@ -204,7 +214,7 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
 
     @Override
     public boolean shouldRecalculatePath() {
-        return sim.distanceToSqr(blockPos.getX(),blockPos.getY(),blockPos.getZ()) > acceptedDistance();
+        return sim.distanceToSqr(blockPos.getX(), blockPos.getY(), blockPos.getZ()) > acceptedDistance();
     }
 
     @Override
@@ -214,22 +224,23 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
 
     @Override
     public boolean canContinueToUse() {
-        if (sim.getJob() != null){
-        if (sim.getJob().getState() == Activity.FORCE_STOP) {
-            return false;
+        if (sim.getJob() != null) {
+            if (sim.getJob().getState() == Activity.FORCE_STOP) {
+                return false;
+            }
+            if (tick < sim.getJob().workTime()) {
+                return true;
+            } else {
+                sim.getJob().finishedWorkPeriod();
+                sim.getJob().setState(Activity.NOT_WORKING);
+            }
         }
-        if (tick < sim.getJob().workTime()) {
-            return true;
-        } else {
-            sim.getJob().finishedWorkPeriod();
-            sim.getJob().setState(Activity.NOT_WORKING);
-        }}
 
         return false;
     }
 
-    private Rotation getRotation(Direction dir){
-        switch (dir){
+    private Rotation getRotation(Direction dir) {
+        switch (dir) {
             case NORTH:
                 return Rotation.COUNTERCLOCKWISE_90;
             case SOUTH:
@@ -245,13 +256,13 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
     }
 
     private Rotation getRotationCalculated(Rotation org, Rotation cur) {
-        if (org == cur.getRotated(Rotation.CLOCKWISE_90)){
+        if (org == cur.getRotated(Rotation.CLOCKWISE_90)) {
             return Rotation.COUNTERCLOCKWISE_90;
         }
-        if (org == cur.getRotated(Rotation.COUNTERCLOCKWISE_90)){
+        if (org == cur.getRotated(Rotation.COUNTERCLOCKWISE_90)) {
             return Rotation.CLOCKWISE_90;
         }
-        if (org == cur.getRotated(Rotation.CLOCKWISE_180)){
+        if (org == cur.getRotated(Rotation.CLOCKWISE_180)) {
             return Rotation.CLOCKWISE_180;
         }
 
@@ -259,8 +270,8 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
     }
 
 
-    private Direction rotateDirection(Direction dir, Rotation rotation){
-        switch (rotation){
+    private Direction rotateDirection(Direction dir, Rotation rotation) {
+        switch (rotation) {
             case NONE:
                 return dir;
             case CLOCKWISE_90:
@@ -274,98 +285,101 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
 
         return Direction.SOUTH;
     }
+
     //Checks for inventories around position.
     private void checkForInventories() {
-        ArrayList<BlockPos> blocks =  BlockUtils.getBlocksAroundAndBelowPosition(job.getWorkSpace(),5);
-        blocks.addAll(BlockUtils.getBlocksAroundAndBelowPosition(job.getWorkSpace().above(),5));
+        ArrayList<BlockPos> blocks = BlockUtils.getBlocksAroundAndBelowPosition(job.getWorkSpace(), 5);
+        blocks.addAll(BlockUtils.getBlocksAroundAndBelowPosition(job.getWorkSpace().above(), 5));
         blocks = (ArrayList<BlockPos>) blocks.stream().filter(pos -> sim.level.getBlockEntity(pos) != null).collect(Collectors.toList());
-        for (BlockPos pos: blocks){
-            if (sim.level.getBlockEntity(pos) instanceof ChestTileEntity){
+        for (BlockPos pos : blocks) {
+            if (sim.level.getBlockEntity(pos) instanceof ChestTileEntity) {
                 chests.add(pos);
             }
         }
     }
 
-    private void setBlocksNeeded(){
+    private void setBlocksNeeded() {
         blocksNeeded.clear();
-        for (int i = this.blockIndex; i< blocks.size();i++){
+        for (int i = this.blockIndex; i < blocks.size(); i++) {
             Template.BlockInfo info = blocks.get(i);
             Block block = info.state.getBlock();
             if (block == Blocks.AIR) continue;
-            if (blocksNeeded.get(block.asItem()) == null){
-                blocksNeeded.put(block.asItem(),1);
-            }else{
+            if (blocksNeeded.get(block.asItem()) == null) {
+                blocksNeeded.put(block.asItem(), 1);
+            } else {
                 int value = blocksNeeded.get(block.asItem());
                 value += 1;
-                blocksNeeded.put(block.asItem(),value);
+                blocksNeeded.put(block.asItem(), value);
 
             }
 
         }
 
     }
+
     //Scans inventories and makes Sim go get items from chest that contains it.
     private void retrieveItemsFromChest() {
-        for (BlockPos pos: chests){
+        for (BlockPos pos : chests) {
             ChestTileEntity entity = (ChestTileEntity) sim.level.getBlockEntity(pos);
-            for (int i = 0; i< entity.getContainerSize();i++){
+            for (int i = 0; i < entity.getContainerSize(); i++) {
                 ItemStack stack = entity.getItem(i);
-                if (blocksNeeded.containsKey(stack.getItem())){
+                if (blocksNeeded.containsKey(stack.getItem())) {
                     int amountNeeded = blocksNeeded.get(stack.getItem());
 
-                    if (amountNeeded < stack.getCount()){
-                        stack.setCount(stack.getCount()-amountNeeded);
+                    if (amountNeeded < stack.getCount()) {
+                        stack.setCount(stack.getCount() - amountNeeded);
                         blocksNeeded.remove(stack.getItem());
-                    }else{
+                    } else {
                         amountNeeded -= stack.getCount();
-                        blocksNeeded.put(stack.getItem(),amountNeeded);
+                        blocksNeeded.put(stack.getItem(), amountNeeded);
                         stack.setCount(0);
                     }
                     ItemStack result = stack.copy();
                     result.setCount(amountNeeded);
                     sim.getInventory().addItemStackToInventory(result);
-                    entity.setItem(i,stack);
+                    entity.setItem(i, stack);
 
                 }
             }
 
         }
         final String[] string = {""};
-            blocksNeeded.keySet().forEach(key -> {
+        blocksNeeded.keySet().forEach(key -> {
             int amount = blocksNeeded.get(key);
-             string[0] += amount + " " + key + " ";
+            string[0] += amount + " " + key + " ";
 
         });
-            if (!string[0].equals("")){
-        SavedWorldData.get(sim.level).getFactionWithSim(sim.getUUID()).sendFactionChatMessage(sim.getName().getString() + " still needs " + string[0],sim.level);
-        delay = 2000;
-    }}
+        if (!string[0].equals("")) {
+            SavedWorldData.get(sim.level).getFactionWithSim(sim.getUUID()).sendFactionChatMessage(sim.getName().getString() + " still needs " + string[0], sim.level);
+            delay = 2000;
+        }
+    }
 
 
-    private boolean placeBlock(Template.BlockInfo blockInfo,BlockState blockstate){
+    private boolean placeBlock(Template.BlockInfo blockInfo, BlockState blockstate) {
 
         if (blockInfo.state.getBlock() == ModBlocks.CONTROL_BLOCK.get()) {
             blockstate = blockInfo.state.setValue(ModBlockProperties.TYPE, template.getTypeID());
             template.setControlBlock(blockInfo.pos);
         }
-        if (blockstate.getBlock() != Blocks.AIR){
-           if (blockstate.getBlock().equals(sim.level.getBlockState(blockInfo.pos).getBlock())){
-               blockIndex++;
-               return false;
-           }
-            sim.level.getBlockState(blockPos).getBlock().removedByPlayer(sim.level.getBlockState(blockPos),sim.level,blockPos,player,true,sim.level.getFluidState(blockPos));
-                sim.level.setBlock(blockInfo.pos, blockstate, 2);
-                blockstate.getBlock().setPlacedBy(sim.level,blockInfo.pos,blockstate,null, ItemStack.EMPTY);
-                if (!settings.getKnownShape()) {
-                    BlockState blockstate1 = sim.level.getBlockState(blockPos);
-                    BlockState blockstate3 = Block.updateFromNeighbourShapes(blockstate1, sim.level, blockPos);
-                    if (blockstate1 != blockstate3) {
-                        sim.level.setBlock(blockPos, blockstate3, 2 & -2 | 16);
-                    }
-                    sim.level.blockUpdated(blockPos, blockstate3.getBlock());
-                    blockIndex++;
-                    return true;
+        if (blockstate.getBlock() != Blocks.AIR) {
+            if (blockstate.getBlock().equals(sim.level.getBlockState(blockInfo.pos).getBlock())) {
+                blockIndex++;
+                return false;
+            }
+            sim.level.getBlockState(blockPos).getBlock().removedByPlayer(sim.level.getBlockState(blockPos), sim.level, blockPos, player, true, sim.level.getFluidState(blockPos));
+            sim.level.setBlock(blockInfo.pos, blockstate, 2);
+            blockstate.getBlock().setPlacedBy(sim.level, blockInfo.pos, blockstate, null, ItemStack.EMPTY);
+            if (!settings.getKnownShape()) {
+                BlockState blockstate1 = sim.level.getBlockState(blockPos);
+                BlockState blockstate3 = Block.updateFromNeighbourShapes(blockstate1, sim.level, blockPos);
+                if (blockstate1 != blockstate3) {
+                    sim.level.setBlock(blockPos, blockstate3, 2 & -2 | 16);
                 }
+                sim.level.blockUpdated(blockPos, blockstate3.getBlock());
+                blockIndex++;
+                return true;
+            }
 
         }
         blockIndex++;
@@ -380,4 +394,5 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
         WAITING,
         COLLECTING
     }
+
 }
