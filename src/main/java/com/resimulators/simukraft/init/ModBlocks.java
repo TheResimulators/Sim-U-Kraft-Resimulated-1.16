@@ -46,6 +46,7 @@ public final class ModBlocks {
     public static final RegistryObject<Block> FARM_BOX = REGISTRY.register("farm_box", () -> new BlockFarmBox(AbstractBlock.Properties.of(Material.STONE,MaterialColor.COLOR_GRAY)));
     public static final RegistryObject<Block> RAINBOW_LIGHT = REGISTRY.register("rainbow_light", () -> new BlockLight(AbstractBlock.Properties.of(Material.WOOL)));
     public static final RegistryObject<Block> MINE_BOX = REGISTRY.register("mine_box", () -> new BlockMineBox(AbstractBlock.Properties.of(Material.WOOD)));
+    public static final RegistryObject<Block> TERRAFORMER = REGISTRY.register("terraformer", () -> new BlockTerraformer(AbstractBlock.Properties.of(Material.WOOD)));
 
     //special blocks
     public static final RegistryObject<Block> MARKER = REGISTRY.register("marker", () -> new BlockMarker(AbstractBlock.Properties.of(Material.WOOD).harvestTool(ToolType.AXE).harvestLevel(1)));
