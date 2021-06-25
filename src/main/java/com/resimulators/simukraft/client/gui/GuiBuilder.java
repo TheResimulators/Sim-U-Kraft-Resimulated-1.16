@@ -162,7 +162,8 @@ public class GuiBuilder extends GuiBaseJob {
                 Build.visible = false;
 
             if (state == State.SELECTBULDING){
-               controlStructures(true,currentCategory);
+
+                controlStructures(true,currentCategory);
                 CustomBack.visible = true;
             }
             if (state == State.BUILDINGINFO){
@@ -236,7 +237,11 @@ public class GuiBuilder extends GuiBaseJob {
                 for (int i = currentIndex; i<maxButtons + currentIndex;i++){
                     if (i >= structureButtons.get(category).size()) return;
                     StructureButton button = structureButtons.get(category).get(i);
+                    if (!buttons.contains(button.name)){
+                        button.addButtonsToGui();
+                    }
                     button.controlVisibility(visible);
+                    System.out.println(button.getVisibility());
                 }
         }
     }
@@ -306,7 +311,7 @@ public class GuiBuilder extends GuiBaseJob {
 
         void createButtons(BuildingTemplate template, int x, int y){
         try {
-            addButton(name = new Button(x, y, width, height, new StringTextComponent(template.getName()), button -> {
+            name = new Button(x, y, width, height, new StringTextComponent(template.getName()), button -> {
                 state = State.BUILDINGINFO;
                 CustomBack.visible = true;
                 confirmBuilding.visible = true;
@@ -314,36 +319,47 @@ public class GuiBuilder extends GuiBaseJob {
                 previousPage.visible = false;
                 controlStructures(false);
                 selected = template;
-            }));
+            });
             name.visible = false;
-            addButton(author = new Button(x, y + height, width, height, new StringTextComponent("Author: " + template.getAuthor()), button -> {
-            }));
+            author = new Button(x, y + height, width, height, new StringTextComponent("Author: " + template.getAuthor()), button -> {
+            });
             author.active = false;
             author.visible = false;
-            addButton(price = new Button(x, y + height * 2, width, height, new StringTextComponent("Price: " + template.getCost()), button -> {
-            }));
+            price = new Button(x, y + height * 2, width, height, new StringTextComponent("Price: " + template.getCost()), button -> {
+            });
             price.active = false;
             price.visible = false;
-            addButton(rent = new Button(x, y + height * 3, width, height, new StringTextComponent("Rent: " + template.getRent()), button -> {
-            }));
+            rent = new Button(x, y + height * 3, width, height, new StringTextComponent("Rent: " + template.getRent()), button -> {
+            });
             rent.active = false;
             rent.visible = false;
             infoButtons.add(name);
             infoButtons.add(author);
             infoButtons.add(price);
             infoButtons.add(rent);
+            addButtonsToGui();
         } catch (Exception e){
             e.printStackTrace();
 
         }
         }
 
+        void addButtonsToGui(){
+            addButton(name);
+            addButton(author);
+            addButton(price);
+            addButton(rent);
 
+        }
         void controlVisibility(boolean visible){
             name.visible = visible;
             author.visible = visible;
             price.visible = visible;
             rent.visible = visible;
+        }
+
+        boolean getVisibility(){
+            return name.visible;
         }
     }
 

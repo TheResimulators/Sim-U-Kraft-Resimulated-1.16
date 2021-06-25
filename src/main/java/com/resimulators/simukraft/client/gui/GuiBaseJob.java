@@ -173,7 +173,6 @@ public class GuiBaseJob extends Screen {
         Back.visible = false;
         if (state != State.MAIN){
             hideAll();
-            showHiring();
             Back.visible = true;
             nextPage.visible = true;
             previousPage.visible = true;
