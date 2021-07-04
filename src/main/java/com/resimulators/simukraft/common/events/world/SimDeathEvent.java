@@ -3,6 +3,7 @@ package com.resimulators.simukraft.common.events.world;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.world.Faction;
 import com.resimulators.simukraft.common.world.SavedWorldData;
+import com.resimulators.simukraft.packets.SimFirePacket;
 import net.minecraft.entity.LivingEntity;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;

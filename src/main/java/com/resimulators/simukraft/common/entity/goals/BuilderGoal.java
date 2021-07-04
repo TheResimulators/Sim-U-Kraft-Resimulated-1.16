@@ -14,12 +14,12 @@ import com.resimulators.simukraft.handlers.StructureHandler;
 import com.resimulators.simukraft.init.ModBlockProperties;
 import com.resimulators.simukraft.init.ModBlocks;
 import com.resimulators.simukraft.utils.BlockUtils;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
+import net.minecraft.block.*;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.pathfinding.Path;
+import net.minecraft.state.DirectionProperty;
+import net.minecraft.state.properties.BedPart;
 import net.minecraft.tileentity.ChestTileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Rotation;
@@ -31,6 +31,7 @@ import net.minecraft.world.IWorldReader;
 import net.minecraft.world.gen.feature.template.PlacementSettings;
 import net.minecraft.world.gen.feature.template.Template;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.common.Tags;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.common.util.FakePlayer;
@@ -116,7 +117,7 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
             );
 
             setBlocksNeeded();
-            template.placeInWorld((IServerWorld) sim.level, origin.above(10), settings, new Random());
+            //template.placeInWorld((IServerWorld) sim.level, origin.above(10), settings, new Random());
         }
     }
 
@@ -124,8 +125,8 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
     public void tick() {
         tick++;
         super.tick();
-        if (delay >= 0) {
-            delay = 60;
+        if (delay <= 0) {
+            delay = 1;
             if (state == State.STARTING) {
                 /*
                  setBlocksNeeded();
@@ -152,7 +153,7 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
                 if (blockIndex < blocks.size()) {
                     Template.BlockInfo blockInfo = blocks.get(blockIndex);
                     BlockState blockstate = blockInfo.state;
-                   // blockstate = blockstate.rotate(sim.level, blockInfo.pos, rotation.getRotated(template.getBlockRotation()));
+                    blockstate = blockstate.rotate(sim.level, blockInfo.pos, rotation.getRotated(template.getBlockRotation()));
 
                     if (sim.getInventory().hasItemStack(new ItemStack(blockInfo.state.getBlock())) || true) { // remove true for official release. for testing purposes
                         if (placeBlock(blockInfo, blockstate)) {
@@ -198,17 +199,17 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
                 BlockPos controlBlock = template.getControlBlock();
                 UUID id = faction.addNewHouse(controlBlock, template.getName(), template.getRent());
                 TileResidential tile = (TileResidential) sim.level.getBlockEntity(controlBlock);
-                tile.setFactionID(faction.getId());
-                tile.setHouseID(id);
-                sim.level.markAndNotifyBlock(tile.getBlockPos(), sim.level.getChunkAt(tile.getBlockPos()), tile.getBlockState(), tile.getBlockState(), Constants.BlockFlags.DEFAULT, 512);
-
+                if (tile != null ) {
+                    tile.setFactionID(faction.getId());
+                    tile.setHouseID(id);
+                    sim.level.markAndNotifyBlock(tile.getBlockPos(), sim.level.getChunkAt(tile.getBlockPos()), tile.getBlockState(), tile.getBlockState(), Constants.BlockFlags.DEFAULT, 512);
+                }
                 blockIndex = 0;
 
                 template = null;
-                sim.fireSim(sim, faction.getId(), false);
+                sim.fireSim(sim, faction.getId(), false); }
             }
         }
-    }
 
     @Override
     public boolean shouldRecalculatePath() {
@@ -349,7 +350,8 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
             }
         }
         final String[] string = {""};
-        blocksNeeded.keySet().forEach(key -> {
+        HashMap<Item, Integer> blocksNeededCache = new HashMap<>(blocksNeeded);
+        blocksNeededCache.keySet().forEach(key -> {
             if (key.equals(ModBlocks.CONTROL_BLOCK.get().asItem())){
                 blocksNeeded.remove(key);
             }else {
@@ -370,13 +372,23 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
             blockstate = blockInfo.state.setValue(ModBlockProperties.TYPE, template.getTypeID());
             template.setControlBlock(blockInfo.pos);
         }
-        if (blockstate.getBlock().equals(sim.level.getBlockState(blockInfo.pos).getBlock())) {
+        if (blockstate.getBlockState().getBlock().equals(sim.level.getBlockState(blockInfo.pos).getBlock())) {
             blockIndex++;
             return false;
         }
-        sim.level.getBlockState(blockPos).getBlock().removedByPlayer(sim.level.getBlockState(blockPos), sim.level, blockPos, player, true, sim.level.getFluidState(blockPos));
-        //sim.level.setBlock(blockInfo.pos, blockstate, 2);
+        if (blockstate.getBlock() instanceof BedBlock){
+            if (blockstate.getValue(BedBlock.PART) == BedPart.HEAD){
+            blockIndex++;
+            return false;
+        }
+        }
+        if (blockstate.getBlock() instanceof HorizontalBlock){
+            Direction dir = blockstate.getValue(BedBlock.FACING);
+           // blockstate.setValue(BedBlock.FACING,Direction.from2DDataValue(dir.get2DDataValue() + template.getDirection().get2DDataValue()));
+        }
+        //sim.level.getBlockState(blockPos).getBlock().removedByPlayer(sim.level.getBlockState(blockPos), sim.level, blockPos, player, true, sim.level.getFluidState(blockPos));
         blockstate.getBlock().setPlacedBy(sim.level, blockInfo.pos, blockstate, null, ItemStack.EMPTY);
+
         if (!settings.getKnownShape()) {
             BlockState blockstate1 = sim.level.getBlockState(blockPos);
             BlockState blockstate3 = Block.updateFromNeighbourShapes(blockstate1, sim.level, blockPos);
@@ -389,6 +401,7 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
         }
 
 
+
         blockIndex++;
         return false;
     }
@@ -397,7 +410,7 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
         List<Template.BlockInfo> newBlocks = new ArrayList<>();
         for (Template.BlockInfo block : blocks) {
             if (block.state.getBlock() == Blocks.GRASS_BLOCK) {
-                Template.BlockInfo info = new Template.BlockInfo(block.pos, Blocks.DIRT.defaultBlockState(), block.nbt);
+                Template.BlockInfo info = new Template.BlockInfo(block.pos, Blocks.DIRT.defaultBlockState(), null);
                 newBlocks.add(info);
             } else {
                 newBlocks.add(block);
