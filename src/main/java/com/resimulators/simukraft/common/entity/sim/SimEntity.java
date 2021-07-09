@@ -629,7 +629,7 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
         if (sim.getJob() != null) {
             if (sim.getJob().getWorkSpace() != null){
                 SavedWorldData.get(level).fireSim(factionID, sim);
-                if (!level.isClientSide) SavedWorldData.get(level).getFaction(factionID).sendPacketToFaction(new SimFirePacket(factionID, sim.getId(), sim.getJob().getWorkSpace()));
+                if (!level.isClientSide) SavedWorldData.get(level).getFaction(factionID).sendPacketToFaction(new SimFirePacket(factionID, sim.getId(), sim.getJob().getWorkSpace(),dying));
                 BlockPos jobPos = sim.getJob().getWorkSpace();
                 ITile tile = (ITile) sim.level.getBlockEntity(jobPos);
                 if (tile != null) {

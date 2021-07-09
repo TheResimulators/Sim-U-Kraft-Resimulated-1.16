@@ -16,18 +16,21 @@ public class SimFirePacket implements IMessage {
     private int factionId;
     private int simId;
     private BlockPos pos;
+    private boolean dying;
     public SimFirePacket(){}
 
-    public SimFirePacket(int factionId,int simId,BlockPos pos){
+    public SimFirePacket(int factionId,int simId,BlockPos pos,boolean dying){
         this.pos = pos;
         this.factionId = factionId;
         this.simId = simId;
+        this.dying = dying;
     }
     @Override
     public void toBytes(PacketBuffer buf) {
         buf.writeBlockPos(pos);
         buf.writeInt(factionId);
         buf.writeInt(simId);
+        buf.writeBoolean(dying);
     }
 
     @Override
@@ -35,6 +38,7 @@ public class SimFirePacket implements IMessage {
         this.pos = buf.readBlockPos();
         this.factionId = buf.readInt();
         this.simId = buf.readInt();
+        this.dying = buf.readBoolean();
     }
 
     @Nullable
@@ -49,7 +53,7 @@ public class SimFirePacket implements IMessage {
         if (world != null) {
             SimEntity sim = (SimEntity) world.getEntity(simId);
             if (sim != null) {
-                sim.fireSim(sim,factionId,false);
+                sim.fireSim(sim,factionId,dying);
 
             }
         }

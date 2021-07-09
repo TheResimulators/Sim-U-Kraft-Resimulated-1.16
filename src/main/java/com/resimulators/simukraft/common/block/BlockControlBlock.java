@@ -98,7 +98,7 @@ public class BlockControlBlock extends BlockBase {
                     if (sim != null){
                         int id = SavedWorldData.get(worldIn).getFactionWithPlayer(player.getUUID()).getId();
                         SavedWorldData.get(worldIn).fireSim(id,sim);
-                        SavedWorldData.get(worldIn).getFaction(id).sendPacketToFaction(new SimFirePacket(id,sim.getId(),pos));
+                        SavedWorldData.get(worldIn).getFaction(id).sendPacketToFaction(new SimFirePacket(id,sim.getId(),pos,false));
                         sim.fireSim(sim,id,false);
                     }
                 }else {
