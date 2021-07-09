@@ -40,6 +40,7 @@ public class ModItems {
     public static final RegistryObject<Item> FARM_BOX = REGISTRY.register("farm_box", () -> new BlockItem(ModBlocks.FARM_BOX.get(), new Item.Properties().tab(SimUTab.tab)));
     public static final RegistryObject<Item> RAINBOW_LIGHT = REGISTRY.register("rainbow_light", () -> new BlockItem(ModBlocks.RAINBOW_LIGHT.get(), new Item.Properties().tab(SimUTab.tab)));
     public static final RegistryObject<Item> MINE_BOX = REGISTRY.register("mine_box", () -> new BlockItem(ModBlocks.MINE_BOX.get(), new Item.Properties().tab(SimUTab.tab)));
+    public static final RegistryObject<Item> TERRAFORMER = REGISTRY.register("terraformer", () -> new BlockItem(ModBlocks.TERRAFORMER.get(), new Item.Properties().tab(SimUTab.tab)));
     public static final RegistryObject<Item> MARKER = REGISTRY.register("marker", () -> new BlockItem(ModBlocks.MARKER.get(), new Item.Properties().tab(SimUTab.tab)));
 
     //Items

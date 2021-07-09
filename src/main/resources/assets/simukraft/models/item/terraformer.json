@@ -1,0 +1,7 @@
+{
+  "parent": "block/cube_column",
+  "textures": {
+    "end": "simukraft:block/terraformer_top",
+    "side": "simukraft:block/terraformer_side"
+  }
+}
