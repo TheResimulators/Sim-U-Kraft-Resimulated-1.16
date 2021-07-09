@@ -110,7 +110,7 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
             blocks = StructureHandler.modifyAndConvertTemplate(template, sim.level, origin, settings);
             adjustBlocks();
             blocks.sort(Comparator
-                .comparingInt((Template.BlockInfo info) -> !info.state.getBlock().hasDynamicShape() && info.state.isCollisionShapeFullBlock(EmptyBlockReader.INSTANCE, BlockPos.ZERO)? -1 : 1)
+                .comparingInt((Template.BlockInfo info) -> !info.state.getBlock().hasDynamicShape() && info.state.isCollisionShapeFullBlock(EmptyBlockReader.INSTANCE, BlockPos.ZERO) || info.state.getBlock() instanceof AirBlock? -1 : 1)
                 .thenComparingInt((info) -> info.pos.getY())
                 .thenComparingInt((info) -> info.pos.getZ())
                 .thenComparingInt((info) -> -info.pos.getX())
@@ -377,16 +377,18 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
             return false;
         }
         if (blockstate.getBlock() instanceof BedBlock){
-            if (blockstate.getValue(BedBlock.PART) == BedPart.HEAD){
-            blockIndex++;
-            return false;
+            if (blockstate.getValue(BedBlock.PART) == BedPart.HEAD) {
+                blockIndex++;
+                return false;
+            }
         }
-        }
+
         if (blockstate.getBlock() instanceof HorizontalBlock){
             Direction dir = blockstate.getValue(BedBlock.FACING);
            // blockstate.setValue(BedBlock.FACING,Direction.from2DDataValue(dir.get2DDataValue() + template.getDirection().get2DDataValue()));
         }
         //sim.level.getBlockState(blockPos).getBlock().removedByPlayer(sim.level.getBlockState(blockPos), sim.level, blockPos, player, true, sim.level.getFluidState(blockPos));
+        sim.level.setBlock(blockPos, blockstate, 2 & -2 | 16);
         blockstate.getBlock().setPlacedBy(sim.level, blockInfo.pos, blockstate, null, ItemStack.EMPTY);
 
         if (!settings.getKnownShape()) {
