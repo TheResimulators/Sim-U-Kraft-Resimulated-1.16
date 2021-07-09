@@ -20,6 +20,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.pathfinding.Path;
 import net.minecraft.state.DirectionProperty;
 import net.minecraft.state.properties.BedPart;
+import net.minecraft.state.properties.DoubleBlockHalf;
 import net.minecraft.tileentity.ChestTileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Rotation;
@@ -102,12 +103,9 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
             Rotation facing = getRotation(job.getDirection());
             rotation = getRotationCalculated(orgDir, facing);
 
-//            blocks.sort(Comparator.comparingDouble((block) -> sim.getJob().getWorkSpace().distSqr(block.pos)));
-
             settings = new PlacementSettings()
                 .setRotation(rotation)
                 .setMirror(template.getMirror());
-            System.out.println(template.getOffSet());
             BlockPos origin = sim.getJob().getWorkSpace().offset(template.getOffSet().rotate(rotation).offset(job.getDirection().getNormal()));
             blocks = StructureHandler.modifyAndConvertTemplate(template, sim.level, origin, settings);
             adjustBlocks();
@@ -119,7 +117,7 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
             );
 
             setBlocksNeeded();
-            //template.placeInWorld((IServerWorld) sim.level, origin.above(10), settings, new Random());
+            template.placeInWorld((IServerWorld) sim.level, origin.above(10), settings, new Random());
         }
     }
 
@@ -157,7 +155,7 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
                     BlockState blockstate = blockInfo.state;
                     blockstate = blockstate.rotate(sim.level, blockInfo.pos, rotation.getRotated(template.getBlockRotation()));
 
-                    if (sim.getInventory().hasItemStack(new ItemStack(blockInfo.state.getBlock())) || true) { // remove true for official release. for testing purposes
+                    if ((sim.getInventory().hasItemStack(new ItemStack(blockInfo.state.getBlock())) || blockIgnorable(blockstate))|| true) { // remove true for official release. for testing purposes
                         if (placeBlock(blockInfo, blockstate)) {
 
                             int index = sim.getInventory().findSlotMatchingUnusedItem(new ItemStack(blockstate.getBlock()));
@@ -311,6 +309,8 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
             Template.BlockInfo info = blocks.get(i);
             Block block = info.state.getBlock();
             if (block == Blocks.AIR) continue;
+            if (block instanceof BedBlock && info.state.getValue(BedBlock.PART) == BedPart.HEAD) continue;
+            if (block instanceof DoorBlock && info.state.getValue(DoorBlock.HALF) == DoubleBlockHalf.UPPER) continue;
             if (blocksNeeded.get(block.asItem()) == null) {
                 blocksNeeded.put(block.asItem(), 1);
             } else {
@@ -424,6 +424,13 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
     blocks = newBlocks;
     }
 
+
+    private boolean blockIgnorable(BlockState state){
+        return (state.getBlock() == Blocks.AIR
+            || state.getBlock()  instanceof BedBlock && state.getValue(BedBlock.PART) == BedPart.HEAD
+            || state.getBlock()  instanceof DoorBlock && state.getValue(DoorBlock.HALF) == DoubleBlockHalf.UPPER);
+
+    }
     private enum State {
         STARTING,
         TRAVELING,
