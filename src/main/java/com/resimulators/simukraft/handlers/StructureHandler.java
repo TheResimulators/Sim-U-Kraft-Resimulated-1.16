@@ -61,7 +61,6 @@ public class StructureHandler {
     /**loads structure using template manager*/
     public static BuildingTemplate loadStructure(String name) {
         if (templateManager != null) {
-            System.out.println(name);
             return templateManager.get(new ResourceLocation(Reference.MODID, name));
         }
         return null;
@@ -72,10 +71,4 @@ public class StructureHandler {
             return BuildingTemplate.processBlockInfos(world, pos, pos, settings, blockInfos.get(0).blocks(), template);
     }
 
-    public static BlockPos calculateOffset(BlockPos size, Vector3i xAxis, Vector3i zAxis){
-        int xOffset = (size.getX()-1)*xAxis.getX();
-        int zOffset = (size.getZ()-1)*zAxis.getZ();
-
-        return new BlockPos(xOffset,0,zOffset);
-    }
 }

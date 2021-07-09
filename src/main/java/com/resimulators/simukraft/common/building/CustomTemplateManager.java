@@ -127,7 +127,7 @@ public class CustomTemplateManager extends TemplateManager {
 
             BuildingType type = BuildingType.getById(template.getTypeID());
             if (type != null){
-            category = type.category; // can't figure out how to add this so it puts it into a folder for each type of building
+                category = type.category; // can't figure out how to add this so it puts it into a folder for each type of building
             }else {
                 category = Category.SPECIAL;
             }
