@@ -115,16 +115,30 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
                 .thenComparingInt((info) -> info.pos.getY())
                 .thenComparingInt((info) -> {
                     System.out.println("Sorting " + sim.getJob().getWorkSpace().subtract(info.pos));
-                    if (job.getDirection().getStepX() != 0){ // facing in a X direction
-                        return (sim.getJob().getWorkSpace().getZ() - (info.pos.getZ())) * job.getDirection().getClockWise().getStepZ();
-                    }else{
-                        return (sim.getJob().getWorkSpace().getX() - (info.pos.getX())) * job.getDirection().getStepX();
+                    switch (job.getDirection()){
+                        case NORTH:
+                            return (sim.getJob().getWorkSpace().getZ() - (info.pos.getZ()));
+                        case SOUTH:
+                            return (sim.getJob().getWorkSpace().getZ() - (info.pos.getZ())) * -1;
+                        case WEST:
+                            return (sim.getJob().getWorkSpace().getX() - (info.pos.getX()));
+                        case EAST:
+                            return (sim.getJob().getWorkSpace().getX() - (info.pos.getX())) * -1;
+                        default:
+                            return 0;
                     }
                 }).thenComparingInt((info) -> {
-                    if (job.getDirection().getStepX() != 0){ // facing in a x direction
-                        return (sim.getJob().getWorkSpace().getX() - (info.pos.getX())) * job.getDirection().getStepX();
-                    }else{
-                        return (sim.getJob().getWorkSpace().getZ() - (info.pos.getZ())) * job.getDirection().getClockWise().getStepZ();
+                    switch (job.getDirection()){
+                        case NORTH:
+                            return (sim.getJob().getWorkSpace().getX() - (info.pos.getX())) * -1;
+                        case SOUTH:
+                            return (sim.getJob().getWorkSpace().getX() - (info.pos.getX()));
+                        case WEST:
+                            return (sim.getJob().getWorkSpace().getZ() - (info.pos.getZ()));
+                        case EAST:
+                            return (sim.getJob().getWorkSpace().getZ() - (info.pos.getZ())) *- 1;
+                        default:
+                            return 0;
                     }
                 })
             );

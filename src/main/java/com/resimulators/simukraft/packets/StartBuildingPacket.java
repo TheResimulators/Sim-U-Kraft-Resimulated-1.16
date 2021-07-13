@@ -62,7 +62,6 @@ public class StartBuildingPacket implements IMessage {
         if (ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayer(playerId) != null) {
             PlayerEntity player = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayer(playerId);
             if (player != null) {
-                SavedWorldData data = SavedWorldData.get(player.level);
                 TileConstructor constructor = (TileConstructor)player.getCommandSenderWorld().getBlockEntity(pos);
                 SimEntity sim = (SimEntity) ((ServerWorld)player.getCommandSenderWorld()).getEntity(constructor.getSimId());
                 JobBuilder builder =(JobBuilder) sim.getJob();
