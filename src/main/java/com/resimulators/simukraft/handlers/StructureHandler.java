@@ -7,6 +7,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.world.World;
@@ -33,14 +34,12 @@ public class StructureHandler {
             templateManager = (CustomTemplateManager) server.overworld().getStructureManager(); // gets servers template manager
         }
     }
-
-    /** gets instance of template manager */
+    /**gets instance of template manager*/
     public static CustomTemplateManager getTemplateManager() {
         return templateManager;
     }
-
-    /** saves the structure to file using built-in template manager */
-    public static boolean saveStructure(World world, BlockPos origin, BlockPos min, BlockPos size, String name, String author, Direction dir) {
+    /**saves the structure to file using built-in template manager*/
+    public static boolean saveStructure(World world, BlockPos origin,BlockPos min, BlockPos size, String name, String author, Direction dir) {
         if (templateManager == null && world.getServer() != null)
             templateManager = (CustomTemplateManager) world.getServer().overworld().getStructureManager();
 
@@ -48,7 +47,7 @@ public class StructureHandler {
             BuildingTemplate template = templateManager.getOrCreate(new ResourceLocation(Reference.MODID, name)); //gets default empty template
             template.fillFromWorld(world, min, size, false, null); //gets all the blocks that are in the world
             template.setAuthor(author); //sets the author to the person saving the structure
-            template.findControlBox(world, min, size);
+            template.findControlBox(world,min,size);
             template.setDirection(dir);
             template.setName(name);
             BlockPos offset = min.subtract(origin);
@@ -59,25 +58,17 @@ public class StructureHandler {
         }
         return false;
     }
-
-    /** loads structure using template manager */
+    /**loads structure using template manager*/
     public static BuildingTemplate loadStructure(String name) {
         if (templateManager != null) {
-            System.out.println(name);
             return templateManager.get(new ResourceLocation(Reference.MODID, name));
         }
         return null;
     }
 
-    public static List<Template.BlockInfo> modifyAndConvertTemplate(BuildingTemplate template, World world, BlockPos pos, PlacementSettings settings) {
-        List<Template.Palette> blockInfos = template.getBlocks();
-        return BuildingTemplate.processBlockInfos(world, pos, pos, settings, blockInfos.get(0).blocks(), template);
+    public static List<Template.BlockInfo> modifyAndConvertTemplate(BuildingTemplate template, World world, BlockPos pos,PlacementSettings settings) {
+            List<Template.Palette> blockInfos = template.getBlocks();
+            return BuildingTemplate.processBlockInfos(world, pos, pos, settings, blockInfos.get(0).blocks(), template);
     }
 
-    public static BlockPos calculateOffset(BlockPos size, Vector3i xAxis, Vector3i zAxis) {
-        int xOffset = (size.getX() - 1) * xAxis.getX();
-        int zOffset = (size.getZ() - 1) * zAxis.getZ();
-
-        return new BlockPos(xOffset, 0, zOffset);
-    }
 }
