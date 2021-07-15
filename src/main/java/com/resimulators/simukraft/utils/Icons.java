@@ -30,6 +30,10 @@ public enum Icons {
     public final int bu, bv, bsu, bsv;
     public final String symbol;
 
+    public static Icons bySymbol(String s) {
+        return ELEMENTS.getOrDefault(s, Icons.EXPERIENCE_BUBBLE);
+    }
+
     Icons(int u, int v, int su, int sv, String symbol) {
         this(u, v, su, sv, -1, -1, -1, -1, symbol);
     }
@@ -44,9 +48,5 @@ public enum Icons {
         this.bsu = bsu;
         this.bsv = bsv;
         this.symbol = symbol;
-    }
-
-    public static Icons bySymbol(String s) {
-        return ELEMENTS.getOrDefault(s, Icons.EXPERIENCE_BUBBLE);
     }
 }

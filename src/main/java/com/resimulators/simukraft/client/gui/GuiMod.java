@@ -11,16 +11,20 @@ import java.util.function.Supplier;
 
 public enum GuiMod {
     ;
-    private Function<PlayerEntity, ItemStack> stackReader;
-    private Function<ItemStack, Supplier<? extends Screen>> clientScreenProvider;
+    private final Function<PlayerEntity, ItemStack> stackReader;
+    private final Function<ItemStack, Supplier<? extends Screen>> clientScreenProvider;
+
+    public static Screen openScreen(Minecraft minecraft, Screen screen) {
+        return screen;
+    }
+
+    public static Color getColor(Color color, int alpha) {
+        return new Color(color.getRed(), color.getGreen(), color.getBlue(), alpha);
+    }
 
     GuiMod(Function<PlayerEntity, ItemStack> stackReader, Function<ItemStack, Supplier<? extends Screen>> clientScreenProvider) {
         this.stackReader = stackReader;
         this.clientScreenProvider = clientScreenProvider;
-    }
-
-    public static Screen openScreen(Minecraft minecraft, Screen screen) {
-        return screen;
     }
 
     public boolean openScreen(PlayerEntity player) {
@@ -34,9 +38,5 @@ public enum GuiMod {
         Screen screen = clientScreenProvider.apply(stack).get();
         Minecraft.getInstance().setScreen(screen);
         return screen == null;
-    }
-
-    public static Color getColor(Color color, int alpha) {
-        return new Color(color.getRed(), color.getGreen(), color.getBlue(), alpha);
     }
 }

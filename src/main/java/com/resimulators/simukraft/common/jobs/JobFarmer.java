@@ -11,8 +11,8 @@ import net.minecraft.util.math.BlockPos;
 
 
 public class JobFarmer implements IJob {
-    private SimEntity sim;
-    private Goal goal1;
+    private final SimEntity sim;
+    private final Goal goal1;
     private int periodsworked = 0;
     private BlockPos workSpace;
     private Activity state = Activity.NOT_WORKING;
@@ -27,12 +27,6 @@ public class JobFarmer implements IJob {
 
     }
 
-
-    @Override
-    public Profession jobType() {
-        return Profession.FARMER;
-    }
-
     @Override
     public Activity getState() {
         return state;
@@ -41,6 +35,11 @@ public class JobFarmer implements IJob {
     @Override
     public void setState(Activity state) {
         this.state = state;
+    }
+
+    @Override
+    public Profession jobType() {
+        return Profession.FARMER;
     }
 
     @Override
@@ -92,11 +91,9 @@ public class JobFarmer implements IJob {
         if (workSpace != null) {
             other.putLong("jobpos", workSpace.asLong());
         }
-        other.putBoolean("tilled",tilled);
-        other.putBoolean("finished",finished);
+        other.putBoolean("tilled", tilled);
+        other.putBoolean("finished", finished);
         nbt.add(other);
-
-
 
         return nbt;
     }
@@ -111,10 +108,10 @@ public class JobFarmer implements IJob {
             if (list.contains("jobpos")) {
                 setWorkSpace(BlockPos.of(list.getLong("jobpos")));
             }
-            if (list.contains("tilled")){
+            if (list.contains("tilled")) {
                 setTilled(list.getBoolean("tilled"));
             }
-            if (list.contains("finished")){
+            if (list.contains("finished")) {
                 finished = list.getBoolean("finished");
             }
 
@@ -137,13 +134,13 @@ public class JobFarmer implements IJob {
     }
 
     @Override
-    public void setWorkSpace(BlockPos pos) {
-        this.workSpace = pos;
+    public BlockPos getWorkSpace() {
+        return workSpace;
     }
 
     @Override
-    public BlockPos getWorkSpace() {
-        return workSpace;
+    public void setWorkSpace(BlockPos pos) {
+        this.workSpace = pos;
     }
 
     @Override
@@ -156,23 +153,6 @@ public class JobFarmer implements IJob {
         return 0.2;
     }
 
-    public boolean isTilled() {
-        return tilled;
-    }
-
-
-    public void setTilled(boolean tilled){
-        this.tilled = tilled;
-    }
-
-    public void setProgress(int progress){
-        this.progress = progress;
-    }
-
-    public int getProgress(){
-        return progress;
-    }
-
     @Override
     public boolean isFinished() {
         return finished;
@@ -181,6 +161,22 @@ public class JobFarmer implements IJob {
     @Override
     public void setFinished(boolean finished) {
         this.finished = finished;
+    }
+
+    public boolean isTilled() {
+        return tilled;
+    }
+
+    public void setTilled(boolean tilled) {
+        this.tilled = tilled;
+    }
+
+    public int getProgress() {
+        return progress;
+    }
+
+    public void setProgress(int progress) {
+        this.progress = progress;
     }
 }
 

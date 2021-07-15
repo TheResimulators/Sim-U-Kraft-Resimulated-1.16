@@ -8,6 +8,7 @@ public class SimUTab extends ItemGroup {
 
     //creative tab
     public static SimUTab tab = new SimUTab("Sim-U-Kraft");
+
     private SimUTab(String label) {
         super(label);
     }

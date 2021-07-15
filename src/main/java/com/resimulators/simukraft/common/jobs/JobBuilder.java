@@ -28,24 +28,20 @@ public class JobBuilder implements IJob {
         addJobAi();
     }
 
-    public void setTemplate(BuildingTemplate template) {
-        this.template = template;
-    }
-
     public BuildingTemplate getTemplate() {
         return template;
     }
 
-    public void setDirection(Direction dir){
-        this.direction = dir;
+    public void setTemplate(BuildingTemplate template) {
+        this.template = template;
     }
 
-    public Direction getDirection(){
+    public Direction getDirection() {
         return direction;
     }
-    @Override
-    public Profession jobType() {
-        return Profession.BUILDER;
+
+    public void setDirection(Direction dir) {
+        this.direction = dir;
     }
 
     @Override
@@ -56,6 +52,11 @@ public class JobBuilder implements IJob {
     @Override
     public void setState(Activity state) {
         this.state = state;
+    }
+
+    @Override
+    public Profession jobType() {
+        return Profession.BUILDER;
     }
 
     @Override
@@ -108,7 +109,7 @@ public class JobBuilder implements IJob {
         if (workSpace != null) {
             other.putLong("jobpos", workSpace.asLong());
         }
-        other.putBoolean("finished",finished);
+        other.putBoolean("finished", finished);
         nbt.add(other);
 
         return nbt;
@@ -124,7 +125,7 @@ public class JobBuilder implements IJob {
             if (list.contains("jobpos")) {
                 setWorkSpace(BlockPos.of(list.getLong("jobpos")));
             }
-            if (list.contains("finished")){
+            if (list.contains("finished")) {
                 finished = list.getBoolean("finished");
             }
         }
@@ -146,17 +147,17 @@ public class JobBuilder implements IJob {
     }
 
     @Override
-    public void setWorkSpace(BlockPos pos) {
-        this.workSpace = pos;
-    }
-
-    @Override
     public BlockPos getWorkSpace() {
         return workSpace;
     }
 
     @Override
-    public boolean hasAiRunning()  {
+    public void setWorkSpace(BlockPos pos) {
+        this.workSpace = pos;
+    }
+
+    @Override
+    public boolean hasAiRunning() {
         return sim.goalSelector.getRunningGoals().anyMatch((goal) -> goal.getGoal() == goal1);
     }
 

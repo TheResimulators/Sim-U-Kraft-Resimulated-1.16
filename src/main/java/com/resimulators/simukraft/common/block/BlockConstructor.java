@@ -8,7 +8,6 @@ import com.resimulators.simukraft.common.world.Faction;
 import com.resimulators.simukraft.common.world.SavedWorldData;
 import com.resimulators.simukraft.handlers.SimUKraftPacketHandler;
 import com.resimulators.simukraft.packets.OpenJobGuiPacket;
-import com.resimulators.simukraft.packets.SimFirePacket;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -24,8 +23,6 @@ import net.minecraftforge.fml.network.NetworkDirection;
 
 import java.util.ArrayList;
 
-import net.minecraft.block.AbstractBlock.Properties;
-
 public class BlockConstructor extends BlockBase {
     public BlockConstructor(final Properties properties) {
         super(properties);
@@ -37,43 +34,42 @@ public class BlockConstructor extends BlockBase {
     }
 
     @Override
+    public TileEntity createTileEntity(BlockState state, IBlockReader world) {
+        return new TileConstructor();
+    }
+
+    @Override
     public ActionResultType use(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTrace) {
         if (!world.isClientSide) {
             Faction faction = SavedWorldData.get(world).getFactionWithPlayer(player.getUUID());
             ArrayList<Integer> simids = faction.getSimIds((ServerWorld) world);
             System.out.println(world.getBlockEntity(pos));
 
-            if (((ITile)world.getBlockEntity(pos)).getHired()){
-                int hiredId = ((ServerWorld) world).getEntity(((ITile)world.getBlockEntity(pos)).getSimId()).getId();
-                SimUKraftPacketHandler.INSTANCE.sendTo(new OpenJobGuiPacket(simids,pos,hiredId, GuiHandler.BUILDER, "Constructor"),((ServerPlayerEntity) player).connection.connection, NetworkDirection.PLAY_TO_CLIENT);// used when there is a sim hired
+            if (((ITile) world.getBlockEntity(pos)).getHired()) {
+                int hiredId = ((ServerWorld) world).getEntity(((ITile) world.getBlockEntity(pos)).getSimId()).getId();
+                SimUKraftPacketHandler.INSTANCE.sendTo(new OpenJobGuiPacket(simids, pos, hiredId, GuiHandler.BUILDER, "Constructor"), ((ServerPlayerEntity) player).connection.connection, NetworkDirection.PLAY_TO_CLIENT);// used when there is a sim hired
             } else {
-                SimUKraftPacketHandler.INSTANCE.sendTo(new OpenJobGuiPacket(simids,pos,GuiHandler.BUILDER, "Constructor"),((ServerPlayerEntity) player).connection.connection, NetworkDirection.PLAY_TO_CLIENT);//used when there is no sim employed at this block
+                SimUKraftPacketHandler.INSTANCE.sendTo(new OpenJobGuiPacket(simids, pos, GuiHandler.BUILDER, "Constructor"), ((ServerPlayerEntity) player).connection.connection, NetworkDirection.PLAY_TO_CLIENT);//used when there is no sim employed at this block
             }
-            if (world.getBlockEntity(pos) instanceof TileConstructor){
-                ((TileConstructor)world.getBlockEntity(pos)).FindAndLoadBuilding(player);
-        }
+            if (world.getBlockEntity(pos) instanceof TileConstructor) {
+                ((TileConstructor) world.getBlockEntity(pos)).FindAndLoadBuilding(player);
+            }
 
         }
         return ActionResultType.SUCCESS;
     }
 
-
-    @Override
-    public TileEntity createTileEntity(BlockState state, IBlockReader world) {
-        return new TileConstructor();
-    }
-
     @Override
     public void playerWillDestroy(World worldIn, BlockPos pos, BlockState state, PlayerEntity player) {
         super.playerWillDestroy(worldIn, pos, state, player);
-        if (!worldIn.isClientSide){
+        if (!worldIn.isClientSide) {
 
             ITile tile = ((ITile) worldIn.getBlockEntity(pos));
 
-            SimEntity sim = (SimEntity) ((ServerWorld)worldIn).getEntity(tile.getSimId());
-            if (sim != null){
+            SimEntity sim = (SimEntity) ((ServerWorld) worldIn).getEntity(tile.getSimId());
+            if (sim != null) {
                 int id = SavedWorldData.get(worldIn).getFactionWithPlayer(player.getUUID()).getId();
-                sim.fireSim(sim,id,false);
+                sim.fireSim(sim, id, false);
 
             }
         }

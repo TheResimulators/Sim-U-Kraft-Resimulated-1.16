@@ -6,8 +6,6 @@ import net.minecraft.entity.player.PlayerEntity;
 
 import java.util.EnumSet;
 
-import net.minecraft.entity.ai.goal.Goal.Flag;
-
 public class TalkingToPlayerGoal extends Goal {
     private final SimEntity sim;
 

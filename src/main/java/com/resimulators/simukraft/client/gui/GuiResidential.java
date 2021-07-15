@@ -17,31 +17,31 @@ import net.minecraft.util.text.StringTextComponent;
 
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.UUID;
 
 
 public class GuiResidential extends Screen {
 
-    private Faction faction;
-    private TileResidential tile;
-    private BlockPos pos;
+    private final Faction faction;
+    private final TileResidential tile;
+    private final BlockPos pos;
     private String name;
     private Button Done;
     private ArrayList<Integer> occupants;
+
     protected GuiResidential(ITextComponent titleIn, BlockPos pos) {
         super(titleIn);
         faction = SavedWorldData.get(SimuKraft.proxy.getClientWorld()).getFactionWithPlayer(SimuKraft.proxy.getClientPlayer().getUUID());
-        tile =(TileResidential) SimuKraft.proxy.getClientWorld().getBlockEntity(pos);
+        tile = (TileResidential) SimuKraft.proxy.getClientWorld().getBlockEntity(pos);
         this.pos = pos;
-        if (tile != null){
-        if (tile.getHouseID() != null){
-            name = faction.getHouseByID(tile.getHouseID()).getName();
+        if (tile != null) {
+            if (tile.getHouseID() != null) {
+                name = faction.getHouseByID(tile.getHouseID()).getName();
             }
         }
         if (name == null) {
             name = "Under Construction";
         }
-        Network.getNetwork().sendToServer(new RequestHouseOccupantsPacket(pos,SimuKraft.proxy.getClientPlayer().getUUID()));
+        Network.getNetwork().sendToServer(new RequestHouseOccupantsPacket(pos, SimuKraft.proxy.getClientPlayer().getUUID()));
     }
 
 
@@ -49,14 +49,14 @@ public class GuiResidential extends Screen {
     public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
         renderBackground(stack);
         super.render(stack, mouseX, mouseY, partialTicks);
-        font.draw(stack,getTitle().getString(),(width/2)- font.width(getTitle().getString())/2,height/6-20, Color.WHITE.getRGB());
-        font.draw(stack,"Name: " + name.replace("_"," "),30,height/2-50, Color.WHITE.getRGB());
-        font.draw(stack,"Occupants: ",30,height/2-30,Color.WHITE.getRGB());
-        if (occupants != null){
+        font.draw(stack, getTitle().getString(), (width / 2) - font.width(getTitle().getString()) / 2, height / 6 - 20, Color.WHITE.getRGB());
+        font.draw(stack, "Name: " + name.replace("_", " "), 30, height / 2 - 50, Color.WHITE.getRGB());
+        font.draw(stack, "Occupants: ", 30, height / 2 - 30, Color.WHITE.getRGB());
+        if (occupants != null) {
             int i = 0;
-            for (int id: occupants){
+            for (int id : occupants) {
                 SimEntity sim = (SimEntity) SimuKraft.proxy.getClientWorld().getEntity(id);
-                font.draw(stack,sim.getCustomName().getString(),40,height/2-10 + i*20,Color.WHITE.getRGB());
+                font.draw(stack, sim.getCustomName().getString(), 40, height / 2 - 10 + i * 20, Color.WHITE.getRGB());
             }
         }
     }
@@ -65,13 +65,13 @@ public class GuiResidential extends Screen {
     public void init(Minecraft minecraft, int width, int height) {
         super.init(minecraft, width, height);
 
-        addButton(Done = new Button(width-120,height-30,100,20,new StringTextComponent("Done"), Done ->{
+        addButton(Done = new Button(width - 120, height - 30, 100, 20, new StringTextComponent("Done"), Done -> {
             minecraft.setScreen(null);
         }));
     }
 
 
-    public void setOccupants(ArrayList<Integer> ids){
+    public void setOccupants(ArrayList<Integer> ids) {
         this.occupants = ids;
 
     }

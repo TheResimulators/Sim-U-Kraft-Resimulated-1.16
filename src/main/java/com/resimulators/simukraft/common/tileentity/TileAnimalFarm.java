@@ -17,13 +17,13 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-public class TileAnimalFarm extends TileEntity implements IControlBlock{
+public class TileAnimalFarm extends TileEntity implements IControlBlock {
 
-    private boolean hired;
-    private UUID simId;
+    private final String name;
     int maxAnimals = 0;
     Animal entity;
-    private final String name;
+    private boolean hired;
+    private UUID simId;
 
     public TileAnimalFarm(TileEntityType<?> tileEntityTypeIn, Animal entity, String name) {
         super(tileEntityTypeIn);
@@ -35,14 +35,19 @@ public class TileAnimalFarm extends TileEntity implements IControlBlock{
     }
 
     @Override
-    public void setHired(boolean hired) {
-        this.hired = hired;
-        setChanged();
+    public int getGui() {
+        return GuiHandler.ANIMAL_FARM;
     }
 
     @Override
     public boolean getHired() {
         return hired;
+    }
+
+    @Override
+    public void setHired(boolean hired) {
+        this.hired = hired;
+        setChanged();
     }
 
     @Override
@@ -56,58 +61,56 @@ public class TileAnimalFarm extends TileEntity implements IControlBlock{
         setChanged();
     }
 
-    @Override
-    public int getGui() {
-        return GuiHandler.ANIMAL_FARM;
+    public String getName() {
+        return name;
     }
 
-
-    public void spawnAnimal(){
-        if (level != null){
-            entity.getAnimal().spawn((ServerWorld) level,null,null,worldPosition.offset(0,1,0), SpawnReason.TRIGGERED,false , false);
+    public void spawnAnimal() {
+        if (level != null) {
+            entity.getAnimal().spawn((ServerWorld) level, null, null, worldPosition.offset(0, 1, 0), SpawnReason.TRIGGERED, false, false);
         }
 
     }
 
-    public int checkForAnimals(){
-        if (level != null){
-        AxisAlignedBB area = new AxisAlignedBB(this.worldPosition.offset(-4,-1,-4),this.worldPosition.offset(4,2,4));
-        List<AnimalEntity> entities = level.getEntitiesOfClass(AnimalEntity.class,area);
-        entities = entities
-                .stream()
-                .filter(animal -> animal.getType() == entity.getAnimal())
-                .collect(Collectors.toList());
-        return entities.size();
+    public boolean hasMaxAnimals() {
+        return checkForAnimals() >= getMaxAnimals();
+    }
+
+    public int checkForAnimals() {
+        if (level != null) {
+            AxisAlignedBB area = new AxisAlignedBB(this.worldPosition.offset(-4, -1, -4), this.worldPosition.offset(4, 2, 4));
+            List<AnimalEntity> entities = level.getEntitiesOfClass(AnimalEntity.class, area);
+            entities = entities
+                    .stream()
+                    .filter(animal -> animal.getType() == entity.getAnimal())
+                    .collect(Collectors.toList());
+            return entities.size();
 
         }
         return maxAnimals; // basically force the tile entity not to spawn anything new
     }
 
-    public int getMaxAnimals(){
-       return maxAnimals;
+    public int getMaxAnimals() {
+        return maxAnimals;
     }
 
-    public boolean hasMaxAnimals(){
-        return checkForAnimals() >= getMaxAnimals();
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public Animal getAnimal(){
+    public Animal getAnimal() {
         return entity;
     }
 
     @Override
     public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
-        load(this.getBlockState(),pkt.getTag());
-    }
-    @Override
-    public CompoundNBT getUpdateTag() {
-        return save(new CompoundNBT());
+        load(this.getBlockState(), pkt.getTag());
     }
 
+    @Override
+    public void load(BlockState state, CompoundNBT nbt) {
+        super.load(state, nbt);
+        hired = nbt.getBoolean("hired");
+        if (nbt.contains("simid")) {
+            simId = nbt.getUUID("simid");
+        }
+    }
 
     @Override
     public CompoundNBT save(CompoundNBT nbt) {
@@ -119,20 +122,14 @@ public class TileAnimalFarm extends TileEntity implements IControlBlock{
         return nbt;
     }
 
-
-
-    @Override
-    public void load(BlockState state, CompoundNBT nbt) {
-        super.load(state,nbt);
-        hired = nbt.getBoolean("hired");
-        if (nbt.contains("simid")) {
-            simId = nbt.getUUID("simid");
-        }
-    }
-
     @Override
     public SUpdateTileEntityPacket getUpdatePacket() {
         return new SUpdateTileEntityPacket(this.worldPosition, -1, this.getUpdateTag());
+    }
+
+    @Override
+    public CompoundNBT getUpdateTag() {
+        return save(new CompoundNBT());
     }
 
 

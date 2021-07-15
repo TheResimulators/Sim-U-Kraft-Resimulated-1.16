@@ -16,14 +16,14 @@ public class OpenJobGuiPacket implements IMessage {
     private int guiId;
     private String string;
 
-    public OpenJobGuiPacket(ArrayList<Integer> ints, BlockPos pos, int guiId,String string) {
+    public OpenJobGuiPacket(ArrayList<Integer> ints, BlockPos pos, int guiId, String string) {
         this.pos = pos;
         this.ints = ints;
         this.guiId = guiId;
         this.string = string;
     }
 
-    public OpenJobGuiPacket(ArrayList<Integer> ints, BlockPos pos, int id, int guiId,String string) {
+    public OpenJobGuiPacket(ArrayList<Integer> ints, BlockPos pos, int id, int guiId, String string) {
         this.pos = pos;
         this.ints = ints;
         this.id = id;

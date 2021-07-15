@@ -12,7 +12,6 @@ import com.resimulators.simukraft.common.enums.Category;
 import com.resimulators.simukraft.common.jobs.Profession;
 import com.resimulators.simukraft.packets.StartBuildingPacket;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.util.ResourceLocation;
@@ -25,8 +24,6 @@ import javax.annotation.Nullable;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
-
-import net.minecraft.client.gui.widget.button.Button.IPressable;
 
 public class GuiBuilder extends GuiBaseJob {
     private Button Build;
@@ -42,148 +39,12 @@ public class GuiBuilder extends GuiBaseJob {
     private boolean loaded = false;
     private Button confirmBuilding;
     private ArrayList<BuildingTemplate> structures;
-    private HashMap<Category, ArrayList<StructureButton>> structureButtons = new HashMap<>();
+    private final HashMap<Category, ArrayList<StructureButton>> structureButtons = new HashMap<>();
     private int maxButtons;
     private int pageIndex = 0;
+
     public GuiBuilder(ITextComponent component, ArrayList<Integer> ids, BlockPos pos, @Nullable int id) {
         super(component, ids, pos, id, Profession.BUILDER.getId());
-    }
-
-
-    @Override
-    public void init(Minecraft minecraft, int width, int height) {
-        super.init(minecraft, width, height);
-        if (structures != null){
-            loaded = true;
-        }
-        pageIndex = 0;
-
-            addButton(Build = new LargeButton(width / 2 - 55, height - 55, 110, 42, new StringTextComponent("Build"), (Build -> {
-                super.hideAll();
-                CustomBack.visible = true;
-                controlCategoryButtons(true);
-                state = State.SELECTCATEGORY;
-            })));
-            //Build.active=false;
-            addButton(CustomBack = new Button(width - 120, height - 30, 110, 20, new StringTextComponent("Back"), (Back -> {
-                super.Back.onPress();
-                if (state == State.SELECTBULDING) {
-                    state = State.SELECTCATEGORY;
-                    controlStructures(false,currentCategory);
-                    controlCategoryButtons(true);
-                    nextPage.visible = false;
-                    previousPage.visible = false;
-
-                }
-                else if (state == State.BUILDINGINFO) {
-                    state = State.SELECTBULDING;
-                    nextPage.visible = true;
-                    previousPage.visible = true;
-                    controlStructures(true,currentCategory);
-                    confirmBuilding.visible = false;
-                }
-                else if (state == State.SELECTCATEGORY){
-                    state = State.MAIN;
-                    controlCategoryButtons(false);
-                    showMainMenu();
-                }
-            })));
-            addButton(confirmBuilding = new Button(20, height - 30, 110, 20, new StringTextComponent("Confirm"), Confirm -> startBuilding()));
-                confirmBuilding.visible = false;
-
-            addButton(residential = new Button(width/2-100,height/2-30,100,20, new StringTextComponent("Residential"),Residential ->{
-                controlCategoryButtons(false);
-                currentCategory = Category.RESIDENTIAL;
-                controlStructures(true,currentCategory);
-                state = State.SELECTBULDING;
-                nextPage.visible = true;
-                previousPage.visible = true;
-            }));
-            addButton(commercial = new Button(width/2+10,height/2-30, 100, 20, new StringTextComponent("Commercial"),Commercial -> {
-                controlCategoryButtons(false);
-                currentCategory = Category.COMMERCIAL;
-                controlStructures(true,currentCategory);
-                state = State.SELECTBULDING;
-                nextPage.visible = true;
-                previousPage.visible = true;
-            }));
-
-            addButton(industrial = new Button(width/2-100,height/2+30,100,20,new StringTextComponent("Industrial"),industrial-> {
-                controlCategoryButtons(false);
-                currentCategory = Category.INDUSTRIAL;
-                controlStructures(true,currentCategory);
-                state = State.SELECTBULDING;
-                nextPage.visible = true;
-                previousPage.visible = true;
-            }));
-
-            addButton(special = new Button(width/2+10,height/2 + 30,100,20, new StringTextComponent("Special"),special ->{
-                controlCategoryButtons(false);
-                currentCategory = Category.SPECIAL;
-                controlStructures(true,currentCategory);
-                state = State.SELECTBULDING;
-                nextPage.visible = true;
-                previousPage.visible = true;
-            }));
-
-            addButton(nextPage = new Button(width-120,height-60,100,20, new StringTextComponent("Next Page"),nextPage ->{
-                hideAllStructures(currentCategory);
-                structureButtons.computeIfAbsent(currentCategory, k -> new ArrayList<>());
-                if ((pageIndex + 1) * maxButtons < structureButtons.get(currentCategory).size())
-                {pageIndex++;}
-                controlStructures(true,currentCategory);
-            }));
-
-            addButton(previousPage = new Button(20,height-60,100,20, new StringTextComponent("Previous Page"), previousPage ->{
-                hideAllStructures(currentCategory);
-                pageIndex--;
-                controlStructures(true,currentCategory);
-
-            }));
-            nextPage.visible = false;
-            previousPage.visible = false;
-            residential.visible = false;
-            commercial.visible = false;
-            industrial.visible = false;
-            special.visible = false;
-            if (structures != null && !loaded){
-                createStructureButtons();
-                loaded = true;
-
-            }
-            if (!isHired()) {
-                Build.active = false;
-            }
-        if (!loaded) {
-            CustomBack.visible = false;
-            Build.visible = false;
-        }else {
-            CustomBack.visible = false;
-            if (state != State.MAIN){
-                Build.visible = false;
-
-            if (state == State.SELECTBULDING){
-
-                controlStructures(true,currentCategory);
-                CustomBack.visible = true;
-            }
-            if (state == State.BUILDINGINFO){
-                confirmBuilding.visible = true;
-                CustomBack.visible = true;
-            }
-            if (state == State.SELECTCATEGORY){
-                CustomBack.visible = true;
-                controlCategoryButtons(true);
-            }
-            }
-
-        }
-
-    }
-
-    private void startBuilding() {
-        Network.getNetwork().sendToServer(new StartBuildingPacket(pos,Minecraft.getInstance().player.getMotionDirection(),selected.getName(),Minecraft.getInstance().player.getUUID()));
-        Minecraft.getInstance().setScreen(null);
     }
 
     public void setStructures(ArrayList<BuildingTemplate> structures) {
@@ -194,70 +55,9 @@ public class GuiBuilder extends GuiBaseJob {
 
     }
 
-    public void createStructureButtons(){
-        int xSpacing = 150;
-        int xPadding = 20;
-        int maxButtonsWidth = this.width/150;
-        maxButtons = maxButtonsWidth * (this.height/125);
-        int index;
-        for (BuildingTemplate template: structures) {
-            BuildingType type = BuildingType.getById(template.getTypeID());
-
-            if (type == null){
-                type = BuildingType.SPECIAL;
-                SimuKraft.LOGGER().error("structure " + template.getName() + " is missing building type and Has been added as a special building");
-            }
-            StructureButton button = new StructureButton();
-            structureButtons.computeIfAbsent(type.category, k -> new ArrayList<>());
-            index = (structureButtons.get(type.category)).size() %maxButtons;
-            button.createButtons(template,(xSpacing *(index%maxButtonsWidth) + xPadding),100 * (((int)index/maxButtonsWidth)) + 25);
-            ArrayList<StructureButton> list = structureButtons.get(type.category);
-            list.add(button);
-            structureButtons.put(type.category,list);
-
-        }
-
-
-    }
-
-    private void controlCategoryButtons(boolean enable){
-        residential.visible = enable;
-        commercial.visible = enable;
-        industrial.visible = enable;
-        special.visible = enable;
-
-    }
-
-    private void controlStructures(boolean visible, Category category){
-            if (structureButtons.containsKey(category)){
-                int currentIndex = maxButtons*pageIndex;
-                if (currentIndex < 0){
-                    currentIndex = 0;
-                    pageIndex = 0;
-                }
-                for (int i = currentIndex; i<maxButtons + currentIndex;i++){
-                    if (i >= structureButtons.get(category).size()) return;
-                    StructureButton button = structureButtons.get(category).get(i);
-                    if (!buttons.contains(button.name)){
-                        button.addButtonsToGui();
-                    }
-                    button.controlVisibility(visible);
-                    System.out.println(button.getVisibility());
-                }
-        }
-    }
-    private void hideAllStructures(Category category){
-        if(structureButtons.containsKey(category)){
-            for(StructureButton button: structureButtons.get(category)){
-                button.controlVisibility(false);
-            }
-
-        }
-
-    }
-    private void controlStructures(boolean visible){
-        for (Category category: Category.values()){
-            controlStructures(visible,category);
+    private void controlStructures(boolean visible) {
+        for (Category category : Category.values()) {
+            controlStructures(visible, category);
         }
 
     }
@@ -267,22 +67,216 @@ public class GuiBuilder extends GuiBaseJob {
         renderBackground(stack);
         if (loaded) {
             super.render(stack, p_render_1_, p_render_2_, p_render_3_);
-            if (state == State.BUILDINGINFO){
+            if (state == State.BUILDINGINFO) {
                 font.draw(stack, "Building Name: " + selected.getName(), (float) width / 6, (float) height / 4, Color.WHITE.getRGB());
-                font.draw(stack, "Author: " + selected.getAuthor(), (float) width / 6, (float) height / 4+20, Color.WHITE.getRGB());
-                font.draw(stack, "Price: " + selected.getCost(), (float) width / 6, (float) height / 4+40, Color.WHITE.getRGB());
-                font.draw(stack, "Rent: " + selected.getRent(), (float) width / 6 , (float) height / 4+60, Color.WHITE.getRGB());
+                font.draw(stack, "Author: " + selected.getAuthor(), (float) width / 6, (float) height / 4 + 20, Color.WHITE.getRGB());
+                font.draw(stack, "Price: " + selected.getCost(), (float) width / 6, (float) height / 4 + 40, Color.WHITE.getRGB());
+                font.draw(stack, "Rent: " + selected.getRent(), (float) width / 6, (float) height / 4 + 60, Color.WHITE.getRGB());
 
             }
 
 
-
-
-
-        }
-        else {
+        } else {
             font.draw(stack, "Loading", (float) width / 2 - font.width("Loading") / 2, (float) height / 2, Color.WHITE.getRGB());
         }
+
+    }
+
+    @Override
+    public void init(Minecraft minecraft, int width, int height) {
+        super.init(minecraft, width, height);
+        if (structures != null) {
+            loaded = true;
+        }
+        pageIndex = 0;
+
+        addButton(Build = new LargeButton(width / 2 - 55, height - 55, 110, 42, new StringTextComponent("Build"), (Build -> {
+            super.hideAll();
+            CustomBack.visible = true;
+            controlCategoryButtons(true);
+            state = State.SELECTCATEGORY;
+        })));
+        //Build.active=false;
+        addButton(CustomBack = new Button(width - 120, height - 30, 110, 20, new StringTextComponent("Back"), (Back -> {
+            super.Back.onPress();
+            if (state == State.SELECTBULDING) {
+                state = State.SELECTCATEGORY;
+                controlStructures(false, currentCategory);
+                controlCategoryButtons(true);
+                nextPage.visible = false;
+                previousPage.visible = false;
+
+            } else if (state == State.BUILDINGINFO) {
+                state = State.SELECTBULDING;
+                nextPage.visible = true;
+                previousPage.visible = true;
+                controlStructures(true, currentCategory);
+                confirmBuilding.visible = false;
+            } else if (state == State.SELECTCATEGORY) {
+                state = State.MAIN;
+                controlCategoryButtons(false);
+                showMainMenu();
+            }
+        })));
+        addButton(confirmBuilding = new Button(20, height - 30, 110, 20, new StringTextComponent("Confirm"), Confirm -> startBuilding()));
+        confirmBuilding.visible = false;
+
+        addButton(residential = new Button(width / 2 - 100, height / 2 - 30, 100, 20, new StringTextComponent("Residential"), Residential -> {
+            controlCategoryButtons(false);
+            currentCategory = Category.RESIDENTIAL;
+            controlStructures(true, currentCategory);
+            state = State.SELECTBULDING;
+            nextPage.visible = true;
+            previousPage.visible = true;
+        }));
+        addButton(commercial = new Button(width / 2 + 10, height / 2 - 30, 100, 20, new StringTextComponent("Commercial"), Commercial -> {
+            controlCategoryButtons(false);
+            currentCategory = Category.COMMERCIAL;
+            controlStructures(true, currentCategory);
+            state = State.SELECTBULDING;
+            nextPage.visible = true;
+            previousPage.visible = true;
+        }));
+
+        addButton(industrial = new Button(width / 2 - 100, height / 2 + 30, 100, 20, new StringTextComponent("Industrial"), industrial -> {
+            controlCategoryButtons(false);
+            currentCategory = Category.INDUSTRIAL;
+            controlStructures(true, currentCategory);
+            state = State.SELECTBULDING;
+            nextPage.visible = true;
+            previousPage.visible = true;
+        }));
+
+        addButton(special = new Button(width / 2 + 10, height / 2 + 30, 100, 20, new StringTextComponent("Special"), special -> {
+            controlCategoryButtons(false);
+            currentCategory = Category.SPECIAL;
+            controlStructures(true, currentCategory);
+            state = State.SELECTBULDING;
+            nextPage.visible = true;
+            previousPage.visible = true;
+        }));
+
+        addButton(nextPage = new Button(width - 120, height - 60, 100, 20, new StringTextComponent("Next Page"), nextPage -> {
+            hideAllStructures(currentCategory);
+            structureButtons.computeIfAbsent(currentCategory, k -> new ArrayList<>());
+            if ((pageIndex + 1) * maxButtons < structureButtons.get(currentCategory).size()) {
+                pageIndex++;
+            }
+            controlStructures(true, currentCategory);
+        }));
+
+        addButton(previousPage = new Button(20, height - 60, 100, 20, new StringTextComponent("Previous Page"), previousPage -> {
+            hideAllStructures(currentCategory);
+            pageIndex--;
+            controlStructures(true, currentCategory);
+
+        }));
+        nextPage.visible = false;
+        previousPage.visible = false;
+        residential.visible = false;
+        commercial.visible = false;
+        industrial.visible = false;
+        special.visible = false;
+        if (structures != null && !loaded) {
+            createStructureButtons();
+            loaded = true;
+
+        }
+        if (!isHired()) {
+            Build.active = false;
+        }
+        if (!loaded) {
+            CustomBack.visible = false;
+            Build.visible = false;
+        } else {
+            CustomBack.visible = false;
+            if (state != State.MAIN) {
+                Build.visible = false;
+
+                if (state == State.SELECTBULDING) {
+
+                    controlStructures(true, currentCategory);
+                    CustomBack.visible = true;
+                }
+                if (state == State.BUILDINGINFO) {
+                    confirmBuilding.visible = true;
+                    CustomBack.visible = true;
+                }
+                if (state == State.SELECTCATEGORY) {
+                    CustomBack.visible = true;
+                    controlCategoryButtons(true);
+                }
+            }
+
+        }
+
+    }
+
+    private void controlCategoryButtons(boolean enable) {
+        residential.visible = enable;
+        commercial.visible = enable;
+        industrial.visible = enable;
+        special.visible = enable;
+
+    }
+
+    private void controlStructures(boolean visible, Category category) {
+        if (structureButtons.containsKey(category)) {
+            int currentIndex = maxButtons * pageIndex;
+            if (currentIndex < 0) {
+                currentIndex = 0;
+                pageIndex = 0;
+            }
+            for (int i = currentIndex; i < maxButtons + currentIndex; i++) {
+                if (i >= structureButtons.get(category).size()) return;
+                StructureButton button = structureButtons.get(category).get(i);
+                if (!buttons.contains(button.name)) {
+                    button.addButtonsToGui();
+                }
+                button.controlVisibility(visible);
+                System.out.println(button.getVisibility());
+            }
+        }
+    }
+
+    private void startBuilding() {
+        Network.getNetwork().sendToServer(new StartBuildingPacket(pos, Minecraft.getInstance().player.getMotionDirection(), selected.getName(), Minecraft.getInstance().player.getUUID()));
+        Minecraft.getInstance().setScreen(null);
+    }
+
+    private void hideAllStructures(Category category) {
+        if (structureButtons.containsKey(category)) {
+            for (StructureButton button : structureButtons.get(category)) {
+                button.controlVisibility(false);
+            }
+
+        }
+
+    }
+
+    public void createStructureButtons() {
+        int xSpacing = 150;
+        int xPadding = 20;
+        int maxButtonsWidth = this.width / 150;
+        maxButtons = maxButtonsWidth * (this.height / 125);
+        int index;
+        for (BuildingTemplate template : structures) {
+            BuildingType type = BuildingType.getById(template.getTypeID());
+
+            if (type == null) {
+                type = BuildingType.SPECIAL;
+                SimuKraft.LOGGER().error("structure " + template.getName() + " is missing building type and Has been added as a special building");
+            }
+            StructureButton button = new StructureButton();
+            structureButtons.computeIfAbsent(type.category, k -> new ArrayList<>());
+            index = (structureButtons.get(type.category)).size() % maxButtons;
+            button.createButtons(template, (xSpacing * (index % maxButtonsWidth) + xPadding), 100 * ((index / maxButtonsWidth)) + 25);
+            ArrayList<StructureButton> list = structureButtons.get(type.category);
+            list.add(button);
+            structureButtons.put(type.category, list);
+
+        }
+
 
     }
 
@@ -298,7 +292,6 @@ public class GuiBuilder extends GuiBaseJob {
         private static final int SELECTCATEGORY = nextID();
 
 
-
     }
 
     private class StructureButton {
@@ -310,56 +303,57 @@ public class GuiBuilder extends GuiBaseJob {
         int width = 150;
         int height = 20;
 
-        void createButtons(BuildingTemplate template, int x, int y){
-        try {
-            name = new Button(x, y, width, height, new StringTextComponent(template.getName()), button -> {
-                state = State.BUILDINGINFO;
-                CustomBack.visible = true;
-                confirmBuilding.visible = true;
-                nextPage.visible = false;
-                previousPage.visible = false;
-                controlStructures(false);
-                selected = template;
-            });
-            name.visible = false;
-            author = new Button(x, y + height, width, height, new StringTextComponent("Author: " + template.getAuthor()), button -> {
-            });
-            author.active = false;
-            author.visible = false;
-            price = new Button(x, y + height * 2, width, height, new StringTextComponent("Price: " + template.getCost()), button -> {
-            });
-            price.active = false;
-            price.visible = false;
-            rent = new Button(x, y + height * 3, width, height, new StringTextComponent("Rent: " + template.getRent()), button -> {
-            });
-            rent.active = false;
-            rent.visible = false;
-            infoButtons.add(name);
-            infoButtons.add(author);
-            infoButtons.add(price);
-            infoButtons.add(rent);
-            addButtonsToGui();
-        } catch (Exception e){
-            e.printStackTrace();
+        void createButtons(BuildingTemplate template, int x, int y) {
+            try {
+                name = new Button(x, y, width, height, new StringTextComponent(template.getName()), button -> {
+                    state = State.BUILDINGINFO;
+                    CustomBack.visible = true;
+                    confirmBuilding.visible = true;
+                    nextPage.visible = false;
+                    previousPage.visible = false;
+                    controlStructures(false);
+                    selected = template;
+                });
+                name.visible = false;
+                author = new Button(x, y + height, width, height, new StringTextComponent("Author: " + template.getAuthor()), button -> {
+                });
+                author.active = false;
+                author.visible = false;
+                price = new Button(x, y + height * 2, width, height, new StringTextComponent("Price: " + template.getCost()), button -> {
+                });
+                price.active = false;
+                price.visible = false;
+                rent = new Button(x, y + height * 3, width, height, new StringTextComponent("Rent: " + template.getRent()), button -> {
+                });
+                rent.active = false;
+                rent.visible = false;
+                infoButtons.add(name);
+                infoButtons.add(author);
+                infoButtons.add(price);
+                infoButtons.add(rent);
+                addButtonsToGui();
+            } catch (Exception e) {
+                e.printStackTrace();
 
-        }
+            }
         }
 
-        void addButtonsToGui(){
+        void addButtonsToGui() {
             addButton(name);
             addButton(author);
             addButton(price);
             addButton(rent);
 
         }
-        void controlVisibility(boolean visible){
+
+        void controlVisibility(boolean visible) {
             name.visible = visible;
             author.visible = visible;
             price.visible = visible;
             rent.visible = visible;
         }
 
-        boolean getVisibility(){
+        boolean getVisibility() {
             return name.visible;
         }
     }

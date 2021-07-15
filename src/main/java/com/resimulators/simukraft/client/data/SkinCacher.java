@@ -27,13 +27,8 @@ import java.util.UUID;
 public class SkinCacher {
     private static PlayerProfileCache profileCache;
     private static MinecraftSessionService sessionService;
-    private static Map<String, ResourceLocation> playerSkinMap = new HashMap<>();
-
-    public void registerSpecialSkins() {
-        for (String s : SimuKraft.config.getSims().specialSimNames.get()) {
-            playerSkinMap.put(s, getPlayerSkin(s));
-        }
-    }
+    private static final Map<String, ResourceLocation> playerSkinMap = new HashMap<>();
+    GameProfile profile = null;
 
     public static ResourceLocation getSkinForSim(String name) {
         if (playerSkinMap.containsKey(name)) {
@@ -42,23 +37,15 @@ public class SkinCacher {
         return null;
     }
 
-    public void initSkinService() {
-        Proxy proxy = Minecraft.getInstance().getProxy();
-        AuthenticationService authenticationservice = new YggdrasilAuthenticationService(proxy, UUID.randomUUID().toString());
-        MinecraftSessionService minecraftsessionservice = authenticationservice.createMinecraftSessionService();
-        GameProfileRepository gameprofilerepository = authenticationservice.createProfileRepository();
-        PlayerProfileCache playerprofilecache = new PlayerProfileCache(gameprofilerepository, new File(Minecraft.getInstance().gameDirectory, MinecraftServer.USERID_CACHE_FILE.getName()));
-        SkullTileEntity.setProfileCache(playerprofilecache);
-        SkullTileEntity.setSessionService(minecraftsessionservice);
-        PlayerProfileCache.setUsesAuthentication(false);
-        setProfileCache(playerprofilecache);
-        setSessionService(minecraftsessionservice);
+    public void registerSpecialSkins() {
+        for (String s : SimuKraft.config.getSims().specialSimNames.get()) {
+            playerSkinMap.put(s, getPlayerSkin(s));
+        }
     }
 
-    GameProfile profile = null;
     private ResourceLocation getPlayerSkin(String playerName) {
         ResourceLocation playerSkin = DefaultPlayerSkin.getDefaultSkin();
-        GameProfile profileDirty = new GameProfile((UUID)null, playerName);
+        GameProfile profileDirty = new GameProfile(null, playerName);
         this.profile = updateGameprofile(profileDirty);
         if (this.profile != null) {
             Minecraft minecraft = Minecraft.getInstance();
@@ -71,14 +58,6 @@ public class SkinCacher {
             }
         }
         return playerSkin;
-    }
-
-    public void setProfileCache(PlayerProfileCache profileCacheIn) {
-        profileCache = profileCacheIn;
-    }
-
-    public void setSessionService(MinecraftSessionService sessionServiceIn) {
-        sessionService = sessionServiceIn;
     }
 
     public static GameProfile updateGameprofile(GameProfile input) {
@@ -105,5 +84,26 @@ public class SkinCacher {
         } else {
             return input;
         }
+    }
+
+    public void initSkinService() {
+        Proxy proxy = Minecraft.getInstance().getProxy();
+        AuthenticationService authenticationservice = new YggdrasilAuthenticationService(proxy, UUID.randomUUID().toString());
+        MinecraftSessionService minecraftsessionservice = authenticationservice.createMinecraftSessionService();
+        GameProfileRepository gameprofilerepository = authenticationservice.createProfileRepository();
+        PlayerProfileCache playerprofilecache = new PlayerProfileCache(gameprofilerepository, new File(Minecraft.getInstance().gameDirectory, MinecraftServer.USERID_CACHE_FILE.getName()));
+        SkullTileEntity.setProfileCache(playerprofilecache);
+        SkullTileEntity.setSessionService(minecraftsessionservice);
+        PlayerProfileCache.setUsesAuthentication(false);
+        setProfileCache(playerprofilecache);
+        setSessionService(minecraftsessionservice);
+    }
+
+    public void setProfileCache(PlayerProfileCache profileCacheIn) {
+        profileCache = profileCacheIn;
+    }
+
+    public void setSessionService(MinecraftSessionService sessionServiceIn) {
+        sessionService = sessionServiceIn;
     }
 }

@@ -1,5 +1,7 @@
 package com.resimulators.simukraft;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.IVertexBuilder;
 import com.resimulators.simukraft.client.data.SkinCacher;
 import com.resimulators.simukraft.client.gui.GuiMod;
 import com.resimulators.simukraft.client.gui.SimHud;
@@ -17,7 +19,13 @@ import com.resimulators.simukraft.init.RegistryHandler;
 import com.resimulators.simukraft.proxy.ClientProxy;
 import com.resimulators.simukraft.proxy.IProxy;
 import com.resimulators.simukraft.proxy.ServerProxy;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -37,10 +45,13 @@ import org.apache.logging.log4j.Logger;
 @Mod(Reference.MODID)
 public class SimuKraft {
     public static final Configs config = new Configs();
-
-    private static final Logger LOGGER = LogManager.getLogger();
-
     public static final IProxy proxy = DistExecutor.runForDist(() -> ClientProxy::new, () -> ServerProxy::new);
+    private static final Logger LOGGER = LogManager.getLogger();
+    int r = 0, g = 0, b = 0;
+
+    public static Logger LOGGER() {
+        return LOGGER;
+    }
 
     public SimuKraft() {
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, config.getSpec(), "SimUKraft.toml");
@@ -54,16 +65,13 @@ public class SimuKraft {
         MinecraftForge.EVENT_BUS.register(this);
     }
 
-    public static Logger LOGGER() {
-        return LOGGER;
-    }
-
     private void setup(final FMLCommonSetupEvent event) {
         ModEntities.registerAttributes();
         MinecraftForge.EVENT_BUS.register(new NewDayEvent());
         MinecraftForge.EVENT_BUS.register(new FactionEvents());
         MinecraftForge.EVENT_BUS.register(new SimDeathEvent());
         MinecraftForge.EVENT_BUS.register(MarkerBrokenEvent.class);
+        MinecraftForge.EVENT_BUS.register(this);
         Network.handler.init();
     }
 
@@ -83,12 +91,74 @@ public class SimuKraft {
     }
 
     @SubscribeEvent
-    public void onCommandRegister(RegisterCommandsEvent event){
+    public void onCommandRegister(RegisterCommandsEvent event) {
         CommandStructure.register(event.getDispatcher());
     }
+
     @SubscribeEvent
     public void onServerStarted(FMLServerStartedEvent event) {
         StructureHandler.createTemplateManager(event.getServer());
+    }
+
+    @SubscribeEvent
+    public void renderWorldLastEvent(RenderWorldLastEvent event) {
+        drawCube(event, new Vector3d(100, 100, 100), new Vector3d(-100, 150, -100), new Vector3d(r, g, b));
+        r = (r + 1) % 256;
+        g = (g + 2) % 256;
+        b = (b + 3) % 256;
+    }
+
+    private void drawCube(RenderWorldLastEvent event, Vector3d pointA, Vector3d pointB, Vector3d color) {
+        IRenderTypeBuffer.Impl buffer = Minecraft.getInstance().renderBuffers().bufferSource();
+        IVertexBuilder builder = buffer.getBuffer(RenderType.lines()); //SpellRender.QUADS is a personal RenderType, of VertexFormat POSITION_COLOR.
+
+        MatrixStack stack = event.getMatrixStack();
+
+        stack.pushPose();
+
+        Vector3d cam = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
+        stack.translate(-cam.x, -cam.y, -cam.z);
+
+        Matrix4f mat = stack.last().pose();
+
+        builder.vertex(mat, (float) pointA.x, (float) pointA.y, (float) pointA.z).color(0, (int) color.x, (int) color.y, (int) color.z).endVertex();
+        builder.vertex(mat, (float) pointA.x, (float) pointA.y, (float) pointB.z).color(0, (int) color.x, (int) color.y, (int) color.z).endVertex();
+
+        builder.vertex(mat, (float) pointA.x, (float) pointA.y, (float) pointA.z).color(0, (int) color.x, (int) color.y, (int) color.z).endVertex();
+        builder.vertex(mat, (float) pointA.x, (float) pointB.y, (float) pointA.z).color(0, (int) color.x, (int) color.y, (int) color.z).endVertex();
+
+        builder.vertex(mat, (float) pointA.x, (float) pointA.y, (float) pointA.z).color(0, (int) color.x, (int) color.y, (int) color.z).endVertex();
+        builder.vertex(mat, (float) pointB.x, (float) pointA.y, (float) pointA.z).color(0, (int) color.x, (int) color.y, (int) color.z).endVertex();
+
+        builder.vertex(mat, (float) pointA.x, (float) pointB.y, (float) pointB.z).color(0, (int) color.x, (int) color.y, (int) color.z).endVertex();
+        builder.vertex(mat, (float) pointB.x, (float) pointB.y, (float) pointB.z).color(0, (int) color.x, (int) color.y, (int) color.z).endVertex();
+
+        builder.vertex(mat, (float) pointA.x, (float) pointB.y, (float) pointB.z).color(0, (int) color.x, (int) color.y, (int) color.z).endVertex();
+        builder.vertex(mat, (float) pointA.x, (float) pointB.y, (float) pointA.z).color(0, (int) color.x, (int) color.y, (int) color.z).endVertex();
+
+        builder.vertex(mat, (float) pointA.x, (float) pointB.y, (float) pointB.z).color(0, (int) color.x, (int) color.y, (int) color.z).endVertex();
+        builder.vertex(mat, (float) pointA.x, (float) pointA.y, (float) pointB.z).color(0, (int) color.x, (int) color.y, (int) color.z).endVertex();
+
+        builder.vertex(mat, (float) pointB.x, (float) pointB.y, (float) pointA.z).color(0, (int) color.x, (int) color.y, (int) color.z).endVertex();
+        builder.vertex(mat, (float) pointA.x, (float) pointB.y, (float) pointA.z).color(0, (int) color.x, (int) color.y, (int) color.z).endVertex();
+
+        builder.vertex(mat, (float) pointB.x, (float) pointB.y, (float) pointA.z).color(0, (int) color.x, (int) color.y, (int) color.z).endVertex();
+        builder.vertex(mat, (float) pointB.x, (float) pointA.y, (float) pointA.z).color(0, (int) color.x, (int) color.y, (int) color.z).endVertex();
+
+        builder.vertex(mat, (float) pointB.x, (float) pointB.y, (float) pointA.z).color(0, (int) color.x, (int) color.y, (int) color.z).endVertex();
+        builder.vertex(mat, (float) pointB.x, (float) pointB.y, (float) pointB.z).color(0, (int) color.x, (int) color.y, (int) color.z).endVertex();
+
+        builder.vertex(mat, (float) pointB.x, (float) pointA.y, (float) pointB.z).color(0, (int) color.x, (int) color.y, (int) color.z).endVertex();
+        builder.vertex(mat, (float) pointB.x, (float) pointB.y, (float) pointB.z).color(0, (int) color.x, (int) color.y, (int) color.z).endVertex();
+
+        builder.vertex(mat, (float) pointB.x, (float) pointA.y, (float) pointB.z).color(0, (int) color.x, (int) color.y, (int) color.z).endVertex();
+        builder.vertex(mat, (float) pointB.x, (float) pointA.y, (float) pointA.z).color(0, (int) color.x, (int) color.y, (int) color.z).endVertex();
+
+        builder.vertex(mat, (float) pointB.x, (float) pointA.y, (float) pointB.z).color(0, (int) color.x, (int) color.y, (int) color.z).endVertex();
+        builder.vertex(mat, (float) pointA.x, (float) pointA.y, (float) pointB.z).color(0, (int) color.x, (int) color.y, (int) color.z).endVertex();
+
+        stack.popPose();
+        buffer.endBatch(RenderType.lines());
     }
 }
 

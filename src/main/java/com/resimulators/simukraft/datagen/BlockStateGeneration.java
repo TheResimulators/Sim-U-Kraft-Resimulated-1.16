@@ -20,15 +20,15 @@ public class BlockStateGeneration extends BlockStateProvider {
     @Override
     protected void registerStatesAndModels() {
         ModelFile rainbowLight = cubeAll(ModBlocks.RAINBOW_LIGHT.get());
-        simpleBlock(ModBlocks.RAINBOW_LIGHT.get(),rainbowLight);
+        simpleBlock(ModBlocks.RAINBOW_LIGHT.get(), rainbowLight);
 
         ModelFile compositeBrick = cubeAll(ModBlocks.COMPOSITE_BRICK.get());
-        simpleBlock(ModBlocks.COMPOSITE_BRICK.get(),compositeBrick);
+        simpleBlock(ModBlocks.COMPOSITE_BRICK.get(), compositeBrick);
 
         ModelFile cheeseBlock = cubeAll(ModBlocks.CHEESE_BLOCK.get());
-        simpleBlock(ModBlocks.CHEESE_BLOCK.get(),cheeseBlock);
+        simpleBlock(ModBlocks.CHEESE_BLOCK.get(), cheeseBlock);
         for (DyeColor color : DyeColor.values()) {
-            if (color.equals(DyeColor.LIGHT_GRAY))continue;
+            if (color.equals(DyeColor.LIGHT_GRAY)) continue;
 
         }
     }

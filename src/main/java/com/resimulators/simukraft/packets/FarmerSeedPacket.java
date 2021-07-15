@@ -11,12 +11,15 @@ import net.minecraftforge.fml.network.NetworkEvent;
 public class FarmerSeedPacket implements IMessage {
     private Seed seed;
     private BlockPos pos;
-    public FarmerSeedPacket(){}
 
-    public FarmerSeedPacket(Seed seed, BlockPos pos){
+    public FarmerSeedPacket() {
+    }
+
+    public FarmerSeedPacket(Seed seed, BlockPos pos) {
         this.seed = seed;
         this.pos = pos;
     }
+
     @Override
     public void toBytes(PacketBuffer buf) {
         buf.writeBlockPos(pos);
@@ -39,9 +42,9 @@ public class FarmerSeedPacket implements IMessage {
     public void onExecute(NetworkEvent.Context ctxIn, boolean isLogicalServer) {
         ctxIn.enqueueWork(() -> {
             ServerPlayerEntity player = ctxIn.getSender();
-            if (player != null){
+            if (player != null) {
                 TileFarmer farmer = (TileFarmer) player.level.getBlockEntity(pos);
-                if (farmer != null){
+                if (farmer != null) {
                     farmer.setSeed(seed);
                 }
             }

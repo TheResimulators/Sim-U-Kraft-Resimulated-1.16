@@ -10,15 +10,16 @@ import net.minecraftforge.fml.network.NetworkEvent;
 import javax.annotation.Nullable;
 import java.util.UUID;
 
-public class RequestHouseOccupantsPacket implements IMessage{
+public class RequestHouseOccupantsPacket implements IMessage {
 
     private BlockPos pos;
     private UUID playerId;
 
 
-    public RequestHouseOccupantsPacket(){}
+    public RequestHouseOccupantsPacket() {
+    }
 
-    public RequestHouseOccupantsPacket(BlockPos pos, UUID playerId){
+    public RequestHouseOccupantsPacket(BlockPos pos, UUID playerId) {
         this.pos = pos;
         this.playerId = playerId;
 

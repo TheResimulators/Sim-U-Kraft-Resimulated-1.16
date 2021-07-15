@@ -20,15 +20,13 @@ public class TileBaker extends TileEntity implements IControlBlock {
     }
 
     @Override
-    public CompoundNBT getUpdateTag() { return save(new CompoundNBT());}
+    public int getGui() {
+        return GuiHandler.BAKER;
+    }
 
     @Override
-    public CompoundNBT save(CompoundNBT nbt) {
-        nbt.putBoolean("hired", this.hired);
-        if (simId != null) {
-            nbt.putUUID("simid", simId);
-        }
-        return nbt;
+    public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
+        load(this.getBlockState(), pkt.getTag());
     }
 
     @Override
@@ -40,15 +38,27 @@ public class TileBaker extends TileEntity implements IControlBlock {
     }
 
     @Override
-    public int getGui() { return GuiHandler.BAKER; }
+    public CompoundNBT save(CompoundNBT nbt) {
+        nbt.putBoolean("hired", this.hired);
+        if (simId != null) {
+            nbt.putUUID("simid", simId);
+        }
+        return nbt;
+    }
 
     @Override
+    public SUpdateTileEntityPacket getUpdatePacket() {
+        return new SUpdateTileEntityPacket(this.worldPosition, -1, this.getUpdateTag());
+    }    @Override
     public void setHired(boolean hired) {
         this.hired = hired;
         setChanged();
     }
 
     @Override
+    public CompoundNBT getUpdateTag() {
+        return save(new CompoundNBT());
+    }    @Override
     public boolean getHired() {
         return this.hired;
     }
@@ -68,12 +78,7 @@ public class TileBaker extends TileEntity implements IControlBlock {
         return "Baker";
     }
 
-    @Override
-    public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
-        load(this.getBlockState(), pkt.getTag());
-    }
-    @Override
-    public SUpdateTileEntityPacket getUpdatePacket() {
-        return new SUpdateTileEntityPacket(this.worldPosition, -1, this.getUpdateTag());
-    }
+
+
+
 }

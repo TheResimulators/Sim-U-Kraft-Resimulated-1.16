@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Random;
 
 public class Utils {
-    private static Random rand = new Random();
+    private static final Random rand = new Random();
 
     public static boolean randomizeBoolean() {
         int dice = rand.nextInt(2);

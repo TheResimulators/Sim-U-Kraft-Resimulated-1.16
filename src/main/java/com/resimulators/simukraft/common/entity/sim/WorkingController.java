@@ -2,13 +2,13 @@ package com.resimulators.simukraft.common.entity.sim;
 
 
 import com.resimulators.simukraft.common.jobs.core.Activity;
-import com.resimulators.simukraft.common.jobs.core.IJob;
+import com.resimulators.simukraft.common.jobs.core.IReworkedJob;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.BlockPos;
 
 
 public class WorkingController {
-    private SimEntity sim;
+    private final SimEntity sim;
     private int tick;
 
     public WorkingController(SimEntity sim) {
@@ -17,31 +17,32 @@ public class WorkingController {
 
 
     public void tick() {
-        IJob job = sim.getJob();
-        if (job != null){
-        if (sim.getActivity() != Activity.WORKING  && sim.getActivity() != Activity.GOING_TO_WORK ) {// only runs this if the sim is not working at all
-            if (tick >= job.intervalTime()) { //interval time makes it so it checks every x seconds to see if it can work
-                tick = 0;
-                //TODO add if idling condition to make sure that we don't interrupt anything else like eating or socializing add to the one below
+        IReworkedJob job = sim.getJob();
+        if (job != null) {
+            job.tick();
+            if (sim.getActivity() != Activity.WORKING && sim.getActivity() != Activity.GOING_TO_WORK) {// only runs this if the sim is not working at all
+                if (tick >= job.intervalTime()) { //interval time makes it so it checks every x seconds to see if it can work
+                    tick = 0;
+                    //TODO add if idling condition to make sure that we don't interrupt anything else like eating or socializing add to the one below
 
-                if (job.getPeriodsWorked() < job.maximumWorkPeriods() || job.maximumWorkPeriods() < 0) {
-                    if (sim.getCommandSenderWorld().isDay() || job.nightShift()) {
-                        if (job.getWorkSpace() != null) {
-                            sim.setActivity(Activity.GOING_TO_WORK);
+                    if (job.getPeriodsWorked() < job.maximumWorkPeriods() || job.maximumWorkPeriods() < 0) {
+                        if (sim.getCommandSenderWorld().isDay() || job.nightShift()) {
+                            if (job.getWorkSpace() != null) {
+                                sim.setActivity(Activity.GOING_TO_WORK);
 
-                            BlockPos pos = new BlockPos(job.getWorkSpace());
-                            sim.getNavigation().moveTo(pos.getX(), pos.getY(), pos.getZ(), sim.getSpeed()*2);
+                                BlockPos pos = new BlockPos(job.getWorkSpace());
+                                sim.getNavigation().moveTo(pos.getX(), pos.getY(), pos.getZ(), sim.getSpeed() * 2);
                             }
                         }
                     }
                 }
-            } else if (sim.getActivity() == Activity.GOING_TO_WORK){
-            BlockPos pos = new BlockPos(job.getWorkSpace());
-            sim.getNavigation().moveTo(pos.getX(), pos.getY(), pos.getZ(), sim.getSpeed()*2);
-        } else {
-            if (!sim.level.isDay()) {
-                if (!job.nightShift()) {
-                    sim.setActivity(Activity.FORCE_STOP);
+            } else if (sim.getActivity() == Activity.GOING_TO_WORK) {
+                BlockPos pos = new BlockPos(job.getWorkSpace());
+                sim.getNavigation().moveTo(pos.getX() + 0.5, pos.getY() + 1, pos.getZ() + 0.5, sim.getSpeed() * 2);
+            } else {
+                if (!sim.level.isDay()) {
+                    if (!job.nightShift()) {
+                        sim.setActivity(Activity.FORCE_STOP);
                     }
                 }
             }
@@ -61,14 +62,13 @@ public class WorkingController {
         tick = nbt.getInt("tick");
     }
 
-    public void setTick(int tick){
-        this.tick = tick;
-    }
-
-    public int getTick(){
+    public int getTick() {
         return tick;
     }
 
+    public void setTick(int tick) {
+        this.tick = tick;
+    }
 
 
 }

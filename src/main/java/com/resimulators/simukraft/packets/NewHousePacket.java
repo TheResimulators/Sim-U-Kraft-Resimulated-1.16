@@ -3,7 +3,6 @@ package com.resimulators.simukraft.packets;
 import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.common.world.Faction.House;
 import com.resimulators.simukraft.common.world.SavedWorldData;
-
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.LogicalSide;
@@ -12,18 +11,21 @@ import net.minecraftforge.fml.network.NetworkEvent;
 import javax.annotation.Nullable;
 import java.util.UUID;
 
-public class NewHousePacket implements IMessage{
+public class NewHousePacket implements IMessage {
     private House house;
     private int faction;
     private UUID houseId;
-    public NewHousePacket(){}
 
-    public NewHousePacket(House house,UUID houseID, int faction){
+    public NewHousePacket() {
+    }
+
+    public NewHousePacket(House house, UUID houseID, int faction) {
         this.house = house;
         this.faction = faction;
         this.houseId = houseID;
 
     }
+
     @Override
     public void toBytes(PacketBuffer buf) {
         buf.writeInt(faction);
@@ -36,8 +38,8 @@ public class NewHousePacket implements IMessage{
         faction = buf.readInt();
         house = new House();
         CompoundNBT nbt = buf.readNbt();
-        if (nbt != null){
-        house.read(nbt);
+        if (nbt != null) {
+            house.read(nbt);
         }
         houseId = buf.readUUID();
     }
@@ -50,6 +52,6 @@ public class NewHousePacket implements IMessage{
 
     @Override
     public void onExecute(NetworkEvent.Context ctxIn, boolean isLogicalServer) {
-        SavedWorldData.get(SimuKraft.proxy.getClientWorld()).getFaction(faction).addHouse(house,houseId);
+        SavedWorldData.get(SimuKraft.proxy.getClientWorld()).getFaction(faction).addHouse(house, houseId);
     }
 }

@@ -28,35 +28,15 @@ public class TileConstructor extends TileEntity implements ITile {
         super(ModTileEntities.CONSTRUCTOR.get());
     }
 
-
     @Override
-    public CompoundNBT save(CompoundNBT nbt) {
-        super.save(nbt);
-        nbt.putBoolean("hired", hired);
-        if (simId != null) {
-            nbt.putUUID("simid", simId);
-        }
-        return nbt;
-    }
-
-    @Override
-    public void load(BlockState state, CompoundNBT nbt) {
-        super.load(state,nbt);
-        hired = nbt.getBoolean("hired");
-        if (nbt.contains("simid")) {
-            simId = nbt.getUUID("simid");
-        }
+    public boolean getHired() {
+        return hired;
     }
 
     @Override
     public void setHired(boolean hired) {
         this.hired = hired;
         setChanged();
-    }
-
-    @Override
-    public boolean getHired() {
-        return hired;
     }
 
     @Override
@@ -70,34 +50,51 @@ public class TileConstructor extends TileEntity implements ITile {
         setChanged();
     }
 
-
     @Override
     public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
-        load(this.getBlockState(),pkt.getTag());
+        load(this.getBlockState(), pkt.getTag());
     }
 
+    @Override
+    public void load(BlockState state, CompoundNBT nbt) {
+        super.load(state, nbt);
+        hired = nbt.getBoolean("hired");
+        if (nbt.contains("simid")) {
+            simId = nbt.getUUID("simid");
+        }
+    }
+
+    @Override
+    public CompoundNBT save(CompoundNBT nbt) {
+        super.save(nbt);
+        nbt.putBoolean("hired", hired);
+        if (simId != null) {
+            nbt.putUUID("simid", simId);
+        }
+        return nbt;
+    }
 
     @Override
     public CompoundNBT getUpdateTag() {
         return save(new CompoundNBT());
     }
 
-    public void FindAndLoadBuilding(PlayerEntity playerEntity){
+    public void FindAndLoadBuilding(PlayerEntity playerEntity) {
         List<ResourceLocation> locations = StructureHandler.getTemplateManager().getAllTemplates();
         ArrayList<BuildingTemplate> templates = new ArrayList<>();
-        for (ResourceLocation location : locations){
-            String name = location.getPath().replace(".nbt","");
+        for (ResourceLocation location : locations) {
+            String name = location.getPath().replace(".nbt", "");
             BuildingTemplate template = StructureHandler.loadStructure(name);
-            if (template != null){
+            if (template != null) {
                 templates.add(template);
 
-            }else{
+            } else {
                 SimuKraft.LOGGER().warn("Structure with name " + name + " is missing or corrupted and could not be loaded," +
-                    " please check if it is in the right location and that it is a valid structure");
+                        " please check if it is in the right location and that it is a valid structure");
 
             }
 
         }
-        Network.getNetwork().sendToPlayer(new BuildingsPacket(templates),(ServerPlayerEntity) playerEntity);
+        Network.getNetwork().sendToPlayer(new BuildingsPacket(templates), (ServerPlayerEntity) playerEntity);
     }
 }

@@ -15,12 +15,16 @@ public class UpdateSimPacket implements IMessage {
     private UUID uuid;
     private int id;
     private CompoundNBT nbt;
-    public UpdateSimPacket(UUID uuid, CompoundNBT nbt,int id){
+
+    public UpdateSimPacket(UUID uuid, CompoundNBT nbt, int id) {
         this.uuid = uuid;
         this.nbt = nbt;
         this.id = id;
     }
-    public UpdateSimPacket(){}
+
+    public UpdateSimPacket() {
+    }
+
     @Override
     public void toBytes(PacketBuffer buf) {
         buf.writeUUID(uuid);

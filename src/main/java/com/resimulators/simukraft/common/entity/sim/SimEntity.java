@@ -2,13 +2,13 @@ package com.resimulators.simukraft.common.entity.sim;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.resimulators.simukraft.Network;
 import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.common.entity.goals.GoToWorkGoal;
 import com.resimulators.simukraft.common.entity.goals.PickupItemGoal;
 import com.resimulators.simukraft.common.entity.goals.TalkingToPlayerGoal;
 import com.resimulators.simukraft.common.jobs.core.Activity;
 import com.resimulators.simukraft.common.jobs.core.IJob;
+import com.resimulators.simukraft.common.jobs.core.IReworkedJob;
 import com.resimulators.simukraft.common.tileentity.ITile;
 import com.resimulators.simukraft.common.world.Faction;
 import com.resimulators.simukraft.common.world.SavedWorldData;
@@ -21,12 +21,20 @@ import com.resimulators.simukraft.utils.Utils;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.attributes.AttributeModifierMap;
 import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.entity.ai.goal.*;
+import net.minecraft.entity.ai.goal.LookAtGoal;
+import net.minecraft.entity.ai.goal.LookRandomlyGoal;
+import net.minecraft.entity.ai.goal.OpenDoorGoal;
+import net.minecraft.entity.ai.goal.SwimGoal;
+import net.minecraft.entity.ai.goal.WaterAvoidingRandomWalkingGoal;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerModelPart;
 import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.*;
+import net.minecraft.item.ArmorItem;
+import net.minecraft.item.DyeItem;
+import net.minecraft.item.ElytraItem;
+import net.minecraft.item.Food;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.network.IPacket;
@@ -41,22 +49,34 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.world.*;
+import net.minecraft.world.Difficulty;
+import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.GameRules;
+import net.minecraft.world.IServerWorld;
+import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.network.NetworkHooks;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.*;
-
-import net.minecraft.entity.AgeableEntity.AgeableData;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Random;
+import java.util.UUID;
 
 public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalSpawnData {
+    public static final DataParameter<Integer> FOOD_LEVEL = EntityDataManager.defineId(SimEntity.class, DataSerializers.INT);
+    public static final DataParameter<Float> FOOD_SATURATION_LEVEL = EntityDataManager.defineId(SimEntity.class, DataSerializers.FLOAT);
+    public static final DataParameter<Optional<UUID>> HOUSE_ID = EntityDataManager.defineId(SimEntity.class, DataSerializers.OPTIONAL_UUID);
     private static final EntitySize SIZE = EntitySize.scalable(0.6f, 1.8f);
     private static final Map<Pose, EntitySize> SIZE_BY_POSE = ImmutableMap.<Pose, EntitySize>builder().put(Pose.STANDING, SIZE).put(Pose.SLEEPING, SLEEPING_DIMENSIONS).put(Pose.CROUCHING, EntitySize.scalable(0.6F, 1.5F)).put(Pose.DYING, EntitySize.fixed(0.2F, 0.2F)).build();
     private static final DataParameter<Integer> VARIATION = EntityDataManager.defineId(SimEntity.class, DataSerializers.INT);
@@ -67,30 +87,32 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
     private static final DataParameter<Byte> MODEL_FLAG = EntityDataManager.defineId(SimEntity.class, DataSerializers.BYTE);
     private static final DataParameter<String> STATUS = EntityDataManager.defineId(SimEntity.class, DataSerializers.STRING);
     private static final DataParameter<Integer> NAME_COLOR = EntityDataManager.defineId(SimEntity.class, DataSerializers.INT);
-    public static final DataParameter<Integer> FOOD_LEVEL = EntityDataManager.defineId(SimEntity.class, DataSerializers.INT);
-    public static final DataParameter<Float> FOOD_SATURATION_LEVEL = EntityDataManager.defineId(SimEntity.class, DataSerializers.FLOAT);
-    public static final DataParameter<Optional<UUID>> HOUSE_ID = EntityDataManager.defineId(SimEntity.class,DataSerializers.OPTIONAL_UUID);
     private final SimInventory inventory;
-    private PlayerEntity interactingPlayer;
-
     protected FoodStats foodStats;
+    private PlayerEntity interactingPlayer;
     private IJob job;
+    private IReworkedJob job1;
     private Activity activity;
     private WorkingController controller = new WorkingController(this);
-    private Random rand = new Random();
+    private final Random rand = new Random();
     private int houseHuntDelay = 200;
+
+    public static AttributeModifierMap.MutableAttribute createAttributes() {
+        return MobEntity.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 0.5D) //Movement Speed
+                .add(Attributes.MAX_HEALTH, 20.0D) //Health
+                .add(Attributes.ATTACK_DAMAGE, 1.0D); //Base Attack Damage
+    }
+
     public SimEntity(World worldIn) {
         this(ModEntities.ENTITY_SIM, worldIn);
     }
+
 
     public SimEntity(EntityType<? extends SimEntity> type, World world) {
         super(type, world);
         this.inventory = new SimInventory(this, "Sim Inventory", false, 27);
         this.foodStats = new FoodStats(this);
-    }
-
-
-    @Override
+    }    @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(VARIATION, 0);
@@ -103,11 +125,25 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
         this.entityData.define(NAME_COLOR, 0);
         this.entityData.define(FOOD_LEVEL, 20);
         this.entityData.define(FOOD_SATURATION_LEVEL, 5f);
-        this.entityData.define(HOUSE_ID,Optional.empty());
+        this.entityData.define(HOUSE_ID, Optional.empty());
 
     }
 
     @Override
+    protected void registerGoals() {
+        this.goalSelector.addGoal(0, new SwimGoal(this));
+        this.goalSelector.addGoal(1, new TalkingToPlayerGoal(this));
+        this.goalSelector.addGoal(2, new PickupItemGoal(this));
+
+        //Unimportant "make more alive"-goals
+        this.goalSelector.addGoal(9, new OpenDoorGoal(this, true));
+        this.goalSelector.addGoal(10, new LookAtGoal(this, PlayerEntity.class, 2.0f, 1.0f));
+        this.goalSelector.addGoal(11, new WaterAvoidingRandomWalkingGoal(this, 0.6d));
+        this.goalSelector.addGoal(12, new LookAtGoal(this, PlayerEntity.class, 8f));
+        this.goalSelector.addGoal(13, new LookRandomlyGoal(this));
+        //Job Important Goals
+        this.goalSelector.addGoal(14, new GoToWorkGoal(this));
+    }    @Override
     public ILivingEntityData finalizeSpawn(IServerWorld worldIn, DifficultyInstance difficultyIn, SpawnReason reason, ILivingEntityData spawnDataIn, CompoundNBT dataTag) {
         this.setSpecial(Utils.randomizeBooleanWithChance(SimuKraft.config.getSims().specialSpawnChance.get()));
 
@@ -147,38 +183,25 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
         return super.finalizeSpawn(worldIn, difficultyIn, reason, spawnDataIn, dataTag);
     }
 
+    //Updates
     @Override
-    protected void registerGoals() {
-        this.goalSelector.addGoal(0, new SwimGoal(this));
-        this.goalSelector.addGoal(1, new TalkingToPlayerGoal(this));
-        this.goalSelector.addGoal(2, new PickupItemGoal(this));
+    public void tick() {
+        super.tick();
+        if (!level.isClientSide()) {
+            this.foodStats.tick(this);
+            this.controller.tick();
+            if (getHouseID() == null) {
+                if (houseHuntDelay <= 0) {
+                    findHouseToLive();
+                } else {
+                    houseHuntDelay--;
 
-        //Unimportant "make more alive"-goals
-        this.goalSelector.addGoal(9, new OpenDoorGoal(this, true));
-        this.goalSelector.addGoal(10, new LookAtGoal(this, PlayerEntity.class, 2.0f, 1.0f));
-        this.goalSelector.addGoal(11, new WaterAvoidingRandomWalkingGoal(this, 0.6d));
-        this.goalSelector.addGoal(12, new LookAtGoal(this, PlayerEntity.class, 8f));
-        this.goalSelector.addGoal(13, new LookRandomlyGoal(this));
-        //Job Important Goals
-        this.goalSelector.addGoal(14, new GoToWorkGoal(this));
+                }
+            }
+            /*if (job1 != null)
+                job1.tick();*/
+        }
     }
-    public static AttributeModifierMap.MutableAttribute createAttributes() {
-        return MobEntity.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 0.5D) //Movement Speed
-                .add(Attributes.MAX_HEALTH, 20.0D) //Health
-                .add(Attributes.ATTACK_DAMAGE, 1.0D); //Base Attack Damage
-    }
-
-    @Nullable
-    @Override
-    public AgeableEntity getBreedOffspring(ServerWorld world, AgeableEntity ageable) {
-        SimEntity simEntity = new SimEntity(world);
-        simEntity.finalizeSpawn(world, this.level.getCurrentDifficultyAt(simEntity.blockPosition()), SpawnReason.BREEDING, new AgeableData(true), null);
-        return simEntity;
-    }
-
-
-
-
 
     //Logic
     @Override
@@ -186,12 +209,36 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
         return false;
     }
 
-
-    public boolean canPickupStack(@Nonnull ItemStack stack) {
-        return Utils.canInsertStack(inventory.getHandler(), stack);
+    @Override
+    protected void customServerAiStep() {
+        super.customServerAiStep();
+    }    @Nullable
+    @Override
+    public AgeableEntity getBreedOffspring(ServerWorld world, AgeableEntity ageable) {
+        SimEntity simEntity = new SimEntity(world);
+        simEntity.finalizeSpawn(world, this.level.getCurrentDifficultyAt(simEntity.blockPosition()), SpawnReason.BREEDING, new AgeableData(true), null);
+        return simEntity;
     }
 
-    //NBT Data
+    @Override
+    public Iterable<ItemStack> getHandSlots() {
+        return Lists.newArrayList(this.getMainHandItem(), this.getOffhandItem());
+    }
+
+    @Override
+    public Iterable<ItemStack> getArmorSlots() {
+        return this.inventory.armorInventory;
+    }
+
+    public ItemStack getItemBySlot(EquipmentSlotType slotIn) {
+        if (slotIn == EquipmentSlotType.MAINHAND) {
+            return this.inventory.getCurrentItem();
+        } else if (slotIn == EquipmentSlotType.OFFHAND) {
+            return this.inventory.handInventory.get(0);
+        } else {
+            return slotIn.getType() == EquipmentSlotType.Group.ARMOR ? this.inventory.armorInventory.get(slotIn.getIndex()) : ItemStack.EMPTY;
+        }
+    }    //NBT Data
     @Override
     public void addAdditionalSaveData(CompoundNBT compound) {
         super.addAdditionalSaveData(compound);
@@ -206,19 +253,30 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
         compound.putString("Status", this.getStatus());
         compound.putInt("activity", this.getActivity().id);
         this.foodStats.write(compound);
-        if (job != null) {
-            compound.put("job", this.job.writeToNbt(new ListNBT()));
+        if (job1 != null) {
+            compound.put("job", this.job1.writeToNbt(new ListNBT()));
         }
-
 
 
         if (controller != null) {
             compound.put("working controller", controller.serializeNBT());
         }
-        compound.putUUID("uuid",getUUID());
+        compound.putUUID("uuid", getUUID());
     }
 
     @Override
+    public void setItemSlot(EquipmentSlotType slotIn, ItemStack stack) {
+        if (slotIn == EquipmentSlotType.MAINHAND) {
+            this.playEquipSound(stack);
+            this.inventory.mainInventory.set(this.inventory.currentItem, stack);
+        } else if (slotIn == EquipmentSlotType.OFFHAND) {
+            this.playEquipSound(stack);
+            this.inventory.handInventory.set(0, stack);
+        } else if (slotIn.getType() == EquipmentSlotType.Group.ARMOR) {
+            this.playEquipSound(stack);
+            this.inventory.armorInventory.set(slotIn.getIndex(), stack);
+        }
+    }    @Override
     public void readAdditionalSaveData(CompoundNBT compound) {
         super.readAdditionalSaveData(compound);
         if (compound.contains("Variation"))
@@ -240,20 +298,20 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
         if (compound.contains("Status"))
             this.setStatus(compound.getString("Status"));
         this.foodStats.read(compound);
-       ListNBT nbt = compound.getList("job", Constants.NBT.TAG_COMPOUND);
+        ListNBT nbt = compound.getList("job", Constants.NBT.TAG_COMPOUND);
 
         int jobType = nbt.getCompound(0).getInt("id");
         if (jobType != 0) {
-            job = ModJobs.JOB_LOOKUP.get(jobType).apply(this);
+            job1 = ModJobs.JOB_LOOKUP.get(jobType).apply(this);
         }
-        if (compound.contains("job") && job != null){
-            this.job.readFromNbt((ListNBT) compound.get("job"));
+        if (compound.contains("job") && job1 != null) {
+            this.job1.readFromNbt((ListNBT) compound.get("job"));
         }
         controller = new WorkingController(this);
         if (compound.contains("working controller")) {
             controller.deserializeNBT(compound.getCompound("working controller"));
         }
-        if (compound.hasUUID("uuid")){
+        if (compound.hasUUID("uuid")) {
             this.uuid = compound.getUUID("uuid");
         }
 
@@ -261,7 +319,6 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
             setActivity(Activity.getActivityById(compound.getInt("activity")));
         //NetworkHooks.getEntitySpawningPacket(this);
     }
-
 
     //Interaction
     @Override
@@ -275,143 +332,6 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
             this.setNameColor(((DyeItem) player.getItemInHand(hand).getItem()).getDyeColor().getId());
         }
         return super.mobInteract(player, hand);
-    }
-
-    //Updates
-    @Override
-    public void tick() {
-        super.tick();
-        if (!level.isClientSide()) {
-            this.foodStats.tick(this);
-            this.controller.tick();
-            if (getHouseID() == null){
-                if (houseHuntDelay <= 0){
-                    findHouseToLive();
-                }else{
-                    houseHuntDelay--;
-
-                }
-            }
-        }
-    }
-
-    @Override
-    public void aiStep() {
-        if (this.level.getDifficulty() == Difficulty.PEACEFUL && this.level.getGameRules().getBoolean(GameRules.RULE_NATURAL_REGENERATION)) {
-            if (this.getHealth() < this.getMaxHealth() && this.tickCount % 20 == 0) {
-                this.heal(1.0F);
-            }
-
-
-            if (this.foodStats.needFood() && this.tickCount % 10 == 0) {
-                this.foodStats.setFoodLevel(this.foodStats.getFoodLevel() + 1);
-            }
-        } else {
-            if (this.foodStats.shouldEat()) {
-                if (this.canEat(false)) {
-                    this.startUsingItem(this.getUsedItemHand());
-                    this.selectSlot(this.inventory.getSlotFor(this.inventory.getFood()));
-                    ItemStack stack = this.getMainHandItem();
-                    Food food = stack.getItem().getFoodProperties();
-                    if (food != null) {
-                        this.foodStats.consume(stack.getItem(), stack);
-                    }
-                }
-            }
-        }
-        this.inventory.tick();
-
-        super.aiStep();
-    }
-
-    public boolean shouldHeal() {
-        return this.getHealth() > 0.0F && this.getHealth() < this.getMaxHealth();
-    }
-
-    @Override
-    public void die(DamageSource cause) {
-        super.die(cause);
-        this.dropEquipment();
-
-    }
-
-    //Inventory
-    public void selectSlot(int i) {
-        if (0 <= i && i < 27)
-            inventory.currentItem = i;
-    }
-
-    public int getSelectedSlot() {
-        return inventory.currentItem;
-    }
-
-    @Override
-    public void take(Entity entity, int quantity) {
-        super.take(entity, quantity);
-    }
-
-    @Override
-    protected void dropEquipment() {
-        super.dropEquipment();
-        this.inventory.dropAllItems();
-    }
-
-    @Nullable
-    public void dropItem(ItemStack droppedItem, boolean dropAround, boolean traceItem) {
-        if (!droppedItem.isEmpty()) {
-            double d0 = this.getEyeY() - (double) 0.3F;
-            ItemEntity itementity = new ItemEntity(this.level, this.getX(), d0, this.getZ(), droppedItem);
-            itementity.setPickUpDelay(40);
-            if (traceItem) {
-                itementity.setThrower(this.getUUID());
-            }
-
-            if (dropAround) {
-                float f = this.rand.nextFloat() * 0.5F;
-                float f1 = this.rand.nextFloat() * ((float) Math.PI * 2F);
-                itementity.setDeltaMovement((double) (-MathHelper.sin(f1) * f), (double) 0.2F, (double) (MathHelper.cos(f1) * f));
-            } else {
-                float f7 = 0.3F;
-                float f8 = MathHelper.sin(this.xRot * ((float) Math.PI / 180F));
-                float f2 = MathHelper.cos(this.xRot * ((float) Math.PI / 180F));
-                float f3 = MathHelper.sin(this.yRot * ((float) Math.PI / 180F));
-                float f4 = MathHelper.cos(this.yRot * ((float) Math.PI / 180F));
-                float f5 = this.rand.nextFloat() * ((float) Math.PI * 2F);
-                float f6 = 0.02F * this.rand.nextFloat();
-                itementity.setDeltaMovement((double) (-f3 * f2 * 0.3F) + Math.cos((double) f5) * (double) f6, (double) (-f8 * 0.3F + 0.1F + (this.rand.nextFloat() - this.rand.nextFloat()) * 0.1F), (double) (f4 * f2 * 0.3F) + Math.sin((double) f5) * (double) f6);
-            }
-
-            this.level.addFreshEntity(itementity);
-        }
-    }
-
-    public ItemStack getItemBySlot(EquipmentSlotType slotIn) {
-        if (slotIn == EquipmentSlotType.MAINHAND) {
-            return this.inventory.getCurrentItem();
-        } else if (slotIn == EquipmentSlotType.OFFHAND) {
-            return this.inventory.handInventory.get(0);
-        } else {
-            return slotIn.getType() == EquipmentSlotType.Group.ARMOR ? this.inventory.armorInventory.get(slotIn.getIndex()) : ItemStack.EMPTY;
-        }
-    }
-
-    @Override
-    public void setItemSlot(EquipmentSlotType slotIn, ItemStack stack) {
-        if (slotIn == EquipmentSlotType.MAINHAND) {
-            this.playEquipSound(stack);
-            this.inventory.mainInventory.set(this.inventory.currentItem, stack);
-        } else if (slotIn == EquipmentSlotType.OFFHAND) {
-            this.playEquipSound(stack);
-            this.inventory.handInventory.set(0, stack);
-        } else if (slotIn.getType() == EquipmentSlotType.Group.ARMOR) {
-            this.playEquipSound(stack);
-            this.inventory.armorInventory.set(slotIn.getIndex(), stack);
-        }
-    }
-
-    public boolean addItemStackToInventory(ItemStack p_191521_1_) {
-        this.playEquipSound(p_191521_1_);
-        return this.inventory.addItemStackToInventory(p_191521_1_);
     }
 
     @Override
@@ -456,105 +376,156 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
         }
     }
 
-    @Override
-    public Iterable<ItemStack> getHandSlots() {
-        return Lists.newArrayList(this.getMainHandItem(), this.getOffhandItem());
+    public UUID getHouseID() {
+        try {
+            return this.entityData.get(HOUSE_ID).get();
+        } catch (Exception e) {
+            return null;
+        }
+
+
+    }    @Override
+    public void aiStep() {
+        if (this.level.getDifficulty() == Difficulty.PEACEFUL && this.level.getGameRules().getBoolean(GameRules.RULE_NATURAL_REGENERATION)) {
+            if (this.getHealth() < this.getMaxHealth() && this.tickCount % 20 == 0) {
+                this.heal(1.0F);
+            }
+
+
+            if (this.foodStats.needFood() && this.tickCount % 10 == 0) {
+                this.foodStats.setFoodLevel(this.foodStats.getFoodLevel() + 1);
+            }
+        } else {
+            if (this.foodStats.shouldEat()) {
+                if (this.canEat(false)) {
+                    this.startUsingItem(this.getUsedItemHand());
+                    this.selectSlot(this.inventory.getSlotFor(this.inventory.getFood()));
+                    ItemStack stack = this.getMainHandItem();
+                    Food food = stack.getItem().getFoodProperties();
+                    if (food != null) {
+                        this.foodStats.consume(stack.getItem(), stack);
+                    }
+                }
+            }
+        }
+        this.inventory.tick();
+
+        super.aiStep();
+    }
+
+    public void setHouseID(UUID id) {
+        if (id != null) {
+            this.entityData.set(HOUSE_ID, Optional.of(id));
+        } else {
+            this.entityData.set(HOUSE_ID, Optional.empty());
+        }
+    }
+
+    public void findHouseToLive() {
+        Faction faction = SavedWorldData.get(level).getFactionWithSim(this.getUUID());
+        if (faction != null) {
+            UUID house = faction.getFreeHouse();
+            if (house != null) {
+                faction.addSimToHouse(house, getUUID());
+                faction.sendFactionChatMessage("Sim " + this.getName().getString() + " Has Moved into " + faction.getHouseByID(house).getName().replace("_", " "), level);
+
+                setHouseID(house);
+            }
+        }
+    }
+
+    public boolean canPickupStack(@Nonnull ItemStack stack) {
+        return Utils.canInsertStack(inventory.getHandler(), stack);
+    }    //Inventory
+    public void selectSlot(int i) {
+        if (0 <= i && i < 27)
+            inventory.currentItem = i;
+    }
+
+    public boolean shouldHeal() {
+        return this.getHealth() > 0.0F && this.getHealth() < this.getMaxHealth();
     }
 
     @Override
-    public Iterable<ItemStack> getArmorSlots() {
-        return this.inventory.armorInventory;
+    public void die(DamageSource cause) {
+        super.die(cause);
+        this.dropEquipment();
+
+    }
+
+    @Override
+    protected void dropEquipment() {
+        super.dropEquipment();
+        this.inventory.dropAllItems();
+    }
+
+    @Override
+    public void take(Entity entity, int quantity) {
+        super.take(entity, quantity);
+    }
+
+    @Override
+    public IPacket<?> getAddEntityPacket() {
+        return NetworkHooks.getEntitySpawningPacket(this);
+        //return super.createSpawnPacket();
+    }
+
+    @Override
+    public EntitySize getDimensions(Pose poseIn) {
+        return SIZE_BY_POSE.getOrDefault(poseIn, SIZE);
+    }
+
+    public int getSelectedSlot() {
+        return inventory.currentItem;
+    }
+
+    @Nullable
+    public void dropItem(ItemStack droppedItem, boolean dropAround, boolean traceItem) {
+        if (!droppedItem.isEmpty()) {
+            double d0 = this.getEyeY() - (double) 0.3F;
+            ItemEntity itementity = new ItemEntity(this.level, this.getX(), d0, this.getZ(), droppedItem);
+            itementity.setPickUpDelay(40);
+            if (traceItem) {
+                itementity.setThrower(this.getUUID());
+            }
+
+            if (dropAround) {
+                float f = this.rand.nextFloat() * 0.5F;
+                float f1 = this.rand.nextFloat() * ((float) Math.PI * 2F);
+                itementity.setDeltaMovement(-MathHelper.sin(f1) * f, 0.2F, MathHelper.cos(f1) * f);
+            } else {
+                float f7 = 0.3F;
+                float f8 = MathHelper.sin(this.xRot * ((float) Math.PI / 180F));
+                float f2 = MathHelper.cos(this.xRot * ((float) Math.PI / 180F));
+                float f3 = MathHelper.sin(this.yRot * ((float) Math.PI / 180F));
+                float f4 = MathHelper.cos(this.yRot * ((float) Math.PI / 180F));
+                float f5 = this.rand.nextFloat() * ((float) Math.PI * 2F);
+                float f6 = 0.02F * this.rand.nextFloat();
+                itementity.setDeltaMovement((double) (-f3 * f2 * 0.3F) + Math.cos(f5) * (double) f6, -f8 * 0.3F + 0.1F + (this.rand.nextFloat() - this.rand.nextFloat()) * 0.1F, (double) (f4 * f2 * 0.3F) + Math.sin(f5) * (double) f6);
+            }
+
+            this.level.addFreshEntity(itementity);
+        }
+    }
+
+    public boolean addItemStackToInventory(ItemStack p_191521_1_) {
+        this.playEquipSound(p_191521_1_);
+        return this.inventory.addItemStackToInventory(p_191521_1_);
     }
 
     public SimInventory getInventory() {
         return inventory;
     }
 
-    //Data Manager Interaction
-    public void setVariation(int variationID) {
-        this.entityData.set(VARIATION, variationID);
+    public PlayerEntity getInteractingPlayer() {
+        return this.interactingPlayer;
     }
-
-    public int getVariation() {
-        try {
-            return Math.max(this.entityData.get(VARIATION), 0);
-        } catch (NullPointerException e) {
-            return 0;
-        }
-    }
-
-    public void setProfession(int professionID) {
-        this.entityData.set(PROFESSION, professionID);
-    }
-
-    public int getProfession() {
-        try {
-            return Math.max(this.entityData.get(PROFESSION), 0);
-        } catch (NullPointerException e) {
-            return 0;
-        }
-    }
-
-
-
-
-    public void setFemale(boolean female) {
-        this.entityData.set(FEMALE, female);
-    }
-
-    public boolean getFemale() {
-        try {
-            return this.entityData.get(FEMALE);
-        } catch (NullPointerException e) {
-            return false;
-        }
-    }
-
-    public void setSpecial(boolean special) {
-        this.entityData.set(SPECIAL, special);
-    }
-
-    public boolean getSpecial() {
-        try {
-            return this.entityData.get(SPECIAL);
-        } catch (NullPointerException e) {
-            return false;
-        }
-    }
-
-    public void setLefthanded(boolean lefthanded) {
-        this.entityData.set(LEFTHANDED, lefthanded);
-    }
-
-    public boolean getLefthanded() {
-        try {
-            return this.entityData.get(LEFTHANDED);
-        } catch (NullPointerException e) {
-            return false;
-        }
-
-    }
-
-    public void setStatus(String status) {
-        this.entityData.set(STATUS, status);
-    }
-
-    public String getStatus() {
-        try {
-            return this.entityData.get(STATUS);
-        } catch (NullPointerException e) {
-            return "";
-        }
-    }
-
-
 
     public void setInteractingPlayer(PlayerEntity player) {
         this.interactingPlayer = player;
-    }
-
-    public PlayerEntity getInteractingPlayer() {
-        return this.interactingPlayer;
+    }    //Data Manager Interaction
+    public void setVariation(int variationID) {
+        this.entityData.set(VARIATION, variationID);
     }
 
     public void addExhaustion(float exhaustion) {
@@ -563,10 +534,155 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
                 this.foodStats.addExhaustion(exhaustion);
             }
         }
+    }    public int getVariation() {
+        try {
+            return Math.max(this.entityData.get(VARIATION), 0);
+        } catch (NullPointerException e) {
+            return 0;
+        }
     }
 
     public FoodStats getFoodStats() {
         return this.foodStats;
+    }    public void setProfession(int professionID) {
+        this.entityData.set(PROFESSION, professionID);
+    }
+
+    public boolean hasJob() {
+        return job != null;
+    }    public int getProfession() {
+        try {
+            return Math.max(this.entityData.get(PROFESSION), 0);
+        } catch (NullPointerException e) {
+            return 0;
+        }
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    public boolean isWearing(PlayerModelPart part) {
+        return (this.getEntityData().get(MODEL_FLAG) & part.getMask()) == part.getMask();
+    }    public void setFemale(boolean female) {
+        this.entityData.set(FEMALE, female);
+    }
+
+    public void fireSim(SimEntity sim, int factionID, boolean dying) {
+        if (sim.getJob() != null) {
+            if (sim.getJob().getWorkSpace() != null) {
+                SavedWorldData.get(level).fireSim(factionID, sim);
+                if (!level.isClientSide)
+                    SavedWorldData.get(level).getFaction(factionID).sendPacketToFaction(new SimFirePacket(factionID, sim.getId(), sim.getJob().getWorkSpace(), dying));
+                BlockPos jobPos = sim.getJob().getWorkSpace();
+                ITile tile = (ITile) sim.level.getBlockEntity(jobPos);
+                if (tile != null) {
+                    tile.setHired(false);
+                    tile.setSimId(null);
+                }
+            }
+            if (!dying) {
+                sim.setJob(null);
+                sim.setProfession(0);
+            } else {
+                SavedWorldData.get(level).getFaction(factionID).removeSim(sim);
+            }
+        }
+
+
+    }    public boolean getFemale() {
+        try {
+            return this.entityData.get(FEMALE);
+        } catch (NullPointerException e) {
+            return false;
+        }
+    }
+
+    public IReworkedJob getJob() {
+        return job1;
+    }    public void setSpecial(boolean special) {
+        this.entityData.set(SPECIAL, special);
+    }
+
+    public void setJob(IReworkedJob job) {
+        this.job1 = job;
+    }    public boolean getSpecial() {
+        try {
+            return this.entityData.get(SPECIAL);
+        } catch (NullPointerException e) {
+            return false;
+        }
+    }
+
+    public WorkingController getController() {
+        return controller;
+    }    public void setLefthanded(boolean lefthanded) {
+        this.entityData.set(LEFTHANDED, lefthanded);
+    }
+
+    public List<UUID> getOtherHouseOccupants() {
+        ArrayList<UUID> list = SavedWorldData.get(level).getFactionWithSim(this.getUUID()).getOccupants(getHouseID());
+        list.remove(this.getUUID());
+        return list;
+
+    }    public boolean getLefthanded() {
+        try {
+            return this.entityData.get(LEFTHANDED);
+        } catch (NullPointerException e) {
+            return false;
+        }
+
+    }
+
+    public void moveHouse(UUID currentHouseID, UUID newHouseID) {
+        Faction faction = SavedWorldData.get(level).getFactionWithSim(this.getUUID());
+        removeFromHouse(faction);
+        faction.addSimToHouse(newHouseID, getUUID());
+        setHouseID(newHouseID);
+
+    }    public void setStatus(String status) {
+        this.entityData.set(STATUS, status);
+    }
+
+    public void removeFromHouse(Faction faction) {
+        faction.removeSimFromHouse(getHouseID(), this.getUUID());
+        removeHouse();
+    }    public String getStatus() {
+        try {
+            return this.entityData.get(STATUS);
+        } catch (NullPointerException e) {
+            return "";
+        }
+    }
+
+    public void removeHouse() {
+        setHouseID(null);
+    }
+
+    public boolean isHomeless() {
+        return getHouseID() == null;
+    }
+
+    @Override
+    public void writeSpawnData(PacketBuffer buffer) {
+        buffer.writeBoolean(job1 != null);
+        if (job1 != null) {
+            buffer.writeInt(this.getProfession());
+            CompoundNBT nbt = new CompoundNBT();
+            ListNBT list = job1.writeToNbt(new ListNBT());
+            buffer.writeBoolean(list != null);
+            if (list != null) nbt.put("nbt", list);
+            buffer.writeNbt(nbt);
+        }
+    }
+
+    @Override
+    public void readSpawnData(PacketBuffer additionalData) {
+        if (additionalData.readBoolean()) {
+            int id = additionalData.readInt();
+            if (id > 0 && additionalData.readBoolean()) {
+                job1 = ModJobs.JOB_LOOKUP.get(id).apply(this);
+                ListNBT nbt = additionalData.readNbt().getList("nbt", Constants.NBT.TAG_COMPOUND);
+                job1.readFromNbt(nbt);
+            }
+        }
     }
 
     public boolean canEat(boolean ignoreHunger) {
@@ -583,10 +699,7 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
         return super.isBaby();
     }
 
-    @Override
-    public EntitySize getDimensions(Pose poseIn) {
-        return SIZE_BY_POSE.getOrDefault(poseIn, SIZE);
-    }
+
 
     public void setNameColor(int colorID) {
         if (0 <= colorID && colorID < 16) {
@@ -602,62 +715,29 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
         }
     }
 
-    public void setJob(IJob job) {
-        this.job = job;
-    }
 
-    public IJob getJob() {
-        return job;
-    }
 
-    public boolean hasJob(){
-        return job != null;
-    }
+
+
+
+
     @Override
     public void setCustomName(ITextComponent name) {
         super.setCustomName(name);
         this.inventory.setCustomName(name.getString());
     }
 
-    @OnlyIn(Dist.CLIENT)
-    public boolean isWearing(PlayerModelPart part) {
-        return (this.getEntityData().get(MODEL_FLAG) & part.getMask()) == part.getMask();
-    }
-
-
-    public void fireSim(SimEntity sim, int factionID,boolean dying){
-        if (sim.getJob() != null) {
-            if (sim.getJob().getWorkSpace() != null){
-                SavedWorldData.get(level).fireSim(factionID, sim);
-                if (!level.isClientSide) SavedWorldData.get(level).getFaction(factionID).sendPacketToFaction(new SimFirePacket(factionID, sim.getId(), sim.getJob().getWorkSpace(),dying));
-                BlockPos jobPos = sim.getJob().getWorkSpace();
-                ITile tile = (ITile) sim.level.getBlockEntity(jobPos);
-                if (tile != null) {
-                    tile.setHired(false);
-                    tile.setSimId(null);
-                }
-            }
-            if (!dying){
-                sim.getJob().removeJobAi();
-                sim.setJob(null);
-                sim.setProfession(0);
-            }else{
-                SavedWorldData.get(level).getFaction(factionID).removeSim(sim);
-            }
-        }
 
 
 
-    }
 
-    public WorkingController getController(){
-        return controller;
-    }
+
+
 
     public Activity getActivity() {
-        if (activity == null){
-        setActivity(Activity.IDLING);
-    }
+        if (activity == null) {
+            setActivity(Activity.IDLING);
+        }
         return activity;
     }
 
@@ -665,96 +745,27 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
         this.activity = activity;
     }
 
-    public void setHouseID(UUID id){
-        if (id != null){
-            this.entityData.set(HOUSE_ID,Optional.of(id));
-        }else{
-            this.entityData.set(HOUSE_ID,Optional.empty());
-        }
-    }
-
-    public UUID getHouseID(){
-        try{
-            return this.entityData.get(HOUSE_ID).get();
-        } catch (Exception e){
-            return null;
-        }
 
 
-    }
-    public void removeHouse(){
-        setHouseID(null);
-    }
 
-    public List<UUID> getOtherHouseOccupants(){
-        ArrayList<UUID> list = SavedWorldData.get(level).getFactionWithSim(this.getUUID()).getOccupants(getHouseID());
-        list.remove(this.getUUID());
-        return list;
 
-    }
-    public void moveHouse(UUID currentHouseID,UUID newHouseID){
-        Faction faction = SavedWorldData.get(level).getFactionWithSim(this.getUUID());
-        removeFromHouse(faction);
-        faction.addSimToHouse(newHouseID,getUUID());
-        setHouseID(newHouseID);
 
-    }
 
-    public void removeFromHouse(Faction faction){
-        faction.removeSimFromHouse(getHouseID(),this.getUUID());
-        removeHouse();
-    }
 
-    public void findHouseToLive(){
-        Faction faction = SavedWorldData.get(level).getFactionWithSim(this.getUUID());
-        if (faction != null){
-            UUID house = faction.getFreeHouse();
-            if (house != null){
-            faction.addSimToHouse(house,getUUID());
-            faction.sendFactionChatMessage("Sim " + this.getName().getString() + " Has Moved into " + faction.getHouseByID(house).getName().replace("_"," "),level);
 
-            setHouseID(house);
-            }
-        }
-    }
 
-    public boolean isHomeless(){
-        return getHouseID() == null;
-    }
 
-    @Override
-    public void writeSpawnData(PacketBuffer buffer) {
-        buffer.writeBoolean(job != null);
-        if (job != null){
-            buffer.writeInt(this.getProfession());
-            CompoundNBT nbt = new CompoundNBT();
-            ListNBT list = job.writeToNbt(new ListNBT());
-            buffer.writeBoolean(list !=null);
-            if (list != null) nbt.put("nbt",list);
-            buffer.writeNbt(nbt);
-        }
-    }
 
-    @Override
-    public void readSpawnData(PacketBuffer additionalData) {
-        if (additionalData.readBoolean()){
-            int id = additionalData.readInt();
-            if(id > 0 && additionalData.readBoolean()) {
-                job = ModJobs.JOB_LOOKUP.get(id).apply(this);
-                ListNBT nbt = additionalData.readNbt().getList("nbt",Constants.NBT.TAG_COMPOUND);
-                job.readFromNbt(nbt);
-            }
-        }
-    }
 
-    @Override
-    protected void customServerAiStep() {
-        super.customServerAiStep();
-    }
 
-    @Override
-    public IPacket<?> getAddEntityPacket() {
-        return NetworkHooks.getEntitySpawningPacket(this);
-        //return super.createSpawnPacket();
-    }
+
+
+
+
+
+
+
+
+
+
 }

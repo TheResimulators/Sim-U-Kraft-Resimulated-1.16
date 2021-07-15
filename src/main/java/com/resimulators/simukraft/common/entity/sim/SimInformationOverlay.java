@@ -30,8 +30,6 @@ import org.lwjgl.opengl.GL12;
 import java.awt.*;
 
 public class SimInformationOverlay {
-    private Minecraft minecraft = Minecraft.getInstance();
-
     protected static boolean hasLight;
     protected static boolean hasDepthTest;
     protected static boolean hasLight0;
@@ -40,10 +38,11 @@ public class SimInformationOverlay {
     protected static boolean hasColorMaterial;
     protected static boolean depthMask;
     protected static int depthFunc;
-
+    private final Minecraft minecraft = Minecraft.getInstance();
     private Entity pastEntity;
     private Faction faction;
     private Faction.House house;
+
     @SubscribeEvent
     public void renderSimOverlay(TickEvent.RenderTickEvent event) {
         RayTraceHelper.INSTANCE.ray();
@@ -57,7 +56,7 @@ public class SimInformationOverlay {
 
             if (entity instanceof SimEntity) {
                 SimEntity sim = (SimEntity) entity;
-                if (faction == null){
+                if (faction == null) {
                     faction = SavedWorldData.get(sim.getCommandSenderWorld()).getFactionWithSim(sim.getUUID());
                     house = faction.getHouseByID(sim.getHouseID());
                 }
@@ -85,12 +84,12 @@ public class SimInformationOverlay {
                 RenderSystem.disableLighting();
                 RenderSystem.disableDepthTest();
                 int rectangleHeight = 86;
-                if (house != null){
+                if (house != null) {
                     rectangleHeight = 99;
 
                 }
                 Rectangle rectangle = new Rectangle(posX, posY, 90, rectangleHeight);
-                drawTooltipBox(rectangle.x, rectangle.y, rectangle.width, rectangle.height, new Color(0, 0 , 0, 150).getRGB(), ColorHelper.getColorFromDye(sim.getNameColor()).getRGB(), Color.BLACK.getRGB());
+                drawTooltipBox(rectangle.x, rectangle.y, rectangle.width, rectangle.height, new Color(0, 0, 0, 150).getRGB(), ColorHelper.getColorFromDye(sim.getNameColor()).getRGB(), Color.BLACK.getRGB());
 
                 RenderSystem.enableBlend();
                 RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
@@ -163,7 +162,7 @@ public class SimInformationOverlay {
                         xOffset += 8;
                     }
                 }
-                
+
                 RenderSystem.disableBlend();
                 RenderSystem.enableRescaleNormal();
                 loadGLState();
@@ -172,24 +171,24 @@ public class SimInformationOverlay {
                 minecraft.font.draw(new MatrixStack(), (SimuKraft.config.getSims().coloredNames.get() ? TextFormatting.getById(ColorHelper.convertDyeToTF(sim.getNameColor())) : TextFormatting.WHITE) + sim.getName().getString(), posX + 5, posY + 5, Color.WHITE.getRGB());
 
                 //TODO: WIP Couple Status (Temp)
-                minecraft.font.draw(new MatrixStack(), "Single (WIP)" + TextFormatting.RESET,posX + 5,posY + 50,Color.WHITE.getRGB());
+                minecraft.font.draw(new MatrixStack(), "Single (WIP)" + TextFormatting.RESET, posX + 5, posY + 50, Color.WHITE.getRGB());
 
 
                 //TODO:WIP HOUSE STATUS (TEMP)
                 if (house != null) {
                     minecraft.font.draw(new MatrixStack(), "Lives in " + TextFormatting.RESET, posX + 5, posY + 63, Color.WHITE.getRGB());
-                    minecraft.font.draw(new MatrixStack(), house.getName().replace("_"," ") + TextFormatting.RESET, posX + 5, posY + 76, Color.WHITE.getRGB());
+                    minecraft.font.draw(new MatrixStack(), house.getName().replace("_", " ") + TextFormatting.RESET, posX + 5, posY + 76, Color.WHITE.getRGB());
                     jobYPos = 89;
-                }else{
-                    minecraft.font.draw(new MatrixStack(), "Homeless" + TextFormatting.RESET,posX + 5,posY + 63,Color.WHITE.getRGB());
+                } else {
+                    minecraft.font.draw(new MatrixStack(), "Homeless" + TextFormatting.RESET, posX + 5, posY + 63, Color.WHITE.getRGB());
                 }
-                if (sim.getJob() == null){
+                if (sim.getJob() == null) {
 
-                   minecraft.font.draw(new MatrixStack(), "Unemployed" + TextFormatting.RESET,posX + 5,posY + jobYPos,Color.WHITE.getRGB());
-                }else{
+                    minecraft.font.draw(new MatrixStack(), "Unemployed" + TextFormatting.RESET, posX + 5, posY + jobYPos, Color.WHITE.getRGB());
+                } else {
                     String profession = Profession.getNameFromID(sim.getProfession());
 
-                    minecraft.font.draw(new MatrixStack(),StringUtils.capitalize(profession) + TextFormatting.RESET,posX + 5,posY + jobYPos,Color.WHITE.getRGB());
+                    minecraft.font.draw(new MatrixStack(), StringUtils.capitalize(profession) + TextFormatting.RESET, posX + 5, posY + jobYPos, Color.WHITE.getRGB());
 
                 }
                 RenderSystem.popMatrix();
@@ -208,6 +207,31 @@ public class SimInformationOverlay {
         depthFunc = GL11.glGetInteger(GL11.GL_DEPTH_FUNC);
         depthMask = GL11.glGetBoolean(GL11.GL_DEPTH_WRITEMASK);
         GL11.glPushAttrib(GL11.GL_CURRENT_BIT);
+    }
+
+    public static void drawTooltipBox(int x, int y, int w, int h, int bg, int grad1, int grad2) {
+        drawGradientRect(x + 1, y, w - 1, 1, bg, bg);
+        drawGradientRect(x + 1, y + h, w - 1, 1, bg, bg);
+        drawGradientRect(x + 1, y + 1, w - 1, h - 1, bg, bg);//center
+        drawGradientRect(x, y + 1, 1, h - 1, bg, bg);
+        drawGradientRect(x + w, y + 1, 1, h - 1, bg, bg);
+        drawGradientRect(x + 1, y + 2, 1, h - 3, grad1, grad2);
+        drawGradientRect(x + w - 1, y + 2, 1, h - 3, grad1, grad2);
+
+        drawGradientRect(x + 1, y + 1, w - 1, 1, grad1, grad1);
+        drawGradientRect(x + 1, y + h - 1, w - 1, 1, grad2, grad2);
+    }
+
+    public static void renderIcon(int x, int y, int sx, int sy, Icons icon) {
+        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+        Minecraft.getInstance().getTextureManager().bind(AbstractGui.GUI_ICONS_LOCATION);
+
+        if (icon == null)
+            return;
+
+        if (icon.bu != -1)
+            drawTexturedModalRect(x, y, icon.bu, icon.bv, sx, sy, icon.bsu, icon.bsv);
+        drawTexturedModalRect(x, y, icon.u, icon.v, sx, sy, icon.su, icon.sv);
     }
 
     public static void loadGLState() {
@@ -234,19 +258,6 @@ public class SimInformationOverlay {
         else
             RenderSystem.disableColorMaterial();
         RenderSystem.popAttributes();
-    }
-
-    public static void drawTooltipBox(int x, int y, int w, int h, int bg, int grad1, int grad2) {
-        drawGradientRect(x + 1, y, w - 1, 1, bg, bg);
-        drawGradientRect(x + 1, y + h, w - 1, 1, bg, bg);
-        drawGradientRect(x + 1, y + 1, w - 1, h - 1, bg, bg);//center
-        drawGradientRect(x, y + 1, 1, h - 1, bg, bg);
-        drawGradientRect(x + w, y + 1, 1, h - 1, bg, bg);
-        drawGradientRect(x + 1, y + 2, 1, h - 3, grad1, grad2);
-        drawGradientRect(x + w - 1, y + 2, 1, h - 3, grad1, grad2);
-
-        drawGradientRect(x + 1, y + 1, w - 1, 1, grad1, grad1);
-        drawGradientRect(x + 1, y + h - 1, w - 1, 1, grad2, grad2);
     }
 
     public static void drawGradientRect(int left, int top, int right, int bottom, int startColor, int endColor) {
@@ -286,22 +297,10 @@ public class SimInformationOverlay {
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder buffer = tessellator.getBuilder();
         buffer.begin(7, DefaultVertexFormats.POSITION_TEX);
-        buffer.vertex(x, y + height, zLevel).uv( ((float) (textureX) * f), ((float) (textureY + th) * f1)).endVertex();
-        buffer.vertex(x + width, y + height, zLevel).uv( ((float) (textureX + tw) * f), ((float) (textureY + th) * f1)).endVertex();
-        buffer.vertex(x + width, y, zLevel).uv( ((float) (textureX + tw) * f), ((float) (textureY) * f1)).endVertex();
-        buffer.vertex(x, y, zLevel).uv( ((float) (textureX) * f), ((float) (textureY) * f1)).endVertex();
+        buffer.vertex(x, y + height, zLevel).uv(((float) (textureX) * f), ((float) (textureY + th) * f1)).endVertex();
+        buffer.vertex(x + width, y + height, zLevel).uv(((float) (textureX + tw) * f), ((float) (textureY + th) * f1)).endVertex();
+        buffer.vertex(x + width, y, zLevel).uv(((float) (textureX + tw) * f), ((float) (textureY) * f1)).endVertex();
+        buffer.vertex(x, y, zLevel).uv(((float) (textureX) * f), ((float) (textureY) * f1)).endVertex();
         tessellator.end();
-    }
-
-    public static void renderIcon(int x, int y, int sx, int sy, Icons icon) {
-        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        Minecraft.getInstance().getTextureManager().bind(AbstractGui.GUI_ICONS_LOCATION);
-
-        if (icon == null)
-            return;
-
-        if (icon.bu != -1)
-            drawTexturedModalRect(x, y, icon.bu, icon.bv, sx, sy, icon.bsu, icon.bsv);
-        drawTexturedModalRect(x, y, icon.u, icon.v, sx, sy, icon.su, icon.sv);
     }
 }

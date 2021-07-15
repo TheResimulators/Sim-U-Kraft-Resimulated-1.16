@@ -14,15 +14,10 @@ public class FoodStats {
     private int foodTimer;
     private int prevFoodLevel = 20;
 
-    private SimEntity sim;
+    private final SimEntity sim;
 
     public FoodStats(SimEntity sim) {
         this.sim = sim;
-    }
-
-    public void addStats(int foodLevel, float saturation) {
-        this.setFoodLevel(Math.min(foodLevel + this.getFoodLevel(), 20));
-        this.setFoodSaturationLevel(Math.min(this.getSaturationLevel() + this.getFoodLevel() * saturation * 2.0F, this.getFoodLevel()));
     }
 
     public void consume(Item item, ItemStack itemStack) {
@@ -31,6 +26,27 @@ public class FoodStats {
             this.addStats(food.getNutrition(), food.getSaturationModifier());
         }
 
+    }
+
+    public void addStats(int foodLevel, float saturation) {
+        this.setFoodLevel(Math.min(foodLevel + this.getFoodLevel(), 20));
+        this.setFoodSaturationLevel(Math.min(this.getSaturationLevel() + this.getFoodLevel() * saturation * 2.0F, this.getFoodLevel()));
+    }
+
+    public int getFoodLevel() {
+        return sim.getEntityData().get(SimEntity.FOOD_LEVEL);
+    }
+
+    public void setFoodLevel(int foodLevel) {
+        sim.getEntityData().set(SimEntity.FOOD_LEVEL, foodLevel);
+    }
+
+    public void setFoodSaturationLevel(float foodSaturationLevel) {
+        sim.getEntityData().set(SimEntity.FOOD_SATURATION_LEVEL, foodSaturationLevel);
+    }
+
+    public float getSaturationLevel() {
+        return sim.getEntityData().get(SimEntity.FOOD_SATURATION_LEVEL);
     }
 
     public void tick(SimEntity simEntity) {
@@ -76,6 +92,10 @@ public class FoodStats {
 
     }
 
+    public void addExhaustion(float exhaustion) {
+        this.foodExhaustionLevel = Math.min(this.foodExhaustionLevel + exhaustion, 40.0F);
+    }
+
     public void read(CompoundNBT compound) {
         if (compound.contains("foodLevel", 99)) {
             this.setFoodLevel(compound.getInt("foodLevel"));
@@ -93,10 +113,6 @@ public class FoodStats {
         compound.putFloat("foodExhaustionLevel", this.foodExhaustionLevel);
     }
 
-    public int getFoodLevel() {
-        return sim.getEntityData().get(SimEntity.FOOD_LEVEL);
-    }
-
     public boolean needFood() {
         return sim.getEntityData().get(SimEntity.FOOD_LEVEL) < 20;
     }
@@ -104,23 +120,6 @@ public class FoodStats {
     public boolean shouldEat() {
         return sim.getEntityData().get(SimEntity.FOOD_LEVEL) < 15;
     }
-
-    public void addExhaustion(float exhaustion) {
-        this.foodExhaustionLevel = Math.min(this.foodExhaustionLevel + exhaustion, 40.0F);
-    }
-
-    public float getSaturationLevel() {
-        return sim.getEntityData().get(SimEntity.FOOD_SATURATION_LEVEL);
-    }
-
-    public void setFoodLevel(int foodLevel) {
-        sim.getEntityData().set(SimEntity.FOOD_LEVEL, foodLevel);
-    }
-
-    public void setFoodSaturationLevel(float foodSaturationLevel) {
-        sim.getEntityData().set(SimEntity.FOOD_SATURATION_LEVEL, foodSaturationLevel);
-    }
-
 
 
     public enum FoodLevels {
@@ -132,7 +131,8 @@ public class FoodStats {
 
         public int level;
         public String status;
-        FoodLevels(int level, String status){
+
+        FoodLevels(int level, String status) {
             this.level = level;
             this.status = status;
 

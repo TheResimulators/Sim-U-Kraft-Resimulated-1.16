@@ -24,71 +24,57 @@ import java.util.UUID;
 
 public class NewDayEvent implements INBTSerializable<CompoundNBT> {
     private static DayOfWeek dayOfWeek;
-    private static Random random = new Random();
+    private static final Random random = new Random();
     private double day = 0;
     private double previousDay = 0;
+
+    public static DayOfWeek getDay() {
+        return dayOfWeek;
+    }
 
     @SubscribeEvent
     public void OnNewDayEvent(TickEvent.WorldTickEvent event) {
         if (event.phase == TickEvent.Phase.END) {
-            if (!event.world.isClientSide){
-            World world = event.world;
-            double time = world.getDayTime();
-            day = Math.floor(time / 24000);
-            dayOfWeek = DayOfWeek.of((int) (1 + (day % 7)));
+            if (!event.world.isClientSide) {
+                World world = event.world;
+                double time = world.getDayTime();
+                day = Math.floor(time / 24000);
+                dayOfWeek = DayOfWeek.of((int) (1 + (day % 7)));
 
-            if (day != previousDay) {
+                if (day != previousDay) {
 
-                payRent(world);
+                    payRent(world);
 
-                previousDay = day;
+                    previousDay = day;
                 }
             }
         }
     }
-
-    @SubscribeEvent
-    public void CheckForSpawnSim(TickEvent.WorldTickEvent event){
-        if (event.phase == TickEvent.Phase.END){
-            if (!event.world.isClientSide){
-                World world = event.world;
-                double time = world.getDayTime();
-                if (time % 600 == 0){
-                    spawnSims(world);
-                }
-            }
-
-    }}
-    @Override
-    public CompoundNBT serializeNBT() {
-        CompoundNBT nbt = new CompoundNBT();
-        nbt.putDouble("day", day);
-        nbt.putDouble("previousDay", previousDay);
-
-        return nbt;
-    }
-
-    @Override
-    public void deserializeNBT(CompoundNBT nbt) {
-        day = nbt.getDouble("day");
-        previousDay = nbt.getDouble("previousDay");
-    }
-
 
     public void payRent(World world) {
         SimuKraft.LOGGER().debug("Paying rent...");
         SavedWorldData worldData = SavedWorldData.get(world);
         ArrayList<Faction> factions = worldData.getFactions();
-        for (Faction faction: factions){
+        for (Faction faction : factions) {
             float rent = faction.getRent();
-            faction.sendFactionChatMessage(rent +" Collected in rent today",world);
+            faction.sendFactionChatMessage(rent + " Collected in rent today", world);
             faction.addCredits(rent);
 
         }
     }
 
-    public static DayOfWeek getDay() {
-        return dayOfWeek;
+    @SubscribeEvent
+    public void CheckForSpawnSim(TickEvent.WorldTickEvent event) {
+        if (event.phase == TickEvent.Phase.END) {
+            if (!event.world.isClientSide) {
+                World world = event.world;
+                double time = world.getDayTime();
+                if (time % 600 == 0) {
+                    spawnSims(world);
+                }
+            }
+
+        }
     }
 
     public void spawnSims(World world) {
@@ -123,8 +109,7 @@ public class NewDayEvent implements INBTSerializable<CompoundNBT> {
     }
 
     /**
-     * Loops through the blocks to try
-     * and find a suitable spawning point
+     * Loops through the blocks to try and find a suitable spawning point
      *
      * @param world              The world
      * @param sim                The sim
@@ -135,21 +120,21 @@ public class NewDayEvent implements INBTSerializable<CompoundNBT> {
         // loop through provided blocks
         SimuKraft.LOGGER().debug(blocksAroundPlayer.size());
 
-            BlockPos spawnPos = null;
-            // if there are no invalid positions, spawn sim and break out of loop
-            for (int i = 0;i< blocksAroundPlayer.size(); i++){
-                int index = random.nextInt(blocksAroundPlayer.size()-i);
-                spawnPos = getSpawnPosition(world, blocksAroundPlayer.get(index), sim);
-                if (spawnPos == null){
-                    SimuKraft.LOGGER().debug("AHHHH NULL " + index);
-                    blocksAroundPlayer.remove(i);
-                }else{
-                    break;
-                }
-
+        BlockPos spawnPos = null;
+        // if there are no invalid positions, spawn sim and break out of loop
+        for (int i = 0; i < blocksAroundPlayer.size(); i++) {
+            int index = random.nextInt(blocksAroundPlayer.size() - i);
+            spawnPos = getSpawnPosition(world, blocksAroundPlayer.get(index), sim);
+            if (spawnPos == null) {
+                SimuKraft.LOGGER().debug("AHHHH NULL " + index);
+                blocksAroundPlayer.remove(i);
+            } else {
+                break;
             }
 
-            if (spawnPos != null){
+        }
+
+        if (spawnPos != null) {
             // get x, y, z coords of block
             double x = spawnPos.getX();
             double y = spawnPos.getY();
@@ -167,10 +152,7 @@ public class NewDayEvent implements INBTSerializable<CompoundNBT> {
     }
 
     /**
-     * Can the sim spawn in an open area?
-     * A A A
-     * A S A
-     * A A A
+     * Can the sim spawn in an open area? A A A A S A A A A
      *
      * @param world       The world
      * @param startingPos The starting position
@@ -192,5 +174,20 @@ public class NewDayEvent implements INBTSerializable<CompoundNBT> {
         }
         SimuKraft.LOGGER().debug("Blocks are NOT valid");
         return null;
+    }
+
+    @Override
+    public CompoundNBT serializeNBT() {
+        CompoundNBT nbt = new CompoundNBT();
+        nbt.putDouble("day", day);
+        nbt.putDouble("previousDay", previousDay);
+
+        return nbt;
+    }
+
+    @Override
+    public void deserializeNBT(CompoundNBT nbt) {
+        day = nbt.getDouble("day");
+        previousDay = nbt.getDouble("previousDay");
     }
 }

@@ -4,7 +4,7 @@ import com.resimulators.simukraft.common.jobs.Profession;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.math.BlockPos;
 
-public interface IJob {
+public interface IReworkedJob {
     //gets the state the sim is in, used to see if they should work or not
     Activity getState();
 
@@ -28,13 +28,6 @@ public interface IJob {
 
     int getPeriodsWorked();
 
-    //add the jobs ai to the sim. allows minimal amount of ai's to be active in a sim at once,
-    // should be called when the sim is hired
-    void addJobAi();
-
-    //removes unneeded job Ai when the sim is fired
-    void removeJobAi();
-
     ListNBT writeToNbt(ListNBT nbt);
 
     void readFromNbt(ListNBT nbt);
@@ -50,8 +43,6 @@ public interface IJob {
 
     void setWorkSpace(BlockPos pos);
 
-    boolean hasAiRunning();
-
     //gets the amount the job gets paid per x Ticks
     double getWage();
 
@@ -59,7 +50,7 @@ public interface IJob {
 
     void setFinished(boolean finished);
 
+    void start();
 
+    void tick();
 }
-
-

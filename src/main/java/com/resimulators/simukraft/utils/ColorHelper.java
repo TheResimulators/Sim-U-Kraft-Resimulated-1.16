@@ -35,7 +35,7 @@ public class ColorHelper {
         PURPLE(10, 5, new Color(170, 0, 170)), //Dark Purple
         BLUE(11, 1, new Color(0, 0, 170)), //Dark Blue
         BROWN(12, 6, new Color(255, 170, 10)), //Gold
-        GREEN(13, 2, new Color(0, 170,0)), //Dark Green
+        GREEN(13, 2, new Color(0, 170, 0)), //Dark Green
         RED(14, 4, new Color(170, 0, 0)), //Dark Red
         BLACK(15, 0, Color.BLACK); //Black
 
@@ -45,6 +45,21 @@ public class ColorHelper {
         int dyeColor;
         int tfColor;
         Color color;
+
+        public static Colors getFromDyeColor(int dyeColor) {
+            if (dyeColor < 0 || dyeColor >= DYECOLORS.length) {
+                dyeColor = 0;
+            }
+            return DYECOLORS[dyeColor];
+        }
+
+        public static Colors getFromTFColor(int tfColor) {
+            if (tfColor < 0 || tfColor >= TFCOLORS.length) {
+                tfColor = 0;
+            }
+            return TFCOLORS[tfColor];
+        }
+
         Colors(int dyeColor, int tfColor, Color color) {
             this.dyeColor = dyeColor;
             this.tfColor = tfColor;
@@ -61,20 +76,6 @@ public class ColorHelper {
 
         public int getTfColor() {
             return tfColor;
-        }
-
-        public static Colors getFromDyeColor(int dyeColor) {
-            if (dyeColor < 0 || dyeColor >= DYECOLORS.length) {
-                dyeColor = 0;
-            }
-            return DYECOLORS[dyeColor];
-        }
-
-        public static Colors getFromTFColor(int tfColor) {
-            if (tfColor < 0 || tfColor >= TFCOLORS.length) {
-                tfColor = 0;
-            }
-            return TFCOLORS[tfColor];
         }
     }
 }
