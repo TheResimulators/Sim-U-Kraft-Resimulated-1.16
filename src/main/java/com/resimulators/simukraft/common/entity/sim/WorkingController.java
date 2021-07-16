@@ -44,6 +44,8 @@ public class WorkingController {
                     if (!job.nightShift()) {
                         sim.setActivity(Activity.FORCE_STOP);
                     }
+                } else if (!job.nightShift()){
+                    sim.setActivity(Activity.WORKING);
                 }
             }
         }

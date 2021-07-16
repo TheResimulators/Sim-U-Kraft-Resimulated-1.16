@@ -1,7 +1,14 @@
 package com.resimulators.simukraft.utils;
 
+import com.resimulators.simukraft.SimuKraft;
+import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.ToolItem;
+import net.minecraft.tileentity.ChestTileEntity;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
 
@@ -55,5 +62,48 @@ public class Utils {
         }
         Collections.reverse(temp);
         return temp.get(index);
+    }
+
+    public static int findNextAvaliableSlot(ChestTileEntity chest) {
+        for (int i = 0; i < chest.getContainerSize(); i++) {
+            ItemStack stack = chest.getItem(i);
+            if (stack == ItemStack.EMPTY) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public static boolean addSimInventoryToChest(ChestTileEntity chest, SimEntity sim) {
+        for (int i = 0; i < sim.getInventory().mainInventory.size(); i++) {
+            ItemStack stack = sim.getInventory().mainInventory.get(i);
+            if (!stack.equals(ItemStack.EMPTY) && !(stack.getItem() instanceof ToolItem)) {
+                int index = findNextAvaliableSlot(chest);
+                if (index >= 0) {
+                    chest.setItem(index, stack);
+                    sim.getInventory().removeItemNoUpdate(i);
+                } else {
+                    SimuKraft.LOGGER().debug("No Room in chest");
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    public static ChestTileEntity getInventoryAroundPos(BlockPos pos, World world) {
+        int range = 6;
+        pos = pos.offset(-range / 2, 0, -range / 2);
+        BlockPos current = pos;
+        for (int i = 0; i < range; i++) {
+            for (int j = 0; j < range; j++) {
+                current = pos.offset(i, 0, j);
+                TileEntity entity = world.getBlockEntity(current);
+                if (entity instanceof ChestTileEntity) {
+                    return (ChestTileEntity) entity;
+                }
+            }
+        }
+        return null;
     }
 }
