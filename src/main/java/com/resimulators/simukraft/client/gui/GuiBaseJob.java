@@ -122,7 +122,7 @@ public class GuiBaseJob extends Screen {
                 previousPage.visible = true;
                 nextPage.visible = true;
                 state = State.HIRE_INFO;
-                ShowHiring();
+                showHiring();
             }
             if (state == State.Firing) {
                 state = State.MAIN;
@@ -196,9 +196,6 @@ public class GuiBaseJob extends Screen {
         mainMenu.add(Done);
 
 
-    }
-
-    private void ShowHiring() {
     }
 
     public void showMainMenu() {
