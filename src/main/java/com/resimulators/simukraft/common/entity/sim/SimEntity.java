@@ -356,6 +356,16 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
         this.inventory.dropAllItems();
     }
 
+    //resets the sim's inventory
+    public void resetInventory(){
+
+        for(int i = 0; i < this.inventory.getContainerSize(); ++i) {
+            //this might cause a crash.......too bad!
+            this.inventory.setItemStack(null);
+        }
+    }
+
+
     @Nullable
     public void dropItem(ItemStack droppedItem, boolean dropAround, boolean traceItem) {
         if (!droppedItem.isEmpty()) {
