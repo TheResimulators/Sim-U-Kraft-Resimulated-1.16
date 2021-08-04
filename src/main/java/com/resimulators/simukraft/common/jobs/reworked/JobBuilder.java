@@ -264,7 +264,7 @@ public class JobBuilder implements IReworkedJob {
                 */
                 state = State.TRAVELING;
                 blockIndex = 0;
-                blockPos = getWorkSpace();
+                blockPos = blocks.get(blockIndex).pos;
                 while (sim.getCommandSenderWorld().getBlockState(blockPos) == blocks.get(blockIndex).state) {
                     blockIndex++;
                     if (blockIndex < blocks.size()) {
