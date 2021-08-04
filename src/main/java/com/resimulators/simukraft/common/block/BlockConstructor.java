@@ -70,7 +70,6 @@ public class BlockConstructor extends BlockBase {
             if (sim != null) {
                 int id = SavedWorldData.get(worldIn).getFactionWithPlayer(player.getUUID()).getId();
                 sim.fireSim(sim, id, false);
-
             }
         }
 

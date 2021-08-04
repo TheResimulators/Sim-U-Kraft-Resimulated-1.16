@@ -9,7 +9,6 @@ public enum Activity {
     IDLING("Idling", 5),
     FORCE_STOP("Forced stop", 6); //use force stop for anything that should make the worker stop work/stop anything immediately
 
-
     public String name;
     public int id;
 
