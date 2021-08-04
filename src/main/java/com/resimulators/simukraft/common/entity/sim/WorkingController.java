@@ -5,6 +5,7 @@ import com.resimulators.simukraft.common.jobs.core.Activity;
 import com.resimulators.simukraft.common.jobs.core.IReworkedJob;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.vector.Vector3d;
 
 
 public class WorkingController {
@@ -19,8 +20,7 @@ public class WorkingController {
     public void tick() {
         IReworkedJob job = sim.getJob();
         if (job != null) {
-            job.tick();
-            if (sim.getActivity() != Activity.WORKING && sim.getActivity() != Activity.GOING_TO_WORK) {// only runs this if the sim is not working at all
+            if (sim.getActivity() != Activity.WORKING && sim.getActivity() != Activity.GOING_TO_WORK && sim.getActivity() != Activity.NOT_WORKING) {// only runs this if the sim is not working at all
                 if (tick >= job.intervalTime()) { //interval time makes it so it checks every x seconds to see if it can work
                     tick = 0;
                     //TODO add if idling condition to make sure that we don't interrupt anything else like eating or socializing add to the one below
@@ -37,16 +37,24 @@ public class WorkingController {
                     }
                 }
             } else if (sim.getActivity() == Activity.GOING_TO_WORK) {
-                BlockPos pos = new BlockPos(job.getWorkSpace());
-                sim.getNavigation().moveTo(pos.getX() + 0.5, pos.getY() + 1, pos.getZ() + 0.5, sim.getSpeed() * 2);
+                BlockPos pos = job.getWorkSpace();
+                if (Math.sqrt(sim.distanceToSqr(pos.getX(), pos.getY(), pos.getZ())) < 4){
+                    job.start();
+                }else {
+                    sim.getNavigation().moveTo(pos.getX() + 0.5, pos.getY() + 1, pos.getZ() + 0.5, sim.getSpeed() * 2);
+                }
             } else {
                 if (!sim.level.isDay()) {
                     if (!job.nightShift()) {
-                        sim.setActivity(Activity.FORCE_STOP);
-                    }
-                } else if (!job.nightShift()){
-                    sim.setActivity(Activity.WORKING);
-                }
+                        sim.setActivity(Activity.NOT_WORKING);
+                    } else if (sim.hasJob() && sim.getActivity() == Activity.NOT_WORKING)
+                        job.start();
+                    else
+                        job.tick();
+                } else if (!job.nightShift() && sim.getActivity() == Activity.NOT_WORKING){
+                    job.start();
+                } else
+                    job.tick();
             }
         }
         tick++;

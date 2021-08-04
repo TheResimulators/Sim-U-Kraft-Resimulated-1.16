@@ -1,9 +1,8 @@
 package com.resimulators.simukraft.common.tileentity;
 
 import com.resimulators.simukraft.Network;
-import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.common.building.BuildingTemplate;
-import com.resimulators.simukraft.handlers.StructureHandler;
+import com.resimulators.simukraft.common.building.CustomTemplateManager;
 import com.resimulators.simukraft.init.ModTileEntities;
 import com.resimulators.simukraft.packets.BuildingsPacket;
 import net.minecraft.block.BlockState;
@@ -13,10 +12,8 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SUpdateTileEntityPacket;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ResourceLocation;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 public class TileConstructor extends TileEntity implements ITile {
@@ -80,21 +77,10 @@ public class TileConstructor extends TileEntity implements ITile {
     }
 
     public void FindAndLoadBuilding(PlayerEntity playerEntity) {
-        List<ResourceLocation> locations = StructureHandler.getTemplateManager().getAllTemplates();
-        ArrayList<BuildingTemplate> templates = new ArrayList<>();
-        for (ResourceLocation location : locations) {
-            String name = location.getPath().replace(".nbt", "");
-            BuildingTemplate template = StructureHandler.loadStructure(name);
-            if (template != null) {
-                templates.add(template);
-
-            } else {
-                SimuKraft.LOGGER().warn("Structure with name " + name + " is missing or corrupted and could not be loaded," +
-                        " please check if it is in the right location and that it is a valid structure");
-
-            }
-
+        if (CustomTemplateManager.isInitialized()) {
+            ArrayList<BuildingTemplate> templates = CustomTemplateManager.getAllBuildingTemplates();
+            Network.getNetwork().sendToPlayer(new BuildingsPacket(templates), (ServerPlayerEntity) playerEntity);
         }
-        Network.getNetwork().sendToPlayer(new BuildingsPacket(templates), (ServerPlayerEntity) playerEntity);
     }
+
 }

@@ -1,6 +1,7 @@
 package com.resimulators.simukraft.common.jobs.reworked;
 
 import com.mojang.authlib.GameProfile;
+import com.resimulators.simukraft.common.block.BlockControlBlock;
 import com.resimulators.simukraft.common.building.BuildingTemplate;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.enums.BuildingType;
@@ -68,10 +69,6 @@ public class JobBuilder implements IReworkedJob {
 
     public JobBuilder(SimEntity sim) {
         this.sim = sim;
-        //?
-        if (!sim.level.isClientSide) {
-            player = new FakePlayer((ServerWorld) sim.level, new GameProfile(null, "Builder_" + UUID.randomUUID()));
-        }
     }
 
     @Override
@@ -192,6 +189,9 @@ public class JobBuilder implements IReworkedJob {
 
     @Override
     public void start() {
+        if (player == null && !sim.level.isClientSide) {
+            player = new FakePlayer((ServerWorld) sim.level, new GameProfile(null, "Builder_" + UUID.randomUUID()));
+        }
         checkForInventories();
         sim.setActivity(Activity.WORKING);
         blockIndex = 0;
@@ -239,10 +239,7 @@ public class JobBuilder implements IReworkedJob {
                     })
             );
             System.out.println("SORRRTTTTTED");
-            blocks.forEach(blockInfo -> System.out.println(sim.getJob().getWorkSpace().subtract(blockInfo.pos)));
-
-            //setBlocksNeeded();
-            //template.placeInWorld((IServerWorld) sim.level, origin.above(10), settings, new Random());
+            chargeBlockIndexForward();
         }
     }
 
@@ -264,13 +261,7 @@ public class JobBuilder implements IReworkedJob {
                 */
                 state = State.TRAVELING;
                 blockIndex = 0;
-                blockPos = blocks.get(blockIndex).pos;
-                while (sim.getCommandSenderWorld().getBlockState(blockPos) == blocks.get(blockIndex).state) {
-                    blockIndex++;
-                    if (blockIndex < blocks.size()) {
-                        blockPos = blocks.get(blockIndex).pos;
-                    }else return;
-                }
+                chargeBlockIndexForward();
             }
             if (state == State.TRAVELING) {
                 if (Math.sqrt(sim.distanceToSqr(blockPos.getX(), blockPos.getY(), blockPos.getZ())) < 8) {
@@ -289,21 +280,19 @@ public class JobBuilder implements IReworkedJob {
 
                     if ((sim.getInventory().hasItemStack(new ItemStack(blockInfo.state.getBlock())) || blockIgnorable(blockstate)) || true) { // remove true for official release. for testing purposes
                         if (placeBlock(blockInfo, blockstate)) {
-
                             int index = sim.getInventory().findSlotMatchingUnusedItem(new ItemStack(blockstate.getBlock()));
                             if (index >= 0) {
                                 sim.getInventory().removeItem(index, 1);
                             }
-                        } else {
-                            state = State.COLLECTING;
-                            blockPos = getWorkSpace();
                         }
-
                         if (blockIndex < blocks.size() - 1) {
                             blockPos = blocks.get(blockIndex).pos;
                             sim.getNavigation().moveTo((Path) null, 7d);
                             state = State.TRAVELING;
                         }
+                    } else {
+                        state = State.COLLECTING;
+                        blockPos = getWorkSpace();
                     }
                 }
             }
@@ -455,6 +444,18 @@ public class JobBuilder implements IReworkedJob {
                 || state.getBlock() instanceof DoorBlock && state.getValue(DoorBlock.HALF) == DoubleBlockHalf.UPPER);
 
     }
+    
+    private void chargeBlockIndexForward() {
+        if (blocks == null)
+            return;
+        blockPos = blocks.get(blockIndex).pos;
+        while (sim.getCommandSenderWorld().getBlockState(blockPos) == blocks.get(blockIndex).state) {
+            blockIndex++;
+            if (blockIndex < blocks.size()) {
+                blockPos = blocks.get(blockIndex).pos;
+            } else return;
+        }
+    }
 
     private boolean placeBlock(Template.BlockInfo blockInfo, BlockState blockstate) {
 
@@ -464,11 +465,13 @@ public class JobBuilder implements IReworkedJob {
         }
         if (blockstate.getBlockState().getBlock().equals(sim.level.getBlockState(blockInfo.pos).getBlock())) {
             blockIndex++;
+            chargeBlockIndexForward();
             return false;
         }
         if (blockstate.getBlock() instanceof BedBlock) {
             if (blockstate.getValue(BedBlock.PART) == BedPart.HEAD) {
                 blockIndex++;
+                chargeBlockIndexForward();
                 return false;
             }
         }
@@ -485,11 +488,11 @@ public class JobBuilder implements IReworkedJob {
             }
             sim.level.blockUpdated(blockPos, blockstate3.getBlock());
             blockIndex++;
+            chargeBlockIndexForward();
             return true;
         }
-
-
         blockIndex++;
+        chargeBlockIndexForward();
         return false;
     }
 

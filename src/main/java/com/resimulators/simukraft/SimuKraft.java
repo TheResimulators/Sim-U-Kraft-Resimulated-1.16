@@ -73,6 +73,7 @@ public class SimuKraft {
         MinecraftForge.EVENT_BUS.register(MarkerBrokenEvent.class);
         MinecraftForge.EVENT_BUS.register(this);
         Network.handler.init();
+        StructureHandler.createTemplateManager();
     }
 
     private void doClientStuff(final FMLClientSetupEvent event) {
@@ -93,11 +94,6 @@ public class SimuKraft {
     @SubscribeEvent
     public void onCommandRegister(RegisterCommandsEvent event) {
         CommandStructure.register(event.getDispatcher());
-    }
-
-    @SubscribeEvent
-    public void onServerStarted(FMLServerStartedEvent event) {
-        StructureHandler.createTemplateManager(event.getServer());
     }
 
     @SubscribeEvent
