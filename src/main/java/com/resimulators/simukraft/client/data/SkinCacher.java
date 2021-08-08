@@ -25,9 +25,9 @@ import java.util.Map;
 import java.util.UUID;
 
 public class SkinCacher {
+    private static final Map<String, ResourceLocation> playerSkinMap = new HashMap<>();
     private static PlayerProfileCache profileCache;
     private static MinecraftSessionService sessionService;
-    private static final Map<String, ResourceLocation> playerSkinMap = new HashMap<>();
     GameProfile profile = null;
 
     public static ResourceLocation getSkinForSim(String name) {

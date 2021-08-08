@@ -10,11 +10,10 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.GameRules;
 
 public class FoodStats {
+    private final SimEntity sim;
     private float foodExhaustionLevel;
     private int foodTimer;
     private int prevFoodLevel = 20;
-
-    private final SimEntity sim;
 
     public FoodStats(SimEntity sim) {
         this.sim = sim;

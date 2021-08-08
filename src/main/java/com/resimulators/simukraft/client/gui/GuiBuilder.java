@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class GuiBuilder extends GuiBaseJob {
+    private final HashMap<Category, ArrayList<StructureButton>> structureButtons = new HashMap<>();
     private Button Build;
     private Button CustomBack;
     private Button residential;
@@ -39,7 +40,6 @@ public class GuiBuilder extends GuiBaseJob {
     private boolean loaded = false;
     private Button confirmBuilding;
     private ArrayList<BuildingTemplate> structures;
-    private final HashMap<Category, ArrayList<StructureButton>> structureButtons = new HashMap<>();
     private int maxButtons;
     private int pageIndex = 0;
 
@@ -55,11 +55,56 @@ public class GuiBuilder extends GuiBaseJob {
 
     }
 
+    public void createStructureButtons() {
+        int xSpacing = 150;
+        int xPadding = 20;
+        int maxButtonsWidth = this.width / 150;
+        maxButtons = maxButtonsWidth * (this.height / 125);
+        int index;
+        for (BuildingTemplate template : structures) {
+            BuildingType type = BuildingType.getById(template.getTypeID());
+
+            if (type == null) {
+                type = BuildingType.SPECIAL;
+                SimuKraft.LOGGER().error("structure " + template.getName() + " is missing building type and Has been added as a special building");
+            }
+            StructureButton button = new StructureButton();
+            structureButtons.computeIfAbsent(type.category, k -> new ArrayList<>());
+            index = (structureButtons.get(type.category)).size() % maxButtons;
+            button.createButtons(template, (xSpacing * (index % maxButtonsWidth) + xPadding), 100 * ((index / maxButtonsWidth)) + 25);
+            ArrayList<StructureButton> list = structureButtons.get(type.category);
+            list.add(button);
+            structureButtons.put(type.category, list);
+
+        }
+
+
+    }
+
     private void controlStructures(boolean visible) {
         for (Category category : Category.values()) {
             controlStructures(visible, category);
         }
 
+    }
+
+    private void controlStructures(boolean visible, Category category) {
+        if (structureButtons.containsKey(category)) {
+            int currentIndex = maxButtons * pageIndex;
+            if (currentIndex < 0) {
+                currentIndex = 0;
+                pageIndex = 0;
+            }
+            for (int i = currentIndex; i < maxButtons + currentIndex; i++) {
+                if (i >= structureButtons.get(category).size()) return;
+                StructureButton button = structureButtons.get(category).get(i);
+                if (!buttons.contains(button.name)) {
+                    button.addButtonsToGui();
+                }
+                button.controlVisibility(visible);
+                System.out.println(button.getVisibility());
+            }
+        }
     }
 
     @Override
@@ -220,25 +265,6 @@ public class GuiBuilder extends GuiBaseJob {
 
     }
 
-    private void controlStructures(boolean visible, Category category) {
-        if (structureButtons.containsKey(category)) {
-            int currentIndex = maxButtons * pageIndex;
-            if (currentIndex < 0) {
-                currentIndex = 0;
-                pageIndex = 0;
-            }
-            for (int i = currentIndex; i < maxButtons + currentIndex; i++) {
-                if (i >= structureButtons.get(category).size()) return;
-                StructureButton button = structureButtons.get(category).get(i);
-                if (!buttons.contains(button.name)) {
-                    button.addButtonsToGui();
-                }
-                button.controlVisibility(visible);
-                System.out.println(button.getVisibility());
-            }
-        }
-    }
-
     private void startBuilding() {
         Network.getNetwork().sendToServer(new StartBuildingPacket(pos, Minecraft.getInstance().player.getMotionDirection(), selected.getName(), Minecraft.getInstance().player.getUUID()));
         Minecraft.getInstance().setScreen(null);
@@ -251,32 +277,6 @@ public class GuiBuilder extends GuiBaseJob {
             }
 
         }
-
-    }
-
-    public void createStructureButtons() {
-        int xSpacing = 150;
-        int xPadding = 20;
-        int maxButtonsWidth = this.width / 150;
-        maxButtons = maxButtonsWidth * (this.height / 125);
-        int index;
-        for (BuildingTemplate template : structures) {
-            BuildingType type = BuildingType.getById(template.getTypeID());
-
-            if (type == null) {
-                type = BuildingType.SPECIAL;
-                SimuKraft.LOGGER().error("structure " + template.getName() + " is missing building type and Has been added as a special building");
-            }
-            StructureButton button = new StructureButton();
-            structureButtons.computeIfAbsent(type.category, k -> new ArrayList<>());
-            index = (structureButtons.get(type.category)).size() % maxButtons;
-            button.createButtons(template, (xSpacing * (index % maxButtonsWidth) + xPadding), 100 * ((index / maxButtonsWidth)) + 25);
-            ArrayList<StructureButton> list = structureButtons.get(type.category);
-            list.add(button);
-            structureButtons.put(type.category, list);
-
-        }
-
 
     }
 

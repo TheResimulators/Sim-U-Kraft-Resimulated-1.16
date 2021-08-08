@@ -61,11 +61,11 @@ public class JobBuilder implements IReworkedJob {
     private State state = State.STARTING;
     private int blockIndex = 0;
     private int delay = 20;
-    private int notifyDelay = 0;
+    private final int notifyDelay = 0;
     private FakePlayer player;
     private PlacementSettings settings;
-    private ArrayList<BlockPos> chests = new ArrayList<>();
-    private HashMap<Item, Integer> blocksNeeded = new HashMap<>();
+    private final ArrayList<BlockPos> chests = new ArrayList<>();
+    private final HashMap<Item, Integer> blocksNeeded = new HashMap<>();
 
     public JobBuilder(SimEntity sim) {
         this.sim = sim;
@@ -255,10 +255,7 @@ public class JobBuilder implements IReworkedJob {
             delay = 1;
             if (state == State.STARTING) {
                 setBlocksNeeded();
-                //retrieveItemsFromChest();
-                 /*
-                 un-comment for official release
-                */
+                retrieveItemsFromChest();
                 state = State.TRAVELING;
                 blockIndex = 0;
                 chargeBlockIndexForward();
@@ -278,7 +275,7 @@ public class JobBuilder implements IReworkedJob {
                     BlockState blockstate = blockInfo.state;
                     blockstate = blockstate.rotate(sim.level, blockInfo.pos, rotation.getRotated(template.getBlockRotation()));
 
-                    if ((sim.getInventory().hasItemStack(new ItemStack(blockInfo.state.getBlock())) || blockIgnorable(blockstate)) || true) { // remove true for official release. for testing purposes
+                    if (((blockInfo.state.getBlock() instanceof BlockControlBlock || sim.getInventory().hasItemStack(new ItemStack(blockInfo.state.getBlock()))) || blockIgnorable(blockstate))) { // remove true for official release. for testing purposes
                         if (placeBlock(blockInfo, blockstate)) {
                             int index = sim.getInventory().findSlotMatchingUnusedItem(new ItemStack(blockstate.getBlock()));
                             if (index >= 0) {
@@ -287,10 +284,11 @@ public class JobBuilder implements IReworkedJob {
                         }
                         if (blockIndex < blocks.size() - 1) {
                             blockPos = blocks.get(blockIndex).pos;
-                            sim.getNavigation().moveTo((Path) null, 7d);
+                            //sim.getNavigation().moveTo((Path) null, 7d);
                             state = State.TRAVELING;
                         }
                     } else {
+                        System.out.println("Builder in need of " + blockInfo.state.getBlock().getName().getString());
                         state = State.COLLECTING;
                         blockPos = getWorkSpace();
                     }
@@ -304,8 +302,8 @@ public class JobBuilder implements IReworkedJob {
                     state = State.STARTING;
                 } else {
                     blockPos = getWorkSpace();
+                    sim.getNavigation().moveTo(blockPos.getX(), blockPos.getY(), blockPos.getZ(), sim.getSpeed() * 2);
                 }
-
             }
         } else {
             delay--;
@@ -416,6 +414,7 @@ public class JobBuilder implements IReworkedJob {
 
     private void setBlocksNeeded() {
         blocksNeeded.clear();
+        chargeBlockIndexForward();
         for (int i = this.blockIndex; i < blocks.size(); i++) {
             Template.BlockInfo info = blocks.get(i);
             Block block = info.state.getBlock();
@@ -431,9 +430,7 @@ public class JobBuilder implements IReworkedJob {
                 int value = blocksNeeded.get(block.asItem());
                 value += 1;
                 blocksNeeded.put(block.asItem(), value);
-
             }
-
         }
 
     }
@@ -444,17 +441,18 @@ public class JobBuilder implements IReworkedJob {
                 || state.getBlock() instanceof DoorBlock && state.getValue(DoorBlock.HALF) == DoubleBlockHalf.UPPER);
 
     }
-    
-    private void chargeBlockIndexForward() {
-        if (blocks == null)
-            return;
+
+    private int chargeBlockIndexForward() {
+        if (blocks == null || blockIndex >= blocks.size())
+            return -1;
         blockPos = blocks.get(blockIndex).pos;
-        while (sim.getCommandSenderWorld().getBlockState(blockPos) == blocks.get(blockIndex).state) {
+        while (sim.getCommandSenderWorld().getBlockState(blockPos).getBlock() instanceof BlockControlBlock || sim.getCommandSenderWorld().getBlockState(blockPos) == blocks.get(blockIndex).state) {
             blockIndex++;
             if (blockIndex < blocks.size()) {
                 blockPos = blocks.get(blockIndex).pos;
-            } else return;
+            } else return blockIndex;
         }
+        return blockIndex;
     }
 
     private boolean placeBlock(Template.BlockInfo blockInfo, BlockState blockstate) {
@@ -483,7 +481,7 @@ public class JobBuilder implements IReworkedJob {
         if (!settings.getKnownShape()) {
             BlockState blockstate1 = sim.level.getBlockState(blockPos);
             BlockState blockstate3 = Block.updateFromNeighbourShapes(blockstate1, sim.level, blockPos);
-            if (blockstate1 != blockstate3) {
+            if (!blockstate1.equals(blockstate3)) {
                 sim.level.setBlock(blockPos, blockstate3, 2 & -2 | 16);
             }
             sim.level.blockUpdated(blockPos, blockstate3.getBlock());
@@ -496,29 +494,47 @@ public class JobBuilder implements IReworkedJob {
         return false;
     }
 
+    private int countSimItem(Item item) {
+        int count = 0;
+        for (int i = 0; i < sim.getInventory().mainInventory.size(); i++) {
+            if (sim.getInventory().mainInventory.get(i).getItem().equals(item))
+                count += sim.getInventory().mainInventory.get(i).getCount();
+        }
+        return count;
+    }
+
     //Scans inventories and makes Sim go get items from chest that contains it.
     private void retrieveItemsFromChest() {
+        for (int i = blocksNeeded.size() - 1; i >= 0; i--) {
+            Item item = (Item) blocksNeeded.keySet().toArray()[i];
+            int needed = blocksNeeded.get(item);
+            int count = countSimItem(item);
+            if (count > 0)
+                if (count >= needed)
+                    blocksNeeded.remove(item);
+                else
+                    blocksNeeded.put(item, needed - count);
+        }
         for (BlockPos pos : chests) {
             ChestTileEntity entity = (ChestTileEntity) sim.level.getBlockEntity(pos);
             if (entity != null) {
                 for (int i = 0; i < entity.getContainerSize(); i++) {
                     ItemStack stack = entity.getItem(i);
                     if (blocksNeeded.containsKey(stack.getItem())) {
+                        Item item = stack.getItem();
                         int amountNeeded = blocksNeeded.get(stack.getItem());
 
                         if (amountNeeded < stack.getCount()) {
                             stack.setCount(stack.getCount() - amountNeeded);
-                            blocksNeeded.remove(stack.getItem());
+                            blocksNeeded.remove(item);
+                            sim.getInventory().addItemStackToInventory(new ItemStack(item, amountNeeded));
                         } else {
                             amountNeeded -= stack.getCount();
                             blocksNeeded.put(stack.getItem(), amountNeeded);
+                            sim.getInventory().addItemStackToInventory(new ItemStack(item, stack.getCount()));
                             stack.setCount(0);
                         }
-                        ItemStack result = stack.copy();
-                        result.setCount(amountNeeded);
-                        sim.getInventory().addItemStackToInventory(result);
                         entity.setItem(i, stack);
-
                     }
                 }
             }
@@ -526,16 +542,17 @@ public class JobBuilder implements IReworkedJob {
         final String[] string = {""};
         HashMap<Item, Integer> blocksNeededCache = new HashMap<>(blocksNeeded);
         blocksNeededCache.keySet().forEach(key -> {
-            if (key.equals(ModBlocks.CONTROL_BLOCK.get().asItem())) {
-                blocksNeeded.remove(key);
-            } else {
-                int amount = blocksNeeded.get(key);
+            /*if (key.equals(ModBlocks.CONTROL_BLOCK.get().asItem())) {
+                //blocksNeeded.remove(key);
+            } else {*/
+            int amount = blocksNeeded.get(key);
+            if (amount > 0)
                 string[0] += amount + " " + key + ", ";
-            }
+            //}
         });
         if (!string[0].equals("")) {
             SavedWorldData.get(sim.level).getFactionWithSim(sim.getUUID()).sendFactionChatMessage(sim.getName().getString() + " still needs " + string[0], sim.level);
-            delay = 2000;
+            delay = 200;
         }
     }
 
@@ -561,7 +578,7 @@ public class JobBuilder implements IReworkedJob {
         blocks.addAll(BlockUtils.getBlocksAroundAndBelowPosition(getWorkSpace().above(), 5));
         blocks = (ArrayList<BlockPos>) blocks.stream().filter(pos -> sim.level.getBlockEntity(pos) != null).collect(Collectors.toList());
         for (BlockPos pos : blocks) {
-            if (sim.level.getBlockEntity(pos) instanceof ChestTileEntity) {
+            if (!chests.contains(pos) && sim.level.getBlockEntity(pos) instanceof ChestTileEntity) {
                 chests.add(pos);
             }
         }

@@ -23,8 +23,8 @@ import java.util.Random;
 import java.util.UUID;
 
 public class NewDayEvent implements INBTSerializable<CompoundNBT> {
-    private static DayOfWeek dayOfWeek;
     private static final Random random = new Random();
+    private static DayOfWeek dayOfWeek;
     private double day = 0;
     private double previousDay = 0;
 

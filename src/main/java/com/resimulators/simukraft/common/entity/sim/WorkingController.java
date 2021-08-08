@@ -5,7 +5,6 @@ import com.resimulators.simukraft.common.jobs.core.Activity;
 import com.resimulators.simukraft.common.jobs.core.IReworkedJob;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
 
 
 public class WorkingController {
@@ -38,9 +37,9 @@ public class WorkingController {
                 }
             } else if (sim.getActivity() == Activity.GOING_TO_WORK) {
                 BlockPos pos = job.getWorkSpace();
-                if (Math.sqrt(sim.distanceToSqr(pos.getX(), pos.getY(), pos.getZ())) < 4){
+                if (Math.sqrt(sim.distanceToSqr(pos.getX(), pos.getY(), pos.getZ())) < 4) {
                     job.start();
-                }else {
+                } else {
                     sim.getNavigation().moveTo(pos.getX() + 0.5, pos.getY() + 1, pos.getZ() + 0.5, sim.getSpeed() * 2);
                 }
             } else {
@@ -51,7 +50,7 @@ public class WorkingController {
                         job.start();
                     else
                         job.tick();
-                } else if (!job.nightShift() && sim.getActivity() == Activity.NOT_WORKING){
+                } else if (!job.nightShift() && sim.getActivity() == Activity.NOT_WORKING) {
                     job.start();
                 } else
                     job.tick();

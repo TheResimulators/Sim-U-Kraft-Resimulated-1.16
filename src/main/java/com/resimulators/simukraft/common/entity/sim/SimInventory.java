@@ -441,7 +441,7 @@ public class SimInventory implements IInventory, INamedContainerProvider {
                     }
                 } else {
                     int i;
-                    while (true) {
+                    do {
                         i = stack.getCount();
                         if (slotIn == -1) {
                             stack.setCount(this.storePartialItemStack(stack));
@@ -449,10 +449,7 @@ public class SimInventory implements IInventory, INamedContainerProvider {
                             stack.setCount(this.addResource(slotIn, stack));
                         }
 
-                        if (stack.isEmpty() || stack.getCount() >= i) {
-                            break;
-                        }
-                    }
+                    } while (!stack.isEmpty() && stack.getCount() < i);
 
                     return stack.getCount() < i;
                 }

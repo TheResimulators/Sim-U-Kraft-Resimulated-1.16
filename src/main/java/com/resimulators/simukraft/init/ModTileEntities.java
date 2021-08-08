@@ -23,6 +23,7 @@ public class ModTileEntities {
     public static final RegistryObject<TileEntityType<TileBaker>> BAKER = REGISTRY.register("baker", () -> TileEntityType.Builder.of(TileBaker::new, ModBlocks.CONTROL_BLOCK.get()).build(null));
     public static final RegistryObject<TileEntityType<TileFisher>> FISHER_MAN = REGISTRY.register("fisher_man", () -> TileEntityType.Builder.of(TileFisher::new, ModBlocks.CONTROL_BLOCK.get()).build(null));
     public static final RegistryObject<TileEntityType<TileResidential>> RESIDENTIAL = REGISTRY.register("residential", () -> TileEntityType.Builder.of(TileResidential::new, ModBlocks.CONTROL_BLOCK.get()).build(null));
+
     public ModTileEntities() {
         REGISTRY.register(FMLJavaModLoadingContext.get().getModEventBus());
     }

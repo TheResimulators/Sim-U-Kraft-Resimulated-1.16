@@ -56,22 +56,7 @@ public class Utils {
     }
 
     public static int getReversedInt(int size, int index) {
-        List<Integer> temp = new ArrayList<>();
-        for (int i = 0; i < size; i++) {
-            temp.add(i);
-        }
-        Collections.reverse(temp);
-        return temp.get(index);
-    }
-
-    public static int findNextAvaliableSlot(ChestTileEntity chest) {
-        for (int i = 0; i < chest.getContainerSize(); i++) {
-            ItemStack stack = chest.getItem(i);
-            if (stack == ItemStack.EMPTY) {
-                return i;
-            }
-        }
-        return -1;
+        return size - index - 1;
     }
 
     public static boolean addSimInventoryToChest(ChestTileEntity chest, SimEntity sim) {
@@ -89,6 +74,16 @@ public class Utils {
             }
         }
         return true;
+    }
+
+    public static int findNextAvaliableSlot(ChestTileEntity chest) {
+        for (int i = 0; i < chest.getContainerSize(); i++) {
+            ItemStack stack = chest.getItem(i);
+            if (stack == ItemStack.EMPTY) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     public static ChestTileEntity getInventoryAroundPos(BlockPos pos, World world) {

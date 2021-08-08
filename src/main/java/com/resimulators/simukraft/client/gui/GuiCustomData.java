@@ -25,15 +25,15 @@ import java.util.ArrayList;
 
 public class GuiCustomData extends Screen {
     private final BlockPos pos;
+    private final ItemStack stack;
+    private final ArrayList<Button> buildingTypes = new ArrayList<>();
+    private final TileCustomData tile;
     private Button done;
     private Button calculatePrice;
     private Button calculateRent;
-    private final ItemStack stack;
     private TextFieldWidget rentInput;
     private TextFieldWidget priceInput;
     private ButtonScrollPanel buildingTypePanel;
-    private final ArrayList<Button> buildingTypes = new ArrayList<>();
-    private final TileCustomData tile;
     private int buildingWidth;
     private int buildingHeight;
     private int buildingDepth;

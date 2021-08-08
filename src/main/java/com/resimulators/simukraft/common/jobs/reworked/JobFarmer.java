@@ -123,7 +123,7 @@ public class JobFarmer implements IReworkedJob {
         if (blockPos != null) {
             other.putLong("blockpos", blockPos.asLong());
         }
-        if (dir != null){
+        if (dir != null) {
             other.putInt("dir", dir.ordinal());
         }
         other.putInt("state", state.ordinal());
@@ -150,13 +150,13 @@ public class JobFarmer implements IReworkedJob {
             if (list.contains("finished")) {
                 finished = list.getBoolean("finished");
             }
-            if (list.contains("blockpos")){
+            if (list.contains("blockpos")) {
                 blockPos = BlockPos.of(list.getLong("blockpos"));
             }
-            if (list.contains("state")){
+            if (list.contains("state")) {
                 state = State.values()[list.getInt("state")];
             }
-            if (list.contains("dir")){
+            if (list.contains("dir")) {
                 dir = Direction.values()[list.getInt("dir")];
             }
         }
@@ -260,12 +260,12 @@ public class JobFarmer implements IReworkedJob {
                     getSeeds();
                     if (checkForHarvestable()) {
                         state = State.HARVESTING;
-                    }else if (!isTilled()) {
+                    } else if (!isTilled()) {
                         seekUntilled();
                         state = State.PLANTING;
                         setDestination();
                     } else {
-                        state=State.WAITING;
+                        state = State.WAITING;
                     }
                 } else {
                     //still no seeds
@@ -448,19 +448,8 @@ public class JobFarmer implements IReworkedJob {
         }
     }
 
-    public void seekUntilled() {
-        for (int i = 0; i < width * depth; i++){
-            if (HOE_LOOKUP.get(world.getBlockState(farmerTile.getMarker().below().relative(dir, (i / width) + 1).relative(dir.getClockWise(), (i % width) + 1)).getBlock()) != null) {
-                row = i / width;
-                column = i % width;
-                setDestination();
-                return;
-            }
-        }
-    }
-
     public boolean isTilled() {
-        for (int i = 0; i < width * depth; i++){
+        for (int i = 0; i < width * depth; i++) {
             if (HOE_LOOKUP.get(world.getBlockState(farmerTile.getMarker().below().relative(dir, (i / width) + 1).relative(dir.getClockWise(), (i % width) + 1)).getBlock()) != null) {
                 return false;
             }
@@ -468,8 +457,15 @@ public class JobFarmer implements IReworkedJob {
         return true;
     }
 
-    public void setTilled(boolean tilled) {
-        this.tilled = tilled;
+    public void seekUntilled() {
+        for (int i = 0; i < width * depth; i++) {
+            if (HOE_LOOKUP.get(world.getBlockState(farmerTile.getMarker().below().relative(dir, (i / width) + 1).relative(dir.getClockWise(), (i % width) + 1)).getBlock()) != null) {
+                row = i / width;
+                column = i % width;
+                setDestination();
+                return;
+            }
+        }
     }
 
     private boolean findNextTarget() {
@@ -569,6 +565,10 @@ public class JobFarmer implements IReworkedJob {
         }
 
         return false;
+    }
+
+    public void setTilled(boolean tilled) {
+        this.tilled = tilled;
     }
 
     protected boolean isValidTarget(IWorldReader worldIn, BlockPos pos) {

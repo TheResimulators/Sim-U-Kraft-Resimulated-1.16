@@ -7,7 +7,6 @@ import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.common.enums.BuildingType;
 import com.resimulators.simukraft.common.enums.Category;
 import com.resimulators.simukraft.handlers.StructureHandler;
-import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTUtil;
@@ -17,7 +16,6 @@ import net.minecraft.util.FileUtil;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.ResourceLocationException;
 import net.minecraft.util.datafix.DefaultTypeReferences;
-import net.minecraftforge.fml.server.ServerLifecycleHooks;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -62,6 +60,41 @@ public class CustomTemplateManager {
         getAllBuildingTemplates();
     }
 
+    public static ArrayList<BuildingTemplate> getAllBuildingTemplates() {
+        List<ResourceLocation> locations = getAllTemplates();
+        ArrayList<BuildingTemplate> templates = new ArrayList<>();
+        for (ResourceLocation location : locations) {
+            String name = location.getPath().replace(".nbt", "");
+            BuildingTemplate template = StructureHandler.loadStructure(name);
+            if (template != null) {
+                templates.add(template);
+            } else {
+                SimuKraft.LOGGER().warn("Structure with name " + name + " is missing or corrupted and could not be loaded," +
+                        " please check if it is in the right location and that it is a valid structure");
+            }
+        }
+        return templates;
+    }
+
+    public static List<ResourceLocation> getAllTemplates() {
+        Path path = pathGenerated.resolve(Reference.MODID + "/structures");
+        ArrayList<File> folders = Arrays.stream(Objects.requireNonNull(path.toFile().listFiles()))
+                .filter(File::isDirectory)
+                .collect(Collectors.toCollection(ArrayList::new));
+
+        ArrayList<ResourceLocation> structures;
+        structures = Arrays.stream(Objects.requireNonNull(path.toFile().listFiles()))
+                .filter(file -> !file.isDirectory())
+                .map(e -> new ResourceLocation(Reference.MODID, e.getName()))
+                .collect(Collectors.toCollection(ArrayList::new));
+        folders.forEach(folder -> structures.addAll(Arrays.stream(Objects.requireNonNull(folder.listFiles()))
+                .filter(file -> !file.isDirectory())
+                .map(e -> new ResourceLocation(Reference.MODID, e.getName()))
+                .collect(Collectors.toList())));
+
+        return structures;
+    }
+
     public static BuildingTemplate getOrCreate(ResourceLocation p_200220_1_) {
         BuildingTemplate template = get(p_200220_1_);
         if (template == null) {
@@ -81,7 +114,7 @@ public class CustomTemplateManager {
     }
 
     public static void onResourceManagerReload(IResourceManager resourceManager) {
-        resourceManager = resourceManager;
+        CustomTemplateManager.resourceManager = resourceManager;
         templates.clear();
     }
 
@@ -117,7 +150,7 @@ public class CustomTemplateManager {
                 try {
                     Files.createDirectories(Files.exists(path1) ? path1.toRealPath() : path1);
                 } catch (IOException ioexception) {
-                    LOGGER.error("Failed to create parent directory: {}", (Object) path1);
+                    LOGGER.error("Failed to create parent directory: {}", path1);
                     return false;
                 }
                 CompoundNBT compoundnbt = template.save(new CompoundNBT());
@@ -130,14 +163,6 @@ public class CustomTemplateManager {
                 }
             }
         }
-    }
-
-    public static boolean isInitialized() {
-        return initialized;
-    }
-
-    public static void setInitialized(boolean inited) {
-        initialized = inited;
     }
 
     private static Path resolvePath(ResourceLocation locationIn, String extIn) {
@@ -170,27 +195,16 @@ public class CustomTemplateManager {
         }
     }
 
-    public static void remove(ResourceLocation templatePath) {
-        templates.remove(templatePath);
+    public static boolean isInitialized() {
+        return initialized;
     }
 
-    public static List<ResourceLocation> getAllTemplates() {
-        Path path = pathGenerated.resolve(Reference.MODID + "/structures");
-        ArrayList<File> folders = Arrays.stream(Objects.requireNonNull(path.toFile().listFiles()))
-                .filter(File::isDirectory)
-                .collect(Collectors.toCollection(ArrayList::new));
+    public static void setInitialized(boolean inited) {
+        initialized = inited;
+    }
 
-        ArrayList<ResourceLocation> structures;
-        structures = Arrays.stream(Objects.requireNonNull(path.toFile().listFiles()))
-                .filter(file -> !file.isDirectory())
-                .map(e -> new ResourceLocation(Reference.MODID, e.getName()))
-                .collect(Collectors.toCollection(ArrayList::new));
-        folders.forEach(folder -> structures.addAll(Arrays.stream(Objects.requireNonNull(folder.listFiles()))
-                .filter(file -> !file.isDirectory())
-                .map(e -> new ResourceLocation(Reference.MODID, e.getName()))
-                .collect(Collectors.toList())));
-
-        return structures;
+    public static void remove(ResourceLocation templatePath) {
+        templates.remove(templatePath);
     }
 
     @Nullable
@@ -228,21 +242,5 @@ public class CustomTemplateManager {
     private static BuildingTemplate loadTemplate(InputStream inputStreamIn) throws IOException {
         CompoundNBT compoundnbt = CompressedStreamTools.readCompressed(inputStreamIn);
         return readStructure(compoundnbt);
-    }
-
-    public static ArrayList<BuildingTemplate> getAllBuildingTemplates() {
-        List<ResourceLocation> locations = getAllTemplates();
-        ArrayList<BuildingTemplate> templates = new ArrayList<>();
-        for (ResourceLocation location : locations) {
-            String name = location.getPath().replace(".nbt", "");
-            BuildingTemplate template = StructureHandler.loadStructure(name);
-            if (template != null) {
-                templates.add(template);
-            } else {
-                SimuKraft.LOGGER().warn("Structure with name " + name + " is missing or corrupted and could not be loaded," +
-                        " please check if it is in the right location and that it is a valid structure");
-            }
-        }
-        return templates;
     }
 }

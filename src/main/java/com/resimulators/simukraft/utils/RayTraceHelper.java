@@ -10,8 +10,8 @@ import java.util.List;
 
 public class RayTraceHelper {
     public static final RayTraceHelper INSTANCE = new RayTraceHelper();
-    private RayTraceResult target = null;
     private final Minecraft minecraft = Minecraft.getInstance();
+    private RayTraceResult target = null;
 
     private RayTraceHelper() {
     }

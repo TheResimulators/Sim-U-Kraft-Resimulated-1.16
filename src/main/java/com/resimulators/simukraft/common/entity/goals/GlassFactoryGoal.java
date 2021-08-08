@@ -31,18 +31,17 @@ import java.util.stream.Collectors;
 public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
     private final SimEntity sim;
     private final World world;
+    private final ArrayList<BlockPos> chests = new ArrayList<>();
+    private final ArrayList<BlockPos> furnaces = new ArrayList<>();
+    private final ArrayList<Integer> itemsToBeMoved = new ArrayList<>();
     private int tick;
     private int delay = 20;
     private State state = State.WAITING;
     private BlockPos targetPos;
     private boolean collected = false;
-    private final ArrayList<BlockPos> chests = new ArrayList<>();
-    private final ArrayList<BlockPos> furnaces = new ArrayList<>();
-
     //to make interaction happen over multiple ticks. keeps track of current furnace/chest
     private int furnaceIndex;
     private int chestIndex;
-    private final ArrayList<Integer> itemsToBeMoved = new ArrayList<>();
 
     public GlassFactoryGoal(SimEntity sim) {
         super(sim, sim.getSpeed() * 2, 20);
@@ -115,6 +114,15 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
         }
     }
 
+    public void findFurnaceAroundBlock(BlockPos workPos) {
+        ArrayList<BlockPos> blocks = BlockUtils.getBlocksAroundAndBelowPosition(workPos, 5);
+        for (BlockPos pos : blocks) {
+            if (world.getBlockEntity(pos) instanceof FurnaceTileEntity) {
+                furnaces.add(pos);
+            }
+        }
+    }
+
     private boolean validateWorkArea() {
         Faction faction = SavedWorldData.get(world).getFactionWithSim(sim.getUUID());
         boolean valid = true;
@@ -132,15 +140,6 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
             return false;
         }
         return valid;
-    }
-
-    public void findFurnaceAroundBlock(BlockPos workPos) {
-        ArrayList<BlockPos> blocks = BlockUtils.getBlocksAroundAndBelowPosition(workPos, 5);
-        for (BlockPos pos : blocks) {
-            if (world.getBlockEntity(pos) instanceof FurnaceTileEntity) {
-                furnaces.add(pos);
-            }
-        }
     }
 
     @Override

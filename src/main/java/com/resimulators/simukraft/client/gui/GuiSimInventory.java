@@ -34,6 +34,7 @@ public class GuiSimInventory extends DisplayEffectsScreen<SimContainer> {
     private static final int HEIGHT = 224;
     protected final Random rand = new Random();
     private final ResourceLocation TEXTURE = new ResourceLocation(Reference.MODID, "textures/gui/sim_inventory.png");
+    private final SimContainer container;
     protected int ticks;
     protected int simHealth;
     protected int lastSimHealth;
@@ -43,7 +44,6 @@ public class GuiSimInventory extends DisplayEffectsScreen<SimContainer> {
     protected int scaledHeight;
     private float oldMouseX;
     private float oldMouseY;
-    private final SimContainer container;
     private SimEntity sim;
 
     public GuiSimInventory(SimContainer container, PlayerInventory playerInventory, ITextComponent name) {

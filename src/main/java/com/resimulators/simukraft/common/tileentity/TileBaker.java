@@ -25,6 +25,32 @@ public class TileBaker extends TileEntity implements IControlBlock {
     }
 
     @Override
+    public boolean getHired() {
+        return this.hired;
+    }
+
+    @Override
+    public void setHired(boolean hired) {
+        this.hired = hired;
+        setChanged();
+    }
+
+    @Override
+    public UUID getSimId() {
+        return this.simId;
+    }
+
+    @Override
+    public void setSimId(UUID id) {
+        this.simId = id;
+    }
+
+    @Override
+    public String getName() {
+        return "Baker";
+    }
+
+    @Override
     public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
         load(this.getBlockState(), pkt.getTag());
     }
@@ -49,36 +75,12 @@ public class TileBaker extends TileEntity implements IControlBlock {
     @Override
     public SUpdateTileEntityPacket getUpdatePacket() {
         return new SUpdateTileEntityPacket(this.worldPosition, -1, this.getUpdateTag());
-    }    @Override
-    public void setHired(boolean hired) {
-        this.hired = hired;
-        setChanged();
     }
 
     @Override
     public CompoundNBT getUpdateTag() {
         return save(new CompoundNBT());
-    }    @Override
-    public boolean getHired() {
-        return this.hired;
     }
-
-    @Override
-    public UUID getSimId() {
-        return this.simId;
-    }
-
-    @Override
-    public void setSimId(UUID id) {
-        this.simId = id;
-    }
-
-    @Override
-    public String getName() {
-        return "Baker";
-    }
-
-
 
 
 }

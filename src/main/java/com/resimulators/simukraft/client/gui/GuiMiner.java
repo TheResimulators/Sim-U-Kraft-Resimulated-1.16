@@ -20,17 +20,6 @@ public class GuiMiner extends GuiBaseJob {
     }
 
     @Override
-    public void init(Minecraft minecraft, int width, int height) {
-        super.init(minecraft, width, height);
-
-    }
-
-    @Override
-    public void showMainMenu() {
-        super.showMainMenu();
-    }
-
-    @Override
     public void render(MatrixStack stack, int p_render_1_, int p_render_2_, float p_render_3_) {
         super.render(stack, p_render_1_, p_render_2_, p_render_3_);
         World world = SimuKraft.proxy.getClientWorld();
@@ -51,5 +40,16 @@ public class GuiMiner extends GuiBaseJob {
                 }
             }
         }
+    }
+
+    @Override
+    public void init(Minecraft minecraft, int width, int height) {
+        super.init(minecraft, width, height);
+
+    }
+
+    @Override
+    public void showMainMenu() {
+        super.showMainMenu();
     }
 }

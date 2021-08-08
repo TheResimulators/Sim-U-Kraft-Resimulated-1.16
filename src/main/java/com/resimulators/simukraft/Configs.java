@@ -14,6 +14,7 @@ public class Configs {
     private final Names names;
     private final ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
     private final ForgeConfigSpec spec;
+
     public Configs() {
         general = new General();
         sims = new Sims();

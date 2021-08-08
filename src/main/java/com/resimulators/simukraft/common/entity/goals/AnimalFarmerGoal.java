@@ -36,15 +36,15 @@ public class AnimalFarmerGoal extends BaseGoal<JobAnimalFarmer> {
     private final SimEntity sim;
     private final int killsBeforeEmpty = 10;
     private final World world;
+    private final ArrayList<BlockPos> chests = new ArrayList<>();
+    private final ArrayList<Integer> itemsToMove = new ArrayList<>();
+    private final List<Item> drops = new ArrayList<>();
     private int currentKillCount;
     private int tick = 20;
     private TileAnimalFarm farm;
     private State state = State.MOVING;
     private AnimalEntity target;
-    private final ArrayList<BlockPos> chests = new ArrayList<>();
-    private final ArrayList<Integer> itemsToMove = new ArrayList<>();
     private LootTable table;
-    private final List<Item> drops = new ArrayList<>();
 
     public AnimalFarmerGoal(SimEntity sim) {
         super(sim, sim.getSpeed() * 2, 20);
