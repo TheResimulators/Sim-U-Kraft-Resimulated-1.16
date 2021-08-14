@@ -113,7 +113,6 @@ public class BanHammer extends Item {
                 switch (item.getOrCreateTag().getInt("state")) {
                     //kills targeted sim
                     case 0:
-                        ((SimEntity) entity).die(DamageSource.OUT_OF_WORLD);
                         entity.kill();
                         ((SimEntity) entity).fireSim(((SimEntity)entity),SavedWorldData.get(entity.level).getFactionWithSim(entity.getUUID()).getId(),true);
                         break;
