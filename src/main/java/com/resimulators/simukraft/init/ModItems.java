@@ -2,8 +2,8 @@ package com.resimulators.simukraft.init;
 
 import com.resimulators.simukraft.Reference;
 import com.resimulators.simukraft.SimUTab;
+import com.resimulators.simukraft.common.item.BanHammer;
 import com.resimulators.simukraft.common.item.ItemStructureTest;
-import com.resimulators.simukraft.common.item.ItemTest;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraftforge.fml.RegistryObject;
@@ -47,5 +47,4 @@ public class ModItems {
     //Items
     //public static final Item TEST_ITEM = register(new ItemTest(new Item.Properties()).setRegistryName(Reference.MODID, "test_item"), SimUTab.tab);
     public static final RegistryObject<Item> STRUCTURE_TEST = REGISTRY.register("structure_test", () -> new ItemStructureTest(new Item.Properties().tab(SimUTab.tab)));
-    public static final RegistryObject<Item> BAN_HAMMER = REGISTRY.register("BanHammer", () -> new Item(new Item.Properties().tab(SimUTab.tab).stacksTo(1)));
-}
+    public static final RegistryObject<Item> BAN_HAMMER = REGISTRY.register("ban_hammer", () -> new BanHammer(new Item.Properties().tab(SimUTab.tab).stacksTo(1)));}
