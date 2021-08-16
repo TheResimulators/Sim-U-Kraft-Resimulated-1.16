@@ -46,4 +46,5 @@ public class ModItems {
     //Items
     //public static final Item TEST_ITEM = register(new ItemTest(new Item.Properties()).setRegistryName(Reference.MODID, "test_item"), SimUTab.tab);
     public static final RegistryObject<Item> STRUCTURE_TEST = REGISTRY.register("structure_test", () -> new ItemStructureTest(new Item.Properties().tab(SimUTab.tab)));
-}
+    public static final RegistryObject<Item> BAN_HAMMER = REGISTRY.register("ban_hammer", () -> new BanHammer(new Item.Properties().tab(SimUTab.tab).stacksTo(1)));}
+    public static final RegistryObject<Item> JOB_EDITOR_STICK = REGISTRY.register("job_editor_stick");
