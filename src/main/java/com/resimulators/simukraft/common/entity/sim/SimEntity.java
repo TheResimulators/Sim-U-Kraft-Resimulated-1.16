@@ -332,6 +332,8 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
     public void die(DamageSource cause) {
         super.die(cause);
         this.dropEquipment();
+        Faction faction = SavedWorldData.get(this.level).getFactionWithSim(getUUID());
+        SavedWorldData.get(level).getFaction(faction.getId()).removeSim(this);
 
     }
 
@@ -355,6 +357,16 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
         super.dropEquipment();
         this.inventory.dropAllItems();
     }
+
+    //resets the sim's inventory
+    public void resetInventory(){
+
+        for(int i = 0; i < this.inventory.getContainerSize(); ++i) {
+            //this might cause a crash.......too bad!
+            this.inventory.setItemStack(null);
+        }
+    }
+
 
     @Nullable
     public void dropItem(ItemStack droppedItem, boolean dropAround, boolean traceItem) {
@@ -641,8 +653,6 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
                 sim.getJob().removeJobAi();
                 sim.setJob(null);
                 sim.setProfession(0);
-            }else{
-                SavedWorldData.get(level).getFaction(factionID).removeSim(sim);
             }
         }
 

@@ -115,6 +115,10 @@ public class Faction {
         sims.remove(sim.getUUID());
     }
 
+    public void removeSim(UUID id) {
+        sims.remove(id);
+    }
+
     public void setCredits(double credits) {
         this.credits = credits;
         if (world != null){
