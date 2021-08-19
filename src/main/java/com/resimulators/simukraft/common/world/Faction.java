@@ -140,19 +140,14 @@ public class Faction {
                 ServerPlayerEntity player = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayer(id);
                 if (player != null) {
                     Network.handler.sendToPlayer(message, player);
-    public void removeSim(UUID id) {
-        sims.remove(id);
-    }
-
-    public void setCredits(double credits) {
-        this.credits = credits;
-        if (world != null){
-            if (!world.isClientSide){
-                updateCredits();
                 }
             }
         }
     }
+    public void removeSim(UUID id) {
+        sims.remove(id);
+    }
+
 
     public void addCredits(double credits) {
         setCredits(this.credits + credits);
