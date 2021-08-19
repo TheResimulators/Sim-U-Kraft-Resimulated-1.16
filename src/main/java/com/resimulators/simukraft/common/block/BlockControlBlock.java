@@ -17,7 +17,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
 import net.minecraft.state.IntegerProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.tileentity.TileEntity;
@@ -31,8 +30,6 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.fml.network.NetworkDirection;
 
 import java.util.ArrayList;
-
-import net.minecraft.block.AbstractBlock.Properties;
 
 public class BlockControlBlock extends BlockBase {
     public static final IntegerProperty type = ModBlockProperties.TYPE;
@@ -78,10 +75,8 @@ public class BlockControlBlock extends BlockBase {
         if (state.hasProperty(ModBlockProperties.TYPE)){
             int typeId = state.getValue(ModBlockProperties.TYPE);
             BuildingType type = BuildingType.getById(typeId);
-            if (type != null){
-                return type.type.get().create();
+            return type.getType().get().create();
 
-            }
         }
         return new TileCustomData();
     }

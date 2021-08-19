@@ -68,9 +68,12 @@ public class TileCustomData extends TileEntity implements IControlBlock{
 
     @Override
     public void load(BlockState blockState, CompoundNBT compoundNBT) {
-        setBuildingType(BuildingType.getById(compoundNBT.getInt("building type")));
-        setPrice(compoundNBT.getFloat("price"));
-        setRent(compoundNBT.getFloat("rent"));
+        if (compoundNBT.contains("building type"))
+        {
+            setBuildingType(BuildingType.getById(compoundNBT.getInt("building type")));
+            setPrice(compoundNBT.getFloat("price"));
+            setRent(compoundNBT.getFloat("rent"));
+        }
         super.load(blockState,compoundNBT);
     }
 
