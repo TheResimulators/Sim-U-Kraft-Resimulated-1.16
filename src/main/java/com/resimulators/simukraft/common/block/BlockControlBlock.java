@@ -74,10 +74,8 @@ public class BlockControlBlock extends BlockBase {
         if (state.hasProperty(ModBlockProperties.TYPE)) {
             int typeId = state.getValue(ModBlockProperties.TYPE);
             BuildingType type = BuildingType.getById(typeId);
-            if (type != null) {
-                return type.type.get().create();
+            return type.getType().get().create();
 
-            }
         }
         return new TileCustomData();
     }

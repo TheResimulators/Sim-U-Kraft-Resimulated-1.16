@@ -386,12 +386,11 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
         return (this.getEntityData().get(MODEL_FLAG) & part.getMask()) == part.getMask();
     }
 
-    public void fireSim(SimEntity sim, int factionID, boolean dying) {
+        public void fireSim(SimEntity sim, int factionID,boolean dying){
         if (sim.getJob() != null) {
-            if (sim.getJob().getWorkSpace() != null) {
+            if (sim.getJob().getWorkSpace() != null){
                 SavedWorldData.get(level).fireSim(factionID, sim);
-                if (!level.isClientSide)
-                    SavedWorldData.get(level).getFaction(factionID).sendPacketToFaction(new SimFirePacket(factionID, sim.getId(), sim.getJob().getWorkSpace(), dying));
+                if (!level.isClientSide) SavedWorldData.get(level).getFaction(factionID).sendPacketToFaction(new SimFirePacket(factionID, sim.getId(), sim.getJob().getWorkSpace(),dying));
                 BlockPos jobPos = sim.getJob().getWorkSpace();
                 ITile tile = (ITile) sim.level.getBlockEntity(jobPos);
                 if (tile != null) {
@@ -399,11 +398,10 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
                     tile.setSimId(null);
                 }
             }
-            if (!dying) {
+            if (!dying){
+                sim.getJob().removeJobAi();
                 sim.setJob(null);
                 sim.setProfession(0);
-            } else {
-                SavedWorldData.get(level).getFaction(factionID).removeSim(sim);
             }
         }
 

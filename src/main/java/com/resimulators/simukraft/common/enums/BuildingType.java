@@ -21,7 +21,7 @@ public enum BuildingType {
 
 
     public String name;
-    public RegistryObject<? extends TileEntityType<?>> type;
+    private RegistryObject<? extends TileEntityType<?>> type;
     public int id;
     public Category category;
 
@@ -31,7 +31,7 @@ public enum BuildingType {
                 return type;
             }
         }
-        return null;
+        throw new IndexOutOfBoundsException();
     }
 
     public static BuildingType getByString(String string) {
@@ -57,4 +57,11 @@ public enum BuildingType {
 
     }
 
+    public RegistryObject<? extends TileEntityType<?>> getType() {
+        return type;
+    }
+
+    public void setType(RegistryObject<? extends TileEntityType<?>> type) {
+        this.type = type;
+    }
 }
