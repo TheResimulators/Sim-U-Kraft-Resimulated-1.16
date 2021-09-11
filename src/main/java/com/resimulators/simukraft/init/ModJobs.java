@@ -6,6 +6,7 @@ import com.resimulators.simukraft.common.jobs.Profession;
 import com.resimulators.simukraft.common.jobs.core.IReworkedJob;
 import com.resimulators.simukraft.common.jobs.reworked.JobBuilder;
 import com.resimulators.simukraft.common.jobs.reworked.JobFarmer;
+import com.resimulators.simukraft.common.jobs.reworked.JobGlassFactory;
 import com.resimulators.simukraft.common.jobs.reworked.JobMiner;
 
 import java.util.Map;
@@ -16,6 +17,7 @@ public class ModJobs {
             .put(Profession.FARMER.getId(), JobFarmer::new)
             .put(Profession.MINER.getId(), JobMiner::new)
             .put(Profession.BUILDER.getId(), JobBuilder::new)
+            .put(Profession.GLASS_FACTORY.getId(), JobGlassFactory::new)
             .build();
 
 }

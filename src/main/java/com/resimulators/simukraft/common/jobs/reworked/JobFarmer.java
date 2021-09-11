@@ -11,6 +11,7 @@ import com.resimulators.simukraft.common.jobs.core.IReworkedJob;
 import com.resimulators.simukraft.common.tileentity.TileFarmer;
 import com.resimulators.simukraft.common.tileentity.TileMarker;
 import com.resimulators.simukraft.common.world.SavedWorldData;
+import com.resimulators.simukraft.utils.Utils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -86,16 +87,17 @@ public class JobFarmer implements IReworkedJob {
         return 1000;
     }
 
+
     @Override
     public int workTime() {
-        return 10000;
+        return 10000;  //negative one so that it can work as much as it can. builder should work all day.
+                       //if it can't find resources it take a 1000 tick break
     }
 
     @Override
     public int maximumWorkPeriods() {
         return 10;
-        //negative one so that it can work as much as it can. builder should work all day.
-        // if it can't find resources it take a 1000 tick break
+
     }
 
     @Override
@@ -241,7 +243,7 @@ public class JobFarmer implements IReworkedJob {
     public void tick() {
         if (blockPos != null && !sim.blockPosition().closerThan(new Vector3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()), 2))
             sim.getNavigation().moveTo(blockPos.getX(), blockPos.getY(), blockPos.getZ(), sim.getSpeed() * 2);
-        chests = BaseGoal.findChestAroundTargetBlock(getWorkSpace(), 5, world);
+        chests = Utils.findInventoriesAroundPos(getWorkSpace(), 5, world);
         if (sim.getActivity() == Activity.GOING_TO_WORK) {
             if (sim.blockPosition().closerThan(new Vector3d(getWorkSpace().getX(), getWorkSpace().getY(), getWorkSpace().getZ()), 5)) {
                 if (hasSeeds()) {

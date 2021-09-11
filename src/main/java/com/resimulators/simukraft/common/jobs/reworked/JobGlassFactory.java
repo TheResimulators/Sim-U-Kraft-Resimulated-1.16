@@ -1,12 +1,14 @@
-package com.resimulators.simukraft.common.entity.goals;
+package com.resimulators.simukraft.common.jobs.reworked;
 
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.entity.sim.SimInventory;
-import com.resimulators.simukraft.common.jobs.JobGlassFactory;
+import com.resimulators.simukraft.common.jobs.Profession;
 import com.resimulators.simukraft.common.jobs.core.Activity;
+import com.resimulators.simukraft.common.jobs.core.IReworkedJob;
 import com.resimulators.simukraft.common.world.Faction;
 import com.resimulators.simukraft.common.world.SavedWorldData;
 import com.resimulators.simukraft.utils.BlockUtils;
+import com.resimulators.simukraft.utils.Utils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -14,11 +16,12 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.loot.LootContext;
 import net.minecraft.loot.LootParameters;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.tileentity.ChestTileEntity;
 import net.minecraft.tileentity.FurnaceTileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.ForgeHooks;
@@ -28,12 +31,16 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
+public class JobGlassFactory implements IReworkedJob {
     private final SimEntity sim;
     private final World world;
-    private final ArrayList<BlockPos> chests = new ArrayList<>();
-    private final ArrayList<BlockPos> furnaces = new ArrayList<>();
+    private ArrayList<BlockPos> chests = new ArrayList<>();
+    private ArrayList<BlockPos> furnaces = new ArrayList<>();
     private final ArrayList<Integer> itemsToBeMoved = new ArrayList<>();
+    private int periodsworked = 0;
+    private BlockPos workSpace, blockPos;
+    private Activity activity = Activity.NOT_WORKING;
+    private boolean finished;
     private int tick;
     private int delay = 20;
     private State state = State.WAITING;
@@ -43,44 +50,134 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
     private int furnaceIndex;
     private int chestIndex;
 
-    public GlassFactoryGoal(SimEntity sim) {
-        super(sim, sim.getSpeed() * 2, 20);
-        this.sim = sim;
-        this.world = sim.level;
 
+    public JobGlassFactory(SimEntity simEntity) {
+        this.sim = simEntity;
+        this.world = sim.getCommandSenderWorld();
     }
 
     @Override
-    public boolean canContinueToUse() {
-        if (sim.getJob() != null) {
-            if (sim.getJob().getState() == Activity.FORCE_STOP) {
-                return false;
-            }
-            if (tick < sim.getJob().workTime()) {
-                return true;
-            }
-        }
-        return canUse() && super.canContinueToUse();
+    public Activity getState() {
+        return activity;
     }
 
     @Override
-    public boolean canUse() {
-        job = (JobGlassFactory) sim.getJob();
-        if (job == null) return false;
-        if (sim.getActivity() == Activity.GOING_TO_WORK) {
-            if (sim.blockPosition().closerThan(new Vector3d(job.getWorkSpace().getX(), job.getWorkSpace().getY(), job.getWorkSpace().getZ()), 5)) {
-                sim.setActivity(Activity.WORKING);
-                findChestAroundTargetBlock(job.getWorkSpace(), 5, world);
-                findFurnaceAroundBlock(job.getWorkSpace());
-                return validateWorkArea();
-            }
-        }
+    public void setState(Activity state) {
+        this.activity = state;
+    }
+
+    @Override
+    public Profession jobType() {
+        return Profession.GLASS_FACTORY;
+    }
+
+    @Override
+    public int intervalTime() {
+        return 400;
+    }
+
+    @Override
+    public int workTime() {
+        return 10000;
+    }
+
+    @Override
+    public int maximumWorkPeriods() {
+        return 3;
+    }
+
+    @Override
+    public boolean nightShift() {
         return false;
     }
 
     @Override
+    public int getPeriodsWorked() {
+        return periodsworked;
+    }
+
+
+    @Override
+    public ListNBT writeToNbt(ListNBT nbt) {
+        CompoundNBT data = new CompoundNBT();
+        data.putInt("id", sim.getProfession());
+        nbt.add(data);
+        CompoundNBT ints = new CompoundNBT();
+        ints.putInt("periodsworked", periodsworked);
+        nbt.add(ints);
+        CompoundNBT other = new CompoundNBT(); // other info that is unique to the miner
+        if (workSpace != null) {
+            other.putLong("jobpos", workSpace.asLong());
+        }
+        nbt.add(other);
+        other.putBoolean("finished", finished);
+        return nbt;
+    }
+
+    @Override
+    public void readFromNbt(ListNBT nbt) {
+        for (int i = 0; i < nbt.size(); i++) {
+            CompoundNBT list = nbt.getCompound(i);
+            if (list.contains("periodsworked")) {
+                periodsworked = list.getInt("periodsworked");
+            }
+            if (list.contains("jobpos")) {
+                setWorkSpace(BlockPos.of(list.getLong("jobpos")));
+            }
+            if (list.contains("finished")) {
+                finished = list.getBoolean("finished");
+            }
+        }
+    }
+
+    @Override
+    public void finishedWorkPeriod() {
+        setWorkedPeriods(++periodsworked);
+    }
+
+    @Override
+    public void setWorkedPeriods(int periods) {
+        periodsworked = periods;
+    }
+
+    @Override
+    public void resetPeriodsWorked() {
+        setWorkedPeriods(0);
+    }
+
+    @Override
+    public BlockPos getWorkSpace() {
+        return workSpace;
+    }
+
+    @Override
+    public void setWorkSpace(BlockPos pos) {
+        this.workSpace = pos;
+    }
+
+
+    @Override
+    public double getWage() {
+        return 0.7d;
+    }
+
+    @Override
+    public boolean isFinished() {
+        return finished;
+    }
+
+    @Override
+    public void setFinished(boolean finished) {
+        this.finished = finished;
+    }
+
+
+    @Override
     public void start() {
         sim.setItemInHand(sim.getUsedItemHand(), Items.DIAMOND_SHOVEL.getDefaultInstance());
+        chests = Utils.findInventoriesAroundPos(getWorkSpace(),10,world);
+        furnaces = findFurnacesAroundPos(getWorkSpace(),10);
+        sim.setActivity(Activity.WORKING);
         if (!furnaces.isEmpty()) {
             blockPos = furnaces.get(0);
             ValidateFurnaces();
@@ -94,58 +191,22 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
     }
 
     @Override
-    public double acceptedDistance() {
-        return 1.0d;
-    }
-
-    private void ValidateFurnaces() {
-        ArrayList<BlockPos> furnacesToBeRemoved = new ArrayList<>();
-        for (BlockPos furnace : furnaces) {
-            if (world.getBlockEntity(furnace) instanceof FurnaceTileEntity) {
-                FurnaceTileEntity tileEntity = (FurnaceTileEntity) world.getBlockEntity(furnace);
-                if (tileEntity == null) {
-                    furnacesToBeRemoved.remove(furnace);
+    public void tick() {
+        if (blockPos != null && !sim.blockPosition().closerThan(new Vector3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()), 2)){
+            sim.getNavigation().moveTo(blockPos.getX(), blockPos.getY(), blockPos.getZ(), sim.getSpeed() * 2);
+        }
+        chests = Utils.findInventoriesAroundPos(getWorkSpace(), 5, world);
+        if (sim.getActivity() == Activity.GOING_TO_WORK) {
+            if (sim.blockPosition().closerThan(new Vector3d(getWorkSpace().getX(), getWorkSpace().getY(), getWorkSpace().getZ()), 5)) {
+                if (validateWorkArea()) {
+                    sim.setActivity(Activity.WORKING);
+                } else {
+                    state = State.WAITING;
                 }
             }
-
         }
-        for (BlockPos furnace : furnacesToBeRemoved) {
-            furnaces.remove(furnace);
-        }
-    }
 
-    public void findFurnaceAroundBlock(BlockPos workPos) {
-        ArrayList<BlockPos> blocks = BlockUtils.getBlocksAroundAndBelowPosition(workPos, 5);
-        for (BlockPos pos : blocks) {
-            if (world.getBlockEntity(pos) instanceof FurnaceTileEntity) {
-                furnaces.add(pos);
-            }
-        }
-    }
 
-    private boolean validateWorkArea() {
-        Faction faction = SavedWorldData.get(world).getFactionWithSim(sim.getUUID());
-        boolean valid = true;
-        if (job.getWorkSpace() != null) {
-            if (chests.isEmpty()) {
-                faction.sendFactionChatMessage(sim.getDisplayName().getString() + " (Glass Factory) has no Inventory at " + job.getWorkSpace(), world);
-                valid = false;
-            } else if (furnaces.isEmpty()) {
-                faction.sendFactionChatMessage(sim.getDisplayName().getString() + " (Glass Factory) Has no Furnaces to smelt with at " + job.getWorkSpace(), world);
-                valid = false;
-            } else {
-                faction.sendFactionChatMessage(sim.getDisplayName().getString() + " (Glass Factory) has started work at " + job.getWorkSpace(), world);
-            }
-        } else {
-            return false;
-        }
-        return valid;
-    }
-
-    @Override
-    public void tick() {
-        super.tick();
-        tick++;
         if (delay <= 0) {
             delay = 10;
             if (state == State.FURNACE_INTERACTION) {
@@ -160,6 +221,7 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
                             sim.getJob().setState(Activity.NOT_WORKING);
                         }
                     }
+                    return;
                 }
             }
             if (state == State.CHEST_INTERACTION) {
@@ -172,6 +234,7 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
                             targetPos = sand;
                             blockPos = sand;
                         }
+                        return;
                     }
                 } else {
                     getItemsToMove();
@@ -183,6 +246,7 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
                             targetPos = sand;
                             blockPos = sand;
                         }
+                        return;
                     }
                 }
             }
@@ -190,11 +254,9 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
                 if (targetPos != null) {
                     if (targetPos.closerThan(sim.position(), 6)) {
                         state = State.COLLECTING;
+                        return;
                     } else {
                         blockPos = targetPos;
-                        if (sim.distanceToSqr(targetPos.getX(), targetPos.getY(), targetPos.getZ()) > 50) {
-                            targetPos = null;
-                        }
                     }
                 } else {
                     BlockPos sand = findSand();
@@ -212,23 +274,27 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
                             world.setBlockAndUpdate(targetPos, Blocks.AIR.defaultBlockState());
                             if (!findNextSand()) {
                                 state = State.RETURNING;
-                                blockPos = job.getWorkSpace();
+                                blockPos = getWorkSpace();
                                 targetPos = null;
                                 collected = true;
+                                return;
                             }
                         } else {
                             findNextSand();
                         }
                     } else {
                         blockPos = targetPos;
+                        state = State.TRAVELING;
+                        return;
                     }
                 } else {
                     //state = State.TRAVELING;
                 }
             }
             if (state == State.RETURNING) {
-                if (sim.distanceToSqr(job.getWorkSpace().getX(), job.getWorkSpace().getY(), job.getWorkSpace().getZ()) < 4) {
+                if (sim.distanceToSqr(getWorkSpace().getX(), getWorkSpace().getY(), getWorkSpace().getZ()) < 4) {
                     state = State.SMELTING;
+                    return;
                 }
             }
 
@@ -247,6 +313,9 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
                         getSandToMove();
                         getItemsToMove();
                     }
+                }else{
+                    state = State.TRAVELING;
+
                 }
 
             }
@@ -260,14 +329,23 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
         }
     }
 
-    @Override
-    protected boolean isValidTarget(IWorldReader worldIn, BlockPos pos) {
-        return sim.distanceToSqr(blockPos.getX(), blockPos.getY(), blockPos.getZ()) > acceptedDistance();
-    }
-
-    @Override
-    public void stop() {
-        sim.setItemInHand(sim.getUsedItemHand(), ItemStack.EMPTY);
+    private boolean validateWorkArea() {
+        Faction faction = SavedWorldData.get(world).getFactionWithSim(sim.getUUID());
+        boolean valid = true;
+        if (getWorkSpace() != null) {
+            if (chests.isEmpty()) {
+                faction.sendFactionChatMessage(sim.getDisplayName().getString() + " (Glass Factory) has no Inventory at " + getWorkSpace(), world);
+                valid = false;
+            } else if (furnaces.isEmpty()) {
+                faction.sendFactionChatMessage(sim.getDisplayName().getString() + " (Glass Factory) Has no Furnaces to smelt with at " + getWorkSpace(), world);
+                valid = false;
+            } else {
+                faction.sendFactionChatMessage(sim.getDisplayName().getString() + " (Glass Factory) has started work at " + getWorkSpace(), world);
+            }
+        } else {
+            return false;
+        }
+        return valid;
     }
 
     private boolean interactWithFurnace() {
@@ -367,14 +445,39 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
         }
 
     }
+    public ArrayList<BlockPos> findFurnacesAroundPos(BlockPos targetBlock, int distance) {
+        ArrayList<BlockPos> blockPoses = BlockUtils.getBlocksAroundAndBelowPosition(targetBlock, distance);
+        ArrayList<BlockPos> blocks = new ArrayList<>();
+        for (BlockPos blockPos : blockPoses) {
+            if (world.getBlockEntity(blockPos) instanceof FurnaceTileEntity) {
+                blocks.add(blockPos);
+            }
+        }
+        return blocks;
+    }
+
+    private void ValidateFurnaces() {
+        ArrayList<BlockPos> furnacesToBeRemoved = new ArrayList<>();
+        for (BlockPos furnace : furnaces) {
+            if (world.getBlockEntity(furnace) instanceof FurnaceTileEntity) {
+                FurnaceTileEntity tileEntity = (FurnaceTileEntity) world.getBlockEntity(furnace);
+                if (tileEntity == null) {
+                    furnacesToBeRemoved.remove(furnace);
+                }
+            }
+        }
+        for (BlockPos furnace : furnacesToBeRemoved) {
+            furnaces.remove(furnace);
+        }
+    }
 
     private BlockPos findSand() {
         final BlockPos[] sand = {BlockPos.ZERO};
-        Iterable<BlockPos> blockPoses = BlockPos.betweenClosedStream(job.getWorkSpace().offset(-10, -3, -10), job.getWorkSpace().offset(10, 5, 10))
-                .filter(blockPos -> world.getBlockState(blockPos).getBlock() == Blocks.SAND)
-                .map(BlockPos::immutable)
-                .sorted(Comparator.comparingDouble(blockPos -> job.getWorkSpace().distSqr(blockPos)))
-                .collect(Collectors.toCollection(ArrayList::new));
+        Iterable<BlockPos> blockPoses = BlockPos.betweenClosedStream(getWorkSpace().offset(-10, -3, -10), getWorkSpace().offset(10, 5, 10))
+            .filter(blockPos -> world.getBlockState(blockPos).getBlock() == Blocks.SAND)
+            .map(BlockPos::immutable)
+            .sorted(Comparator.comparingDouble(blockPos -> getWorkSpace().distSqr(blockPos)))
+            .collect(Collectors.toCollection(ArrayList::new));
         for (BlockPos blockPos : blockPoses) {
             if (world.getBlockState(blockPos).getBlock() == Blocks.SAND) {
                 sand[0] = blockPos;
@@ -405,9 +508,11 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
         }
         Block block = world.getBlockState(pos).getBlock();
         LootContext.Builder builder = new LootContext.Builder((ServerWorld) sim.getCommandSenderWorld())
-                .withRandom(world.random)
-                .withParameter(LootParameters.TOOL, sim.getUseItem())
-                .withOptionalParameter(LootParameters.BLOCK_ENTITY, world.getBlockEntity(pos));
+            .withRandom(world.random)
+            .withParameter(LootParameters.TOOL, sim.getUseItem())
+            .withOptionalParameter(LootParameters.BLOCK_ENTITY, world.getBlockEntity(pos))
+            .withParameter(LootParameters.ORIGIN, Vector3d.atCenterOf(pos));
+
         List<ItemStack> drops = block.defaultBlockState().getDrops(builder);
 
         for (ItemStack stack : drops) {
@@ -417,11 +522,11 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
 
     private boolean findNextSand() {
         BlockPos sand = BlockPos.ZERO;
-        ArrayList<BlockPos> blockPoses = BlockPos.betweenClosedStream(job.getWorkSpace().offset(-5, -3, -5), job.getWorkSpace().offset(5, 5, 5))
-                .filter(blockPos -> world.getBlockState(blockPos).getBlock() == Blocks.SAND)
-                .map(BlockPos::immutable)
-                .sorted(Comparator.comparingDouble(blockPos -> sim.position().distanceToSqr(blockPos.getX(), blockPos.getY(), blockPos.getZ())))
-                .collect(Collectors.toCollection(ArrayList::new));
+        ArrayList<BlockPos> blockPoses = BlockPos.betweenClosedStream(sim.blockPosition().offset(-5, -3, -5), sim.blockPosition().offset(5, 5, 5))
+            .filter(blockPos -> world.getBlockState(blockPos).getBlock() == Blocks.SAND)
+            .map(BlockPos::immutable)
+            .sorted(Comparator.comparingDouble(blockPos -> sim.position().distanceToSqr(blockPos.getX(), blockPos.getY(), blockPos.getZ())))
+            .collect(Collectors.toCollection(ArrayList::new));
         if (blockPoses.size() > 0) {
             sand = blockPoses.get(0);
             blockPos = sand;
@@ -581,10 +686,6 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
         return stack;
     }
 
-    private boolean interactWithChests() { // this will be used to check for any extra sand in the chest to put in the furnace
-        return false;
-
-    }
 
     private enum State {
         TRAVELING,

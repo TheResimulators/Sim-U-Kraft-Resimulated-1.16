@@ -3,6 +3,7 @@ package com.resimulators.simukraft.utils;
 import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolItem;
 import net.minecraft.tileentity.ChestTileEntity;
@@ -100,5 +101,16 @@ public class Utils {
             }
         }
         return null;
+    }
+
+    public static ArrayList<BlockPos> findInventoriesAroundPos(BlockPos targetBlock, int distance, World world) {
+        ArrayList<BlockPos> blockPoses = BlockUtils.getBlocksAroundAndBelowPosition(targetBlock, distance);
+        ArrayList<BlockPos> blocks = new ArrayList<>();
+        for (BlockPos blockPos : blockPoses) {
+            if (world.getBlockEntity(blockPos) instanceof ChestTileEntity) {
+                blocks.add(blockPos);
+            }
+        }
+        return blocks;
     }
 }
