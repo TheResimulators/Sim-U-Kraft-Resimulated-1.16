@@ -1,7 +1,13 @@
 package com.resimulators.simukraft.common.building;
 
+import com.google.common.collect.ImmutableList;
 import com.resimulators.simukraft.common.tileentity.TileCustomData;
+import it.unimi.dsi.fastutil.Hash;
 import net.minecraft.block.Block;
+import net.minecraft.item.Item;
+import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.item.crafting.Ingredient;
+import net.minecraft.item.crafting.RecipeManager;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
@@ -15,8 +21,8 @@ import net.minecraft.world.gen.feature.template.PlacementSettings;
 import net.minecraft.world.gen.feature.template.Template;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
-import java.util.List;
-import java.util.Random;
+import java.util.*;
+import java.util.concurrent.BlockingDeque;
 
 public class BuildingTemplate extends Template {
     private BlockPos controlBlock = BlockPos.ZERO;
@@ -28,6 +34,7 @@ public class BuildingTemplate extends Template {
     private String name = "";
     private Direction direction;
     private Rotation blockRotation = Rotation.NONE;
+
 
 
     public BuildingTemplate() {
@@ -232,5 +239,34 @@ public class BuildingTemplate extends Template {
     public Rotation getBlockRotation() {
         return blockRotation;
     }
+
+    /*public void setResourceRequirements(World world){
+        RecipeManager recipeManager = world.getRecipeManager();
+        HashMap<Item,Integer> items = new HashMap<>();
+        for (Template.Palette palette: getBlocks()){
+            for(BlockInfo info: palette.blocks()){
+                Block block = info.state.getBlock();
+                if (items.get(block.asItem()) == null){
+                    items.put(block.asItem(),1);
+                }else{
+                    int amount = items.get(block.asItem());
+                    items.put(block.asItem(),amount + 1);
+                }
+            }
+        }
+
+        for (Item item: items.keySet()){
+            int itemAmount = items.get(item);
+            if (item.getRegistryName() != null) {
+                Optional<? extends IRecipe<?>> optionalIRecipe = recipeManager.byKey(item.getRegistryName());
+                if (optionalIRecipe.isPresent()){
+                    IRecipe<?> recipe = optionalIRecipe.get();
+                    int recipeAmount = (int)Math.ceil((double)recipe.getResultItem().getCount() / itemAmount);
+                    resourceRequirements.put(recipe,recipeAmount);
+                }
+            }
+        }
+
+    }*/
 }
 

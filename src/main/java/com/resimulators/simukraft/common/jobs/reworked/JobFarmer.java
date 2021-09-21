@@ -68,13 +68,13 @@ public class JobFarmer implements IReworkedJob {
     }
 
     @Override
-    public Activity getState() {
+    public Activity getActivity() {
         return activity;
     }
 
     @Override
-    public void setState(Activity state) {
-        this.activity = state;
+    public void setActivity(Activity activity) {
+        this.activity = activity;
     }
 
     @Override
@@ -213,7 +213,7 @@ public class JobFarmer implements IReworkedJob {
         if (farmerTile != null) {
             dir = farmerTile.getDir();
         }
-        chests = BaseGoal.findChestAroundTargetBlock(getWorkSpace(), 5, world);
+        chests = BaseGoal.findChestsAroundTargetBlock(getWorkSpace(), 5, world);
         width = farmerTile.getWidth() - 1;
         depth = farmerTile.getDepth() - 1;
         row = 0;

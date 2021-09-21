@@ -18,7 +18,7 @@ public class BaseGoal<JobType extends IJob> extends MoveToBlockGoal {
     JobType job;
     private int delay = 60; // every 3 seconds (60 ticks) pay sim their wage
 
-    public static ArrayList<BlockPos> findChestAroundTargetBlock(BlockPos targetBlock, int distance, World world) {
+    public static ArrayList<BlockPos> findChestsAroundTargetBlock(BlockPos targetBlock, int distance, World world) {
         ArrayList<BlockPos> blockPoses = BlockUtils.getBlocksAroundAndBelowPosition(targetBlock, distance);
         ArrayList<BlockPos> blocks = new ArrayList<>();
         for (BlockPos blockPos : blockPoses) {

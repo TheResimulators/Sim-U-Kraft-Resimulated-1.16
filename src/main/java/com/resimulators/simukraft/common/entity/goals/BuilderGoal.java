@@ -217,14 +217,14 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
     @Override
     public boolean canContinueToUse() {
         if (sim.getJob() != null) {
-            if (sim.getJob().getState() == Activity.FORCE_STOP) {
+            if (sim.getJob().getActivity() == Activity.FORCE_STOP) {
                 return false;
             }
             if (tick < sim.getJob().workTime()) {
                 return true;
             } else {
                 sim.getJob().finishedWorkPeriod();
-                sim.getJob().setState(Activity.NOT_WORKING);
+                sim.getJob().setActivity(Activity.NOT_WORKING);
             }
         }
 
@@ -303,7 +303,7 @@ public class BuilderGoal extends BaseGoal<JobBuilder> {
             delay--;
         }
         if (blockIndex >= blocks.size()) {
-            sim.getJob().setState(Activity.FORCE_STOP);
+            sim.getJob().setActivity(Activity.FORCE_STOP);
 
             Faction faction = SavedWorldData.get(sim.level).getFactionWithSim(sim.getUUID());
             faction.sendFactionChatMessage("Builder " + sim.getName().getString() + "has finished building " + template.getName(), sim.getCommandSenderWorld());

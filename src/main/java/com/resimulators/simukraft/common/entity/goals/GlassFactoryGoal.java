@@ -53,7 +53,7 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
     @Override
     public boolean canContinueToUse() {
         if (sim.getJob() != null) {
-            if (sim.getJob().getState() == Activity.FORCE_STOP) {
+            if (sim.getJob().getActivity() == Activity.FORCE_STOP) {
                 return false;
             }
             if (tick < sim.getJob().workTime()) {
@@ -70,7 +70,7 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
         if (sim.getActivity() == Activity.GOING_TO_WORK) {
             if (sim.blockPosition().closerThan(new Vector3d(job.getWorkSpace().getX(), job.getWorkSpace().getY(), job.getWorkSpace().getZ()), 5)) {
                 sim.setActivity(Activity.WORKING);
-                findChestAroundTargetBlock(job.getWorkSpace(), 5, world);
+                findChestsAroundTargetBlock(job.getWorkSpace(), 5, world);
                 findFurnaceAroundBlock(job.getWorkSpace());
                 return validateWorkArea();
             }
@@ -88,7 +88,7 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
 
         } else {
             if (!validateWorkArea()) {
-                sim.getJob().setState(Activity.NOT_WORKING);
+                sim.getJob().setActivity(Activity.NOT_WORKING);
             }
         }
     }
@@ -157,7 +157,7 @@ public class GlassFactoryGoal extends BaseGoal<JobGlassFactory> {
                         blockPos = chests.get(0);
                     } else {
                         if (!validateWorkArea()) {
-                            sim.getJob().setState(Activity.NOT_WORKING);
+                            sim.getJob().setActivity(Activity.NOT_WORKING);
                         }
                     }
                 }

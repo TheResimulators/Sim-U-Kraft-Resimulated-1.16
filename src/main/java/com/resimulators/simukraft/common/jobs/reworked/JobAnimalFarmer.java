@@ -1,9 +1,11 @@
-package com.resimulators.simukraft.common.entity.goals;
+package com.resimulators.simukraft.common.jobs.reworked;
 
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
-import com.resimulators.simukraft.common.jobs.JobAnimalFarmer;
+import com.resimulators.simukraft.common.jobs.Profession;
 import com.resimulators.simukraft.common.jobs.core.Activity;
+import com.resimulators.simukraft.common.jobs.core.IReworkedJob;
 import com.resimulators.simukraft.common.tileentity.TileAnimalFarm;
+import com.resimulators.simukraft.utils.Utils;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -13,6 +15,8 @@ import net.minecraft.loot.LootContext;
 import net.minecraft.loot.LootParameterSets;
 import net.minecraft.loot.LootParameters;
 import net.minecraft.loot.LootTable;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tileentity.ChestTileEntity;
 import net.minecraft.util.DamageSource;
@@ -32,8 +36,13 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-public class AnimalFarmerGoal extends BaseGoal<JobAnimalFarmer> {
+public class JobAnimalFarmer implements IReworkedJob {
     private final SimEntity sim;
+    private int periodsWorked = 0;
+    private BlockPos workSpace,blockPos;
+    private Activity activity = Activity.NOT_WORKING;
+    private boolean finished;
+
     private final int killsBeforeEmpty = 10;
     private final World world;
     private final ArrayList<BlockPos> chests = new ArrayList<>();
@@ -46,37 +55,141 @@ public class AnimalFarmerGoal extends BaseGoal<JobAnimalFarmer> {
     private AnimalEntity target;
     private LootTable table;
 
-    public AnimalFarmerGoal(SimEntity sim) {
-        super(sim, sim.getSpeed() * 2, 20);
+    public JobAnimalFarmer(SimEntity sim) {
         this.sim = sim;
         this.world = sim.level;
 
     }
 
+    @Override
+    public Activity getActivity() {
+        return activity;
+    }
 
     @Override
-    public boolean canUse() {
-        job = (JobAnimalFarmer) sim.getJob();
-        if (job == null) return false;
-        if (sim.getActivity() == Activity.GOING_TO_WORK) {
-            if (job.getWorkSpace() != null) {
-                if (sim.blockPosition().closerThan(new Vector3d(job.getWorkSpace().getX(), job.getWorkSpace().getY(), job.getWorkSpace().getZ()), 5)) {
-                    sim.setActivity(Activity.WORKING);
-                    return true;
-                }
-            }
-        }
+    public void setActivity(Activity state) {
+        this.activity = state;
+    }
+
+    @Override
+    public Profession jobType() {
+        return Profession.ANIMAL_FARMER;
+    }
+
+    @Override
+    public int intervalTime() {
+        return 400;
+    }
+
+    @Override
+    public int workTime() {
+        return 10000;
+    }
+
+    @Override
+    public int maximumWorkPeriods() {
+        return 3;
+    }
+
+    @Override
+    public boolean nightShift() {
         return false;
+    }
+
+    @Override
+    public int getPeriodsWorked() {
+        return periodsWorked;
     }
 
 
     @Override
+    public ListNBT writeToNbt(ListNBT nbt) {
+        CompoundNBT data = new CompoundNBT();
+        data.putInt("id", sim.getProfession());
+        nbt.add(data);
+        CompoundNBT ints = new CompoundNBT();
+        ints.putInt("periodsworked", periodsWorked);
+        nbt.add(ints);
+        CompoundNBT other = new CompoundNBT(); // other info that is unique to the miner
+        if (workSpace != null) {
+            other.putLong("jobpos", workSpace.asLong());
+        }
+        other.putBoolean("finished", finished);
+        other.putInt("currentKillCount",currentKillCount);
+        nbt.add(other);
+        return nbt;
+    }
+
+    @Override
+    public void readFromNbt(ListNBT nbt) {
+        for (int i = 0; i < nbt.size(); i++) {
+            CompoundNBT list = nbt.getCompound(i);
+            if (list.contains("periodsworked")) {
+                periodsWorked = list.getInt("periodsworked");
+            }
+            if (list.contains("jobpos")) {
+                setWorkSpace(BlockPos.of(list.getLong("jobpos")));
+            }
+            if (list.contains("finished")) {
+                finished = list.getBoolean("finished");
+            }
+            if (list.contains("currentKillCount")){
+                currentKillCount = list.getInt("currentKillCount");
+            }
+        }
+    }
+
+    @Override
+    public void finishedWorkPeriod() {
+        setWorkedPeriods(++periodsWorked);
+    }
+
+    @Override
+    public void setWorkedPeriods(int periods) {
+        periodsWorked = periods;
+    }
+
+    @Override
+    public void resetPeriodsWorked() {
+        setWorkedPeriods(0);
+    }
+
+    @Override
+    public BlockPos getWorkSpace() {
+        return workSpace;
+    }
+
+    @Override
+    public void setWorkSpace(BlockPos pos) {
+        this.workSpace = pos;
+    }
+
+
+    @Override
+    public double getWage() {
+        return 0.7d;
+    }
+
+    @Override
+    public boolean isFinished() {
+        return finished;
+    }
+
+    @Override
+    public void setFinished(boolean finished) {
+        this.finished = finished;
+    }
+
+
+
+
+    @Override
     public void start() {
-        super.start();
+
         sim.setItemInHand(Hand.MAIN_HAND, new ItemStack(Items.DIAMOND_SWORD));
-        findChestsAroundTargetBlock(sim.getJob().getWorkSpace(), 5, world);
+        Utils.findInventoriesAroundPos(sim.getJob().getWorkSpace(), 5, world);
         if (farm == null) {
-            farm = (TileAnimalFarm) world.getBlockEntity(job.getWorkSpace());
+            farm = (TileAnimalFarm) world.getBlockEntity(getWorkSpace());
             ResourceLocation resourcelocation = farm.getAnimal().getAnimal().getDefaultLootTable();
             table = this.world.getServer().getLootTables().get(resourcelocation);
         }
@@ -84,14 +197,14 @@ public class AnimalFarmerGoal extends BaseGoal<JobAnimalFarmer> {
 
     @Override
     public void tick() {
-        super.tick();
 
-        AxisAlignedBB area = new AxisAlignedBB(job.getWorkSpace().offset(-4, 0, -4), job.getWorkSpace().offset(4, 2, 4));
+
+        AxisAlignedBB area = new AxisAlignedBB(getWorkSpace().offset(-4, 0, -4), getWorkSpace().offset(4, 2, 4));
         List<AnimalEntity> entities = world.getLoadedEntitiesOfClass(AnimalEntity.class, area);
         entities = entities
                 .stream()
                 .filter(animal -> animal.getType() == farm.getAnimal().getAnimal())
-                .sorted(Comparator.comparingDouble(animalEntity -> job.getWorkSpace().distSqr(animalEntity.blockPosition())))
+                .sorted(Comparator.comparingDouble(animalEntity -> getWorkSpace().distSqr(animalEntity.blockPosition())))
                 .collect(Collectors.toList());
 
         if (tick <= 0) {
@@ -188,12 +301,6 @@ public class AnimalFarmerGoal extends BaseGoal<JobAnimalFarmer> {
         }
 
         return false;
-    }
-
-    @Override
-    public void stop() {
-        super.stop();
-        sim.setStatus("Idle");
     }
 
 

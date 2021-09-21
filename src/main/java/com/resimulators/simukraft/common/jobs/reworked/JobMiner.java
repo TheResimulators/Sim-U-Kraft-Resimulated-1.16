@@ -62,13 +62,13 @@ public class JobMiner implements IReworkedJob {
     }
 
     @Override
-    public Activity getState() {
+    public Activity getActivity() {
         return state;
     }
 
     @Override
-    public void setState(Activity state) {
-        this.state = state;
+    public void setActivity(Activity activity) {
+        this.state = activity;
     }
 
     @Override
@@ -302,7 +302,7 @@ public class JobMiner implements IReworkedJob {
                     if ((sim.distanceToSqr(pos.getX(), pos.getY(), pos.getZ()) <= 5)) {
                         if (Utils.getInventoryAroundPos(sim.getJob().getWorkSpace(), sim.level) != null) {
                             if (Utils.addSimInventoryToChest(Utils.getInventoryAroundPos(sim.getJob().getWorkSpace(), sim.level), sim)) {
-                                sim.getJob().setState(Activity.NOT_WORKING);
+                                sim.getJob().setActivity(Activity.NOT_WORKING);
                                 currentTask = Task.NONE;
                                 int id = SavedWorldData.get(sim.level).getFactionWithSim(sim.getUUID()).getId();
                                 sim.fireSim(sim, id, false);

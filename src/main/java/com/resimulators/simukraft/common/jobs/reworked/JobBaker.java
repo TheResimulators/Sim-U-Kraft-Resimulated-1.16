@@ -1,77 +1,175 @@
-package com.resimulators.simukraft.common.entity.goals;
+package com.resimulators.simukraft.common.jobs.reworked;
 
+import com.resimulators.simukraft.common.entity.goals.BakerGoal;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.enums.Seed;
-import com.resimulators.simukraft.common.jobs.JobBaker;
 import com.resimulators.simukraft.common.jobs.Profession;
 import com.resimulators.simukraft.common.jobs.core.Activity;
-import com.resimulators.simukraft.common.jobs.reworked.JobFarmer;
+import com.resimulators.simukraft.common.jobs.core.IReworkedJob;
 import com.resimulators.simukraft.common.tileentity.TileFarmer;
 import com.resimulators.simukraft.common.world.Faction;
 import com.resimulators.simukraft.common.world.SavedWorldData;
 import com.resimulators.simukraft.utils.BlockUtils;
+import com.resimulators.simukraft.utils.Utils;
+import jdk.nashorn.internal.ir.Block;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.tileentity.ChestTileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.items.ItemHandlerHelper;
+import net.minecraftforge.items.wrapper.InvWrapper;
 
+import java.sql.Wrapper;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 
-public class BakerGoal extends BaseGoal<JobBaker> {
-
+public class JobBaker implements IReworkedJob {
     private final SimEntity sim;
     private final World world;
     private final ArrayList<BlockPos> chests = new ArrayList<>();
     private final ArrayList<SimEntity> simFarmers = new ArrayList<>();
     private final ArrayList<BlockPos> farmerWorkSpace = new ArrayList<>();
     private final HashMap<BlockPos, ArrayList<BlockPos>> farmChestsHashMap = new HashMap<>();
+    private int periodsworked = 0;
+    private BlockPos workSpace, blockPos;
+    private Activity activity = Activity.NOT_WORKING;
+    private boolean finished = false;
     private State state = State.WAITING;
     private int tick, delay = 0, navigation, wheatAmount;
     private boolean validateSentence = false;
 
-    public BakerGoal(SimEntity sim) {
-        super(sim, sim.getSpeed() * 2, 20);
-        this.sim = sim;
-        this.world = sim.level;
+
+    public JobBaker(SimEntity simEntity) {
+        this.sim = simEntity;
+        world = sim.level;
+
     }
 
     @Override
-    public boolean canContinueToUse() {
-        if (sim.getJob() != null) {
-            if (sim.getJob().getActivity() == Activity.FORCE_STOP) {
-                return false;
-            }
-            if (tick < sim.getJob().workTime()) {
-                return true;
-            }
-        }
-        return canUse() && super.canContinueToUse();
+    public Activity getActivity() {
+        return activity;
     }
 
     @Override
-    public boolean canUse() {
-        job = (JobBaker) sim.getJob();
-        if (job == null) return false;
-        if (sim.getActivity() == Activity.GOING_TO_WORK) {
-            if (sim.blockPosition().closerThan(new Vector3d(job.getWorkSpace().getX(), job.getWorkSpace().getY(), job.getWorkSpace().getZ()), 2)) {
-                sim.setActivity(Activity.WORKING);
-                findChestsAroundTargetBlock(job.getWorkSpace(), 5, world);
-                return true;
-            }
-        }
+    public void setActivity(Activity activity) {
+        this.activity = activity;
+    }
+
+    @Override
+    public Profession jobType() {
+        return Profession.BAKER;
+    }
+
+    @Override
+    public int intervalTime() {
+        return 400;
+    }
+
+    @Override
+    public int workTime() {
+        return 10000;
+    }
+
+    @Override
+    public int maximumWorkPeriods() {
+        return 3;
+    }
+
+    @Override
+    public boolean nightShift() {
         return false;
     }
 
     @Override
+    public int getPeriodsWorked() {
+        return periodsworked;
+    }
+
+    @Override
+    public ListNBT writeToNbt(ListNBT nbt) {
+        CompoundNBT data = new CompoundNBT();
+        nbt.add(data);
+        data.putInt("id", sim.getProfession());
+        CompoundNBT ints = new CompoundNBT();
+        ints.putInt("periodsworked", periodsworked);
+        nbt.add(ints);
+        CompoundNBT other = new CompoundNBT(); // other info that is unique to the miner
+        if (workSpace != null) {
+            other.putLong("jobpos", workSpace.asLong());
+        }
+        other.putBoolean("finished", finished);
+        nbt.add(other);
+        return nbt;
+    }
+
+    @Override
+    public void readFromNbt(ListNBT nbt) {
+        for (int i = 0; i < nbt.size(); i++) {
+            CompoundNBT list = nbt.getCompound(i);
+            if (list.contains("periodsworked")) {
+                periodsworked = list.getInt("periodsworked");
+            }
+            if (list.contains("jobpos")) {
+                setWorkSpace(BlockPos.of(list.getLong("jobpos")));
+            }
+            if (list.contains("finished")) {
+                finished = list.getBoolean("finished");
+            }
+        }
+    }
+
+    @Override
+    public void finishedWorkPeriod() {
+        setWorkedPeriods(++periodsworked);
+    }
+
+    @Override
+    public void setWorkedPeriods(int periods) {
+        periodsworked = periods;
+    }
+
+    @Override
+    public void resetPeriodsWorked() {
+        setWorkedPeriods(0);
+    }
+
+    @Override
+    public BlockPos getWorkSpace() {
+        return workSpace;
+    }
+
+    @Override
+    public void setWorkSpace(BlockPos pos) {
+        this.workSpace = pos;
+    }
+
+    @Override
+    public double getWage() {
+        return 0.7d;
+    }
+
+    @Override
+    public boolean isFinished() {
+        return finished;
+    }
+
+    @Override
+    public void setFinished(boolean finished) {
+        this.finished = finished;
+    }
+
+
+    @Override
     public void start() {
         sim.setItemInHand(sim.getUsedItemHand(), Items.BREAD.getDefaultInstance());
-        blockPos = job.getWorkSpace();
+        blockPos = getWorkSpace();
         if (!chests.isEmpty()) {
             state = State.CHEST_INTERACTION;
         } else if (!validateWorkArea()) {
@@ -79,16 +177,11 @@ public class BakerGoal extends BaseGoal<JobBaker> {
         }
     }
 
-    @Override
-    public double acceptedDistance() {
-        return 1.0d;
-    }
-
     private boolean validateWorkArea() {
         Faction faction = SavedWorldData.get(world).getFactionWithSim(sim.getUUID());
-        if (job.getWorkSpace() != null) {
+        if (getWorkSpace() != null) {
             if (chests.isEmpty()) {
-                faction.sendFactionChatMessage(sim.getDisplayName().getString() + " (JobBaker) has no inventory at: " + job.getWorkSpace(), world);
+                faction.sendFactionChatMessage(sim.getDisplayName().getString() + " (JobBaker) has no inventory at: " + getWorkSpace(), world);
             } else {
                 if (!validateSentence)
                     faction.sendFactionChatMessage(sim.getDisplayName().getString() + " (JobBaker) has started working", world);
@@ -101,11 +194,11 @@ public class BakerGoal extends BaseGoal<JobBaker> {
 
     @Override
     public void tick() {
-        super.tick();
+
         tick++;
         delay++;
         navigation++;
-        findChestsAroundTargetBlock(job.getWorkSpace(), 5, world);
+        Utils.getInventoryAroundPos(getWorkSpace(), world);
         putSimInvInChest();
         if (!validateWorkArea()) {
             validateSentence = false;
@@ -202,42 +295,30 @@ public class BakerGoal extends BaseGoal<JobBaker> {
         }
     }
 
-    @Override
-    protected boolean isValidTarget(IWorldReader worldIn, BlockPos pos) {
-        return sim.distanceToSqr(blockPos.getX(), blockPos.getY(), blockPos.getZ()) > acceptedDistance();
-    }
 
     private void putSimInvInChest() {
-        int simInvLeftOver;
-        int simInvAmount = sim.getInventory().countItem(Items.WHEAT);
-        int simInvStack = simInvAmount / 64;
-        if (simInvStack >= 1) {
-            simInvLeftOver = simInvAmount - (simInvAmount * 64);
-        } else {
-            simInvStack = 0;
-            simInvLeftOver = simInvAmount;
-        }
-        ChestLoop:
-        for (BlockPos chest : chests) {
-            ChestTileEntity chestTileEntity = (ChestTileEntity) world.getBlockEntity(chest);
-            if (chestTileEntity != null) {
-                for (int i = 0; i < chestTileEntity.getContainerSize(); i++) {
-                    ItemStack wheatStack = chestTileEntity.getItem(i);
-                    if (wheatStack.isEmpty()) {
-                        if (simInvStack != 0) {
-                            simInvStack--;
-                            chestTileEntity.setItem(i, new ItemStack(Items.WHEAT, 64));
-                        } else {
-                            chestTileEntity.setItem(i, new ItemStack(Items.WHEAT, simInvLeftOver));
-                            break ChestLoop;
-                        }
-                    }
+        Faction faction = SavedWorldData.get(world).getFactionWithSim(sim.getUUID());
+        int chestIndex = 0;
+        while (sim.getInventory().getSlotFor(new ItemStack(Items.WHEAT)) != -1){
+            int index = sim.getInventory().getSlotFor(new ItemStack(Items.WHEAT));
+            BlockPos entityPos = chests.get(chestIndex);
+            ChestTileEntity entity = (ChestTileEntity) world.getBlockEntity(entityPos);
+            if (entity == null){
+                chestIndex += 1;
+                if (chestIndex > chests.size()){
+                    break;
                 }
+                continue;
             }
-        }
-        for (int i = 0; i < sim.getInventory().getContainerSize(); i++) {
-            ItemStack simWheatStack = sim.getInventory().getItem(i);
-            if (simWheatStack.getItem().equals(Items.WHEAT)) sim.getInventory().setItem(i, ItemStack.EMPTY);
+            InvWrapper wrapper = new InvWrapper(entity);
+            ItemStack stack = sim.getInventory().getItem(index);
+            if(ItemHandlerHelper.insertItemStacked(wrapper,stack,false) == ItemStack.EMPTY){
+                sim.getInventory().setItem(index,ItemStack.EMPTY);
+            }else{
+                faction.sendFactionChatMessage("Baker " + sim.getName() + ", has ran out of inventory space",world);
+
+            }
+
         }
     }
 

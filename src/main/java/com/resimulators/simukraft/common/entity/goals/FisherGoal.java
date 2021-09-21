@@ -44,7 +44,7 @@ public class FisherGoal extends BaseGoal<JobFisher> {
     @Override
     public boolean canContinueToUse() {
         if (sim.getJob() != null) {
-            if (sim.getJob().getState() == Activity.FORCE_STOP) {
+            if (sim.getJob().getActivity() == Activity.FORCE_STOP) {
                 return false;
             }
             if (tick < sim.getJob().workTime()) {
@@ -61,7 +61,7 @@ public class FisherGoal extends BaseGoal<JobFisher> {
         if (sim.getActivity() == Activity.GOING_TO_WORK) {
             if (sim.blockPosition().closerThan(new Vector3d(job.getWorkSpace().getX(), job.getWorkSpace().getY(), job.getWorkSpace().getZ()), 5)) {
                 sim.setActivity(Activity.WORKING);
-                findChestAroundTargetBlock(job.getWorkSpace(), 5, world);
+                findChestsAroundTargetBlock(job.getWorkSpace(), 5, world);
                 return true;
             }
         }
@@ -77,7 +77,7 @@ public class FisherGoal extends BaseGoal<JobFisher> {
             blockPos = chests.get(0);
         } else {
             if (!validateWorkArea()) {
-                sim.getJob().setState(Activity.NOT_WORKING);
+                sim.getJob().setActivity(Activity.NOT_WORKING);
             }
         }
     }
@@ -131,12 +131,12 @@ public class FisherGoal extends BaseGoal<JobFisher> {
         tick++;
         fishTrigger++;
         state = State.WAITING;
-        findChestAroundTargetBlock(job.getWorkSpace(), 5, world);
+        findChestsAroundTargetBlock(job.getWorkSpace(), 5, world);
         if (!validateWorkArea()) {
-            sim.getJob().setState(Activity.NOT_WORKING);
+            sim.getJob().setActivity(Activity.NOT_WORKING);
             validateSentence = false;
         } else if (validateWorkArea()) {
-            sim.getJob().setState(Activity.WORKING);
+            sim.getJob().setActivity(Activity.WORKING);
         }
         if (fishTrigger >= delay * 20 && sim.getActivity().equals(Activity.WORKING)) {
             state = State.FISHING;

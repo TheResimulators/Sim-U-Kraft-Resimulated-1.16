@@ -21,7 +21,7 @@ public class GoToWorkGoal extends MoveToBlockGoal {
     @Override
     public boolean canUse() {
         if (sim.getJob() == null) return false;
-        if (sim.getJob().getState() == Activity.GOING_TO_WORK) {
+        if (sim.getJob().getActivity() == Activity.GOING_TO_WORK) {
             this.job = sim.getJob();
             return true;
         }

@@ -57,13 +57,13 @@ public class JobGlassFactory implements IReworkedJob {
     }
 
     @Override
-    public Activity getState() {
+    public Activity getActivity() {
         return activity;
     }
 
     @Override
-    public void setState(Activity state) {
-        this.activity = state;
+    public void setActivity(Activity activity) {
+        this.activity = activity;
     }
 
     @Override
@@ -185,7 +185,7 @@ public class JobGlassFactory implements IReworkedJob {
 
         } else {
             if (!validateWorkArea()) {
-                sim.getJob().setState(Activity.NOT_WORKING);
+                sim.getJob().setActivity(Activity.NOT_WORKING);
             }
         }
     }
@@ -218,7 +218,7 @@ public class JobGlassFactory implements IReworkedJob {
                         blockPos = chests.get(0);
                     } else {
                         if (!validateWorkArea()) {
-                            sim.getJob().setState(Activity.NOT_WORKING);
+                            sim.getJob().setActivity(Activity.NOT_WORKING);
                         }
                     }
                     return;

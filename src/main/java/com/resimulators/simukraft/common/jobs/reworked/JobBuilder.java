@@ -8,6 +8,7 @@ import com.resimulators.simukraft.common.enums.BuildingType;
 import com.resimulators.simukraft.common.jobs.Profession;
 import com.resimulators.simukraft.common.jobs.core.Activity;
 import com.resimulators.simukraft.common.jobs.core.IReworkedJob;
+import com.resimulators.simukraft.common.tileentity.TileConstructor;
 import com.resimulators.simukraft.common.tileentity.TileResidential;
 import com.resimulators.simukraft.common.world.Faction;
 import com.resimulators.simukraft.common.world.SavedWorldData;
@@ -23,13 +24,15 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.DoorBlock;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.item.crafting.RecipeManager;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
-import net.minecraft.pathfinding.Path;
 import net.minecraft.state.properties.BedPart;
 import net.minecraft.state.properties.DoubleBlockHalf;
 import net.minecraft.tileentity.ChestTileEntity;
 import net.minecraft.util.Direction;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.EmptyBlockReader;
@@ -39,11 +42,7 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.common.util.FakePlayer;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class JobBuilder implements IReworkedJob {
@@ -72,13 +71,13 @@ public class JobBuilder implements IReworkedJob {
     }
 
     @Override
-    public Activity getState() {
+    public Activity getActivity() {
         return activity;
     }
 
     @Override
-    public void setState(Activity state) {
-        this.activity = state;
+    public void setActivity(Activity activity) {
+        this.activity = activity;
     }
 
     @Override
@@ -238,7 +237,9 @@ public class JobBuilder implements IReworkedJob {
                         }
                     })
             );
-            System.out.println("SORRRTTTTTED");
+
+            TileConstructor constructor = (TileConstructor) sim.level.getBlockEntity(workSpace);
+            constructor.setBuildingPositioning(blocks.get(0).pos,blocks.get(blocks.size()-1).pos);
             chargeBlockIndexForward();
         }
     }
@@ -309,7 +310,7 @@ public class JobBuilder implements IReworkedJob {
             delay--;
         }
         if (blocks != null && blockIndex >= blocks.size()) {
-            sim.getJob().setState(Activity.FORCE_STOP);
+            sim.getJob().setActivity(Activity.FORCE_STOP);
 
             Faction faction = SavedWorldData.get(sim.level).getFactionWithSim(sim.getUUID());
             faction.sendFactionChatMessage("Builder " + sim.getName().getString() + "has finished building " + template.getName(), sim.getCommandSenderWorld());
@@ -413,6 +414,7 @@ public class JobBuilder implements IReworkedJob {
     }
 
     private void setBlocksNeeded() {
+
         blocksNeeded.clear();
         chargeBlockIndexForward();
         for (int i = this.blockIndex; i < blocks.size(); i++) {
@@ -431,6 +433,8 @@ public class JobBuilder implements IReworkedJob {
                 value += 1;
                 blocksNeeded.put(block.asItem(), value);
             }
+
+
         }
 
     }

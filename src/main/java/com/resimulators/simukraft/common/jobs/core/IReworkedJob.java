@@ -6,10 +6,10 @@ import net.minecraft.util.math.BlockPos;
 
 public interface IReworkedJob {
     //gets the state the sim is in, used to see if they should work or not
-    Activity getState();
+    Activity getActivity();
 
     //set the state that the job is in. i.e when the sim starts to work set it to going to work. then the ai can use it to determine what to do when etc.
-    void setState(Activity state);
+    void setActivity(Activity activity);
 
     // what profession is this job for
     Profession jobType();
