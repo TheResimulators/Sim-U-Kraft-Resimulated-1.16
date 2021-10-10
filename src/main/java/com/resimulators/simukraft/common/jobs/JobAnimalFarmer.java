@@ -10,20 +10,20 @@ import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.math.BlockPos;
 
 public class JobAnimalFarmer implements IJob {
-    private SimEntity sim;
-    private Goal goal1;
+    private final SimEntity sim;
+    private final Goal goal1;
     private int periodsworked = 0;
     private BlockPos workSpace;
     private Activity state = Activity.NOT_WORKING;
     private boolean finished;
 
 
-
-    public  JobAnimalFarmer(SimEntity entity){
+    public JobAnimalFarmer(SimEntity entity) {
         this.sim = entity;
         goal1 = new AnimalFarmerGoal(sim);
         addJobAi();
     }
+
     @Override
     public Activity getState() {
         return state;
@@ -66,7 +66,7 @@ public class JobAnimalFarmer implements IJob {
 
     @Override
     public void addJobAi() {
-        sim.goalSelector.addGoal(3,goal1);
+        sim.goalSelector.addGoal(3, goal1);
     }
 
     @Override
@@ -86,7 +86,7 @@ public class JobAnimalFarmer implements IJob {
         if (workSpace != null) {
             other.putLong("jobpos", workSpace.asLong());
         }
-        other.putBoolean("finished",finished);
+        other.putBoolean("finished", finished);
         nbt.add(other);
         return nbt;
     }
@@ -101,7 +101,7 @@ public class JobAnimalFarmer implements IJob {
             if (list.contains("jobpos")) {
                 setWorkSpace(BlockPos.of(list.getLong("jobpos")));
             }
-            if (list.contains("finished")){
+            if (list.contains("finished")) {
                 finished = list.getBoolean("finished");
             }
         }
@@ -123,13 +123,13 @@ public class JobAnimalFarmer implements IJob {
     }
 
     @Override
-    public void setWorkSpace(BlockPos pos) {
-        this.workSpace = pos;
+    public BlockPos getWorkSpace() {
+        return workSpace;
     }
 
     @Override
-    public BlockPos getWorkSpace() {
-        return workSpace;
+    public void setWorkSpace(BlockPos pos) {
+        this.workSpace = pos;
     }
 
     @Override
@@ -149,6 +149,6 @@ public class JobAnimalFarmer implements IJob {
 
     @Override
     public void setFinished(boolean finished) {
-    this.finished = finished;
+        this.finished = finished;
     }
 }

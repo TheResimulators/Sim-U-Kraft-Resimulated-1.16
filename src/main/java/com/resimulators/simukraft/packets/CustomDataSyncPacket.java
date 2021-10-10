@@ -8,7 +8,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.network.NetworkEvent;
 
-public class CustomDataSyncPacket  implements IMessage{
+public class CustomDataSyncPacket implements IMessage {
 
     private float price;
     private float rent;
@@ -16,9 +16,10 @@ public class CustomDataSyncPacket  implements IMessage{
     private BlockPos pos;
 
 
-    public CustomDataSyncPacket(){}
+    public CustomDataSyncPacket() {
+    }
 
-    public CustomDataSyncPacket(float price, float rent, BuildingType type, BlockPos pos){
+    public CustomDataSyncPacket(float price, float rent, BuildingType type, BlockPos pos) {
         this.price = price;
         this.rent = rent;
         this.type = type;
@@ -52,9 +53,9 @@ public class CustomDataSyncPacket  implements IMessage{
     public void onExecute(NetworkEvent.Context ctxIn, boolean isLogicalServer) {
         if (ctxIn.getSender() != null) {
             World world = ctxIn.getSender().level;
-            if (world != null){
+            if (world != null) {
                 TileCustomData tile = (TileCustomData) world.getBlockEntity(pos);
-                if (tile != null){
+                if (tile != null) {
                     tile.setPrice(price);
                     tile.setRent(rent);
                     tile.setBuildingType(type);

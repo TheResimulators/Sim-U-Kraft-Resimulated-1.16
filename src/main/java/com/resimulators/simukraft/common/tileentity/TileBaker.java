@@ -20,37 +20,19 @@ public class TileBaker extends TileEntity implements IControlBlock {
     }
 
     @Override
-    public CompoundNBT getUpdateTag() { return save(new CompoundNBT());}
-
-    @Override
-    public CompoundNBT save(CompoundNBT nbt) {
-        nbt.putBoolean("hired", this.hired);
-        if (simId != null) {
-            nbt.putUUID("simid", simId);
-        }
-        return nbt;
-    }
-
-    @Override
-    public void load(BlockState state, CompoundNBT nbt) {
-        hired = nbt.getBoolean("hired");
-        if (nbt.contains("simid")) {
-            simId = nbt.getUUID("simid");
-        }
-    }
-
-    @Override
-    public int getGui() { return GuiHandler.BAKER; }
-
-    @Override
-    public void setHired(boolean hired) {
-        this.hired = hired;
-        setChanged();
+    public int getGui() {
+        return GuiHandler.BAKER;
     }
 
     @Override
     public boolean getHired() {
         return this.hired;
+    }
+
+    @Override
+    public void setHired(boolean hired) {
+        this.hired = hired;
+        setChanged();
     }
 
     @Override
@@ -69,11 +51,41 @@ public class TileBaker extends TileEntity implements IControlBlock {
     }
 
     @Override
-    public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
-        load(this.getBlockState(), pkt.getTag());
+    public void load(BlockState state, CompoundNBT nbt) {
+        hired = nbt.getBoolean("hired");
+        if (nbt.contains("simid")) {
+            simId = nbt.getUUID("simid");
+        }
     }
+
+    @Override
+    public CompoundNBT save(CompoundNBT nbt) {
+        nbt.putBoolean("hired", this.hired);
+        if (simId != null) {
+            nbt.putUUID("simid", simId);
+        }
+        return nbt;
+    }
+
     @Override
     public SUpdateTileEntityPacket getUpdatePacket() {
         return new SUpdateTileEntityPacket(this.worldPosition, -1, this.getUpdateTag());
     }
+
+    @Override
+    public CompoundNBT getUpdateTag() {
+        return save(new CompoundNBT());
+    }
+
+
+    @Override
+    public void handleUpdateTag(BlockState blockState, CompoundNBT parentNBTTagCompound) {
+        this.load(blockState, parentNBTTagCompound);
+    }
+
+    @Override
+    public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
+        load(this.getBlockState(), pkt.getTag());
+    }
+
 }

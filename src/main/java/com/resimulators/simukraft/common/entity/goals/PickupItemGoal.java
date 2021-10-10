@@ -12,7 +12,7 @@ import java.util.List;
 
 public class PickupItemGoal extends Goal {
     private final SimEntity sim;
-    private PathNavigator navigator;
+    private final PathNavigator navigator;
     private ItemEntity item;
 
     public PickupItemGoal(SimEntity sim) {
@@ -47,12 +47,6 @@ public class PickupItemGoal extends Goal {
     }
 
     @Override
-    public void stop() {
-        navigator.stop();
-        this.item = null;
-    }
-
-    @Override
     public boolean canContinueToUse() {
         return sim.isAlive() && !navigator.isDone() && this.item.isAlive();
     }
@@ -62,6 +56,12 @@ public class PickupItemGoal extends Goal {
         if (this.item != null) {
             navigator.moveTo(this.item.blockPosition().getX(), this.item.blockPosition().getY(), this.item.blockPosition().getZ(), 0.6f);
         }
+    }
+
+    @Override
+    public void stop() {
+        navigator.stop();
+        this.item = null;
     }
 
     @Override

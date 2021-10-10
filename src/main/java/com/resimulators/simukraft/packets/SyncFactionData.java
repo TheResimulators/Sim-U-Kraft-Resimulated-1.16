@@ -15,12 +15,14 @@ public class SyncFactionData implements IMessage {
     private CompoundNBT nbt;
     private int id;
 
-    public SyncFactionData(CompoundNBT nbt, int id){
+    public SyncFactionData(CompoundNBT nbt, int id) {
 
         this.nbt = nbt;
         this.id = id;
     }
-    public SyncFactionData(){}
+
+    public SyncFactionData() {
+    }
 
 
     @Override
@@ -47,7 +49,7 @@ public class SyncFactionData implements IMessage {
         World world = SimuKraft.proxy.getClientWorld();
         if (world != null) { // adds faction data to client so info can be shown in guis and on Hud's
             SavedWorldData.get(world).clearAll();
-            Faction faction = new Faction(id,world);
+            Faction faction = new Faction(id, world);
             faction.read(nbt);
             SavedWorldData.get(world).setFaction(id, faction);
         }

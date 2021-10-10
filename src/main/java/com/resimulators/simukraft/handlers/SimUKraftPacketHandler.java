@@ -20,14 +20,6 @@ import java.util.function.Supplier;
 public class SimUKraftPacketHandler {
 
 
-    public SimUKraftPacketHandler(){}
-    private static int ID = 0;
-
-    private static int newId(){
-        return ID++;
-    }
-
-
     public static final String PROTOCOL_VERSION = "1";
     public static final SimpleChannel INSTANCE = NetworkRegistry.newSimpleChannel(
             new ResourceLocation(Reference.MODID, "main"),
@@ -35,8 +27,11 @@ public class SimUKraftPacketHandler {
             PROTOCOL_VERSION::equals,
             PROTOCOL_VERSION::equals
     );
+    private static int ID = 0;
 
 
+    public SimUKraftPacketHandler() {
+    }
 
     public void init() {
         registerMessage(newId(), SyncFactionData.class, SyncFactionData::new);
@@ -49,11 +44,11 @@ public class SimUKraftPacketHandler {
         registerMessage(newId(), FarmerSeedPacket.class, FarmerSeedPacket::new);
         registerMessage(newId(), CreditUpdatePacket.class, CreditUpdatePacket::new);
         registerMessage(newId(), CustomDataSyncPacket.class, CustomDataSyncPacket::new);
-        registerMessage(newId(),BuildingsPacket.class, BuildingsPacket::new);
+        registerMessage(newId(), BuildingsPacket.class, BuildingsPacket::new);
         registerMessage(newId(), StartBuildingPacket.class, StartBuildingPacket::new);
         registerMessage(newId(), NewHousePacket.class, NewHousePacket::new);
         registerMessage(newId(), HouseOccupantIdsPacket.class, HouseOccupantIdsPacket::new);
-        registerMessage(newId(), RequestHouseOccupantsPacket.class,RequestHouseOccupantsPacket::new);
+        registerMessage(newId(), RequestHouseOccupantsPacket.class, RequestHouseOccupantsPacket::new);
 
     }
 
@@ -65,8 +60,7 @@ public class SimUKraftPacketHandler {
      * @param msgClazz   message class
      * @param msgCreator supplier with new instance of msgClazz
      */
-    private <MSG extends IMessage> void registerMessage(final int id, final Class<MSG> msgClazz, final Supplier<MSG> msgCreator)
-    {
+    private <MSG extends IMessage> void registerMessage(final int id, final Class<MSG> msgClazz, final Supplier<MSG> msgCreator) {
         INSTANCE.registerMessage(id, msgClazz, (msg, buf) -> msg.toBytes(buf), (buf) -> {
             final MSG msg = msgCreator.get();
             msg.fromBytes(buf);
@@ -75,8 +69,7 @@ public class SimUKraftPacketHandler {
             final NetworkEvent.Context ctx = ctxIn.get();
             final LogicalSide packetOrigin = ctx.getDirection().getOriginationSide();
             ctx.setPacketHandled(true);
-            if (msg.getExecutionSide() != null && packetOrigin.equals(msg.getExecutionSide()))
-            {
+            if (msg.getExecutionSide() != null && packetOrigin.equals(msg.getExecutionSide())) {
                 SimuKraft.LOGGER().warn("Receving {} at wrong side!", msg.getClass().getName());
                 return;
             }
@@ -85,25 +78,8 @@ public class SimUKraftPacketHandler {
         });
     }
 
-    /**
-     * Sends to server.
-     *
-     * @param msg message to send
-     */
-    public void sendToServer(final IMessage msg)
-    {
-        INSTANCE.sendToServer(msg);
-    }
-
-    /**
-     * Sends to player.
-     *
-     * @param msg    message to send
-     * @param player target player
-     */
-    public void sendToPlayer(final IMessage msg, final ServerPlayerEntity player)
-    {
-        INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), msg);
+    private static int newId() {
+        return ID++;
     }
 
     /**
@@ -112,17 +88,33 @@ public class SimUKraftPacketHandler {
      * @param msg message to send
      * @param ctx network context
      */
-    public void sendToOrigin(final IMessage msg, final NetworkEvent.Context ctx)
-    {
+    public void sendToOrigin(final IMessage msg, final NetworkEvent.Context ctx) {
         final ServerPlayerEntity player = ctx.getSender();
         if (player != null) // side check
         {
             sendToPlayer(msg, player);
-        }
-        else
-        {
+        } else {
             sendToServer(msg);
         }
+    }
+
+    /**
+     * Sends to player.
+     *
+     * @param msg    message to send
+     * @param player target player
+     */
+    public void sendToPlayer(final IMessage msg, final ServerPlayerEntity player) {
+        INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), msg);
+    }
+
+    /**
+     * Sends to server.
+     *
+     * @param msg message to send
+     */
+    public void sendToServer(final IMessage msg) {
+        INSTANCE.sendToServer(msg);
     }
 
     /**
@@ -131,8 +123,7 @@ public class SimUKraftPacketHandler {
      * @param msg message to send
      * @param dim target dimension
      */
-    public void sendToDimension(final IMessage msg, final RegistryKey<World> dim)
-    {
+    public void sendToDimension(final IMessage msg, final RegistryKey<World> dim) {
         INSTANCE.send(PacketDistributor.DIMENSION.with(() -> {
             return dim;
         }), msg);
@@ -145,8 +136,7 @@ public class SimUKraftPacketHandler {
      * @param pos target position and radius
      * @see PacketDistributor.TargetPoint
      */
-    public void sendToPosition(final IMessage msg, final PacketDistributor.TargetPoint pos)
-    {
+    public void sendToPosition(final IMessage msg, final PacketDistributor.TargetPoint pos) {
         INSTANCE.send(PacketDistributor.NEAR.with(() -> pos), msg);
     }
 
@@ -155,8 +145,7 @@ public class SimUKraftPacketHandler {
      *
      * @param msg message to send
      */
-    public void sendToEveryone(final IMessage msg)
-    {
+    public void sendToEveryone(final IMessage msg) {
         INSTANCE.send(PacketDistributor.ALL.noArg(), msg);
     }
 
@@ -166,14 +155,13 @@ public class SimUKraftPacketHandler {
      * <pre>
      * Math.min(Entity.getType().getTrackingRange(), ChunkManager.this.viewDistance - 1) * 16;
      * </pre>
-     *
+     * <p>
      * as of 24-06-2019
      *
      * @param msg    message to send
      * @param entity target entity to look at
      */
-    public void sendToTrackingEntity(final IMessage msg, final Entity entity)
-    {
+    public void sendToTrackingEntity(final IMessage msg, final Entity entity) {
         INSTANCE.send(PacketDistributor.TRACKING_ENTITY.with(() -> entity), msg);
     }
 
@@ -183,14 +171,13 @@ public class SimUKraftPacketHandler {
      * <pre>
      * Math.min(Entity.getType().getTrackingRange(), ChunkManager.this.viewDistance - 1) * 16;
      * </pre>
-     *
+     * <p>
      * as of 24-06-2019
      *
      * @param msg    message to send
      * @param entity target entity to look at
      */
-    public void sendToTrackingEntityAndSelf(final IMessage msg, final Entity entity)
-    {
+    public void sendToTrackingEntityAndSelf(final IMessage msg, final Entity entity) {
         INSTANCE.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity), msg);
     }
 
@@ -200,8 +187,7 @@ public class SimUKraftPacketHandler {
      * @param msg   message to send
      * @param chunk target chunk to look at
      */
-    public void sendToTrackingChunk(final IMessage msg, final Chunk chunk)
-    {
+    public void sendToTrackingChunk(final IMessage msg, final Chunk chunk) {
         INSTANCE.send(PacketDistributor.TRACKING_CHUNK.with(() -> chunk), msg);
     }
 }

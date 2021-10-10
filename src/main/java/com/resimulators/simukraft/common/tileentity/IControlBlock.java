@@ -8,15 +8,13 @@ public interface IControlBlock extends ITile {
     int getGui();
 
     @Override
+    boolean getHired();
+
+    @Override
     void setHired(boolean hired);
 
     @Override
-    boolean getHired();
-
-
-    @Override
     UUID getSimId();
-
 
 
     @Override

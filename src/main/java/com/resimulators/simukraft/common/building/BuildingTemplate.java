@@ -1,9 +1,13 @@
 package com.resimulators.simukraft.common.building;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableList;
 import com.resimulators.simukraft.common.tileentity.TileCustomData;
+import it.unimi.dsi.fastutil.Hash;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
+import net.minecraft.item.Item;
+import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.item.crafting.Ingredient;
+import net.minecraft.item.crafting.RecipeManager;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
@@ -17,14 +21,8 @@ import net.minecraft.world.gen.feature.template.PlacementSettings;
 import net.minecraft.world.gen.feature.template.Template;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.List;
-import java.util.Random;
-
-import net.minecraft.world.gen.feature.template.Template.BlockInfo;
+import java.util.*;
+import java.util.concurrent.BlockingDeque;
 
 public class BuildingTemplate extends Template {
     private BlockPos controlBlock = BlockPos.ZERO;
@@ -39,10 +37,12 @@ public class BuildingTemplate extends Template {
 
 
 
-    public BuildingTemplate(){}
+    public BuildingTemplate() {
+    }
+
     @Override
     public void fillFromWorld(World worldIn, BlockPos startPos, BlockPos size, boolean takeEntities, Block toIgnore) {
-        super.fillFromWorld(worldIn,startPos,size,takeEntities,toIgnore);
+        super.fillFromWorld(worldIn, startPos, size, takeEntities, toIgnore);
 
     }
 
@@ -100,12 +100,12 @@ public class BuildingTemplate extends Template {
     public CompoundNBT save(CompoundNBT nbt) {
         nbt.putFloat("rent", rent);
         nbt.putFloat("cost", cost);
-        nbt.putInt("typeID",typeID);
-        nbt.putInt("direction",direction.get2DDataValue());
-        nbt.putString("name",name);
-        nbt.putString("author",this.getAuthor());
-        nbt.putLong("offset",offSet.asLong());
-        nbt.putString("mirror",mirror.toString());
+        nbt.putInt("typeID", typeID);
+        nbt.putInt("direction", direction.get2DDataValue());
+        nbt.putString("name", name);
+        nbt.putString("author", this.getAuthor());
+        nbt.putLong("offset", offSet.asLong());
+        nbt.putString("mirror", mirror.toString());
 
         return super.save(nbt);
     }
@@ -115,25 +115,26 @@ public class BuildingTemplate extends Template {
         rent = compound.getFloat("rent");
         cost = compound.getFloat("cost");
         typeID = compound.getInt("typeID");
-        if (compound.contains("direction")){
-        direction = Direction.from2DDataValue(compound.getInt("direction"));}
-        else{
-            direction =  Direction.from2DDataValue(2);
+        if (compound.contains("direction")) {
+            direction = Direction.from2DDataValue(compound.getInt("direction"));
+        } else {
+            direction = Direction.from2DDataValue(2);
             blockRotation = Rotation.CLOCKWISE_90;
         }
-        if (compound.contains("name"))
-        {name = compound.getString("name");}else{
+        if (compound.contains("name")) {
+            name = compound.getString("name");
+        } else {
             name = "Placeholder";
         }
-        if (compound.contains("offset")){
+        if (compound.contains("offset")) {
             offSet = BlockPos.of(compound.getLong("offset"));
-        }else {
+        } else {
             offSet = BlockPos.ZERO;
         }
 
-        if (compound.contains("mirror")){
+        if (compound.contains("mirror")) {
             mirror = Mirror.valueOf(compound.getString("mirror"));
-        } else{
+        } else {
             mirror = Mirror.LEFT_RIGHT;
         }
         setAuthor(compound.getString("author"));
@@ -142,13 +143,14 @@ public class BuildingTemplate extends Template {
     }
 
 
-    public List<Template.Palette> getBlocks(){
-        return ObfuscationReflectionHelper.getPrivateValue(Template.class,this, "field_204769_a");
+    public List<Template.Palette> getBlocks() {
+        return ObfuscationReflectionHelper.getPrivateValue(Template.class, this, "field_204769_a");
     }
 
-    public List<Template.Palette> getEntities(){
-        return ObfuscationReflectionHelper.getPrivateValue(Template.class,this, "field_186271_b");
+    public List<Template.Palette> getEntities() {
+        return ObfuscationReflectionHelper.getPrivateValue(Template.class, this, "field_186271_b");
     }
+
     public BlockPos getControlBlock() {
         return controlBlock;
     }
@@ -157,83 +159,114 @@ public class BuildingTemplate extends Template {
         this.controlBlock = controlBlock;
     }
 
-    public void findControlBox(World worldIn, BlockPos startPos, BlockPos size){
+    public void findControlBox(World worldIn, BlockPos startPos, BlockPos size) {
         BlockPos blockpos = startPos.offset(size).offset(-1, -1, -1);
         BlockPos blockpos1 = new BlockPos(Math.min(startPos.getX(), blockpos.getX()), Math.min(startPos.getY(), blockpos.getY()), Math.min(startPos.getZ(), blockpos.getZ()));
         BlockPos blockpos2 = new BlockPos(Math.max(startPos.getX(), blockpos.getX()), Math.max(startPos.getY(), blockpos.getY()), Math.max(startPos.getZ(), blockpos.getZ()));
 
-        for(BlockPos blockpos3 : BlockPos.betweenClosed(blockpos1, blockpos2)) {
-                TileEntity entity =worldIn.getBlockEntity(blockpos3);
-                if (worldIn.getBlockEntity(blockpos3) instanceof TileCustomData){
-                    if (entity != null){
-                        TileCustomData data = (TileCustomData) entity;
-                        setControlBlock(blockpos3);
-                        rent = data.getRent();
-                        cost = data.getPrice();
-                        typeID = data.getBuildingType().id;
-                        return;
+        for (BlockPos blockpos3 : BlockPos.betweenClosed(blockpos1, blockpos2)) {
+            TileEntity entity = worldIn.getBlockEntity(blockpos3);
+            if (worldIn.getBlockEntity(blockpos3) instanceof TileCustomData) {
+                if (entity != null) {
+                    TileCustomData data = (TileCustomData) entity;
+                    setControlBlock(blockpos3);
+                    rent = data.getRent();
+                    cost = data.getPrice();
+                    typeID = data.getBuildingType().id;
+                    return;
                 }
             }
         }
     }
 
-    public void setDirection(Direction dir){
+    public Direction getDirection() {
+        return direction;
+    }
+
+    public void setDirection(Direction dir) {
         this.direction = dir;
     }
 
-    public Direction getDirection(){
-        return direction;
-    }
     public float getRent() {
         return rent;
-    }
-
-    public float getCost() {
-        return cost;
-    }
-
-    public int getTypeID() {
-        return typeID;
-    }
-
-    public String getName(){return name;}
-
-    public void setName(String name){
-        this.name = name;
-
-    }
-
-    public void setCost(float cost) {
-        this.cost = cost;
     }
 
     public void setRent(float rent) {
         this.rent = rent;
     }
 
+    public float getCost() {
+        return cost;
+    }
+
+    public void setCost(float cost) {
+        this.cost = cost;
+    }
+
+    public int getTypeID() {
+        return typeID;
+    }
+
     public void setTypeID(int typeID) {
         this.typeID = typeID;
     }
 
-    public void setOffSet(BlockPos offset){
-        this.offSet = offset;
+    public String getName() {
+        return name;
     }
 
-    public void setMirror(Mirror mirror){
-        this.mirror = mirror;
+    public void setName(String name) {
+        this.name = name;
+
     }
 
-
-    public BlockPos getOffSet(){
+    public BlockPos getOffSet() {
         return offSet;
     }
 
-    public Mirror getMirror(){
+    public void setOffSet(BlockPos offset) {
+        this.offSet = offset;
+    }
+
+    public Mirror getMirror() {
         return mirror;
     }
 
-    public Rotation getBlockRotation(){
+    public void setMirror(Mirror mirror) {
+        this.mirror = mirror;
+    }
+
+    public Rotation getBlockRotation() {
         return blockRotation;
     }
+
+    /*public void setResourceRequirements(World world){
+        RecipeManager recipeManager = world.getRecipeManager();
+        HashMap<Item,Integer> items = new HashMap<>();
+        for (Template.Palette palette: getBlocks()){
+            for(BlockInfo info: palette.blocks()){
+                Block block = info.state.getBlock();
+                if (items.get(block.asItem()) == null){
+                    items.put(block.asItem(),1);
+                }else{
+                    int amount = items.get(block.asItem());
+                    items.put(block.asItem(),amount + 1);
+                }
+            }
+        }
+
+        for (Item item: items.keySet()){
+            int itemAmount = items.get(item);
+            if (item.getRegistryName() != null) {
+                Optional<? extends IRecipe<?>> optionalIRecipe = recipeManager.byKey(item.getRegistryName());
+                if (optionalIRecipe.isPresent()){
+                    IRecipe<?> recipe = optionalIRecipe.get();
+                    int recipeAmount = (int)Math.ceil((double)recipe.getResultItem().getCount() / itemAmount);
+                    resourceRequirements.put(recipe,recipeAmount);
+                }
+            }
+        }
+
+    }*/
 }
 

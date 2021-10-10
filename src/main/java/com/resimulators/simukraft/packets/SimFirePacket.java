@@ -2,8 +2,6 @@ package com.resimulators.simukraft.packets;
 
 import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
-import com.resimulators.simukraft.common.tileentity.ITile;
-import com.resimulators.simukraft.common.world.SavedWorldData;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -17,14 +15,17 @@ public class SimFirePacket implements IMessage {
     private int simId;
     private BlockPos pos;
     private boolean dying;
-    public SimFirePacket(){}
 
-    public SimFirePacket(int factionId,int simId,BlockPos pos,boolean dying){
+    public SimFirePacket() {
+    }
+
+    public SimFirePacket(int factionId, int simId, BlockPos pos, boolean dying) {
         this.pos = pos;
         this.factionId = factionId;
         this.simId = simId;
         this.dying = dying;
     }
+
     @Override
     public void toBytes(PacketBuffer buf) {
         buf.writeBlockPos(pos);
@@ -53,7 +54,7 @@ public class SimFirePacket implements IMessage {
         if (world != null) {
             SimEntity sim = (SimEntity) world.getEntity(simId);
             if (sim != null) {
-                sim.fireSim(sim,factionId,dying);
+                sim.fireSim(sim, factionId, dying);
 
             }
         }

@@ -9,8 +9,6 @@ import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.text.StringTextComponent;
 
-import net.minecraft.item.Item.Properties;
-
 public class ItemTest extends Item {
     public ItemTest(Properties properties) {
         super(properties);

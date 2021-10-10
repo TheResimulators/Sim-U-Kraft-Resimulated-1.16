@@ -11,7 +11,11 @@ import net.minecraft.data.LootTableProvider;
 import net.minecraft.data.loot.BlockLootTables;
 import net.minecraft.data.loot.EntityLootTables;
 import net.minecraft.entity.EntityType;
-import net.minecraft.loot.*;
+import net.minecraft.loot.LootParameterSet;
+import net.minecraft.loot.LootParameterSets;
+import net.minecraft.loot.LootTable;
+import net.minecraft.loot.LootTableManager;
+import net.minecraft.loot.ValidationTracker;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -23,28 +27,21 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class LootTableGen extends LootTableProvider implements IDataProvider {
+    private final List<Pair<Supplier<Consumer<BiConsumer<ResourceLocation, LootTable.Builder>>>, LootParameterSet>> lootTables = ImmutableList.of(
+            Pair.of(ModLootTables::new, LootParameterSets.BLOCK),
+            Pair.of(ModEntityLootTables::new, LootParameterSets.ENTITY)
+
+    );
+
     public LootTableGen(DataGenerator dataGeneratorIn) {
         super(dataGeneratorIn);
 
     }
 
-    private final List<Pair<Supplier<Consumer<BiConsumer<ResourceLocation, LootTable.Builder>>>, LootParameterSet>> lootTables = ImmutableList.of(
-            Pair.of(ModLootTables::new, LootParameterSets.BLOCK),
-            Pair.of(ModEntityLootTables::new,LootParameterSets.ENTITY)
-
-    );
-
-
     @Override
-    protected List<Pair<Supplier<Consumer<BiConsumer<ResourceLocation, LootTable.Builder>>>, LootParameterSet>> getTables(){
+    protected List<Pair<Supplier<Consumer<BiConsumer<ResourceLocation, LootTable.Builder>>>, LootParameterSet>> getTables() {
         return lootTables;
     }
-    @Override
-    public String getName() {
-        return "Sim u kraft Block Loot Tables";
-    }
-
-
 
     @Override
     protected void validate(Map<ResourceLocation, LootTable> map, ValidationTracker validationtracker) {
@@ -53,16 +50,21 @@ public class LootTableGen extends LootTableProvider implements IDataProvider {
         });
     }
 
+    @Override
+    public String getName() {
+        return "Sim u kraft Block Loot Tables";
+    }
 
     private static class ModLootTables extends BlockLootTables {
 
         @Override
-        protected void addTables(){
+        protected void addTables() {
             for (Block block : getKnownBlocks()) {
                 super.dropSelf(block);
             }
 
         }
+
         @Override
         protected Iterable<Block> getKnownBlocks() {
             return ForgeRegistries.BLOCKS.getValues()
@@ -72,18 +74,18 @@ public class LootTableGen extends LootTableProvider implements IDataProvider {
         }
     }
 
-    private static class ModEntityLootTables extends EntityLootTables{
+    private static class ModEntityLootTables extends EntityLootTables {
 
 
         @Override
-        protected void addTables(){
-           super.add(ModEntities.ENTITY_SIM,LootTable.lootTable());
+        protected void addTables() {
+            super.add(ModEntities.ENTITY_SIM, LootTable.lootTable());
 
         }
 
 
         @Override
-        protected Iterable<EntityType<?>> getKnownEntities(){
+        protected Iterable<EntityType<?>> getKnownEntities() {
             return ForgeRegistries.ENTITIES.getValues()
                     .stream()
                     .filter((entityType) -> entityType.getRegistryName().getNamespace().equals(Reference.MODID))

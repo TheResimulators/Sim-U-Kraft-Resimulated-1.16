@@ -2,10 +2,9 @@ package com.resimulators.simukraft.packets;
 
 import com.resimulators.simukraft.common.building.BuildingTemplate;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
-import com.resimulators.simukraft.common.jobs.JobBuilder;
 import com.resimulators.simukraft.common.jobs.core.Activity;
+import com.resimulators.simukraft.common.jobs.reworked.JobBuilder;
 import com.resimulators.simukraft.common.tileentity.TileConstructor;
-import com.resimulators.simukraft.common.world.SavedWorldData;
 import com.resimulators.simukraft.handlers.StructureHandler;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketBuffer;
@@ -25,9 +24,11 @@ public class StartBuildingPacket implements IMessage {
     private Direction direction;
     private String name;
     private UUID playerId;
-    public StartBuildingPacket(){}
 
-    public StartBuildingPacket(BlockPos pos, Direction dir,String name, UUID playerId){
+    public StartBuildingPacket() {
+    }
+
+    public StartBuildingPacket(BlockPos pos, Direction dir, String name, UUID playerId) {
         this.pos = pos;
         direction = dir;
         this.name = name;
@@ -62,15 +63,16 @@ public class StartBuildingPacket implements IMessage {
         if (ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayer(playerId) != null) {
             PlayerEntity player = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayer(playerId);
             if (player != null) {
-                TileConstructor constructor = (TileConstructor)player.getCommandSenderWorld().getBlockEntity(pos);
-                SimEntity sim = (SimEntity) ((ServerWorld)player.getCommandSenderWorld()).getEntity(constructor.getSimId());
-                JobBuilder builder =(JobBuilder) sim.getJob();
+                TileConstructor constructor = (TileConstructor) player.getCommandSenderWorld().getBlockEntity(pos);
+                SimEntity sim = (SimEntity) ((ServerWorld) player.getCommandSenderWorld()).getEntity(constructor.getSimId());
+                JobBuilder builder = (JobBuilder) sim.getJob();
                 builder.setDirection(direction);
                 BuildingTemplate template = StructureHandler.loadStructure(name);
                 builder.setTemplate(template);
                 sim.setActivity(Activity.GOING_TO_WORK);
 
-            }}
+            }
+        }
 
 
     }

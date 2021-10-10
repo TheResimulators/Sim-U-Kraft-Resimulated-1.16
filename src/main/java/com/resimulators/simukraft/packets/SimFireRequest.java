@@ -1,12 +1,9 @@
 package com.resimulators.simukraft.packets;
 
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
-import com.resimulators.simukraft.common.tileentity.ITile;
 import com.resimulators.simukraft.common.world.SavedWorldData;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.fml.LogicalSide;
@@ -54,12 +51,12 @@ public class SimFireRequest implements IMessage {
     public void onExecute(NetworkEvent.Context ctxIn, boolean isLogicalServer) {
         if (ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayer(playerId) != null) {
             PlayerEntity player = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayer(playerId);
-            if (player != null){
-            SavedWorldData data = SavedWorldData.get(player.level);
-            int id = data.getFactionWithPlayer(player.getUUID()).getId();
-            SimEntity sim = (SimEntity) ((ServerWorld)player.level).getEntity(simId);
-            if (sim != null) {
-                sim.fireSim(sim, id, false);
+            if (player != null) {
+                SavedWorldData data = SavedWorldData.get(player.level);
+                int id = data.getFactionWithPlayer(player.getUUID()).getId();
+                SimEntity sim = (SimEntity) ((ServerWorld) player.level).getEntity(simId);
+                if (sim != null) {
+                    sim.fireSim(sim, id, false);
                 }
             }
         }

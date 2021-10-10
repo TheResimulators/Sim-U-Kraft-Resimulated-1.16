@@ -10,5 +10,4 @@ public class TileMiner extends TileBaseMarker {
     }
 
 
-
 }

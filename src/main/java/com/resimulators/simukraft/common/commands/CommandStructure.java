@@ -19,7 +19,8 @@ import net.minecraft.util.text.TranslationTextComponent;
 public class CommandStructure {
     private static final SimpleCommandExceptionType FAILED_EXCEPTION = new SimpleCommandExceptionType(new TranslationTextComponent("commands.structure.failed"));
     private static final SimpleCommandExceptionType WRONG_ITEM_EXCEPTION = new SimpleCommandExceptionType(new TranslationTextComponent("commands.structure.item"));
-    /** sets command to the formate /structure (save/load) (first postion) (second position) (name)*/
+
+    /** sets command to the formate /structure (save/load) (first postion) (second position) (name) */
     public static void register(CommandDispatcher<CommandSource> dispatcher) {
         dispatcher.register(Commands.literal("structure").requires((context) -> { // sub command context
             return context.hasPermission(0); // checks for permission level
@@ -29,7 +30,8 @@ public class CommandStructure {
             return load(context.getSource(), StringArgumentType.getString(context, "name"));
         }))));
     }
-    /**saves structure using template system, with given bounds set from command. saves with given name*/
+
+    /** saves structure using template system, with given bounds set from command. saves with given name */
     private static int save(CommandSource source, BlockPos pos1, BlockPos pos2, String name) throws CommandSyntaxException {
         MutableBoundingBox bounds = new MutableBoundingBox(pos1, pos2);
         BlockPos minPos = new BlockPos(bounds.x0, bounds.y0, bounds.z0);
@@ -38,13 +40,14 @@ public class CommandStructure {
         int i = bounds.getXSpan() * bounds.getYSpan() * bounds.getZSpan();
         if (i == 0)
             throw FAILED_EXCEPTION.create();
-        if (StructureHandler.saveStructure(source.getLevel(),pos1, minPos, size, name, source.getTextName(),source.getPlayerOrException().getDirection()))
+        if (StructureHandler.saveStructure(source.getLevel(), pos1, minPos, size, name, source.getTextName(), source.getPlayerOrException().getDirection()))
             source.sendSuccess(new StringTextComponent("Saved " + name), true);
         else
             source.sendSuccess(new StringTextComponent("Couldn't save " + name), true);
         return i;
     }
-    /**loads gioven stycture with given name to held item stack*/
+
+    /** loads gioven stycture with given name to held item stack */
     private static int load(CommandSource source, String name) throws CommandSyntaxException {
         PlayerEntity player = source.getPlayerOrException();
         ItemStack stack = player.getMainHandItem();

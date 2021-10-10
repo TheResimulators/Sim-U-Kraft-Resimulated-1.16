@@ -24,16 +24,16 @@ import java.awt.*;
 import java.util.ArrayList;
 
 public class GuiCustomData extends Screen {
-    private BlockPos pos;
+    private final BlockPos pos;
+    private final ItemStack stack;
+    private final ArrayList<Button> buildingTypes = new ArrayList<>();
+    private final TileCustomData tile;
     private Button done;
     private Button calculatePrice;
     private Button calculateRent;
-    private ItemStack stack;
     private TextFieldWidget rentInput;
     private TextFieldWidget priceInput;
     private ButtonScrollPanel buildingTypePanel;
-    private ArrayList<Button> buildingTypes =  new ArrayList<>();
-    private TileCustomData tile;
     private int buildingWidth;
     private int buildingHeight;
     private int buildingDepth;
@@ -42,7 +42,7 @@ public class GuiCustomData extends Screen {
         super(titleIn);
         this.pos = pos;
         stack = Minecraft.getInstance().player.getMainHandItem();
-        if ((stack.getItem() != Items.AIR)){
+        if ((stack.getItem() != Items.AIR)) {
             //set width height and depth
         }
 
@@ -63,29 +63,34 @@ public class GuiCustomData extends Screen {
 
         super.render(stack, p_render_1_, p_render_2_, p_render_3_);
 
-        getMinecraft().font.draw(stack, "Currently Selected",width/2 - 40,height/2 - 100, Color.WHITE.getRGB());
+        getMinecraft().font.draw(stack, "Currently Selected", width / 2 - 40, height / 2 - 100, Color.WHITE.getRGB());
         if (buildingTypePanel.selection.string != null) {
-            minecraft.font.draw(stack, "Building: " + StringUtils.capitalize(buildingTypePanel.selection.string), width/2 - 40, height/2-80, Color.WHITE.getRGB());
+            minecraft.font.draw(stack, "Building: " + StringUtils.capitalize(buildingTypePanel.selection.string), width / 2 - 40, height / 2 - 80, Color.WHITE.getRGB());
         }
         priceInput.render(stack, p_render_1_, p_render_2_, p_render_3_);
         rentInput.render(stack, p_render_1_, p_render_2_, p_render_3_);
         rentInput.renderButton(stack, p_render_1_, p_render_2_, p_render_3_);
 
-        if ((buildingWidth != 0 && buildingHeight != 0 && buildingDepth != 0) || rentInput != null){
-            minecraft.font.draw(stack, ("Width: " + buildingWidth), width/2-40,height/2 - 40,Color.WHITE.getRGB());
-            minecraft.font.draw(stack, ("Height: " + buildingHeight), width/2-40,height/2 - 20,Color.WHITE.getRGB());
-            minecraft.font.draw(stack, ("Depth: " + buildingDepth), width/2-40,height/2,Color.WHITE.getRGB());
+        if ((buildingWidth != 0 && buildingHeight != 0 && buildingDepth != 0) || rentInput != null) {
+            minecraft.font.draw(stack, ("Width: " + buildingWidth), width / 2 - 40, height / 2 - 40, Color.WHITE.getRGB());
+            minecraft.font.draw(stack, ("Height: " + buildingHeight), width / 2 - 40, height / 2 - 20, Color.WHITE.getRGB());
+            minecraft.font.draw(stack, ("Depth: " + buildingDepth), width / 2 - 40, height / 2, Color.WHITE.getRGB());
 
         }
 
-        if (buildingTypePanel.selection.getType() != null){
+        if (buildingTypePanel.selection.getType() != null) {
             String category = buildingTypePanel.selection.getType().category.category;
-            minecraft.font.draw(stack, ("Category: " + StringUtils.capitalize(category)),width/2-40, height/2 - 60, Color.WHITE.getRGB());
+            minecraft.font.draw(stack, ("Category: " + StringUtils.capitalize(category)), width / 2 - 40, height / 2 - 60, Color.WHITE.getRGB());
         }
 
 
     }
 
+    @Override
+    public void onClose() {
+        super.onClose();
+        UpdateServer();
+    }
 
     @Override
     public void init(Minecraft minecraft, int width, int height) {
@@ -109,12 +114,12 @@ public class GuiCustomData extends Screen {
         }));
         buildingTypes.clear();
         addBuildingTypeButtons();
-        buildingTypePanel = new ButtonScrollPanel(minecraft,108,120,height/2 - 100,30, buildingTypes, 6,2);
+        buildingTypePanel = new ButtonScrollPanel(minecraft, 108, 120, height / 2 - 100, 30, buildingTypes, 6, 2);
 
         this.children.add(buildingTypePanel);
 
-        rentInput = new TextFieldWidget(minecraft.font,width-120,(height/2) + 80,100,20, new StringTextComponent("Rent"));
-        priceInput = new TextFieldWidget(minecraft.font, width-120,(height/2),100,20, new StringTextComponent("Price"));
+        rentInput = new TextFieldWidget(minecraft.font, width - 120, (height / 2) + 80, 100, 20, new StringTextComponent("Rent"));
+        priceInput = new TextFieldWidget(minecraft.font, width - 120, (height / 2), 100, 20, new StringTextComponent("Price"));
         rentInput.setVisible(true);
         rentInput.setFocus(true);
         rentInput.setMaxLength(6);
@@ -129,13 +134,10 @@ public class GuiCustomData extends Screen {
         buildingTypePanel.selection.string = tile.getBuildingType().name;
     }
 
-
-
-
-    private void addBuildingTypeButtons(){
+    private void addBuildingTypeButtons() {
         int i = 0;
-        for (BuildingType type: BuildingType.values()){
-            Button button = new Button(30,60 + (i*25), 100, 20 , new StringTextComponent(type.name),butn ->{
+        for (BuildingType type : BuildingType.values()) {
+            Button button = new Button(30, 60 + (i * 25), 100, 20, new StringTextComponent(type.name), butn -> {
                 buildingTypePanel.selection.id = type.id;
                 buildingTypePanel.selection.string = type.name;
                 buildingTypePanel.selection.type = type;
@@ -148,25 +150,12 @@ public class GuiCustomData extends Screen {
         }
     }
 
-
-    private void reactivateButtons(ArrayList<Button> buttons){
-        for (Button button: buttons){
-            button.active = true;
-        }
-    }
-
-    @Override
-    public void onClose() {
-        super.onClose();
-        UpdateServer();
-    }
-
     private void UpdateServer() {
         try {
-        tile.setRent(Float.parseFloat(rentInput.getValue()));
-        tile.setPrice(Float.parseFloat(priceInput.getValue()));
+            tile.setRent(Float.parseFloat(rentInput.getValue()));
+            tile.setPrice(Float.parseFloat(priceInput.getValue()));
 
-        } catch (NumberFormatException e){
+        } catch (NumberFormatException e) {
             SimuKraft.LOGGER().debug("Incorrect input" + e);
             tile.setRent(0);
             tile.setPrice(0);
@@ -179,13 +168,19 @@ public class GuiCustomData extends Screen {
         SimUKraftPacketHandler.INSTANCE.sendToServer(new CustomDataSyncPacket(tile.getPrice(), tile.getRent(), tile.getBuildingType(), pos));
     }
 
+    private void reactivateButtons(ArrayList<Button> buttons) {
+        for (Button button : buttons) {
+            button.active = true;
+        }
+    }
 
     private class ButtonScrollPanel extends ScrollPanel {
 
-        private ArrayList<Button> buttons;
-        private int maxButtonsVisible;
-        private Selection selection;
+        private final ArrayList<Button> buttons;
+        private final int maxButtonsVisible;
+        private final Selection selection;
         private int contentOffset = 0;
+
         public ButtonScrollPanel(Minecraft client, int width, int height, int top, int left, ArrayList<Button> buttons, int maxButtonsVisible, int contentOffset) {
             super(client, width, height, top, left);
             children.addAll(buttons);
@@ -194,6 +189,20 @@ public class GuiCustomData extends Screen {
             updateButtonPlacement();
             selection = new Selection(this);
             this.contentOffset = contentOffset;
+        }
+
+        private void updateButtonPlacement() {
+            int i = 0;
+            for (Button button : buttons) {
+                int index = (((int) this.scrollDistance) / getScrollAmount());
+                button.y = ((this.top + i * 30) - index * 30);
+                i++;
+                button.visible = disableOuterButton(button);
+            }
+        }
+
+        private boolean disableOuterButton(Button button) {
+            return button.y >= this.top && button.y + button.getHeight() <= this.bottom;
         }
 
         @Override
@@ -206,10 +215,9 @@ public class GuiCustomData extends Screen {
 
         }
 
-
         @Override
         public boolean mouseScrolled(double mouseX, double mouseY, double scroll) {
-            if (super.mouseScrolled(mouseX, mouseY, scroll)){
+            if (super.mouseScrolled(mouseX, mouseY, scroll)) {
                 updateButtonPlacement();
                 return true;
 
@@ -218,55 +226,43 @@ public class GuiCustomData extends Screen {
         }
 
         @Override
-        public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-            if (super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY)){
-               updateButtonPlacement();
-               return true;
-            }
-            return false;
+        protected int getScrollAmount() {
+            return (int) Math.ceil((double) this.buttons.size() / (double) maxButtonsVisible);
         }
 
         @Override
-        protected int getScrollAmount() {
-            return (int) Math.ceil((double)this.buttons.size()/(double)maxButtonsVisible);
-        }
-
-
-
-        private void updateButtonPlacement(){
-            int i = 0;
-            for (Button button: buttons) {
-                int index = (((int) this.scrollDistance)/getScrollAmount());
-                button.y = ((this.top + i*30) - index* 30);
-                i++;
-                button.visible = disableOuterButton(button);
+        public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+            if (super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY)) {
+                updateButtonPlacement();
+                return true;
             }
-        }
-
-        private boolean disableOuterButton(Button button){
-            return button.y >= this.top && button.y+ button.getHeight() <= this.bottom;
+            return false;
         }
     }
 
-    private class Selection{
+    private class Selection {
         private String string;
         private int id;
         private BuildingType type;
 
-        Selection(ButtonScrollPanel panel){
+        Selection(ButtonScrollPanel panel) {
             string = panel.buttons.get(0).getMessage().getString();
             BuildingType type = tile.getBuildingType();
             this.type = type;
-            if (type != null){
-            id = type.id;
+            if (type != null) {
+                id = type.id;
             }
         }
 
-        public String getString(){
+        public String getString() {
             return string;
         }
 
-        public int getId(){
+        public void setString(String string) {
+            this.string = string;
+        }
+
+        public int getId() {
             return id;
         }
 
@@ -274,11 +270,9 @@ public class GuiCustomData extends Screen {
             this.id = id;
         }
 
-        public void setString(String string) {
-            this.string = string;
+        public BuildingType getType() {
+            return type;
         }
-
-        public BuildingType getType(){ return type;}
     }
 }
 

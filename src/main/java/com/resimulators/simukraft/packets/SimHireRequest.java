@@ -21,9 +21,11 @@ public class SimHireRequest implements IMessage {
     private int simId;
     private BlockPos pos;
     private int job;
-    public SimHireRequest(){}
 
-    public SimHireRequest(int simId, UUID playerId, BlockPos pos, int job){
+    public SimHireRequest() {
+    }
+
+    public SimHireRequest(int simId, UUID playerId, BlockPos pos, int job) {
         this.pos = pos;
         this.playerId = playerId;
         this.simId = simId;
@@ -62,18 +64,19 @@ public class SimHireRequest implements IMessage {
                 data.hireSim(id, (SimEntity) player.level.getEntity(simId));
                 ((ITile) player.level.getBlockEntity(pos)).setHired(true);
                 SimEntity sim = ((SimEntity) player.level.getEntity(simId));
-                if (sim != null){
+                if (sim != null) {
                     sim.setJob(ModJobs.JOB_LOOKUP.get(job).apply(sim));
                     sim.setProfession(job);
 
                     ITile tile = (ITile) player.level.getBlockEntity(pos);
-                    if (tile != null){
-                    tile.setSimId(sim.getUUID());
+                    if (tile != null) {
+                        tile.setSimId(sim.getUUID());
 
-                    sim.getJob().setWorkSpace(pos);
-                    data.getFaction(id).subCredits(sim.getJob().getWage() + 4);
-                    data.getFaction(id).sendPacketToFaction(new SimHirePacket(simId, id, pos, job));
-                    sim.getController().setTick(sim.getJob().intervalTime());
+                        sim.getJob().setWorkSpace(pos);
+                        sim.getJob().start();
+                        data.getFaction(id).subCredits(sim.getJob().getWage() + 4);
+                        data.getFaction(id).sendPacketToFaction(new SimHirePacket(simId, id, pos, job));
+                        sim.getController().setTick(sim.getJob().intervalTime());
                     }
                 }
             }

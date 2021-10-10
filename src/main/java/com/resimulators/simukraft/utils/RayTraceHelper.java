@@ -10,10 +10,11 @@ import java.util.List;
 
 public class RayTraceHelper {
     public static final RayTraceHelper INSTANCE = new RayTraceHelper();
+    private final Minecraft minecraft = Minecraft.getInstance();
     private RayTraceResult target = null;
-    private Minecraft minecraft = Minecraft.getInstance();
 
-    private RayTraceHelper() {}
+    private RayTraceHelper() {
+    }
 
     public void ray() {
         if (minecraft.hitResult != null && minecraft.hitResult.getType() == RayTraceResult.Type.ENTITY) {

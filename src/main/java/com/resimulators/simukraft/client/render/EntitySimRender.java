@@ -61,10 +61,6 @@ public class EntitySimRender extends LivingRenderer<SimEntity, EntitySimModel> {
             model.leftArmPose = bipedmodel$armpose1;
         }
     }
-    @Override
-    protected boolean shouldShowName(SimEntity entity){
-        return true;
-    }
 
     private BipedModel.ArmPose getArmpose(SimEntity simEntity, Hand hand) {
         ItemStack itemstack = simEntity.getItemInHand(hand);
@@ -97,6 +93,11 @@ public class EntitySimRender extends LivingRenderer<SimEntity, EntitySimModel> {
     }
 
     @Override
+    protected boolean shouldShowName(SimEntity entity) {
+        return true;
+    }
+
+    @Override
     public ResourceLocation getTextureLocation(SimEntity simEntity) {
         ResourceLocation location = new ResourceLocation(Reference.MODID, DIR + (simEntity.getFemale() ? "female/" : "male/") + "entity_sim" + simEntity.getVariation() + ".png");
         if (simEntity.getSpecial())
@@ -110,19 +111,18 @@ public class EntitySimRender extends LivingRenderer<SimEntity, EntitySimModel> {
     protected void renderNameTag(SimEntity simEntity, ITextComponent text, MatrixStack matrix, IRenderTypeBuffer renderBuffer, int light) {
         double d = this.entityRenderDispatcher.distanceToSqr(simEntity);
         matrix.pushPose();
-            if (d < 100.0d) {
+        if (d < 100.0d) {
 
-                if (!simEntity.getStatus().equals("")){
-                    matrix.translate(0, (9.0F * 1.2f * 0.025F), 0);
+            if (!simEntity.getStatus().equals("")) {
+                matrix.translate(0, (9.0F * 1.2f * 0.025F), 0);
 
 
-                    matrix.scale(.9f,.9f,.9f);
-                    super.renderNameTag(simEntity, new StringTextComponent(TextFormatting.YELLOW  + simEntity.getActivity().name + TextFormatting.RESET), matrix, renderBuffer, light);
-                    matrix.translate(0, (double) (9.0F *1.2f* 0.025F), 0);
-                }
-                //matrix.translate(0, (double) (9.0F * 1F * 0.025F), 0);
-                matrix.scale(1f,1f,1f);
-
+                matrix.scale(.9f, .9f, .9f);
+                super.renderNameTag(simEntity, new StringTextComponent(TextFormatting.YELLOW + simEntity.getActivity().name + TextFormatting.RESET), matrix, renderBuffer, light);
+                matrix.translate(0, 9.0F * 1.2f * 0.025F, 0);
+            }
+            //matrix.translate(0, (double) (9.0F * 1F * 0.025F), 0);
+            matrix.scale(1f, 1f, 1f);
 
 
         }

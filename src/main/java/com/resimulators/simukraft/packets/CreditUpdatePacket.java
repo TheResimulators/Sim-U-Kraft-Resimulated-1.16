@@ -12,9 +12,10 @@ public class CreditUpdatePacket implements IMessage {
     private double credit;
     private int factionId;
 
-    public CreditUpdatePacket(){}
+    public CreditUpdatePacket() {
+    }
 
-    public CreditUpdatePacket(double credits, int factionId){
+    public CreditUpdatePacket(double credits, int factionId) {
         this.credit = credits;
         this.factionId = factionId;
     }
@@ -39,12 +40,11 @@ public class CreditUpdatePacket implements IMessage {
 
     @Override
     public void onExecute(NetworkEvent.Context ctxIn, boolean isLogicalServer) {
-            World world = SimuKraft.proxy.getClientWorld();
-            Faction faction = SavedWorldData.get(world).getFaction(factionId);
-            if (faction != null){
-                faction.setCredits(credit);
-            }
-
+        World world = SimuKraft.proxy.getClientWorld();
+        Faction faction = SavedWorldData.get(world).getFaction(factionId);
+        if (faction != null) {
+            faction.setCredits(credit);
+        }
 
 
     }

@@ -10,8 +10,8 @@ import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.math.BlockPos;
 
 public class JobGlassFactory implements IJob {
-    private SimEntity sim;
-    private Goal goal1;
+    private final SimEntity sim;
+    private final Goal goal1;
     private int periodsworked = 0;
     private BlockPos workSpace;
     private Activity state = Activity.NOT_WORKING;
@@ -66,7 +66,7 @@ public class JobGlassFactory implements IJob {
 
     @Override
     public void addJobAi() {
-        sim.goalSelector.addGoal(3,goal1);
+        sim.goalSelector.addGoal(3, goal1);
     }
 
     @Override
@@ -87,7 +87,7 @@ public class JobGlassFactory implements IJob {
             other.putLong("jobpos", workSpace.asLong());
         }
         nbt.add(other);
-        other.putBoolean("finished",finished);
+        other.putBoolean("finished", finished);
         return nbt;
     }
 
@@ -101,7 +101,7 @@ public class JobGlassFactory implements IJob {
             if (list.contains("jobpos")) {
                 setWorkSpace(BlockPos.of(list.getLong("jobpos")));
             }
-            if (list.contains("finished")){
+            if (list.contains("finished")) {
                 finished = list.getBoolean("finished");
             }
         }
@@ -123,13 +123,13 @@ public class JobGlassFactory implements IJob {
     }
 
     @Override
-    public void setWorkSpace(BlockPos pos) {
-        this.workSpace = pos;
+    public BlockPos getWorkSpace() {
+        return workSpace;
     }
 
     @Override
-    public BlockPos getWorkSpace() {
-        return workSpace;
+    public void setWorkSpace(BlockPos pos) {
+        this.workSpace = pos;
     }
 
     @Override

@@ -43,22 +43,22 @@ public class SimContainer extends Container {
         for (int i = 0; i < 4; i++) {
             final EquipmentSlotType equipmentSlotType = VALID_EQUIPMENT_SLOTS[i];
             this.addSlot(new Slot(inventory, 30 - i, 8, 8 + i * 18) {
-                public int getMaxStackSize() {
-                    return 1;
-                }
-
                 public boolean mayPlace(ItemStack stack) {
                     return stack.canEquip(equipmentSlotType, sim);
                 }
 
-                public boolean mayPickup(PlayerEntity player) {
-                    ItemStack itemStack = this.getItem();
-                    return (itemStack.isEmpty() || player.isCreative() || !EnchantmentHelper.hasBindingCurse(itemStack)) && super.mayPickup(player);
+                public int getMaxStackSize() {
+                    return 1;
                 }
 
                 @OnlyIn(Dist.CLIENT)
                 public Pair<ResourceLocation, ResourceLocation> getNoItemIcon() {
                     return Pair.of(SimContainer.blocks, SimContainer.ARMOR_SLOT_TEXTURES[equipmentSlotType.getIndex()]);
+                }
+
+                public boolean mayPickup(PlayerEntity player) {
+                    ItemStack itemStack = this.getItem();
+                    return (itemStack.isEmpty() || player.isCreative() || !EnchantmentHelper.hasBindingCurse(itemStack)) && super.mayPickup(player);
                 }
             });
         }
@@ -124,9 +124,9 @@ public class SimContainer extends Container {
         addDataSlot(new IntReferenceHolder() {
             @Override
             public int get() {
-                if (sim.getJob() != null){
+                if (sim.getJob() != null) {
                     return sim.getProfession();
-                }else {
+                } else {
                     return Profession.UNEMPLOYED.getId();
                 }
             }
@@ -138,10 +138,8 @@ public class SimContainer extends Container {
         });
     }
 
-
-    @Override
-    public boolean stillValid(PlayerEntity playerIn) {
-        return true;
+    public SimEntity getSim() {
+        return sim;
     }
 
     @Override
@@ -206,7 +204,8 @@ public class SimContainer extends Container {
         return itemstack;
     }
 
-    public SimEntity getSim() {
-        return sim;
+    @Override
+    public boolean stillValid(PlayerEntity playerIn) {
+        return true;
     }
 }

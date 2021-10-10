@@ -5,7 +5,6 @@ import com.resimulators.simukraft.common.jobs.core.IJob;
 import com.resimulators.simukraft.common.world.Faction;
 import com.resimulators.simukraft.common.world.SavedWorldData;
 import com.resimulators.simukraft.utils.BlockUtils;
-import jdk.nashorn.internal.ir.Block;
 import net.minecraft.entity.ai.goal.MoveToBlockGoal;
 import net.minecraft.tileentity.ChestTileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -14,38 +13,26 @@ import net.minecraft.world.World;
 
 import java.util.ArrayList;
 
-public class BaseGoal<JobType extends IJob>  extends MoveToBlockGoal{
-    JobType job;
+public class BaseGoal<JobType extends IJob> extends MoveToBlockGoal {
     protected SimEntity sim;
+    JobType job;
     private int delay = 60; // every 3 seconds (60 ticks) pay sim their wage
+
+    public static ArrayList<BlockPos> findChestsAroundTargetBlock(BlockPos targetBlock, int distance, World world) {
+        ArrayList<BlockPos> blockPoses = BlockUtils.getBlocksAroundAndBelowPosition(targetBlock, distance);
+        ArrayList<BlockPos> blocks = new ArrayList<>();
+        for (BlockPos blockPos : blockPoses) {
+            if (world.getBlockEntity(blockPos) instanceof ChestTileEntity) {
+                blocks.add(blockPos);
+            }
+        }
+        return blocks;
+    }
 
     public BaseGoal(SimEntity sim, double speedIn, int length) {
         super(sim, speedIn, length);
         this.sim = sim;
     }
-
-    @Override
-    protected boolean isValidTarget(IWorldReader worldIn, BlockPos pos) {
-        return false;
-    }
-
-
-    @Override
-    public void tick() {
-        super.tick();
-        if (delay <= 0){
-            delay = 60;
-            Faction faction = SavedWorldData.get(sim.getCommandSenderWorld()).getFactionWithSim(sim.getUUID());
-            if(faction != null){
-                if (faction.hasEnoughCredits(job.getWage())){
-                    faction.subCredits(job.getWage());
-                }
-            }
-        }else {
-            delay--;
-        }
-    }
-
 
     @Override
     public boolean canContinueToUse() {
@@ -57,19 +44,29 @@ public class BaseGoal<JobType extends IJob>  extends MoveToBlockGoal{
     }
 
     @Override
+    public void tick() {
+        super.tick();
+        if (delay <= 0) {
+            delay = 60;
+            Faction faction = SavedWorldData.get(sim.getCommandSenderWorld()).getFactionWithSim(sim.getUUID());
+            if (faction != null) {
+                if (faction.hasEnoughCredits(job.getWage())) {
+                    faction.subCredits(job.getWage());
+                }
+            }
+        } else {
+            delay--;
+        }
+    }
+
+    @Override
+    protected boolean isValidTarget(IWorldReader worldIn, BlockPos pos) {
+        return false;
+    }
+
+    @Override
     public void stop() {
         super.stop();
         sim.setStatus("");
-    }
-
-    public ArrayList<BlockPos> findChestAroundTargetBlock(BlockPos targetBlock, int distance, World world) {
-        ArrayList<BlockPos> blockPoses = BlockUtils.getBlocksAroundAndBelowPosition(targetBlock, distance);
-        ArrayList<BlockPos> blocks = new ArrayList<>();
-        for (BlockPos blockPos : blockPoses) {
-            if (world.getBlockEntity(blockPos) instanceof ChestTileEntity) {
-                blocks.add(blockPos);
-            }
-        }
-        return blocks;
     }
 }

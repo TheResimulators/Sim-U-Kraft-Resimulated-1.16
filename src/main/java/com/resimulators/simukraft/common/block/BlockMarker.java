@@ -18,21 +18,22 @@ import net.minecraft.world.IWorld;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 
-import net.minecraft.block.AbstractBlock.Properties;
-
 public class BlockMarker extends BlockBase {
     public BlockMarker(Properties properties) {
         super(properties);
     }
 
-
-    @Override
-    public VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context){
-        return box(6,0,6,10,14,10);
-    }
     @Override
     public BlockState updateShape(BlockState stateIn, Direction facing, BlockState facingState, IWorld worldIn, BlockPos currentPos, BlockPos facingPos) {
         return facing == Direction.DOWN && !this.canSurvive(stateIn, worldIn, currentPos) ? Blocks.AIR.defaultBlockState() : super.updateShape(stateIn, facing, facingState, worldIn, currentPos, facingPos);
+    }
+
+    @Override
+    public ActionResultType use(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult p_225533_6_) {
+
+        ((TileMarker) worldIn.getBlockEntity(pos)).onRightClick(player.getMotionDirection());
+        player.displayClientMessage(new StringTextComponent(String.format("Right Clicked Marker Scanned Markers Back Left: %s, Front Right: %s, Back Right: %s ", ((TileMarker) worldIn.getBlockEntity(pos)).getBackLeft(), ((TileMarker) worldIn.getBlockEntity(pos)).getFrontRight(), ((TileMarker) worldIn.getBlockEntity(pos)).getBackRight())), true);
+        return ActionResultType.SUCCESS;
     }
 
     public boolean canSurvive(BlockState state, IWorldReader worldIn, BlockPos pos) {
@@ -40,29 +41,25 @@ public class BlockMarker extends BlockBase {
     }
 
     @Override
+    public VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context) {
+        return box(6, 0, 6, 10, 14, 10);
+    }
+
+    @Override
     public void playerWillDestroy(World worldIn, BlockPos pos, BlockState state, PlayerEntity player) {
         super.playerWillDestroy(worldIn, pos, state, player);
-        if (worldIn.getBlockEntity(pos) != null){
-        ((TileMarker)worldIn.getBlockEntity(pos)).onDestroy(pos);}
+        if (worldIn.getBlockEntity(pos) != null) {
+            ((TileMarker) worldIn.getBlockEntity(pos)).onDestroy(pos);
+        }
     }
-
-    @Override
-    public ActionResultType use(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult p_225533_6_) {
-
-        ((TileMarker)worldIn.getBlockEntity(pos)).onRightClick(player.getMotionDirection());
-        player.displayClientMessage(new StringTextComponent(String.format("Right Clicked Marker Scanned Markers Back Left: %s, Front Right: %s, Back Right: %s ", ((TileMarker)worldIn.getBlockEntity(pos)).getBackLeft(), ((TileMarker)worldIn.getBlockEntity(pos)).getFrontRight(), ((TileMarker)worldIn.getBlockEntity(pos)).getBackRight() )),true);
-        return ActionResultType.SUCCESS;
-    }
-
-    @Override
-    public TileEntity createTileEntity(BlockState state, IBlockReader world)
-    {
-        return new TileMarker();
-    }
-
 
     @Override
     public boolean hasTileEntity(BlockState state) {
         return true;
+    }
+
+    @Override
+    public TileEntity createTileEntity(BlockState state, IBlockReader world) {
+        return new TileMarker();
     }
 }

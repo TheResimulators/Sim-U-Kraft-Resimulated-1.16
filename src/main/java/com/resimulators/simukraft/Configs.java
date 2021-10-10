@@ -9,16 +9,11 @@ import java.util.List;
 @Mod.EventBusSubscriber
 public class Configs {
 
-    private ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
-    private ForgeConfigSpec spec;
-
-    public ForgeConfigSpec getSpec() {
-        return spec;
-    }
-
     private final General general;
     private final Sims sims;
     private final Names names;
+    private final ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
+    private final ForgeConfigSpec spec;
 
     public Configs() {
         general = new General();
@@ -26,6 +21,10 @@ public class Configs {
         names = new Names();
 
         spec = builder.build();
+    }
+
+    public ForgeConfigSpec getSpec() {
+        return spec;
     }
 
     public General getGeneral() {
