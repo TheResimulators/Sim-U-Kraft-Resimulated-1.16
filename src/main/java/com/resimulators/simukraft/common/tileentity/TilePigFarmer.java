@@ -5,6 +5,6 @@ import com.resimulators.simukraft.init.ModTileEntities;
 
 public class TilePigFarmer extends TileAnimalFarm {
     public TilePigFarmer() {
-        super(ModTileEntities.PIG_FARMER.get(),Animal.PIG, "Pig Farm");
+        super(ModTileEntities.PIG_FARMER.get(), Animal.PIG, "Pig Farm");
     }
 }

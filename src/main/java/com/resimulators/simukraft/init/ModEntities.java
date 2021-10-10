@@ -25,25 +25,10 @@ import java.util.List;
 //TODO: fabbe50: update to deferred registry !lowprio
 @Mod.EventBusSubscriber(modid = Reference.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ModEntities {
-    private static List<EntityType> entities = Lists.newArrayList();
-    private static List<Item> spawmEggs = Lists.newArrayList();
+    private static final List<EntityType> entities = Lists.newArrayList();
+    private static final List<Item> spawmEggs = Lists.newArrayList();
 
     public static final EntityType<SimEntity> ENTITY_SIM = createEntity(SimEntity.class, SimEntity::new, EntityClassification.CREATURE, 0.6875f, 1.8f, 0x07b351, 0x614500);
-
-    private static <T extends Entity> EntityType<T> createEntity(Class<T> entityClass, EntityType.IFactory<T> factory, EntityClassification classification, float width, float height, int eggPrimary, int eggSecondary) {
-        ResourceLocation location = new ResourceLocation(Reference.MODID, classToString(entityClass));
-        EntityType<T> entity = EntityType.Builder.of(factory, classification).sized(width, height).setTrackingRange(64).setUpdateInterval(1).build(location.toString());
-        entity.setRegistryName(location);
-        entities.add(entity);
-        Item spawnEgg = new SpawnEggItem(entity, eggPrimary, eggSecondary, (new Item.Properties()).tab(ItemGroup.TAB_MISC));
-        spawnEgg.setRegistryName(new ResourceLocation(Reference.MODID, classToString(entityClass) + "_spawn_egg"));
-        spawmEggs.add(spawnEgg);
-        return entity;
-    }
-
-    private static String classToString(Class<? extends Entity> entityClass) {
-        return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, entityClass.getSimpleName()).replace("_entity", "");
-    }
 
     public static void init(RegistryEvent.Register<EntityType<?>> event) {
         event.getRegistry().register(ENTITY_SIM);
@@ -72,5 +57,20 @@ public class ModEntities {
 
     public static void registerAttributes() {
         GlobalEntityTypeAttributes.put(ENTITY_SIM, SimEntity.createAttributes().build());
+    }
+
+    private static <T extends Entity> EntityType<T> createEntity(Class<T> entityClass, EntityType.IFactory<T> factory, EntityClassification classification, float width, float height, int eggPrimary, int eggSecondary) {
+        ResourceLocation location = new ResourceLocation(Reference.MODID, classToString(entityClass));
+        EntityType<T> entity = EntityType.Builder.of(factory, classification).sized(width, height).setTrackingRange(64).setUpdateInterval(1).build(location.toString());
+        entity.setRegistryName(location);
+        entities.add(entity);
+        Item spawnEgg = new SpawnEggItem(entity, eggPrimary, eggSecondary, (new Item.Properties()).tab(ItemGroup.TAB_MISC));
+        spawnEgg.setRegistryName(new ResourceLocation(Reference.MODID, classToString(entityClass) + "_spawn_egg"));
+        spawmEggs.add(spawnEgg);
+        return entity;
+    }
+
+    private static String classToString(Class<? extends Entity> entityClass) {
+        return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, entityClass.getSimpleName()).replace("_entity", "");
     }
 }

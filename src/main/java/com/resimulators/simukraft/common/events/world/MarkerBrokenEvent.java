@@ -11,10 +11,10 @@ public class MarkerBrokenEvent {
 
 
     @SubscribeEvent
-    public static void onMarkerDestroyed(BlockEvent.BreakEvent event){
-        if (event.getWorld().getBlockEntity(event.getPos()) instanceof TileMarker){
-           TileMarker marker = (TileMarker) event.getWorld().getBlockEntity(event.getPos());
-           marker.onDestroy(event.getPos());
+    public static void onMarkerDestroyed(BlockEvent.BreakEvent event) {
+        if (event.getWorld().getBlockEntity(event.getPos()) instanceof TileMarker) {
+            TileMarker marker = (TileMarker) event.getWorld().getBlockEntity(event.getPos());
+            marker.onDestroy(event.getPos());
         }
     }
 }

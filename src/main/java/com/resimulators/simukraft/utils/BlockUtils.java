@@ -19,9 +19,10 @@ public class BlockUtils {
         }
         return blocks;
     }
+
     public static ArrayList<BlockPos> getBlocksAroundAndBelowPosition(BlockPos startingPos, int radius) {
         ArrayList<BlockPos> blocks = new ArrayList<>();
-        for (int y = -1; y <=1;y++){
+        for (int y = -1; y <= 1; y++) {
             for (int x = -radius; x <= radius; x++) {
                 for (int z = -radius; z <= radius; z++) {
                     BlockPos blockPos = startingPos.offset(x, y, z);
@@ -31,14 +32,6 @@ public class BlockUtils {
         }
 
         return blocks;
-    }
-    public static boolean aboveBlocksValid(World world, BlockPos startingPos) {
-        for (int y = 0; y <= 3; y++) {
-            BlockPos blockAbovePos = startingPos.offset(0, y, 0);
-            BlockState blockAboveState = world.getBlockState(blockAbovePos);
-            if (blockAboveState.canOcclude()) return false;
-        }
-        return true;
     }
 
     public static BlockPos getGroundBlock(World world, BlockPos startingPos) {
@@ -83,6 +76,15 @@ public class BlockUtils {
         if (!aboveBlocksValid(world, blockPos)) {
             SimuKraft.LOGGER().debug("Above blocks not valid");
             return false;
+        }
+        return true;
+    }
+
+    public static boolean aboveBlocksValid(World world, BlockPos startingPos) {
+        for (int y = 0; y <= 3; y++) {
+            BlockPos blockAbovePos = startingPos.offset(0, y, 0);
+            BlockState blockAboveState = world.getBlockState(blockAbovePos);
+            if (blockAboveState.canOcclude()) return false;
         }
         return true;
     }

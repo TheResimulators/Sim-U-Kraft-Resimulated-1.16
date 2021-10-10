@@ -20,18 +20,20 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
 
-import java.util.*;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Random;
+import java.util.UUID;
 
 public class Faction {
     private final ArrayList<UUID> players = new ArrayList<>();
     private final HashMap<UUID, SimInfo> sims = new HashMap<>();
-    private final HashMap<UUID,House>  houses = new HashMap<>();
+    private final HashMap<UUID, House> houses = new HashMap<>();
+    private final World world;
     private Random rnd;
     private double credits = 0d;
     private int id;
-    private final World world;
 
     public Faction(int id, World world) {
         this.id = id;
@@ -58,13 +60,13 @@ public class Faction {
 
         nbt.put("sims", list);
         list = new ListNBT();
-        for (UUID uuid: houses.keySet()){
+        for (UUID uuid : houses.keySet()) {
             CompoundNBT compound = new CompoundNBT();
-            compound.putUUID("houseID",uuid);
-            compound.put("house nbt",houses.get(uuid).write());
+            compound.putUUID("houseID", uuid);
+            compound.put("house nbt", houses.get(uuid).write());
             list.add(compound);
         }
-        nbt.put("houses",list);
+        nbt.put("houses", list);
         nbt.putDouble("credits", credits);
         nbt.putInt("id", id);
         return nbt;
@@ -86,12 +88,12 @@ public class Faction {
             this.sims.put(id, info);
         }
         ListNBT houses = nbt.getList("houses", Constants.NBT.TAG_COMPOUND);
-        for (INBT house: houses){
+        for (INBT house : houses) {
             CompoundNBT compound = (CompoundNBT) house;
             UUID id = compound.getUUID("houseID");
             House newHouse = new House();
             newHouse.read(compound.getCompound("house nbt"));
-            this.houses.put(id,newHouse);
+            this.houses.put(id, newHouse);
 
         }
         this.credits = nbt.getDouble("credits");
@@ -103,8 +105,16 @@ public class Faction {
         addSim(sim.getUUID());
     }
 
-    private void updateCredits() {
-        sendPacketToFaction(new CreditUpdatePacket(credits, this.id));
+    public void validateSims(ServerWorld world) {
+        List<UUID> temp = Lists.newArrayList();
+        for (UUID id : sims.keySet()) {
+            Entity entity = world.getEntity(id);
+            if (entity == null)
+                temp.add(id);
+        }
+        for (UUID id : temp) {
+            sims.remove(id);
+        }
     }
 
     public void addSim(UUID id) {
@@ -115,23 +125,29 @@ public class Faction {
         sims.remove(sim.getUUID());
     }
 
+    public void subCredits(double credits) {
+        setCredits(this.credits - credits);
+
+    }
+
+    private void updateCredits() {
+        sendPacketToFaction(new CreditUpdatePacket(credits, this.id));
+    }
+
+    public void sendPacketToFaction(IMessage message) {
+        for (UUID id : players) {
+            if (ServerLifecycleHooks.getCurrentServer() != null) {
+                ServerPlayerEntity player = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayer(id);
+                if (player != null) {
+                    Network.handler.sendToPlayer(message, player);
+                }
+            }
+        }
+    }
     public void removeSim(UUID id) {
         sims.remove(id);
     }
 
-    public void setCredits(double credits) {
-        this.credits = credits;
-        if (world != null){
-            if (!world.isClientSide){
-                updateCredits();
-                }
-            }
-        }
-
-    public void subCredits(double credits){
-        setCredits(this.credits - credits);
-
-    }
 
     public void addCredits(double credits) {
         setCredits(this.credits + credits);
@@ -141,8 +157,17 @@ public class Faction {
         return this.credits;
     }
 
-    public boolean hasEnoughCredits(double creditsNeeded){
-        if (this.credits >= creditsNeeded){
+    public void setCredits(double credits) {
+        this.credits = credits;
+        if (world != null) {
+            if (!world.isClientSide) {
+                updateCredits();
+            }
+        }
+    }
+
+    public boolean hasEnoughCredits(double creditsNeeded) {
+        if (this.credits >= creditsNeeded) {
             return true;
         }
 
@@ -173,20 +198,20 @@ public class Faction {
         return sims;
     }
 
-    public void hireSim(UUID id) {
-        this.sims.get(id).hired = true;
-    }
-
     public void hireSim(SimEntity sim) {
         this.hireSim(sim.getUUID());
     }
 
-    public void fireSim(UUID id) {
-        this.sims.get(id).hired = false;
+    public void hireSim(UUID id) {
+        this.sims.get(id).hired = true;
     }
 
     public void fireSim(SimEntity sim) {
         this.fireSim(sim.getUUID());
+    }
+
+    public void fireSim(UUID id) {
+        this.sims.get(id).hired = false;
     }
 
     public int getAmountOfSims() {
@@ -209,7 +234,7 @@ public class Faction {
     public ArrayList<Integer> getSimUnemployedIds(ServerWorld world) {
         ArrayList<Integer> simids = new ArrayList<>();
         for (UUID id : sims.keySet()) {
-           Entity entity = world.getEntity(id);
+            Entity entity = world.getEntity(id);
             if (entity != null) {
                 if (!sims.get(id).hired) {
                     simids.add(entity.getId());
@@ -221,29 +246,14 @@ public class Faction {
         return simids;
     }
 
-    public void validateSims(ServerWorld world) {
-        List<UUID> temp = Lists.newArrayList();
-        for (UUID id : sims.keySet()) {
-            Entity entity = world.getEntity(id);
-            if (entity == null)
-                temp.add(id);
-        }
-        for (UUID id : temp) {
-            sims.remove(id);
-        }
-    }
-
     public HashMap<UUID, SimInfo> getSimsAndInfo() {
         return sims;
     }
 
-    public ArrayList<UUID> getSims(){
+    public ArrayList<UUID> getSims() {
         return new ArrayList<>(sims.keySet());
 
 
-    }
-    public ArrayList<UUID> getPlayers() {
-        return players;
     }
 
     public void addPlayer(UUID player) {
@@ -262,31 +272,19 @@ public class Faction {
         players.iterator().forEachRemaining(players::remove);
     }
 
-    public void sendPacketToFaction(IMessage message) {
+    public UUID getOnlineFactionPlayer() {
         for (UUID id : players) {
-            if (ServerLifecycleHooks.getCurrentServer() != null){
+            if (ServerLifecycleHooks.getCurrentServer() != null) {
                 ServerPlayerEntity player = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayer(id);
                 if (player != null) {
-                    Network.handler.sendToPlayer(message, player);
-                    }
-            }
-        }
-    }
-
-
-
-    public UUID getOnlineFactionPlayer(){
-        for (UUID id : players) {
-            if (ServerLifecycleHooks.getCurrentServer() != null){
-                ServerPlayerEntity player = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayer(id);
-                if (player != null){
-                return id;
+                    return id;
                 }
             }
 
-            }
+        }
         return null;
     }
+
     public boolean containsSim(UUID id) {
         return sims.containsKey(id);
     }
@@ -299,34 +297,38 @@ public class Faction {
         return sims.get(id).write();
     }
 
-
-    public void sendFactionChatMessage(String string, World world){
-        for (UUID id: getPlayers()){
+    public void sendFactionChatMessage(String string, World world) {
+        for (UUID id : getPlayers()) {
             PlayerEntity entity = world.getPlayerByUUID(id);
-            if (entity != null){
-                entity.sendMessage(new StringTextComponent(string),id);
+            if (entity != null) {
+                entity.sendMessage(new StringTextComponent(string), id);
 
             }
 
         }
 
     }
+
+    public ArrayList<UUID> getPlayers() {
+        return players;
+    }
+
     public boolean getHired(UUID id) {
         return sims.get(id).hired;
     }
 
 
-    public UUID addNewHouse(BlockPos pos,String name, float rent){
+    public UUID addNewHouse(BlockPos pos, String name, float rent) {
         UUID id = UUID.randomUUID();
-        House house = new House(pos,name,rent);
-        houses.put(id,house);
-        sendPacketToFaction(new NewHousePacket(house,id,this.id));
+        House house = new House(pos, name, rent);
+        houses.put(id, house);
+        sendPacketToFaction(new NewHousePacket(house, id, this.id));
         return id;
     }
 
-    public boolean removeHouse(UUID id,ServerWorld world){
+    public boolean removeHouse(UUID id, ServerWorld world) {
         if (houses.get(id) == null) return false;
-        for (UUID simID: houses.get(id).simOccupants){
+        for (UUID simID : houses.get(id).simOccupants) {
             SimEntity entity = (SimEntity) world.getEntity(simID);
             if (entity != null) {
                 entity.removeHouse();
@@ -338,29 +340,30 @@ public class Faction {
     }
 
 
-    public void addSimToHouse(UUID houseID, UUID simID){
+    public void addSimToHouse(UUID houseID, UUID simID) {
         House house = houses.get(houseID);
         sims.get(simID).homeless = false;
         house.simOccupants.add(simID);
     }
-    public boolean removeSimFromHouse(UUID houseID, UUID simID){
+
+    public boolean removeSimFromHouse(UUID houseID, UUID simID) {
         House house = houses.get(houseID);
         sims.get(simID).homeless = true;
         return house.simOccupants.remove(simID);
 
     }
 
-    public House getHouseByID(UUID uuid){
+    public House getHouseByID(UUID uuid) {
         return houses.get(uuid);
     }
 
-    public ArrayList<UUID> getOccupants(UUID houseID){
+    public ArrayList<UUID> getOccupants(UUID houseID) {
         return houses.get(houseID).simOccupants;
     }
 
-    public UUID getFreeHouse(){
-        for (UUID house: houses.keySet()){
-            if (houses.get(house).simOccupants.isEmpty()){
+    public UUID getFreeHouse() {
+        for (UUID house : houses.keySet()) {
+            if (houses.get(house).simOccupants.isEmpty()) {
                 return house;
             }
 
@@ -368,10 +371,10 @@ public class Faction {
         return null;
     }
 
-    public int getFreeHousesCount(){
+    public int getFreeHousesCount() {
         int size = 0;
-        for (UUID house: houses.keySet()){
-            if (houses.get(house).simOccupants.isEmpty()){
+        for (UUID house : houses.keySet()) {
+            if (houses.get(house).simOccupants.isEmpty()) {
                 size++;
             }
 
@@ -379,39 +382,41 @@ public class Faction {
         return size;
     }
 
-    public int getHomelessSimCount(){
+    public int getHomelessSimCount() {
         int count = 0;
-        for (SimInfo info: sims.values()){
-            if (info.homeless){
+        for (SimInfo info : sims.values()) {
+            if (info.homeless) {
                 count++;
             }
         }
         return count;
     }
-    public void addHouse(House house,UUID houseID){
-        houses.put(houseID,house);
+
+    public void addHouse(House house, UUID houseID) {
+        houses.put(houseID, house);
 
     }
-    public ArrayList<House> getAllOccupiedHouses(){
-            ArrayList<House> houses = new ArrayList<>();
-            for (UUID house: this.houses.keySet()){
-                if (!this.houses.get(house).simOccupants.isEmpty()){
-                    houses.add(this.houses.get(house));
-                }
 
-            }
-            return houses;
-    }
-
-
-    public float getRent(){
+    public float getRent() {
         float rent = 0;
         List<House> rentHouses = getAllOccupiedHouses();
-        for (House house: rentHouses){
+        for (House house : rentHouses) {
             rent += house.rent;
         }
         return rent;
     }
+
+    public ArrayList<House> getAllOccupiedHouses() {
+        ArrayList<House> houses = new ArrayList<>();
+        for (UUID house : this.houses.keySet()) {
+            if (!this.houses.get(house).simOccupants.isEmpty()) {
+                houses.add(this.houses.get(house));
+            }
+
+        }
+        return houses;
+    }
+
     static class SimInfo {
         private UUID sim;
         private boolean hired;
@@ -445,53 +450,56 @@ public class Faction {
     }
 
 
-    public static class House{
-        private BlockPos position;
+    public static class House {
         private final ArrayList<UUID> simOccupants = new ArrayList<>();
+        private BlockPos position;
         private String name;
         private float rent;
 
-        public House(){}
-        private House(BlockPos position, String name,float rent){
+        public House() {
+        }
+
+        private House(BlockPos position, String name, float rent) {
             this.position = position;
             this.name = name;
             this.rent = rent;
         }
-        public CompoundNBT write(){
+
+        public CompoundNBT write() {
             CompoundNBT nbt = new CompoundNBT();
-            nbt.putInt("x",position.getX());
-            nbt.putInt("y",position.getY());
-            nbt.putInt("z",position.getZ());
-            nbt.putString("name",name);
-            nbt.putFloat("rent",rent);
+            nbt.putInt("x", position.getX());
+            nbt.putInt("y", position.getY());
+            nbt.putInt("z", position.getZ());
+            nbt.putString("name", name);
+            nbt.putFloat("rent", rent);
             ListNBT simIds = new ListNBT();
-            for (UUID uuid: simOccupants){
+            for (UUID uuid : simOccupants) {
                 CompoundNBT id = new CompoundNBT();
-                id.putUUID("uuid",uuid);
+                id.putUUID("uuid", uuid);
                 simIds.add(id);
 
             }
-            nbt.put("simids",simIds);
+            nbt.put("simids", simIds);
             return nbt;
         }
 
-        public void read(CompoundNBT nbt){
+        public void read(CompoundNBT nbt) {
             int x = nbt.getInt("x");
             int y = nbt.getInt("y");
             int z = nbt.getInt("z");
-            position = new BlockPos(x,y,z);
+            position = new BlockPos(x, y, z);
             name = nbt.getString("name");
             rent = nbt.getFloat("rent");
-            ListNBT ids = nbt.getList("simids",Constants.NBT.TAG_COMPOUND);
+            ListNBT ids = nbt.getList("simids", Constants.NBT.TAG_COMPOUND);
 
-            for (INBT inbt: ids){
-                CompoundNBT simId = (CompoundNBT)inbt;
+            for (INBT inbt : ids) {
+                CompoundNBT simId = (CompoundNBT) inbt;
                 simOccupants.add(simId.getUUID("uuid"));
 
 
             }
 
-            }
+        }
 
         public float getRent() {
             return rent;
@@ -500,7 +508,8 @@ public class Faction {
         public String getName() {
             return name;
         }
-        public BlockPos getPosition(){
+
+        public BlockPos getPosition() {
             return position;
         }
     }

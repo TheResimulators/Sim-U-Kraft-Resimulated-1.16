@@ -12,7 +12,7 @@ import net.minecraft.tileentity.TileEntity;
 import java.util.UUID;
 
 
-public class TileCustomData extends TileEntity implements IControlBlock{
+public class TileCustomData extends TileEntity implements IControlBlock {
     private BuildingType type;
     private float price;
     private float rent;
@@ -32,13 +32,13 @@ public class TileCustomData extends TileEntity implements IControlBlock{
     }
 
     @Override
-    public void setHired(boolean hired) {
-
+    public boolean getHired() {
+        return false;
     }
 
     @Override
-    public boolean getHired() {
-        return false;
+    public void setHired(boolean hired) {
+
     }
 
     @Override
@@ -56,97 +56,99 @@ public class TileCustomData extends TileEntity implements IControlBlock{
         return "Control Block";
     }
 
-    @Override
-    public CompoundNBT save(CompoundNBT compound) {
-        compound.putInt("building type",type.id);
-        compound.putFloat("price",this.price);
-        compound.putFloat("rent",this.rent);
-
-        return super.save(compound);
-
-    }
-
-    @Override
-    public void load(BlockState blockState, CompoundNBT compoundNBT) {
-        if (compoundNBT.contains("building type"))
-        {
-            setBuildingType(BuildingType.getById(compoundNBT.getInt("building type")));
-            setPrice(compoundNBT.getFloat("price"));
-            setRent(compoundNBT.getFloat("rent"));
-        }
-        super.load(blockState,compoundNBT);
-    }
-
-    public void setBuildingType(BuildingType type){
-        this.type = type;
-        setChanged();
-    }
-
-    public void setPrice(float price){
-        this.price = price;
-        setChanged();
-    }
-
-    public void setRent(float rent){
-        this.rent = rent;
-        setChanged();
-    }
-
-
     public BuildingType getBuildingType() {
         return type;
     }
 
+    public void setBuildingType(BuildingType type) {
+        this.type = type;
+        setChanged();
+    }
 
     public float getPrice() {
         return price;
+    }
+
+    public void setPrice(float price) {
+        this.price = price;
+        setChanged();
     }
 
     public float getRent() {
         return rent;
     }
 
-    public void calculatePrice(){
+    public void setRent(float rent) {
+        this.rent = rent;
+        setChanged();
+    }
+
+    public void calculatePrice() {
         //TODO: automatically calculate the price based on size and materials
         //fabbe50: you are probably best to do this
     }
 
-    public void calculateRent(){
+    public void calculateRent() {
         //TODO: automatically calculate rent based on size. this is only used in residential buildings
         //fabbe50: this as well
-    }
-
-
-    public void setWidth(int width){
-        this.width = width;
-        setChanged();
-    }
-
-    public void setHeight(int height){
-        this.height = height;
-        setChanged();
-    }
-
-    public void setDepth(int depth){
-        this.depth = depth;
-        setChanged();
     }
 
     public int getWidth() {
         return width;
     }
 
+    public void setWidth(int width) {
+        this.width = width;
+        setChanged();
+    }
+
     public int getHeight() {
         return height;
+    }
+
+    public void setHeight(int height) {
+        this.height = height;
+        setChanged();
     }
 
     public int getDepth() {
         return depth;
     }
 
+    public void setDepth(int depth) {
+        this.depth = depth;
+        setChanged();
+    }
+
     @Override
     public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
-        load(this.getBlockState(),pkt.getTag());
+        load(this.getBlockState(), pkt.getTag());
+    }
+
+    @Override
+    public void load(BlockState blockState, CompoundNBT compoundNBT) {
+        if (compoundNBT.contains("building type")) {
+            setBuildingType(BuildingType.getById(compoundNBT.getInt("building type")));
+            setPrice(compoundNBT.getFloat("price"));
+            setRent(compoundNBT.getFloat("rent"));
+        }
+        super.load(blockState, compoundNBT);
+    }
+
+
+    @Override
+    public CompoundNBT save(CompoundNBT compound) {
+        compound.putInt("building type", type.id);
+        compound.putFloat("price", this.price);
+        compound.putFloat("rent", this.rent);
+
+        return super.save(compound);
+
+    }
+
+    @Override
+    public SUpdateTileEntityPacket getUpdatePacket() {
+        return new SUpdateTileEntityPacket(this.worldPosition, -1, this.getUpdateTag());
     }
 
     @Override
@@ -154,8 +156,9 @@ public class TileCustomData extends TileEntity implements IControlBlock{
         return save(new CompoundNBT());
     }
 
+
     @Override
-    public SUpdateTileEntityPacket getUpdatePacket() {
-        return new SUpdateTileEntityPacket(this.worldPosition, -1, this.getUpdateTag());
+    public void handleUpdateTag(BlockState blockState, CompoundNBT parentNBTTagCompound) {
+        this.load(blockState, parentNBTTagCompound);
     }
 }

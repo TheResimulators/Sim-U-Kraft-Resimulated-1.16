@@ -4,9 +4,9 @@ import java.util.UUID;
 
 public interface ITile {
 
-    void setHired(boolean hired);
-
     boolean getHired();
+
+    void setHired(boolean hired);
 
     UUID getSimId();
 

@@ -13,7 +13,10 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUseContext;
-import net.minecraft.util.*;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.ActionResultType;
+import net.minecraft.util.Direction;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
@@ -22,11 +25,10 @@ import net.minecraft.world.World;
 import javax.annotation.Nullable;
 import java.util.List;
 
-import net.minecraft.item.Item.Properties;
-
 public class ItemStructureTest extends Item implements IStructureStorage {
     private BlockPos placementArea;
     private Direction direction;
+
     public ItemStructureTest(Properties properties) {
         super(properties);
     }
@@ -61,7 +63,7 @@ public class ItemStructureTest extends Item implements IStructureStorage {
         //sets sims job to builder and relevant info needed for it to work
         if (temp != null && target instanceof SimEntity) {
             ((SimEntity) target).setProfession(Profession.BUILDER.getId());
-            ((SimEntity) target).setJob(ModJobs.JOB_LOOKUP.get(Profession.BUILDER.getId()).apply((SimEntity)target));
+            ((SimEntity) target).setJob(ModJobs.JOB_LOOKUP.get(Profession.BUILDER.getId()).apply((SimEntity) target));
             if (((SimEntity) target).getJob() instanceof JobBuilder) {
                 ((JobBuilder) ((SimEntity) target).getJob()).setTemplate(temp);
                 ((JobBuilder) ((SimEntity) target).getJob()).setDirection(direction);
@@ -76,22 +78,24 @@ public class ItemStructureTest extends Item implements IStructureStorage {
     public void appendHoverText(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
         super.appendHoverText(stack, worldIn, tooltip, flagIn);
         //adds info to tooltip when structure is loaded
-        tooltip.add(new StringTextComponent(((ItemStructureTest)stack.getItem()).getStructure(stack) + "   " + placementArea));
+        tooltip.add(new StringTextComponent(((ItemStructureTest) stack.getItem()).getStructure(stack) + "   " + placementArea));
+    }
+
+    /** gets template that this item is linked to */
+    public BuildingTemplate getTemplate(String name) {
+        return StructureHandler.loadStructure(name);
     }
 
     public BlockPos getPlacementArea() {
         return placementArea;
     }
-    /**gets template that this item is linked to*/
-    public BuildingTemplate getTemplate(String name) {
-        return StructureHandler.loadStructure(name);
-    }
-    /**sets template this item is connected to*/
+
+    /** sets template this item is connected to */
     public void setTemplate(ItemStack stack, String name) {
         setStructure(stack, name);
     }
 
-    public Direction getDirection(){
+    public Direction getDirection() {
         return direction;
     }
 }

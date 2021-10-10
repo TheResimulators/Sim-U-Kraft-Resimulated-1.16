@@ -9,8 +9,6 @@ import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.util.HandSide;
 
 public class EntitySimModel extends BipedModel<SimEntity> {
-    private boolean smallArms;
-
     public ModelRenderer bipedLeftArmwear;
     public ModelRenderer bipedRightArmwear;
     public ModelRenderer bipedLeftLegwear;
@@ -22,6 +20,7 @@ public class EntitySimModel extends BipedModel<SimEntity> {
     public ModelRenderer femaleArmRight;
     public ModelRenderer maleArmLeft;
     public ModelRenderer maleArmRight;
+    private boolean smallArms;
     private SimEntity sim;
 
     public EntitySimModel(float modelSize) {
@@ -67,26 +66,7 @@ public class EntitySimModel extends BipedModel<SimEntity> {
         this.bipedBodyWear = new ModelRenderer(this, 16, 32);
         this.bipedBodyWear.addBox(-4.0F, 0.0F, -2.0F, 8, 12, 4, modelSize + 0.25F);
         this.bipedBodyWear.setPos(0.0F, 0.0F, 0.0F);
-        setVisible(true,true);
-    }
-
-    @Override
-    protected Iterable<ModelRenderer> bodyParts() {
-        return Iterables.concat(super.bodyParts(), ImmutableList.of(this.bipedLeftLegwear, this.bipedRightLegwear, this.bipedLeftArmwear, this.bipedRightArmwear, this.bipedBodyWear));
-    }
-
-    @Override
-    public void setupAnim(SimEntity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-        super.setupAnim(entityIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-        this.bipedLeftLegwear.copyFrom(this.leftLeg);
-        this.bipedRightLegwear.copyFrom(this.rightLeg);
-        this.bipedLeftArmwear.copyFrom(this.leftArm);
-        this.bipedRightArmwear.copyFrom(this.rightArm);
-        this.bipedBodyWear.copyFrom(this.body);
-        this.femaleArmLeft.copyFrom(this.leftArm);
-        this.femaleArmRight.copyFrom(this.rightArm);
-        this.maleArmLeft.copyFrom(this.leftArm);
-        this.maleArmRight.copyFrom(this.rightArm);
+        setVisible(true, true);
     }
 
     public void setVisible(boolean visible, boolean female) {
@@ -118,6 +98,25 @@ public class EntitySimModel extends BipedModel<SimEntity> {
     }
 
     @Override
+    protected Iterable<ModelRenderer> bodyParts() {
+        return Iterables.concat(super.bodyParts(), ImmutableList.of(this.bipedLeftLegwear, this.bipedRightLegwear, this.bipedLeftArmwear, this.bipedRightArmwear, this.bipedBodyWear));
+    }
+
+    @Override
+    public void setupAnim(SimEntity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
+        super.setupAnim(entityIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
+        this.bipedLeftLegwear.copyFrom(this.leftLeg);
+        this.bipedRightLegwear.copyFrom(this.rightLeg);
+        this.bipedLeftArmwear.copyFrom(this.leftArm);
+        this.bipedRightArmwear.copyFrom(this.rightArm);
+        this.bipedBodyWear.copyFrom(this.body);
+        this.femaleArmLeft.copyFrom(this.leftArm);
+        this.femaleArmRight.copyFrom(this.rightArm);
+        this.maleArmLeft.copyFrom(this.leftArm);
+        this.maleArmRight.copyFrom(this.rightArm);
+    }
+
+    @Override
     public void translateToHand(HandSide side, MatrixStack matrix) {
         ModelRenderer modelrenderer = this.getArm(side);
         if (this.smallArms) {
@@ -126,7 +125,7 @@ public class EntitySimModel extends BipedModel<SimEntity> {
             modelrenderer.translateAndRotate(matrix);
             modelrenderer.x -= f;
         } else {
-          modelrenderer.translateAndRotate(matrix);
+            modelrenderer.translateAndRotate(matrix);
         }
     }
 }

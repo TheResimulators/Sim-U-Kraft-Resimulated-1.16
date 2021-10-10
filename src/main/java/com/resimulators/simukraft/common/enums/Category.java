@@ -9,20 +9,20 @@ public enum Category {
 
     public String category;
     public int id;
-    Category(String string,int id)
-    {
-        this.category = string;
-        this.id = id;
-    }
-    
-    
-    public static Category getById(int id){
-        for (Category category: Category.values()){
-            if (category.id == id){
+
+    public static Category getById(int id) {
+        for (Category category : Category.values()) {
+            if (category.id == id) {
                 return category;
             }
         }
         return null;
+    }
+
+
+    Category(String string, int id) {
+        this.category = string;
+        this.id = id;
     }
 
 }
