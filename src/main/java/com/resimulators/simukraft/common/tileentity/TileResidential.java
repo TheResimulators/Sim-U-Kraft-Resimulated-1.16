@@ -124,4 +124,9 @@ public class TileResidential extends TileEntity implements IControlBlock {
     public void onDestroy(World world) {
         SavedWorldData.get(world).getFaction(factionID).removeHouse(houseID, (ServerWorld) world);
     }
+
+    @Override
+    public void handleUpdateTag(BlockState blockState, CompoundNBT parentNBTTagCompound) {
+        this.load(blockState, parentNBTTagCompound);
+    }
 }

@@ -51,11 +51,6 @@ public class TileBaker extends TileEntity implements IControlBlock {
     }
 
     @Override
-    public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
-        load(this.getBlockState(), pkt.getTag());
-    }
-
-    @Override
     public void load(BlockState state, CompoundNBT nbt) {
         hired = nbt.getBoolean("hired");
         if (nbt.contains("simid")) {
@@ -82,5 +77,15 @@ public class TileBaker extends TileEntity implements IControlBlock {
         return save(new CompoundNBT());
     }
 
+
+    @Override
+    public void handleUpdateTag(BlockState blockState, CompoundNBT parentNBTTagCompound) {
+        this.load(blockState, parentNBTTagCompound);
+    }
+
+    @Override
+    public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
+        load(this.getBlockState(), pkt.getTag());
+    }
 
 }

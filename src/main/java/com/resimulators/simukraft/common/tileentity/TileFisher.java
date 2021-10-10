@@ -82,5 +82,8 @@ public class TileFisher extends TileEntity implements IControlBlock {
         return save(new CompoundNBT());
     }
 
-
+    @Override
+    public void handleUpdateTag(BlockState blockState, CompoundNBT parentNBTTagCompound) {
+        this.load(blockState, parentNBTTagCompound);
+    }
 }

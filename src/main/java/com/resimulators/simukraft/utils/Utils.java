@@ -12,6 +12,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
+import net.minecraftforge.items.wrapper.InvWrapper;
 
 import javax.annotation.Nonnull;
 import java.math.BigDecimal;
@@ -61,14 +62,11 @@ public class Utils {
     }
 
     public static boolean addSimInventoryToChest(ChestTileEntity chest, SimEntity sim) {
+        InvWrapper wrapper = new InvWrapper((chest));
         for (int i = 0; i < sim.getInventory().mainInventory.size(); i++) {
             ItemStack stack = sim.getInventory().mainInventory.get(i);
             if (!stack.equals(ItemStack.EMPTY) && !(stack.getItem() instanceof ToolItem)) {
-                int index = findNextAvaliableSlot(chest);
-                if (index >= 0) {
-                    chest.setItem(index, stack);
-                    sim.getInventory().removeItemNoUpdate(i);
-                } else {
+                if (ItemHandlerHelper.insertItemStacked(wrapper,stack,false) != ItemStack.EMPTY){
                     SimuKraft.LOGGER().debug("No Room in chest");
                     return false;
                 }

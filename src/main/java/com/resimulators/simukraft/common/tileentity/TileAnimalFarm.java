@@ -98,10 +98,6 @@ public class TileAnimalFarm extends TileEntity implements IControlBlock {
         return entity;
     }
 
-    @Override
-    public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
-        load(this.getBlockState(), pkt.getTag());
-    }
 
     @Override
     public void load(BlockState state, CompoundNBT nbt) {
@@ -130,6 +126,16 @@ public class TileAnimalFarm extends TileEntity implements IControlBlock {
     @Override
     public CompoundNBT getUpdateTag() {
         return save(new CompoundNBT());
+    }
+    @Override
+    public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
+        load(this.getBlockState(), pkt.getTag());
+    }
+
+    @Override
+    public void handleUpdateTag(BlockState blockState, CompoundNBT parentNBTTagCompound)
+    {
+        this.load(blockState, parentNBTTagCompound);
     }
 
 

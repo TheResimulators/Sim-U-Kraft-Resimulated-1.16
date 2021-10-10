@@ -160,6 +160,11 @@ public class TileBaseMarker extends TileEntity implements ITile {
     }
 
     @Override
+    public void handleUpdateTag(BlockState blockState, CompoundNBT parentNBTTagCompound) {
+        this.load(blockState, parentNBTTagCompound);
+    }
+
+    @Override
     public boolean getHired() {
         return hired;
     }

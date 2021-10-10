@@ -239,7 +239,7 @@ public class JobBuilder implements IReworkedJob {
             );
 
             TileConstructor constructor = (TileConstructor) sim.level.getBlockEntity(workSpace);
-            constructor.setBuildingPositioning(blocks.get(0).pos,blocks.get(blocks.size()-1).pos);
+            constructor.setBuildingPositioning(blocks.get(blocks.size()-1).pos,direction);
             chargeBlockIndexForward();
         }
     }

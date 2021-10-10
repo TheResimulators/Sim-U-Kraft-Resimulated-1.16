@@ -80,4 +80,10 @@ public class TileGlassFactory extends TileEntity implements IControlBlock {
     public CompoundNBT getUpdateTag() {
         return save(new CompoundNBT());
     }
+
+
+    @Override
+    public void handleUpdateTag(BlockState blockState, CompoundNBT parentNBTTagCompound) {
+        this.load(blockState, parentNBTTagCompound);
+    }
 }
