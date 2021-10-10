@@ -224,6 +224,7 @@ public class CustomTemplateManager {
     @Nullable
     private static BuildingTemplate loadTemplateFile(ResourceLocation locationIn) {
         if (!pathGenerated.toFile().isDirectory()) {
+            SimuKraft.LOGGER().warn("Direction to Folder does not exist");
             return null;
         } else {
             Path path = resolvePath(locationIn, ".nbt");
@@ -231,6 +232,7 @@ public class CustomTemplateManager {
             try (InputStream inputstream = new FileInputStream(path.toFile())) {
                 return loadTemplate(inputstream);
             } catch (FileNotFoundException filenotfoundexception) {
+                SimuKraft.LOGGER().error("File not found: " + filenotfoundexception.getMessage());
                 return null;
             } catch (IOException ioexception) {
                 LOGGER.error("Couldn't load structure from {}", path, ioexception);

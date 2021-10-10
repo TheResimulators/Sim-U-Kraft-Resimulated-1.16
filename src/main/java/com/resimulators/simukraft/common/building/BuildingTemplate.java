@@ -1,6 +1,7 @@
 package com.resimulators.simukraft.common.building;
 
 import com.google.common.collect.ImmutableList;
+import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.common.tileentity.TileCustomData;
 import it.unimi.dsi.fastutil.Hash;
 import net.minecraft.block.Block;
@@ -12,6 +13,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Mirror;
+import net.minecraft.util.ResourceLocationException;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MutableBoundingBox;
@@ -20,6 +22,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.template.PlacementSettings;
 import net.minecraft.world.gen.feature.template.Template;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
+import sun.awt.windows.WPrinterJob;
 
 import java.util.*;
 import java.util.concurrent.BlockingDeque;
@@ -139,7 +142,13 @@ public class BuildingTemplate extends Template {
         }
         setAuthor(compound.getString("author"));
         System.out.println(name);
-        super.load(compound);
+        try{
+            super.load(compound);
+        }catch (ResourceLocationException e){
+            SimuKraft.LOGGER().error("Invalid block in template: " + name + " skipping, please check for errors in the blocks");
+            SimuKraft.LOGGER().error(e.getMessage());
+
+        }
     }
 
 

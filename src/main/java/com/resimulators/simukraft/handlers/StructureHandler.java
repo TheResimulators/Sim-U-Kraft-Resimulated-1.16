@@ -1,6 +1,7 @@
 package com.resimulators.simukraft.handlers;
 
 import com.resimulators.simukraft.Reference;
+import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.common.building.BuildingTemplate;
 import com.resimulators.simukraft.common.building.CustomTemplateManager;
 import net.minecraft.client.Minecraft;
@@ -42,6 +43,7 @@ public class StructureHandler {
         if (CustomTemplateManager.isInitialized()) {
             return CustomTemplateManager.get(new ResourceLocation(Reference.MODID, name));
         }
+        SimuKraft.LOGGER().error("CustomTemplateManager not initialized!");
         return null;
     }
 
