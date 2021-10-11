@@ -6,16 +6,15 @@ import com.resimulators.simukraft.client.data.SkinCacher;
 import com.resimulators.simukraft.client.gui.GuiMod;
 import com.resimulators.simukraft.client.gui.SimHud;
 import com.resimulators.simukraft.client.render.MarkerEntityRender;
+import com.resimulators.simukraft.client.render.TileConstructorRenderer;
 import com.resimulators.simukraft.common.commands.CommandStructure;
 import com.resimulators.simukraft.common.entity.sim.SimInformationOverlay;
 import com.resimulators.simukraft.common.events.world.MarkerBrokenEvent;
 import com.resimulators.simukraft.common.events.world.NewDayEvent;
 import com.resimulators.simukraft.common.events.world.SimDeathEvent;
+import com.resimulators.simukraft.common.tileentity.TileConstructor;
 import com.resimulators.simukraft.handlers.StructureHandler;
-import com.resimulators.simukraft.init.FactionEvents;
-import com.resimulators.simukraft.init.ModContainers;
-import com.resimulators.simukraft.init.ModEntities;
-import com.resimulators.simukraft.init.RegistryHandler;
+import com.resimulators.simukraft.init.*;
 import com.resimulators.simukraft.proxy.ClientProxy;
 import com.resimulators.simukraft.proxy.IProxy;
 import com.resimulators.simukraft.proxy.ServerProxy;
@@ -32,6 +31,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ExtensionPoint;
 import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -46,8 +46,8 @@ public class SimuKraft {
     public static final Configs config = new Configs();
     public static final IProxy proxy = DistExecutor.runForDist(() -> ClientProxy::new, () -> ServerProxy::new);
     private static final Logger LOGGER = LogManager.getLogger();
-    int r = 0, g = 0, b = 0;
 
+    private int r = 0, g = 0, b = 0;
     public static Logger LOGGER() {
         return LOGGER;
     }
@@ -80,6 +80,7 @@ public class SimuKraft {
         MinecraftForge.EVENT_BUS.register(new SimHud());
         MinecraftForge.EVENT_BUS.register(new SimInformationOverlay());
         MarkerEntityRender.register();
+        TileConstructorRenderer.register();
 
         //Registering SkinCache and Special Skins
         SkinCacher skinCacher = new SkinCacher();
@@ -88,6 +89,7 @@ public class SimuKraft {
 
         ModEntities.registerRenderers();
         ModContainers.registerScreens();
+
     }
 
     @SubscribeEvent
@@ -103,7 +105,7 @@ public class SimuKraft {
         b = (b + 3) % 256;
     }
 
-    private void drawCube(RenderWorldLastEvent event, Vector3d pointA, Vector3d pointB, Vector3d color) {
+    public static void drawCube(RenderWorldLastEvent event, Vector3d pointA, Vector3d pointB, Vector3d color) {
         IRenderTypeBuffer.Impl buffer = Minecraft.getInstance().renderBuffers().bufferSource();
         IVertexBuilder builder = buffer.getBuffer(RenderType.lines()); //SpellRender.QUADS is a personal RenderType, of VertexFormat POSITION_COLOR.
 
