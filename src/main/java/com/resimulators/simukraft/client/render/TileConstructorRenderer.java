@@ -75,11 +75,6 @@ public class TileConstructorRenderer extends TileEntityRenderer<TileConstructor>
                 Vector3d color = new Vector3d(255,255,255);
                 stack.translate(-constructor.getBlockPos().getX(), -constructor.getBlockPos().getY(), -constructor.getBlockPos().getZ());
                 Matrix4f mat = stack.last().pose();
-                //System.out.println(new Vector3d(pointA.x - pointB.x, pointA.y - pointB.y,pointA.z - pointB.z));
-                //Vector3d cam = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
-                //stack.scale(2,2,2);
-                constructor.getLevel().setBlock(new BlockPos(pointA.x,pointA.y + 3, pointA.z), Blocks.COBBLESTONE.defaultBlockState(),3);
-                constructor.getLevel().setBlock(new BlockPos(pointB.x,pointB.y + 3, pointB.z), Blocks.COBBLESTONE.defaultBlockState(),3);
                 /** builder.vertex(mat, (float) pointA.x, (float) pointA.y, (float) pointA.z).color(0, (int) color.x, (int) color.y, (int) color.z).endVertex();
                  builder.vertex(mat, (float) pointA.x, (float) pointA.y, (float) pointB.z).color(0, (int) color.x, (int) color.y, (int) color.z).endVertex();
 
