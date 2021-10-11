@@ -86,4 +86,11 @@ public class TileFisher extends TileEntity implements IControlBlock {
     public void handleUpdateTag(BlockState blockState, CompoundNBT parentNBTTagCompound) {
         this.load(blockState, parentNBTTagCompound);
     }
+
+
+    @Override
+    public void fireSim() {
+        setHired(false);
+        setSimId(null);
+    }
 }

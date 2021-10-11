@@ -189,4 +189,11 @@ public class TileBaseMarker extends TileEntity implements ITile {
     }
 
 
+    @Override
+    public void fireSim() {
+        setHired(false);
+        setSimId(null);
+    }
+
+
 }

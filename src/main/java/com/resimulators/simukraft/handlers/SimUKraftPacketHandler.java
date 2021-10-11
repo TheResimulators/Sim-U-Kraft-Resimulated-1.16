@@ -49,6 +49,7 @@ public class SimUKraftPacketHandler {
         registerMessage(newId(), NewHousePacket.class, NewHousePacket::new);
         registerMessage(newId(), HouseOccupantIdsPacket.class, HouseOccupantIdsPacket::new);
         registerMessage(newId(), RequestHouseOccupantsPacket.class, RequestHouseOccupantsPacket::new);
+        registerMessage(newId(), BuilderShouldRenderPacket.class, BuilderShouldRenderPacket::new);
 
     }
 

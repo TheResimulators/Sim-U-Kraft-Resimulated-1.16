@@ -11,4 +11,6 @@ public interface ITile {
     UUID getSimId();
 
     void setSimId(UUID id);
+
+    void fireSim();
 }

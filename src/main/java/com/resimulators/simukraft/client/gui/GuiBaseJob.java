@@ -171,7 +171,8 @@ public class GuiBaseJob extends Screen {
         Back.visible = false;
 
 
-        addButton(Confirm = new Button(20, height - 30, 110, 20, new StringTextComponent("Confirm"), Confirm -> sendPackets()));
+        addButton(Confirm = new Button(20, height - 30, 110, 20, new StringTextComponent("Confirm"),
+                Confirm -> sendPackets()));
         Confirm.visible = false;
         if (state == State.HIRE_INFO) {
             Hire.visible = false;

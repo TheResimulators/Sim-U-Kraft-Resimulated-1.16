@@ -41,4 +41,11 @@ public class TileFarmer extends TileBaseMarker {
     public void handleUpdateTag(BlockState blockState, CompoundNBT parentNBTTagCompound) {
         this.load(blockState, parentNBTTagCompound);
     }
+
+
+    @Override
+    public void fireSim() {
+        setHired(false);
+        setSimId(null);
+    }
 }

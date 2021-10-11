@@ -61,6 +61,12 @@ public class TileAnimalFarm extends TileEntity implements IControlBlock {
         setChanged();
     }
 
+    @Override
+    public void fireSim() {
+        setHired(false);
+        setSimId(null);
+    }
+
     public String getName() {
         return name;
     }

@@ -70,6 +70,7 @@ public class StartBuildingPacket implements IMessage {
                 BuildingTemplate template = StructureHandler.loadStructure(name);
                 builder.setTemplate(template);
                 sim.setActivity(Activity.GOING_TO_WORK);
+                constructor.setBuilding(true);
 
             }
         }

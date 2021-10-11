@@ -33,6 +33,8 @@ public class TileConstructor extends TileEntity implements ITile {
     private UUID simId;
     private BlockPos cornerPosition;
     private BlockPos origin;
+    private boolean shouldRender;
+    private boolean isBuilding;
 
     public TileConstructor() {
         super(ModTileEntities.CONSTRUCTOR.get());
@@ -61,6 +63,14 @@ public class TileConstructor extends TileEntity implements ITile {
     }
 
     @Override
+    public void fireSim() {
+        setHired(false);
+        setSimId(null);
+        shouldRender = false;
+        isBuilding = false;
+    }
+
+    @Override
     public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
         load(this.getBlockState(), pkt.getTag());
     }
@@ -72,12 +82,17 @@ public class TileConstructor extends TileEntity implements ITile {
         if (nbt.contains("simid")) {
             simId = nbt.getUUID("simid");
         }
-        if (nbt.contains("origin")){
+        if (nbt.contains("origin")) {
             origin = BlockPos.of(nbt.getLong("origin"));
             cornerPosition = BlockPos.of(nbt.getLong("cornerPos"));
         }
+        if (nbt.contains("shouldRender")) {
+            shouldRender = nbt.getBoolean("shouldRender");
+        }
+        if (nbt.contains("isbuilding")){
+            isBuilding = nbt.getBoolean("isbuilding");
+        }
     }
-
     @Override
     public CompoundNBT save(CompoundNBT nbt) {
         super.save(nbt);
@@ -89,6 +104,8 @@ public class TileConstructor extends TileEntity implements ITile {
             nbt.putLong("origin",origin.asLong());
             nbt.putLong("cornerPos",cornerPosition.asLong());
         }
+        nbt.putBoolean("shouldRender",shouldRender);
+        nbt.putBoolean("isbuilding",isBuilding);
         return nbt;
     }
 
@@ -109,7 +126,6 @@ public class TileConstructor extends TileEntity implements ITile {
 
         cornerPosition = size;
                 //BlockPos.ZERO.relative(direction).relative(direction.getClockWise(),size.getX()).relative(direction,size.getZ()).above(size.getY());
-
         this.origin = this.getBlockPos().relative(direction);
         this.level.setBlock(origin.offset(0,3,0), Blocks.COBBLESTONE.defaultBlockState(),3);
         this.level.setBlock(cornerPosition.offset(0,3,0), Blocks.COBBLESTONE.defaultBlockState(),3);
@@ -138,6 +154,31 @@ public class TileConstructor extends TileEntity implements ITile {
 
     @Override
     public AxisAlignedBB getRenderBoundingBox() {
-        return new AxisAlignedBB(this.getBlockPos(),cornerPosition);
+        if (cornerPosition != null){
+            return new AxisAlignedBB(this.getBlockPos(),cornerPosition);
+        }else{
+            return super.getRenderBoundingBox();
+        }
+    }
+    /**this returns the boolean should render*/
+    public boolean isShouldRender(){
+        return shouldRender;
+    }
+
+    public void setShouldRender(boolean shouldRender){
+        this.shouldRender = shouldRender;
+        setChanged();
+        level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 2);
+
+    }
+
+    public boolean isBuilding() {
+        return isBuilding;
+    }
+
+    public void setBuilding(boolean building) {
+        isBuilding = building;
+        setChanged();
+        level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 2);
     }
 }

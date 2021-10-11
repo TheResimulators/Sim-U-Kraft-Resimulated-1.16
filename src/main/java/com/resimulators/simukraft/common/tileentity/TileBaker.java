@@ -88,4 +88,10 @@ public class TileBaker extends TileEntity implements IControlBlock {
         load(this.getBlockState(), pkt.getTag());
     }
 
+
+    @Override
+    public void fireSim() {
+        setHired(false);
+        setSimId(null);
+    }
 }

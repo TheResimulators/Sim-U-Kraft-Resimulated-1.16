@@ -403,8 +403,7 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
                 BlockPos jobPos = sim.getJob().getWorkSpace();
                 ITile tile = (ITile) sim.level.getBlockEntity(jobPos);
                 if (tile != null) {
-                    tile.setHired(false);
-                    tile.setSimId(null);
+                    tile.fireSim();
                 }
             }
             if (!dying){

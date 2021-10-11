@@ -10,6 +10,8 @@ import com.resimulators.simukraft.common.building.BuildingTemplate;
 import com.resimulators.simukraft.common.enums.BuildingType;
 import com.resimulators.simukraft.common.enums.Category;
 import com.resimulators.simukraft.common.jobs.Profession;
+import com.resimulators.simukraft.common.tileentity.TileConstructor;
+import com.resimulators.simukraft.packets.BuilderShouldRenderPacket;
 import com.resimulators.simukraft.packets.StartBuildingPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -19,6 +21,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nullable;
 import java.awt.*;
@@ -43,8 +46,12 @@ public class GuiBuilder extends GuiBaseJob {
     private int maxButtons;
     private int pageIndex = 0;
 
+    private boolean shouldRender = false;
+    private Button shouldRenderButton;
+    private TileConstructor constructor;
     public GuiBuilder(ITextComponent component, ArrayList<Integer> ids, BlockPos pos, @Nullable int id) {
         super(component, ids, pos, id, Profession.BUILDER.getId());
+        constructor = (TileConstructor) SimuKraft.proxy.getClientWorld().getBlockEntity(pos);
     }
 
     public void setStructures(ArrayList<BuildingTemplate> structures) {
@@ -55,19 +62,21 @@ public class GuiBuilder extends GuiBaseJob {
 
     }
 
-    public void createStructureButtons() {
+    private void createStructureButtons() {
         int xSpacing = 150;
         int xPadding = 20;
         int maxButtonsWidth = this.width / 150;
         maxButtons = maxButtonsWidth * (this.height / 125);
         int index;
+        BuildingType type;
         for (BuildingTemplate template : structures) {
-            BuildingType type = BuildingType.getById(template.getTypeID());
-
-            if (type == null) {
-                type = BuildingType.SPECIAL;
-                SimuKraft.LOGGER().error("structure " + template.getName() + " is missing building type and Has been added as a special building");
+            try {
+               type = BuildingType.getById(template.getTypeID());
+            }catch (IndexOutOfBoundsException e) {
+                System.out.println("Template Id out of bounds, please check that the id is correct ID: " + template.getTypeID());
+                continue;
             }
+            //SimuKraft.LOGGER().error("structure " + template.getName() + " is missing building type and Has been added as a special building");
             StructureButton button = new StructureButton();
             structureButtons.computeIfAbsent(type.category, k -> new ArrayList<>());
             index = (structureButtons.get(type.category)).size() % maxButtons;
@@ -117,7 +126,9 @@ public class GuiBuilder extends GuiBaseJob {
                 font.draw(stack, "Author: " + selected.getAuthor(), (float) width / 6, (float) height / 4 + 20, Color.WHITE.getRGB());
                 font.draw(stack, "Price: " + selected.getCost(), (float) width / 6, (float) height / 4 + 40, Color.WHITE.getRGB());
                 font.draw(stack, "Rent: " + selected.getRent(), (float) width / 6, (float) height / 4 + 60, Color.WHITE.getRGB());
-
+                }
+                if (constructor.isBuilding() && state == State.MAIN){
+                    font.draw(stack,"Render outline", width-145 + StringUtils.length("Render outline")/2, 25,Color.WHITE.getRGB());
             }
 
 
@@ -135,6 +146,14 @@ public class GuiBuilder extends GuiBaseJob {
         }
         pageIndex = 0;
 
+        if (constructor.isBuilding()){
+            shouldRender = constructor.isShouldRender();
+            addButton(shouldRenderButton = new Button(width-150,40,100,20,new StringTextComponent(String.valueOf(shouldRender)), Render ->{
+                shouldRender = !shouldRender;
+                shouldRenderButton.setMessage(new StringTextComponent(String.valueOf(shouldRender)));
+                Network.getNetwork().sendToServer(new BuilderShouldRenderPacket(pos,shouldRender));
+            }));
+        }
         addButton(Build = new LargeButton(width / 2 - 55, height - 55, 110, 42, new StringTextComponent("Build"), (Build -> {
             super.hideAll();
             CustomBack.visible = true;
@@ -266,6 +285,7 @@ public class GuiBuilder extends GuiBaseJob {
     }
 
     private void startBuilding() {
+
         Network.getNetwork().sendToServer(new StartBuildingPacket(pos, Minecraft.getInstance().player.getMotionDirection(), selected.getName(), Minecraft.getInstance().player.getUUID()));
         Minecraft.getInstance().setScreen(null);
     }
@@ -284,6 +304,7 @@ public class GuiBuilder extends GuiBaseJob {
     public void showMainMenu() {
         super.showMainMenu();
         Build.visible = true;
+        shouldRenderButton.visible = true;
     }
 
     private static class State extends GuiBaseJob.State {
