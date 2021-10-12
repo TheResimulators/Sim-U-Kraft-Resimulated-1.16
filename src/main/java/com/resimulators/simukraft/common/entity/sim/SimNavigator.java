@@ -1,5 +1,7 @@
 package com.resimulators.simukraft.common.entity.sim;
 
+import com.resimulators.simukraft.Configs;
+import com.resimulators.simukraft.SimuKraft;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.pathfinding.GroundPathNavigator;
 import net.minecraft.pathfinding.Path;
@@ -17,7 +19,7 @@ public class SimNavigator extends GroundPathNavigator {
     @Override
     public boolean moveTo(@Nullable Path path, double p_75484_2_) {
         this.doStuckDetection(this.getTempMobPos());
-        if ((path != null && path.getDistToTarget() > maxLengthBeforeTeleport) || this.isStuck()) {
+        if ((path != null && path.getDistToTarget() > SimuKraft.config.getSims().teleportDistance.get()) || this.isStuck()) {
             //teleport
             mob.setPos(getTargetPos().getX(), getTargetPos().getY(), getTargetPos().getZ());
             return true;
