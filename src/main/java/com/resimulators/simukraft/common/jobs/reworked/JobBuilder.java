@@ -124,6 +124,7 @@ public class JobBuilder implements IReworkedJob {
         if (workSpace != null) {
             other.putLong("jobpos", workSpace.asLong());
         }
+        other.putInt("blockIndex",blockIndex);
         other.putBoolean("finished", finished);
         nbt.add(other);
 
@@ -421,6 +422,7 @@ public class JobBuilder implements IReworkedJob {
             Template.BlockInfo info = blocks.get(i);
             Block block = info.state.getBlock();
             if (block == Blocks.AIR) continue;
+            if (block == ModBlocks.CONTROL_BLOCK.get()) continue;
             if (block instanceof BedBlock && info.state.getValue(BedBlock.PART) == BedPart.HEAD) continue;
             if (block instanceof DoorBlock) {
                 if (info.state.getValue(DoorBlock.HALF) == DoubleBlockHalf.UPPER)
