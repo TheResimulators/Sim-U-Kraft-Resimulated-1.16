@@ -7,6 +7,7 @@ import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.common.enums.BuildingType;
 import com.resimulators.simukraft.common.enums.Category;
 import com.resimulators.simukraft.handlers.StructureHandler;
+import net.minecraft.crash.ReportedException;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTUtil;
@@ -20,13 +21,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nullable;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
@@ -242,7 +237,14 @@ public class CustomTemplateManager {
     }
 
     private static BuildingTemplate loadTemplate(InputStream inputStreamIn) throws IOException {
-        CompoundNBT compoundnbt = CompressedStreamTools.readCompressed(inputStreamIn);
-        return readStructure(compoundnbt);
+        try {
+            CompoundNBT compoundnbt = CompressedStreamTools.readCompressed(inputStreamIn);
+            return readStructure(compoundnbt);
+        }catch (ReportedException e){
+            System.out.println("building could not be loaded");
+            System.out.println(e.getMessage());
+            e.printStackTrace();
+        }
+        return null;
     }
 }
