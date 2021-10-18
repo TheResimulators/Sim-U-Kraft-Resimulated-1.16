@@ -49,6 +49,7 @@ public class GuiBuilder extends GuiBaseJob {
     private boolean shouldRender = false;
     private Button shouldRenderButton;
     private TileConstructor constructor;
+
     public GuiBuilder(ITextComponent component, ArrayList<Integer> ids, BlockPos pos, @Nullable int id) {
         super(component, ids, pos, id, Profession.BUILDER.getId());
         constructor = (TileConstructor) SimuKraft.proxy.getClientWorld().getBlockEntity(pos);
@@ -71,9 +72,9 @@ public class GuiBuilder extends GuiBaseJob {
         BuildingType type;
         for (BuildingTemplate template : structures) {
             try {
-               type = BuildingType.getById(template.getTypeID());
-            }catch (IndexOutOfBoundsException e) {
-                System.out.println("Template Id out of bounds, please check that the id is correct ID: " + template.getTypeID());
+                type = BuildingType.getById(template.getTypeID());
+            } catch (IndexOutOfBoundsException e) {
+                System.out.println("Template Id out of bounds, building:  " + template.getName() + ". please check that the id is correct ID: " + template.getTypeID());
                 continue;
             }
             //SimuKraft.LOGGER().error("structure " + template.getName() + " is missing building type and Has been added as a special building");
@@ -126,9 +127,9 @@ public class GuiBuilder extends GuiBaseJob {
                 font.draw(stack, "Author: " + selected.getAuthor(), (float) width / 6, (float) height / 4 + 20, Color.WHITE.getRGB());
                 font.draw(stack, "Price: " + selected.getCost(), (float) width / 6, (float) height / 4 + 40, Color.WHITE.getRGB());
                 font.draw(stack, "Rent: " + selected.getRent(), (float) width / 6, (float) height / 4 + 60, Color.WHITE.getRGB());
-                }
-                if (constructor.isBuilding() && state == State.MAIN){
-                    font.draw(stack,"Render outline", width-145 + StringUtils.length("Render outline")/2, 25,Color.WHITE.getRGB());
+            }
+            if (constructor.isBuilding() && state == State.MAIN) {
+                font.draw(stack, "Render outline", width - 145 + StringUtils.length("Render outline") / 2, 25, Color.WHITE.getRGB());
             }
 
 
@@ -146,12 +147,12 @@ public class GuiBuilder extends GuiBaseJob {
         }
         pageIndex = 0;
 
-        if (constructor.isBuilding()){
+        if (constructor.isBuilding()) {
             shouldRender = constructor.isShouldRender();
-            addButton(shouldRenderButton = new Button(width-150,40,100,20,new StringTextComponent(String.valueOf(shouldRender)), Render ->{
+            addButton(shouldRenderButton = new Button(width - 150, 40, 100, 20, new StringTextComponent(String.valueOf(shouldRender)), Render -> {
                 shouldRender = !shouldRender;
                 shouldRenderButton.setMessage(new StringTextComponent(String.valueOf(shouldRender)));
-                Network.getNetwork().sendToServer(new BuilderShouldRenderPacket(pos,shouldRender));
+                Network.getNetwork().sendToServer(new BuilderShouldRenderPacket(pos, shouldRender));
             }));
         }
         addButton(Build = new LargeButton(width / 2 - 55, height - 55, 110, 42, new StringTextComponent("Build"), (Build -> {
