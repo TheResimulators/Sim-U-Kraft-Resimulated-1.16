@@ -65,6 +65,7 @@ public class JobBuilder implements IReworkedJob {
     private PlacementSettings settings;
     private final ArrayList<BlockPos> chests = new ArrayList<>();
     private final HashMap<Item, Integer> blocksNeeded = new HashMap<>();
+    private TileConstructor constructor;
 
     public JobBuilder(SimEntity sim) {
         this.sim = sim;
@@ -143,6 +144,9 @@ public class JobBuilder implements IReworkedJob {
             }
             if (list.contains("finished")) {
                 finished = list.getBoolean("finished");
+            }
+            if (list.contains("blockIndex")){
+                blockIndex = list.getInt("blockIndex");
             }
         }
     }
@@ -239,9 +243,10 @@ public class JobBuilder implements IReworkedJob {
                     })
             );
 
-            TileConstructor constructor = (TileConstructor) sim.level.getBlockEntity(workSpace);
+            constructor = (TileConstructor) sim.level.getBlockEntity(workSpace);
             constructor.setBuildingPositioning(blocks.get(blocks.size()-1).pos,direction);
             chargeBlockIndexForward();
+            constructor.onStartBuilding(blockIndex+1,blocks.size());
         }
     }
 
@@ -257,6 +262,7 @@ public class JobBuilder implements IReworkedJob {
             delay = 1;
             if (state == State.STARTING) {
                 setBlocksNeeded();
+                constructor.setBlocksNeeded(blocksNeeded);
                 retrieveItemsFromChest();
                 state = State.TRAVELING;
                 blockIndex = 0;
@@ -278,10 +284,11 @@ public class JobBuilder implements IReworkedJob {
                     blockstate = blockstate.rotate(sim.level, blockInfo.pos, rotation.getRotated(template.getBlockRotation()));
 
                     if (((blockInfo.state.getBlock() instanceof BlockControlBlock || sim.getInventory().hasItemStack(new ItemStack(blockInfo.state.getBlock()))) || blockIgnorable(blockstate))) { // remove true for official release. for testing purposes
-                        if (placeBlock(blockInfo, blockstate)) {
                             int index = sim.getInventory().findSlotMatchingUnusedItem(new ItemStack(blockstate.getBlock()));
-                            if (index >= 0) {
+                        if (index >= 0) {
+                            if (placeBlock(blockInfo, blockstate)) {
                                 sim.getInventory().removeItem(index, 1);
+                                constructor.updateBlockIndex(blockIndex+1);
                             }
                         }
                         if (blockIndex < blocks.size() - 1) {
@@ -516,10 +523,11 @@ public class JobBuilder implements IReworkedJob {
             int needed = blocksNeeded.get(item);
             int count = countSimItem(item);
             if (count > 0)
-                if (count >= needed)
+                if (count >= needed){
                     blocksNeeded.remove(item);
-                else
-                    blocksNeeded.put(item, needed - count);
+                    constructor.removeBlockFromNeeded(item);}
+                else{
+                    blocksNeeded.put(item, needed - count);}
         }
         for (BlockPos pos : chests) {
             ChestTileEntity entity = (ChestTileEntity) sim.level.getBlockEntity(pos);
@@ -533,6 +541,7 @@ public class JobBuilder implements IReworkedJob {
                         if (amountNeeded < stack.getCount()) {
                             stack.setCount(stack.getCount() - amountNeeded);
                             blocksNeeded.remove(item);
+                            constructor.removeBlockFromNeeded(item);
                             sim.getInventory().addItemStackToInventory(new ItemStack(item, amountNeeded));
                         } else {
                             amountNeeded -= stack.getCount();
@@ -548,13 +557,9 @@ public class JobBuilder implements IReworkedJob {
         final String[] string = {""};
         HashMap<Item, Integer> blocksNeededCache = new HashMap<>(blocksNeeded);
         blocksNeededCache.keySet().forEach(key -> {
-            /*if (key.equals(ModBlocks.CONTROL_BLOCK.get().asItem())) {
-                //blocksNeeded.remove(key);
-            } else {*/
             int amount = blocksNeeded.get(key);
             if (amount > 0)
-                string[0] += amount + " " + key + ", ";
-            //}
+                string[0] += amount + " " + key + ", \n";
         });
         if (!string[0].equals("")) {
             SavedWorldData.get(sim.level).getFactionWithSim(sim.getUUID()).sendFactionChatMessage(sim.getName().getString() + " still needs " + string[0], sim.level);
