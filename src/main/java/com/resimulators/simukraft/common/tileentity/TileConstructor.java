@@ -12,7 +12,9 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SUpdateTileEntityPacket;
 import net.minecraft.tileentity.TileEntity;
@@ -22,9 +24,11 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.UUID;
 
 public class TileConstructor extends TileEntity implements ITile {
@@ -35,6 +39,11 @@ public class TileConstructor extends TileEntity implements ITile {
     private BlockPos origin;
     private boolean shouldRender;
     private boolean isBuilding;
+
+    private int currentBlockIndex;
+    private int totalBlockIndex;
+
+    private HashMap<Item, Integer> blocksNeeded = new HashMap<>();
 
     public TileConstructor() {
         super(ModTileEntities.CONSTRUCTOR.get());
@@ -92,6 +101,21 @@ public class TileConstructor extends TileEntity implements ITile {
         if (nbt.contains("isbuilding")){
             isBuilding = nbt.getBoolean("isbuilding");
         }
+        if (nbt.contains("currentBlockIndex")){
+            currentBlockIndex = nbt.getInt("currentBlockIndex");
+        }
+        if (nbt.contains("totalBlockIndex")){
+            totalBlockIndex = nbt.getInt("totalBlockIndex");
+        }
+        if (nbt.contains("items needed")){
+            ListNBT listNBT = nbt.getList("items needed", Constants.NBT.TAG_COMPOUND);
+            for (int i = 0; i< listNBT.size();i++){
+                CompoundNBT compoundNBT = (CompoundNBT) listNBT.get(i);
+                Item item = Item.byId(compoundNBT.getInt("item"));
+                int amount = compoundNBT.getInt("amount");
+                blocksNeeded.put(item,amount);
+            }
+        }
     }
     @Override
     public CompoundNBT save(CompoundNBT nbt) {
@@ -106,6 +130,16 @@ public class TileConstructor extends TileEntity implements ITile {
         }
         nbt.putBoolean("shouldRender",shouldRender);
         nbt.putBoolean("isbuilding",isBuilding);
+        nbt.putInt("currentBlockIndex",currentBlockIndex);
+        nbt.putInt("totalBlockIndex",totalBlockIndex);
+        ListNBT blocksNeededList = new ListNBT();
+        for (Item item: blocksNeeded.keySet()){
+            CompoundNBT compoundNBT = new CompoundNBT();
+            compoundNBT.putInt("item",Item.getId(item));
+            compoundNBT.putInt("amount",blocksNeeded.get(item));
+            blocksNeededList.add(compoundNBT);
+        }
+        nbt.put("items needed",blocksNeededList);
         return nbt;
     }
 
@@ -178,6 +212,32 @@ public class TileConstructor extends TileEntity implements ITile {
 
     public void setBuilding(boolean building) {
         isBuilding = building;
+        setChanged();
+        level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 2);
+    }
+
+    public void onStartBuilding(int buildIndex,int maxBlockIndex)
+    {
+        this.currentBlockIndex = buildIndex;
+        this.totalBlockIndex = maxBlockIndex;
+        this.blocksNeeded = blocksNeeded;
+        setChanged();
+        level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 2);
+    }
+
+    public void updateBlockIndex(int newBlockIndex){
+        this.currentBlockIndex = newBlockIndex;
+        setChanged();
+        level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 2);
+    }
+
+    public void setBlocksNeeded(HashMap<Item,Integer> blocksNeeded){
+        this.blocksNeeded = blocksNeeded;
+    }
+
+    public void removeBlockFromNeeded(Item item){
+        int amount = blocksNeeded.get(item);
+        blocksNeeded.put(item,amount-1);
         setChanged();
         level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 2);
     }
