@@ -6,6 +6,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.resimulators.simukraft.Network;
 import com.resimulators.simukraft.Reference;
 import com.resimulators.simukraft.SimuKraft;
+import com.resimulators.simukraft.common.block.BlockControlBlock;
 import com.resimulators.simukraft.common.building.BuildingTemplate;
 import com.resimulators.simukraft.common.enums.BuildingType;
 import com.resimulators.simukraft.common.enums.Category;
@@ -13,14 +14,26 @@ import com.resimulators.simukraft.common.jobs.Profession;
 import com.resimulators.simukraft.common.tileentity.TileConstructor;
 import com.resimulators.simukraft.packets.BuilderShouldRenderPacket;
 import com.resimulators.simukraft.packets.StartBuildingPacket;
+import net.minecraft.block.BedBlock;
+import net.minecraft.block.Block;
+import net.minecraft.block.DoorBlock;
+import net.minecraft.block.GrassBlock;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.item.AirItem;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.world.gen.feature.IFeatureConfig;
+import net.minecraft.world.gen.feature.template.Template;
+import net.minecraftforge.client.gui.ScrollPanel;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nullable;
@@ -38,6 +51,7 @@ public class GuiBuilder extends GuiBaseJob {
     private Button special;
     private Button nextPage;
     private Button previousPage;
+    private Button showRemainingBlocks;
     private Category currentCategory;
     private BuildingTemplate selected;
     private boolean loaded = false;
@@ -45,7 +59,8 @@ public class GuiBuilder extends GuiBaseJob {
     private ArrayList<BuildingTemplate> structures;
     private int maxButtons;
     private int pageIndex = 0;
-
+    private RequirmentsScrollPanel requirmentsScrollPanel;
+    private RequirmentsScrollPanel remainingPanel;
     private boolean shouldRender = false;
     private Button shouldRenderButton;
     private TileConstructor constructor;
@@ -112,7 +127,6 @@ public class GuiBuilder extends GuiBaseJob {
                     button.addButtonsToGui();
                 }
                 button.controlVisibility(visible);
-                System.out.println(button.getVisibility());
             }
         }
     }
@@ -127,9 +141,17 @@ public class GuiBuilder extends GuiBaseJob {
                 font.draw(stack, "Author: " + selected.getAuthor(), (float) width / 6, (float) height / 4 + 20, Color.WHITE.getRGB());
                 font.draw(stack, "Price: " + selected.getCost(), (float) width / 6, (float) height / 4 + 40, Color.WHITE.getRGB());
                 font.draw(stack, "Rent: " + selected.getRent(), (float) width / 6, (float) height / 4 + 60, Color.WHITE.getRGB());
+                font.draw(stack,"Requirements",(float)width/2+60,(float)height/6,Color.WHITE.getRGB());
+                requirmentsScrollPanel.render(stack,p_render_1_,p_render_2_,p_render_3_);
             }
             if (constructor.isBuilding() && state == State.MAIN) {
                 font.draw(stack, "Render outline", width - 145 + StringUtils.length("Render outline") / 2, 25, Color.WHITE.getRGB());
+                font.draw(stack,"Blocks",width/2,20,Color.WHITE.getRGB());
+                font.draw(stack,constructor.getCurrentBlockIndex() +"/" + constructor.getTotalBlockIndex(), width/2,40,Color.WHITE.getRGB());
+            }
+            if (state == State.SHOWREMAINING){
+                font.draw(stack,"Remaining blocks",(float)width/2+60,(float)height/6,Color.WHITE.getRGB());
+                remainingPanel.render(stack,p_render_1_,p_render_2_,p_render_3_);
             }
 
 
@@ -147,14 +169,13 @@ public class GuiBuilder extends GuiBaseJob {
         }
         pageIndex = 0;
 
-        if (constructor.isBuilding()) {
-            shouldRender = constructor.isShouldRender();
-            addButton(shouldRenderButton = new Button(width - 150, 40, 100, 20, new StringTextComponent(String.valueOf(shouldRender)), Render -> {
-                shouldRender = !shouldRender;
-                shouldRenderButton.setMessage(new StringTextComponent(String.valueOf(shouldRender)));
-                Network.getNetwork().sendToServer(new BuilderShouldRenderPacket(pos, shouldRender));
-            }));
-        }
+        shouldRender = constructor.isShouldRender();
+        addButton(shouldRenderButton = new Button(width - 150, 40, 100, 20, new StringTextComponent(String.valueOf(shouldRender)), Render -> {
+            shouldRender = !shouldRender;
+            shouldRenderButton.setMessage(new StringTextComponent(String.valueOf(shouldRender)));
+            Network.getNetwork().sendToServer(new BuilderShouldRenderPacket(pos, shouldRender));
+        }));
+
         addButton(Build = new LargeButton(width / 2 - 55, height - 55, 110, 42, new StringTextComponent("Build"), (Build -> {
             super.hideAll();
             CustomBack.visible = true;
@@ -181,6 +202,10 @@ public class GuiBuilder extends GuiBaseJob {
                 state = State.MAIN;
                 controlCategoryButtons(false);
                 showMainMenu();
+            } else if (state == State.SHOWREMAINING){
+                state = State.MAIN;
+                showMainMenu();
+                showRemainingBlocks.visible = true;
             }
         })));
         addButton(confirmBuilding = new Button(20, height - 30, 110, 20, new StringTextComponent("Confirm"), Confirm -> startBuilding()));
@@ -236,6 +261,19 @@ public class GuiBuilder extends GuiBaseJob {
             controlStructures(true, currentCategory);
 
         }));
+
+        addWidget(remainingPanel = new RequirmentsScrollPanel(minecraft,130,height/2,height/4,width/2 + 40));
+
+        addButton(showRemainingBlocks = new Button(width-150,80,150,20, new StringTextComponent("Show Remaning Resources"),resources ->{
+            super.hideAll();
+            getRemaining();
+            state = State.SHOWREMAINING;
+            CustomBack.visible = true;
+        }));
+        requirmentsScrollPanel = new RequirmentsScrollPanel(minecraft,130,height/2,height/4,width/2+40);
+        this.children.add(requirmentsScrollPanel);
+
+
         nextPage.visible = false;
         previousPage.visible = false;
         residential.visible = false;
@@ -253,6 +291,7 @@ public class GuiBuilder extends GuiBaseJob {
         if (!loaded) {
             CustomBack.visible = false;
             Build.visible = false;
+
         } else {
             CustomBack.visible = false;
             if (state != State.MAIN) {
@@ -266,6 +305,7 @@ public class GuiBuilder extends GuiBaseJob {
                 if (state == State.BUILDINGINFO) {
                     confirmBuilding.visible = true;
                     CustomBack.visible = true;
+                    setRequirementsPanelString(selected);
                 }
                 if (state == State.SELECTCATEGORY) {
                     CustomBack.visible = true;
@@ -273,7 +313,15 @@ public class GuiBuilder extends GuiBaseJob {
                 }
             }
 
+
+
         }
+
+        if ((!constructor.isBuilding() || state != State.MAIN)){
+            shouldRenderButton.visible = false;
+            showRemainingBlocks.visible = false;
+        }
+
 
     }
 
@@ -308,10 +356,31 @@ public class GuiBuilder extends GuiBaseJob {
         shouldRenderButton.visible = true;
     }
 
+
+    private void getRemaining(){
+        HashMap<Item,Integer> remaining = constructor.getBlocksNeeded();
+        remainingPanel.requirements.clear();
+        int amount;
+        for (Item item: remaining.keySet()){
+            amount = remaining.get(item);
+            if (item instanceof AirItem) continue;
+            if (Block.byItem(item) instanceof GrassBlock) item = Items.DIRT;
+            if (Block.byItem(item) instanceof BlockControlBlock)continue;
+            if (Block.byItem(item) instanceof DoorBlock) amount = amount/2;
+            if (Block.byItem(item) instanceof BedBlock) amount = amount/2;
+            String builder = item.toString() +
+                ": " +
+                amount;
+            remainingPanel.requirements.add(builder);
+
+        }
+
+    }
     private static class State extends GuiBaseJob.State {
         private static final int SELECTBULDING = nextID();
         private static final int BUILDINGINFO = nextID();
         private static final int SELECTCATEGORY = nextID();
+        private static final int SHOWREMAINING = nextID();
 
 
     }
@@ -335,6 +404,7 @@ public class GuiBuilder extends GuiBaseJob {
                     previousPage.visible = false;
                     controlStructures(false);
                     selected = template;
+                    setRequirementsPanelString(selected);
                 });
                 name.visible = false;
                 author = new Button(x, y + height, width, height, new StringTextComponent("Author: " + template.getAuthor()), button -> {
@@ -380,6 +450,26 @@ public class GuiBuilder extends GuiBaseJob {
         }
     }
 
+    private void setRequirementsPanelString(BuildingTemplate template){
+        HashMap<Item,Integer> items = template.getBlockList();
+        requirmentsScrollPanel.requirements.clear();
+        int amount;
+        for (Item item: items.keySet()){
+            amount = items.get(item);
+            if (item instanceof AirItem) continue;
+            if (Block.byItem(item) instanceof GrassBlock) item = Items.DIRT;
+            if (Block.byItem(item) instanceof BlockControlBlock)continue;
+            if (Block.byItem(item) instanceof DoorBlock) amount = amount/2;
+            if (Block.byItem(item) instanceof BedBlock) amount = amount/2;
+            String builder = item.toString() +
+                ": " +
+                amount;
+            requirmentsScrollPanel.requirements.add(builder);
+
+        }
+
+    }
+
     private class LargeButton extends Button {
         final ResourceLocation LARGE_BUTTON = new ResourceLocation(Reference.MODID, "textures/gui/large_button.png");
 
@@ -417,6 +507,29 @@ public class GuiBuilder extends GuiBaseJob {
             }
 
             return i;
+        }
+    }
+
+    private class RequirmentsScrollPanel extends ScrollPanel{
+
+        private final ArrayList<String> requirements = new ArrayList<>();
+        private int PADDING = 6;
+        public RequirmentsScrollPanel(Minecraft client, int width, int height, int top, int left) {
+            super(client, width, height, top, left);
+        }
+
+        @Override
+        protected int getContentHeight() {
+            return requirements.size() * (font.lineHeight+5)+2 ;
+        }
+
+        @Override
+        protected void drawPanel(MatrixStack mStack, int entryRight, int relativeY, Tessellator tess, int mouseX, int mouseY) {
+
+            for (String line: requirements){
+                font.draw(mStack,new StringTextComponent(line),left + PADDING,relativeY,Color.WHITE.getRGB());
+                relativeY += font.lineHeight + 5;
+            }
         }
     }
 }
