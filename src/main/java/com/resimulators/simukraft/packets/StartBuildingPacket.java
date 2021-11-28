@@ -71,6 +71,8 @@ public class StartBuildingPacket implements IMessage {
                 builder.setTemplate(template);
                 sim.setActivity(Activity.GOING_TO_WORK);
                 constructor.setBuilding(true);
+                constructor.setWageTotal(template.getCost());
+                constructor.setWagePerBlock(template.getCost()/ template.totalItemsNeeded());
 
             }
         }
