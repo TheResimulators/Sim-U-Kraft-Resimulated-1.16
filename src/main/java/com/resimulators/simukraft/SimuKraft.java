@@ -24,6 +24,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
@@ -36,6 +37,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -72,7 +74,7 @@ public class SimuKraft {
         MinecraftForge.EVENT_BUS.register(MarkerBrokenEvent.class);
         MinecraftForge.EVENT_BUS.register(this);
         Network.handler.init();
-        StructureHandler.createTemplateManager();
+        //StructureHandler.createTemplateManager();
     }
 
     private void doClientStuff(final FMLClientSetupEvent event) {
@@ -91,20 +93,24 @@ public class SimuKraft {
         ModContainers.registerScreens();
 
     }
-
+    @SubscribeEvent
+    public void onServerStart(FMLServerAboutToStartEvent event){
+        StructureHandler.createTemplateManager();
+    }
     @SubscribeEvent
     public void onCommandRegister(RegisterCommandsEvent event) {
         CommandStructure.register(event.getDispatcher());
     }
 
     @SubscribeEvent
+    @OnlyIn(Dist.CLIENT)
     public void renderWorldLastEvent(RenderWorldLastEvent event) {
         drawCube(event, new Vector3d(100, 100, 100), new Vector3d(-100, 150, -100), new Vector3d(r, g, b));
         r = (r + 1) % 256;
         g = (g + 2) % 256;
         b = (b + 3) % 256;
     }
-
+    @OnlyIn(Dist.CLIENT)
     public static void drawCube(RenderWorldLastEvent event, Vector3d pointA, Vector3d pointB, Vector3d color) {
         IRenderTypeBuffer.Impl buffer = Minecraft.getInstance().renderBuffers().bufferSource();
         IVertexBuilder builder = buffer.getBuffer(RenderType.lines()); //SpellRender.QUADS is a personal RenderType, of VertexFormat POSITION_COLOR.
