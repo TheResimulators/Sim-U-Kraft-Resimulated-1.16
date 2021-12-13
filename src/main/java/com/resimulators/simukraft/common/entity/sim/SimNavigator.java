@@ -1,6 +1,5 @@
 package com.resimulators.simukraft.common.entity.sim;
 
-import com.resimulators.simukraft.Configs;
 import com.resimulators.simukraft.SimuKraft;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.pathfinding.GroundPathNavigator;
@@ -10,7 +9,6 @@ import net.minecraft.world.World;
 import javax.annotation.Nullable;
 
 public class SimNavigator extends GroundPathNavigator {
-    private static final double maxLengthBeforeTeleport = 10;
 
     public SimNavigator(MobEntity p_i45875_1_, World p_i45875_2_) {
         super(p_i45875_1_, p_i45875_2_);

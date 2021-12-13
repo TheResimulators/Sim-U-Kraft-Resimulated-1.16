@@ -41,7 +41,10 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.pathfinding.GroundPathNavigator;
 import net.minecraft.pathfinding.PathNavigator;
+import net.minecraft.potion.EffectUtils;
+import net.minecraft.potion.Effects;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
@@ -107,7 +110,9 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
         super(type, world);
         this.inventory = new SimInventory(this, "Sim Inventory", false, 27);
         this.foodStats = new FoodStats(this);
+        ((GroundPathNavigator) this.getNavigation()).setCanOpenDoors(true);
     }
+
 
     @Override
     protected void registerGoals() {
@@ -654,9 +659,28 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
         this.inventory.tick();
 
         super.aiStep();
+        updateSwingTime();
+    }
+
+    protected void updateSwingTime() {
+        int i = this.getCurrentSwingDuration();
+        if (this.swinging) {
+            ++this.swingTime;
+            if (this.swingTime >= i) {
+                this.swingTime = 0;
+                this.swinging = false;
+            }
+        } else {
+            this.swingTime = 0;
+        }
+
+        this.attackAnim = (float)this.swingTime / (float)i;
     }
 
 
+    private int getCurrentSwingDuration(){
+        return 8;
+    }
     public void selectSlot(int i) {
         if (0 <= i && i < 27)
             inventory.currentItem = i;
