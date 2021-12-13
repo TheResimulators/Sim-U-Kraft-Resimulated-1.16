@@ -12,7 +12,6 @@ import com.resimulators.simukraft.common.entity.sim.SimInformationOverlay;
 import com.resimulators.simukraft.common.events.world.MarkerBrokenEvent;
 import com.resimulators.simukraft.common.events.world.NewDayEvent;
 import com.resimulators.simukraft.common.events.world.SimDeathEvent;
-import com.resimulators.simukraft.common.tileentity.TileConstructor;
 import com.resimulators.simukraft.handlers.StructureHandler;
 import com.resimulators.simukraft.init.*;
 import com.resimulators.simukraft.proxy.ClientProxy;
@@ -32,11 +31,11 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ExtensionPoint;
 import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
 import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
@@ -91,11 +90,14 @@ public class SimuKraft {
 
         ModEntities.registerRenderers();
         ModContainers.registerScreens();
+        StructureHandler.createTemplateManager();
 
     }
     @SubscribeEvent
     public void onServerStart(FMLServerAboutToStartEvent event){
-        StructureHandler.createTemplateManager();
+        if (event.getServer().isDedicatedServer()){
+            StructureHandler.createServerTemplateManager();
+        }
     }
     @SubscribeEvent
     public void onCommandRegister(RegisterCommandsEvent event) {
@@ -105,15 +107,17 @@ public class SimuKraft {
     @SubscribeEvent
     @OnlyIn(Dist.CLIENT)
     public void renderWorldLastEvent(RenderWorldLastEvent event) {
+      /*
         drawCube(event, new Vector3d(100, 100, 100), new Vector3d(-100, 150, -100), new Vector3d(r, g, b));
         r = (r + 1) % 256;
         g = (g + 2) % 256;
         b = (b + 3) % 256;
+      */
     }
     @OnlyIn(Dist.CLIENT)
     public static void drawCube(RenderWorldLastEvent event, Vector3d pointA, Vector3d pointB, Vector3d color) {
         IRenderTypeBuffer.Impl buffer = Minecraft.getInstance().renderBuffers().bufferSource();
-        IVertexBuilder builder = buffer.getBuffer(RenderType.lines()); //SpellRender.QUADS is a personal RenderType, of VertexFormat POSITION_COLOR.
+        IVertexBuilder builder = buffer.getBuffer(RenderType.lines());
 
         MatrixStack stack = event.getMatrixStack();
 

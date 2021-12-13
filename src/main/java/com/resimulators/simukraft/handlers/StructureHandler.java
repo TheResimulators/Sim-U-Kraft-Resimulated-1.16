@@ -29,8 +29,12 @@ import java.util.function.Predicate;
 
 public class StructureHandler implements ISelectiveResourceReloadListener {
 
-    public static void createTemplateManager() {
+    public static void createServerTemplateManager() {
         CustomTemplateManager.initCustomTemplateManager(ServerLifecycleHooks.getCurrentServer().getDataPackRegistries().getResourceManager(),ServerLifecycleHooks.getCurrentServer().getFixerUpper());
+    }
+
+    public static void createTemplateManager(){
+        CustomTemplateManager.initCustomTemplateManager(Minecraft.getInstance().getResourceManager(),Minecraft.getInstance().getFixerUpper());
     }
 
     /** saves the structure to file using built-in template manager */
