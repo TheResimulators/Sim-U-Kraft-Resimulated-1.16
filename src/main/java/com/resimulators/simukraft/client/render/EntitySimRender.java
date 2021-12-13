@@ -118,7 +118,7 @@ public class EntitySimRender extends LivingRenderer<SimEntity, EntitySimModel> {
 
 
                 matrix.scale(.9f, .9f, .9f);
-                super.renderNameTag(simEntity, new StringTextComponent(TextFormatting.YELLOW + simEntity.getActivity().name + TextFormatting.RESET), matrix, renderBuffer, light);
+                super.renderNameTag(simEntity, new StringTextComponent(TextFormatting.YELLOW + simEntity.getStatus() + TextFormatting.RESET), matrix, renderBuffer, light);
                 matrix.translate(0, 9.0F * 1.2f * 0.025F, 0);
             }
             //matrix.translate(0, (double) (9.0F * 1F * 0.025F), 0);
