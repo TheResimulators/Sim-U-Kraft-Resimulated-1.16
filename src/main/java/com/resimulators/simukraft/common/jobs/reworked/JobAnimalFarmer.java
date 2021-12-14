@@ -336,7 +336,9 @@ public class JobAnimalFarmer implements IReworkedJob {
             }
         }
         if (itemsToMove.size() != 0){
-            SavedWorldData.get(sim.level).getFactionWithSim(sim.getUUID()).sendFactionChatMessage(String.format("%s has no more inventory space to empty collected items",farm.getName() +"er"),world);
+            SavedWorldData.get(sim.level).getFactionWithSim(sim.getUUID()).sendFactionChatMessage(String.format("%s %s has no more inventory space to empty collected items",farm.getName() +"er",sim.getCustomName().getString()),world);
+            sim.setActivity(Activity.FORCE_STOP);
+            sim.setStatus("Not working");
         }
         return false;
     }
