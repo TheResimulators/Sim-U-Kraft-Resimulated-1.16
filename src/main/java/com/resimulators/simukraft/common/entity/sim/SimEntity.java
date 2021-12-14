@@ -6,6 +6,7 @@ import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.common.entity.goals.GoToWorkGoal;
 import com.resimulators.simukraft.common.entity.goals.PickupItemGoal;
 import com.resimulators.simukraft.common.entity.goals.TalkingToPlayerGoal;
+import com.resimulators.simukraft.common.entity.pathfinding.OpenGateGoal;
 import com.resimulators.simukraft.common.jobs.core.Activity;
 import com.resimulators.simukraft.common.jobs.core.IReworkedJob;
 import com.resimulators.simukraft.common.tileentity.ITile;
@@ -111,6 +112,8 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
         this.inventory = new SimInventory(this, "Sim Inventory", false, 27);
         this.foodStats = new FoodStats(this);
         ((GroundPathNavigator) this.getNavigation()).setCanOpenDoors(true);
+        this.getNavigation().getNodeEvaluator().setCanPassDoors(true);
+
     }
 
 
@@ -121,6 +124,7 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
         this.goalSelector.addGoal(2, new PickupItemGoal(this));
 
         //Unimportant "make more alive"-goals
+        this.goalSelector.addGoal(8, new OpenGateGoal(this,true));
         this.goalSelector.addGoal(9, new OpenDoorGoal(this, true));
         this.goalSelector.addGoal(10, new LookAtGoal(this, PlayerEntity.class, 2.0f, 1.0f));
         this.goalSelector.addGoal(11, new WaterAvoidingRandomWalkingGoal(this, 0.6d));
