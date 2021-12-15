@@ -62,6 +62,7 @@ public class Configs {
         public final ForgeConfigSpec.ConfigValue<List<? extends String>> specialSimNames;
         public final ForgeConfigSpec.ConfigValue<List<? extends String>> specialSimGenders;
         public final ForgeConfigSpec.BooleanValue coloredNames;
+        public final ForgeConfigSpec.DoubleValue teleportDistance;
 
         public Sims() {
             //Creating the configuration category for each side.
@@ -76,7 +77,7 @@ public class Configs {
                     .defineList("Thin model", ImmutableList.of("Div4Wom4n", "fabbe50"), obj -> obj instanceof String);
             coloredNames = builder.comment("Should you be able to color the Sim's names?")
                     .define("Colored Names", true);
-
+            teleportDistance = builder.comment("Distance that a sim has to be for it to teleport to its destination").defineInRange("Distance",10d,1d,Double.MAX_VALUE);
             //Finishes off the configuration category.
             builder.pop();
         }

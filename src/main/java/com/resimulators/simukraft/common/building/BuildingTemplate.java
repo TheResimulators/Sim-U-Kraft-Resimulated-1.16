@@ -21,6 +21,8 @@ import net.minecraft.world.IServerWorld;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.template.PlacementSettings;
 import net.minecraft.world.gen.feature.template.Template;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import sun.awt.windows.WPrinterJob;
 
@@ -37,7 +39,7 @@ public class BuildingTemplate extends Template {
     private String name = "";
     private Direction direction;
     private Rotation blockRotation = Rotation.NONE;
-
+    HashMap<Item,Integer> items = new HashMap<>();
 
 
     public BuildingTemplate() {
@@ -109,7 +111,6 @@ public class BuildingTemplate extends Template {
         nbt.putString("author", this.getAuthor());
         nbt.putLong("offset", offSet.asLong());
         nbt.putString("mirror", mirror.toString());
-
         return super.save(nbt);
     }
 
@@ -122,7 +123,8 @@ public class BuildingTemplate extends Template {
             direction = Direction.from2DDataValue(compound.getInt("direction"));
         } else {
             direction = Direction.from2DDataValue(2);
-            blockRotation = Rotation.CLOCKWISE_90;
+            blockRotation = Rotation.CLOCKWISE_180;
+
         }
         if (compound.contains("name")) {
             name = compound.getString("name");
@@ -144,11 +146,13 @@ public class BuildingTemplate extends Template {
         System.out.println(name);
         try{
             super.load(compound);
+            setBlockList();
         }catch (ResourceLocationException e){
             SimuKraft.LOGGER().error("Invalid block in template: " + name + " skipping, please check for errors in the blocks");
             SimuKraft.LOGGER().error(e.getMessage());
 
         }
+
     }
 
 
@@ -249,10 +253,9 @@ public class BuildingTemplate extends Template {
         return blockRotation;
     }
 
-    /*public void setResourceRequirements(World world){
-        RecipeManager recipeManager = world.getRecipeManager();
-        HashMap<Item,Integer> items = new HashMap<>();
-        for (Template.Palette palette: getBlocks()){
+    private void setBlockList(){
+        if (getBlocks().size() > 0){
+            Palette palette = getBlocks().get(0);
             for(BlockInfo info: palette.blocks()){
                 Block block = info.state.getBlock();
                 if (items.get(block.asItem()) == null){
@@ -263,19 +266,24 @@ public class BuildingTemplate extends Template {
                 }
             }
         }
+    }
 
+    public HashMap<Item, Integer> getBlockList(){
+        if (items.size() == 0) setBlockList();
+        return items;
+    }
+
+    public int totalItemsNeeded(){
+        HashMap<Item, Integer> items = getBlockList();
+        int total = 0;
         for (Item item: items.keySet()){
-            int itemAmount = items.get(item);
-            if (item.getRegistryName() != null) {
-                Optional<? extends IRecipe<?>> optionalIRecipe = recipeManager.byKey(item.getRegistryName());
-                if (optionalIRecipe.isPresent()){
-                    IRecipe<?> recipe = optionalIRecipe.get();
-                    int recipeAmount = (int)Math.ceil((double)recipe.getResultItem().getCount() / itemAmount);
-                    resourceRequirements.put(recipe,recipeAmount);
-                }
-            }
+            total += items.get(item);
         }
+        return total;
+    }
 
-    }*/
+    public void setBlockList(HashMap<Item,Integer> items){
+        this.items = items;
+    }
 }
 

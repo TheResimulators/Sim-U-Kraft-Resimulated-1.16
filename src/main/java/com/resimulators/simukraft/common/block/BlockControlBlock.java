@@ -96,7 +96,7 @@ public class BlockControlBlock extends BlockBase {
                         sim.fireSim(sim, id, false);
                     }
                 } else {
-
+                    ((TileResidential) tile).onDestroy(worldIn);
                 }
             }
         }

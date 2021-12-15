@@ -6,6 +6,7 @@ import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.common.entity.goals.GoToWorkGoal;
 import com.resimulators.simukraft.common.entity.goals.PickupItemGoal;
 import com.resimulators.simukraft.common.entity.goals.TalkingToPlayerGoal;
+import com.resimulators.simukraft.common.entity.pathfinding.OpenGateGoal;
 import com.resimulators.simukraft.common.jobs.core.Activity;
 import com.resimulators.simukraft.common.jobs.core.IReworkedJob;
 import com.resimulators.simukraft.common.tileentity.ITile;
@@ -41,7 +42,10 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.pathfinding.GroundPathNavigator;
 import net.minecraft.pathfinding.PathNavigator;
+import net.minecraft.potion.EffectUtils;
+import net.minecraft.potion.Effects;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
@@ -107,7 +111,11 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
         super(type, world);
         this.inventory = new SimInventory(this, "Sim Inventory", false, 27);
         this.foodStats = new FoodStats(this);
+        ((GroundPathNavigator) this.getNavigation()).setCanOpenDoors(true);
+        this.getNavigation().getNodeEvaluator().setCanPassDoors(true);
+
     }
+
 
     @Override
     protected void registerGoals() {
@@ -116,6 +124,7 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
         this.goalSelector.addGoal(2, new PickupItemGoal(this));
 
         //Unimportant "make more alive"-goals
+        this.goalSelector.addGoal(8, new OpenGateGoal(this,true));
         this.goalSelector.addGoal(9, new OpenDoorGoal(this, true));
         this.goalSelector.addGoal(10, new LookAtGoal(this, PlayerEntity.class, 2.0f, 1.0f));
         this.goalSelector.addGoal(11, new WaterAvoidingRandomWalkingGoal(this, 0.6d));
@@ -654,9 +663,28 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
         this.inventory.tick();
 
         super.aiStep();
+        updateSwingTime();
+    }
+
+    protected void updateSwingTime() {
+        int i = this.getCurrentSwingDuration();
+        if (this.swinging) {
+            ++this.swingTime;
+            if (this.swingTime >= i) {
+                this.swingTime = 0;
+                this.swinging = false;
+            }
+        } else {
+            this.swingTime = 0;
+        }
+
+        this.attackAnim = (float)this.swingTime / (float)i;
     }
 
 
+    private int getCurrentSwingDuration(){
+        return 8;
+    }
     public void selectSlot(int i) {
         if (0 <= i && i < 27)
             inventory.currentItem = i;

@@ -5,6 +5,8 @@ import com.resimulators.simukraft.common.jobs.Profession;
 import com.resimulators.simukraft.common.jobs.core.Activity;
 import com.resimulators.simukraft.common.jobs.core.IReworkedJob;
 import com.resimulators.simukraft.common.tileentity.TileAnimalFarm;
+import com.resimulators.simukraft.common.world.SavedWorldData;
+import com.resimulators.simukraft.utils.BlockUtils;
 import com.resimulators.simukraft.utils.Utils;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.item.Item;
@@ -45,7 +47,7 @@ public class JobAnimalFarmer implements IReworkedJob {
 
     private final int killsBeforeEmpty = 10;
     private final World world;
-    private final ArrayList<BlockPos> chests = new ArrayList<>();
+    private ArrayList<BlockPos> chests = new ArrayList<>();
     private final ArrayList<Integer> itemsToMove = new ArrayList<>();
     private final List<Item> drops = new ArrayList<>();
     private int currentKillCount;
@@ -187,63 +189,77 @@ public class JobAnimalFarmer implements IReworkedJob {
     public void start() {
 
         sim.setItemInHand(Hand.MAIN_HAND, new ItemStack(Items.DIAMOND_SWORD));
-        Utils.findInventoriesAroundPos(sim.getJob().getWorkSpace(), 5, world);
+        chests = Utils.findInventoriesAroundPos(sim.getJob().getWorkSpace(), 4, world);
         if (farm == null) {
             farm = (TileAnimalFarm) world.getBlockEntity(getWorkSpace());
             ResourceLocation resourcelocation = farm.getAnimal().getAnimal().getDefaultLootTable();
             table = this.world.getServer().getLootTables().get(resourcelocation);
+
+        }else{
+            sim.setActivity(Activity.WORKING);
+            getNewTarget();
         }
     }
 
     @Override
     public void tick() {
-
-
-        AxisAlignedBB area = new AxisAlignedBB(getWorkSpace().offset(-4, 0, -4), getWorkSpace().offset(4, 2, 4));
-        List<AnimalEntity> entities = world.getLoadedEntitiesOfClass(AnimalEntity.class, area);
-        entities = entities
-                .stream()
-                .filter(animal -> animal.getType() == farm.getAnimal().getAnimal())
-                .sorted(Comparator.comparingDouble(animalEntity -> getWorkSpace().distSqr(animalEntity.blockPosition())))
-                .collect(Collectors.toList());
-
+        if (farm == null) {
+            sim.setActivity(Activity.FORCE_STOP);
+            return;
+        }
         if (tick <= 0) {
             spawnNewAnimals();
             if (state == State.MOVING) {
-                sim.setStatus("Moving Towards target");
-                if (entities.size() > 0) {
-                    blockPos = entities.get(0).blockPosition();
-                    target = entities.get(0);
+                    sim.setStatus("Moving Towards target");
                     sim.getLookControl().setLookAt(new Vector3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()));
-                }
-                System.out.println(sim.blockPosition().distSqr(blockPos));
-                if (sim.blockPosition().closerThan(blockPos, 6f)) {
-                    state = State.ATTACKING;
-                }
+
+                    if (sim.getNavigation().getPath() != null){
+                        if (!sim.getNavigation().getPath().sameAs(sim.getNavigation().createPath(blockPos,(int)sim.getSpeed() * 2))){
+                            sim.getNavigation().moveTo(blockPos.getX(), blockPos.getY(), blockPos.getZ(), sim.getSpeed() * 2);
+                        }
+                    }else{
+                        sim.getNavigation().moveTo(blockPos.getX(), blockPos.getY(), blockPos.getZ(), sim.getSpeed() * 2);
+                    }
+                    System.out.println(sim.blockPosition().distSqr(blockPos));
+                    if (sim.blockPosition().closerThan(blockPos, 6f)) {
+                        state = State.ATTACKING;
+                    }
+
 
             } else if (state == State.ATTACKING) {
                 sim.setStatus("Attacking Target");
-                sim.swing(sim.getUsedItemHand());
-                sim.getMainHandItem().getItem().hurtEnemy(sim.getMainHandItem(), target, sim);
-                sim.doHurtTarget(target);
-                if (target.isDeadOrDying()) {
-                    target = null;
-                    state = State.MOVING;
 
-                    currentKillCount++;
-                    if (currentKillCount >= killsBeforeEmpty) {
-                        state = State.RETURNING;
-                        LootContext.Builder builder = new LootContext.Builder((ServerWorld) sim.getCommandSenderWorld()).withRandom(new Random())
-                                .withParameter(LootParameters.THIS_ENTITY, sim)
-                                .withParameter(LootParameters.ORIGIN, sim.position())
-                                .withParameter(LootParameters.DAMAGE_SOURCE, DamageSource.GENERIC);
-                        LootContext ctx = builder.create(LootParameterSets.ENTITY);
-                        table.getRandomItems(ctx).forEach(itemStack -> drops.add(itemStack.getItem()));
-                        getCollectedItemStacks();
-                        currentKillCount = 0;
-                        sim.setStatus("Emptying inventory");
+                if (target != null){
+                    sim.getMainHandItem().getItem().hurtEnemy(sim.getMainHandItem(), target, sim);
+                    sim.doHurtTarget(target);
+                    sim.getLookControl().setLookAt(new Vector3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()));
+                    sim.swing(sim.getUsedItemHand(),true);
+                    if (target.isDeadOrDying()) {
+                        target = null;
+                        state = State.MOVING;
+
+                        currentKillCount++;
+                        System.out.println(currentKillCount);
+                        if (currentKillCount >= killsBeforeEmpty) {
+                            state = State.RETURNING;
+                            LootContext.Builder builder = new LootContext.Builder((ServerWorld) sim.getCommandSenderWorld()).withRandom(new Random())
+                                    .withParameter(LootParameters.THIS_ENTITY, sim)
+                                    .withParameter(LootParameters.ORIGIN, sim.position())
+                                    .withParameter(LootParameters.DAMAGE_SOURCE, DamageSource.GENERIC);
+                            LootContext ctx = builder.create(LootParameterSets.ENTITY);
+                            table.getRandomItems(ctx).forEach(itemStack -> drops.add(itemStack.getItem()));
+
+                            getCollectedItemStacks();
+                            currentKillCount = 0;
+                            sim.setStatus("Emptying inventory");
+                        }else{
+                            getNewTarget();
+                        }
+
                     }
-
+                }else{
+                    getNewTarget();
+                    state = State.MOVING;
                 }
 
             } else if (state == State.RETURNING) {
@@ -283,9 +299,29 @@ public class JobAnimalFarmer implements IReworkedJob {
 
     }
 
+    private void getNewTarget(){
+        AxisAlignedBB area = new AxisAlignedBB(getWorkSpace().offset(-4, 0, -4), getWorkSpace().offset(4, 2, 4));
+        List<AnimalEntity> entities = world.getLoadedEntitiesOfClass(AnimalEntity.class, area);
+        entities = entities
+            .stream()
+            .filter(animal -> animal.getType() == farm.getAnimal().getAnimal())
+            .sorted(Comparator.comparingDouble(animalEntity -> getWorkSpace().distSqr(animalEntity.blockPosition())))
+            .collect(Collectors.toList());
+
+
+        if (entities.size() > 0) {
+            blockPos = entities.get(0).blockPosition();
+            target = entities.get(0);
+        }
+    }
+
     private boolean addItemsToChests() {
         for (BlockPos pos : chests) {
             ChestTileEntity chest = (ChestTileEntity) world.getBlockEntity(pos);
+            if (chest == null) {
+                chests.remove(pos);
+                continue;
+            }
             InvWrapper wrapper = new InvWrapper((chest));
             List<Integer> invStacks = new ArrayList<>(itemsToMove);
             for (int i = 0; i < invStacks.size(); i++) {
@@ -299,7 +335,11 @@ public class JobAnimalFarmer implements IReworkedJob {
                 }
             }
         }
-
+        if (itemsToMove.size() != 0){
+            SavedWorldData.get(sim.level).getFactionWithSim(sim.getUUID()).sendFactionChatMessage(String.format("%s %s has no more inventory space to empty collected items",farm.getName() +"er",sim.getCustomName().getString()),world);
+            sim.setActivity(Activity.FORCE_STOP);
+            sim.setStatus("Not working");
+        }
         return false;
     }
 

@@ -1,23 +1,29 @@
 package com.resimulators.simukraft.common.entity.sim;
 
+import com.resimulators.simukraft.SimuKraft;
+import com.resimulators.simukraft.common.entity.pathfinding.CustomWalkNodeProcessor;
 import net.minecraft.entity.MobEntity;
-import net.minecraft.pathfinding.GroundPathNavigator;
-import net.minecraft.pathfinding.Path;
+import net.minecraft.network.DebugPacketSender;
+import net.minecraft.pathfinding.*;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
 
 public class SimNavigator extends GroundPathNavigator {
-    private static final double maxLengthBeforeTeleport = 10;
 
     public SimNavigator(MobEntity p_i45875_1_, World p_i45875_2_) {
         super(p_i45875_1_, p_i45875_2_);
+
     }
 
     @Override
     public boolean moveTo(@Nullable Path path, double p_75484_2_) {
         this.doStuckDetection(this.getTempMobPos());
-        if ((path != null && path.getDistToTarget() > maxLengthBeforeTeleport) || this.isStuck()) {
+        if ((path != null && path.getDistToTarget() > SimuKraft.config.getSims().teleportDistance.get()) || this.isStuck()) {
             //teleport
             mob.setPos(getTargetPos().getX(), getTargetPos().getY(), getTargetPos().getZ());
             return true;
@@ -25,6 +31,40 @@ public class SimNavigator extends GroundPathNavigator {
             if (path == null || !path.sameAs(this.path)) {
                 return super.moveTo(path, p_75484_2_);
             } else return false;
+        }
+    }
+
+    @Override
+    protected PathFinder createPathFinder(int p_179679_1_) {
+        this.nodeEvaluator = new CustomWalkNodeProcessor();
+        this.nodeEvaluator.setCanPassDoors(true);
+        return new PathFinder(this.nodeEvaluator, p_179679_1_);
+    }
+
+    @Override
+    public void tick() {
+        ++this.tick;
+        if (this.hasDelayedRecomputation) {
+            this.recomputePath();
+        }
+
+        if (!this.isDone()) {
+            if (this.canUpdatePath()) {
+                this.followThePath();
+            } else if (this.path != null && !this.path.isDone()) {
+                Vector3d vector3d = this.getTempMobPos();
+                Vector3d vector3d1 = this.path.getNextEntityPos(this.mob);
+                if (vector3d.y > vector3d1.y && !this.mob.isOnGround() && MathHelper.floor(vector3d.x) == MathHelper.floor(vector3d1.x) && MathHelper.floor(vector3d.z) == MathHelper.floor(vector3d1.z)) {
+                    this.path.advance();
+                }
+            }
+
+            DebugPacketSender.sendPathFindingPacket(this.level, this.mob, this.path, this.maxDistanceToWaypoint);
+            if (!this.isDone()) {
+                Vector3d vector3d2 = this.path.getNextEntityPos(this.mob);
+                BlockPos blockpos = new BlockPos(vector3d2);
+                this.mob.getMoveControl().setWantedPosition(vector3d2.x, this.level.getBlockState(blockpos.below()).isAir() ? vector3d2.y : CustomWalkNodeProcessor.getFloorLevel(this.level, blockpos), vector3d2.z, this.speedModifier);
+            }
         }
     }
 }

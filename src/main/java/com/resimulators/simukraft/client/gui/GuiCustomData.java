@@ -114,7 +114,7 @@ public class GuiCustomData extends Screen {
         }));
         buildingTypes.clear();
         addBuildingTypeButtons();
-        buildingTypePanel = new ButtonScrollPanel(minecraft, 108, 120, height / 2 - 100, 30, buildingTypes, 6, 2);
+        buildingTypePanel = new ButtonScrollPanel(minecraft, 108, 120, height / 2 - 100, 30, buildingTypes, buildingTypes.size(), 60);
 
         this.children.add(buildingTypePanel);
 
@@ -179,7 +179,8 @@ public class GuiCustomData extends Screen {
         private final ArrayList<Button> buttons;
         private final int maxButtonsVisible;
         private final Selection selection;
-        private int contentOffset = 0;
+        private int contentOffset;
+        private int buttonConstant = 30;
 
         public ButtonScrollPanel(Minecraft client, int width, int height, int top, int left, ArrayList<Button> buttons, int maxButtonsVisible, int contentOffset) {
             super(client, width, height, top, left);
@@ -195,7 +196,7 @@ public class GuiCustomData extends Screen {
             int i = 0;
             for (Button button : buttons) {
                 int index = (((int) this.scrollDistance) / getScrollAmount());
-                button.y = ((this.top + i * 30) - index * 30);
+                button.y = ((this.top + i * buttonConstant) - (index * buttonConstant));
                 i++;
                 button.visible = disableOuterButton(button);
             }
@@ -207,7 +208,7 @@ public class GuiCustomData extends Screen {
 
         @Override
         protected int getContentHeight() {
-            return maxButtonsVisible * 21 + contentOffset;
+            return buttons.size() * buttonConstant + contentOffset;
         }
 
         @Override
@@ -227,7 +228,7 @@ public class GuiCustomData extends Screen {
 
         @Override
         protected int getScrollAmount() {
-            return (int) Math.ceil((double) this.buttons.size() / (double) maxButtonsVisible);
+            return (int) Math.ceil((double) (this.buttons.size() * buttonConstant + contentOffset)/ (double) maxButtonsVisible);
         }
 
         @Override
