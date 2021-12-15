@@ -1,6 +1,7 @@
 package com.resimulators.simukraft.common.jobs.reworked;
 
 import com.resimulators.simukraft.SimuKraft;
+import com.resimulators.simukraft.common.entity.goals.BaseGoal;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.jobs.Profession;
 import com.resimulators.simukraft.common.jobs.core.Activity;
@@ -24,6 +25,7 @@ import net.minecraft.state.DirectionProperty;
 import net.minecraft.state.EnumProperty;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.state.properties.SlabType;
+import net.minecraft.tileentity.ChestTileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
@@ -56,6 +58,7 @@ public class JobMiner implements IReworkedJob {
     private Activity state = Activity.NOT_WORKING;
     //specific to the miner
     private boolean finished;
+    private boolean waitingForStairs= false;
 
     public JobMiner(SimEntity sim) {
         this.sim = sim;
@@ -198,6 +201,12 @@ public class JobMiner implements IReworkedJob {
             sim.getNavigation().moveTo(blockPos.getX(), blockPos.getY(), blockPos.getZ(), sim.getSpeed() * 2);
         World world = sim.getCommandSenderWorld();
         if (sim.getActivity() == Activity.WORKING) { // checks if the miner should be working
+            if (waitingForStairs) {
+                if (placeStairs(minepos)) {
+                    waitingForStairs = false;
+                } else
+                    return;
+            }
             switch (currentTask) {
                 case MINING: {
                     this.sim.getLookControl().setLookAt(Vector3d.atCenterOf(minepos));
@@ -233,7 +242,10 @@ public class JobMiner implements IReworkedJob {
 
                             }
 
-                            placeStairs(minepos); // runs placing stairs code
+                            if (!placeStairs(minepos)) {
+                                waitingForStairs = true;
+                                break;
+                            } else waitingForStairs = false;
 
                             //added mined block to inventory
                             column++;
@@ -270,7 +282,10 @@ public class JobMiner implements IReworkedJob {
                     }
 
                     while (sim.getCommandSenderWorld().getBlockState(minepos).getBlock().isAir(sim.getCommandSenderWorld().getBlockState(minepos), sim.getCommandSenderWorld(), minepos) || sim.level.getBlockState(minepos).getBlock() == Blocks.OAK_STAIRS || sim.level.getBlockState(minepos).getBlock() == Blocks.OAK_SLAB && layer < depth) {
-                        placeStairs(minepos);
+                        if (!placeStairs(minepos)) {
+                            waitingForStairs = true;
+                            break;
+                        } else waitingForStairs = false;
 
                         minepos = offset;
                         minepos = minepos.offset(markerPos.getX(), markerPos.getY(), markerPos.getZ());
@@ -333,46 +348,93 @@ public class JobMiner implements IReworkedJob {
      * Used to check where the next stair needs to be placed and places it. does not handle rotation handles placing
      * slabs and the corners.
      */
-    private void placeStairs(BlockPos pos) {
+    private boolean placeStairs(BlockPos pos) {
         if (row == 0 && column != 0) {
             if (0 == (layer - column + 1) % (2 * (depth - 2) + 2 * (width - 2)))
-                if (column == width - 1)
-                    placeBlock(pos, Blocks.OAK_SLAB);
-                else
-                    placeBlock(pos, Blocks.OAK_STAIRS, dir.getCounterClockWise());
+                if (column == width - 1) {
+                    return placeBlock(pos, Blocks.OAK_SLAB);
+                } else {
+                    return placeBlock(pos, Blocks.OAK_STAIRS, dir.getCounterClockWise());
+                }
         }
         if (column == width - 1 && row != 0) {
             if (0 == (1 + layer - row - (width - 2)) % (2 * (depth - 2) + 2 * (width - 2)))
-                if (row == depth - 1)
-                    placeBlock(pos, Blocks.OAK_SLAB);
-                else
-                    placeBlock(pos, Blocks.OAK_STAIRS, dir.getCounterClockWise().getCounterClockWise());
+                if (row == depth - 1) {
+                    return placeBlock(pos, Blocks.OAK_SLAB);
+                } else {
+                    return placeBlock(pos, Blocks.OAK_STAIRS, dir.getCounterClockWise().getCounterClockWise());
+                }
         }
         if (row == depth - 1 && column != width - 1) {
             if (0 == (layer + column - 2 * (width - 2) - (depth - 2)) % (2 * (depth - 2) + 2 * (width - 2)))
-                if (column == 0)
-                    placeBlock(pos, Blocks.OAK_SLAB);
-                else
-                    placeBlock(pos, Blocks.OAK_STAIRS, dir.getCounterClockWise().getCounterClockWise().getCounterClockWise());
+                if (column == 0) {
+                    return placeBlock(pos, Blocks.OAK_SLAB);
+                } else {
+                    return placeBlock(pos, Blocks.OAK_STAIRS, dir.getCounterClockWise().getCounterClockWise().getCounterClockWise());
+                }
         }
         if (column == 0 && row != depth - 1) {
             if (0 == (layer + row) % (2 * (depth - 2) + 2 * (width - 2)))
-                if (row == 0)
-                    placeBlock(pos, Blocks.OAK_SLAB);
-                else
-                    placeBlock(pos, Blocks.OAK_STAIRS);
+                if (row == 0) {
+                    return placeBlock(pos, Blocks.OAK_SLAB);
+                } else {
+                    return placeBlock(pos, Blocks.OAK_STAIRS);
+                }
         }
+        return true;
     }
 
-    private void placeBlock(BlockPos pos, Block block) {
-        placeBlock(pos, block, dir);
+    private boolean placeBlock(BlockPos pos, Block block) {
+        return placeBlock(pos, block, dir);
     }
 
-    private void placeBlock(BlockPos pos, Block block, Direction orientation) {
-        if (block == Blocks.OAK_STAIRS) { // checks if it should be a stair to be placed
-            sim.level.setBlockAndUpdate(pos, block.defaultBlockState().setValue(FACING, orientation));
-        } else if (block == Blocks.OAK_SLAB) { // the block to be placed is a slab
-            sim.level.setBlockAndUpdate(pos, block.defaultBlockState().setValue(TYPE, SlabType.TOP));
+    private boolean placeBlock(BlockPos pos, Block block, Direction orientation) {
+        if (hasBlock(block)) {
+            consumeBlock(block);
+            if (block == Blocks.OAK_STAIRS) { // checks if it should be a stair to be placed
+                sim.level.setBlockAndUpdate(pos, block.defaultBlockState().setValue(FACING, orientation));
+            } else if (block == Blocks.OAK_SLAB) { // the block to be placed is a slab
+                sim.level.setBlockAndUpdate(pos, block.defaultBlockState().setValue(TYPE, SlabType.TOP));
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private boolean hasBlock(Block block) {
+        if (sim.getInventory().hasItemStack(new ItemStack(block)))
+            return true;
+        for (BlockPos pos : BaseGoal.findChestsAroundTargetBlock(workSpace, 1, sim.level)) {
+            ChestTileEntity chest = (ChestTileEntity) sim.level.getBlockEntity(pos);
+            if (chest != null) {
+                for (int i = 0; i < chest.getContainerSize(); i++) {
+                    if (chest.getItem(i).sameItem(new ItemStack(block)))
+                        return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private void consumeBlock(Block block) {
+        if (sim.getInventory().hasItemStack(new ItemStack(block))) {
+            for (int i = 0; i < sim.getInventory().getContainerSize(); i++) {
+                if (sim.getInventory().getItem(i).sameItem(new ItemStack(block))) {
+                    sim.getInventory().getItem(i).shrink(1);
+                    return;
+                }
+            }
+        }
+        for (BlockPos pos : BaseGoal.findChestsAroundTargetBlock(workSpace, 1, sim.level)) {
+            ChestTileEntity chest = (ChestTileEntity) sim.level.getBlockEntity(pos);
+            if (chest != null) {
+                for (int i = 0; i < chest.getContainerSize(); i++) {
+                    if (chest.getItem(i).sameItem(new ItemStack(block))) {
+                        chest.getItem(i).shrink(1);
+                        return;
+                    }
+                }
+            }
         }
     }
 
