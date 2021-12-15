@@ -1,27 +1,28 @@
-modLoader="javafml"
-loaderVersion="[36.2,)"
+modLoader = "javafml"
+loaderVersion = "[36.2,)"
 issueTrackerURL = "https://github.com/TheResimulators/Sim-U-Kraft-Resimulated-1.15/issues"
 license = "Insert License here"
 
 [[mods]]
-modId="simukraft"
-version="${file.jarVersion}"
-displayName="Sim-u-Kraft"
-credits="Resimulators" #optional
-authors="Aidie8, Fabbe50, Mcboy, Reprevise,MrStrikor, basmulder03" #optional
-description='''This mod is a remake of the original simukraft. it was updated to 1.7.10 and now being updated to 1.16'''
+modId = "simukraft"
+# doesnt work?
+version = "${file.jarVersion}"
+displayName = "Sim-u-Kraft"
+credits = "Resimulators" #optional
+authors = "Aidie8, Fabbe50, Mcboy, Reprevise,MrStrikor, basmulder03, jojo2357" #optional
+description = '''This mod is a remake of the original simukraft. it was updated to 1.7.10 and now being updated to 1.16'''
 
 [[dependencies.suk]] #optional
-    modId="forge"
-    mandatory=true
-    versionRange="[36.2,)"
-    ordering="NONE"
+modId = "forge"
+mandatory = true
+versionRange = "[36.2,)"
+ordering = "NONE"
 
-    side="BOTH"
+side = "BOTH"
 # Here's another dependency
 [[dependencies.suk]]
-    modId="minecraft"
-    mandatory=true
-    versionRange="[1.16.5]"
-    ordering="NONE"
-    side="BOTH"
+modId = "minecraft"
+mandatory = true
+versionRange = "[1.16.5]"
+ordering = "NONE"
+side = "BOTH"
