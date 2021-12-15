@@ -47,7 +47,7 @@ public class OpenGateGoal extends InteractGateGoal {
     }
 
     /**
-     * Reset the action
+     * runs on stopping the action
      */
     @Override
     public void stop() {

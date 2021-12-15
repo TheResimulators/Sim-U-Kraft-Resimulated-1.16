@@ -11,9 +11,12 @@ apply plugin: 'net.minecraftforge.gradle'
 // Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
+apply plugin: 'idea'
+apply plugin: 'eclipse'
+apply plugin: 'maven'
 
-version = '1.0'
-group = 'com.Resimulators.Simukraft' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+version = '0.01a'
+group = 'com.resimulators.simukraft' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'simukraft'
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(8) // Mojang ships Java 8 to end users, so your mod should target Java 8.
@@ -54,13 +57,15 @@ minecraft {
             // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
             property 'forge.logging.console.level', 'debug'
 
+            ideaModule "${project.name}.main"
+
+            environment 'MOD_CLASSES', "${project.file("out/production/resources").canonicalPath};${project.file("out/production/classes").canonicalPath}"
             mods {
-                examplemod {
-                    source sourceSets.main
+                simukraft {
+                    sources sourceSets.main
                 }
             }
         }
-
         server {
             workingDirectory project.file('run')
 
@@ -75,9 +80,9 @@ minecraft {
             // You can set various levels here.
             // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
             property 'forge.logging.console.level', 'debug'
-
+            ideaModule "${project.name}.main"
             mods {
-                examplemod {
+                simukraft {
                     source sourceSets.main
                 }
             }
@@ -97,12 +102,16 @@ minecraft {
             // You can set various levels here.
             // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
             property 'forge.logging.console.level', 'debug'
+            //targeting DataGeneration
+            environment 'target', 'fmluserdevdata'
+            args '--mod', 'simukraft', '--all', '--output', file('src/generated/resources/'),
+                    '--existing', '"' + rootProject.file('src/main/resources') + '"'
 
             // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
             args '--mod', 'simukraft', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
 
             mods {
-                examplemod {
+                simukraft {
                     source sourceSets.main
                 }
             }
@@ -118,20 +127,6 @@ dependencies {
     // that the dep is a ForgeGradle 'patcher' dependency. And it's patches will be applied.
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
     minecraft 'net.minecraftforge:forge:1.16.5-36.2.20'
-
-    // You may put jars on which you depend on in ./libs or you may define them like so..
-    // compile "some.group:artifact:version:classifier"
-    // compile "some.group:artifact:version"
-
-    // Real examples
-    // compile 'com.mod-buildcraft:buildcraft:6.0.8:dev'  // adds buildcraft to the dev env
-    // compile 'com.googlecode.efficient-java-matrix-library:ejml:0.24' // adds ejml to the dev env
-
-    // The 'provided' configuration is for optional dependencies that exist at compile-time but might not at runtime.
-    // provided 'com.mod-buildcraft:buildcraft:6.0.8:dev'
-
-    // These dependencies get remapped to your current MCP mappings
-    // deobf 'com.mod-buildcraft:buildcraft:6.0.8:dev'
 
     // For more info...
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
