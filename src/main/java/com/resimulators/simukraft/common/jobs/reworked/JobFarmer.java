@@ -223,6 +223,7 @@ public class JobFarmer implements IReworkedJob {
             state = State.HARVESTING;
         }
 
+        sim.setActivity(Activity.WORKING);
     }
 
     private void setDestination() {
