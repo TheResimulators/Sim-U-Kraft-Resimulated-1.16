@@ -12,7 +12,7 @@ credits = "Resimulators" #optional
 authors = "Aidie8, Fabbe50, Mcboy, Reprevise,MrStrikor, basmulder03, jojo2357" #optional
 description = '''This mod is a remake of the original simukraft. it was updated to 1.7.10 and now being updated to 1.16'''
 
-[[dependencies.suk]] #optional
+[[dependencies.simukraft]] #optional
 modId = "forge"
 mandatory = true
 versionRange = "[36.2,)"
