@@ -89,6 +89,9 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
     private static final DataParameter<Byte> MODEL_FLAG = EntityDataManager.defineId(SimEntity.class, DataSerializers.BYTE);
     private static final DataParameter<String> STATUS = EntityDataManager.defineId(SimEntity.class, DataSerializers.STRING);
     private static final DataParameter<Integer> NAME_COLOR = EntityDataManager.defineId(SimEntity.class, DataSerializers.INT);
+    private static final int maleSkinCount = 9;
+    private static final int femaleSkinCount = 12;
+
     private final SimInventory inventory;
     protected FoodStats foodStats;
     private PlayerEntity interactingPlayer;
@@ -217,6 +220,8 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
         }
         return super.mobInteract(player, hand);
     }
+
+
 
     @Override
     public boolean setSlot(int inventorySlot, ItemStack itemStackIn) {
@@ -534,19 +539,12 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
             if (this.getFemale()) {
                 if (!SimuKraft.config.getNames().femaleNames.get().isEmpty())
                     this.setCustomName(new StringTextComponent(SimuKraft.config.getNames().femaleNames.get().get(level.getRandom().nextInt(SimuKraft.config.getNames().femaleNames.get().size()))));
-                try {
-                    this.setVariation(level.getRandom().nextInt(Objects.requireNonNull(TextureUtils.getAllFilesInFolder("textures/entity/sim/female")).size()));
-                } catch (URISyntaxException | IOException e) {
-                    e.printStackTrace();
-                }
+                    this.setVariation(level.getRandom().nextInt(femaleSkinCount));
+
             } else {
                 if (!SimuKraft.config.getNames().maleNames.get().isEmpty())
                     this.setCustomName(new StringTextComponent(SimuKraft.config.getNames().maleNames.get().get(level.getRandom().nextInt(SimuKraft.config.getNames().maleNames.get().size()))));
-                try {
-                    this.setVariation(level.getRandom().nextInt((Objects.requireNonNull(TextureUtils.getAllFilesInFolder("textures/entity/sim/male")).size())));
-                } catch (URISyntaxException | IOException e) {
-                    e.printStackTrace();
-                }
+                    this.setVariation(level.getRandom().nextInt(maleSkinCount));
             }
         }
         this.getNavigation().getNodeEvaluator().setCanOpenDoors(true);
