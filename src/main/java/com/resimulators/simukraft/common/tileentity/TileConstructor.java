@@ -254,8 +254,11 @@ public class TileConstructor extends TileEntity implements ITile {
     }
 
     public void removeBlockFromNeeded(Item item, int amount) {
-        int currentamount = blocksNeeded.get(item);
-        blocksNeeded.put(item, currentamount - amount);
+        int currentAmount = 0;
+        if (blocksNeeded.containsKey(item)) {
+            currentAmount = blocksNeeded.get(item);
+        }
+        blocksNeeded.put(item, currentAmount - amount);
         setChanged();
         level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 2);
     }
