@@ -501,27 +501,29 @@ public class JobBuilder implements IReworkedJob {
                     blocksNeeded.put(item, needed - count);}
         }
         for (BlockPos pos : chests) {
-            ChestTileEntity entity = (ChestTileEntity) sim.level.getBlockEntity(pos);
-            if (entity != null) {
-                for (int i = 0; i < entity.getContainerSize(); i++) {
-                    ItemStack stack = entity.getItem(i);
-                    if (blocksNeeded.containsKey(stack.getItem())) {
-                        Item item = stack.getItem();
-                        int amountNeeded = blocksNeeded.get(stack.getItem());
+            if (sim.level.getBlockEntity(pos) instanceof ChestTileEntity) {
+                ChestTileEntity entity = (ChestTileEntity) sim.level.getBlockEntity(pos);
+                if (entity != null) {
+                    for (int i = 0; i < entity.getContainerSize(); i++) {
+                        ItemStack stack = entity.getItem(i);
+                        if (blocksNeeded.containsKey(stack.getItem())) {
+                            Item item = stack.getItem();
+                            int amountNeeded = blocksNeeded.get(stack.getItem());
 
-                        if (amountNeeded < stack.getCount()) {
-                            stack.setCount(stack.getCount() - amountNeeded);
-                            blocksNeeded.remove(item);
-                            constructor.removeBlockFromNeeded(item);
-                            sim.getInventory().addItemStackToInventory(new ItemStack(item, amountNeeded));
-                        } else {
-                            amountNeeded -= stack.getCount();
-                            blocksNeeded.put(stack.getItem(), amountNeeded);
-                            constructor.removeBlockFromNeeded(item,stack.getCount());
-                            sim.getInventory().addItemStackToInventory(new ItemStack(item, stack.getCount()));
-                            stack.setCount(0);
+                            if (amountNeeded < stack.getCount()) {
+                                stack.setCount(stack.getCount() - amountNeeded);
+                                blocksNeeded.remove(item);
+                                constructor.removeBlockFromNeeded(item);
+                                sim.getInventory().addItemStackToInventory(new ItemStack(item, amountNeeded));
+                            } else {
+                                amountNeeded -= stack.getCount();
+                                blocksNeeded.put(stack.getItem(), amountNeeded);
+                                constructor.removeBlockFromNeeded(item,stack.getCount());
+                                sim.getInventory().addItemStackToInventory(new ItemStack(item, stack.getCount()));
+                                stack.setCount(0);
+                            }
+                            entity.setItem(i, stack);
                         }
-                        entity.setItem(i, stack);
                     }
                 }
             }
