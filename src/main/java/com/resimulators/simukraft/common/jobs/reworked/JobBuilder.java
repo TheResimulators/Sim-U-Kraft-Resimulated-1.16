@@ -318,8 +318,8 @@ public class JobBuilder implements IReworkedJob {
                     constructor.addToWage(dif);
                 }
                 template = null;
-                sim.fireSim(sim, faction.getId(), false);
             }
+            sim.fireSim(sim, faction.getId(), false);
         }
     }
 
