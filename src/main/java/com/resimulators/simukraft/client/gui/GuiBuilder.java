@@ -191,7 +191,7 @@ public class GuiBuilder extends GuiBaseJob {
                 controlCategoryButtons(true);
                 nextPage.visible = false;
                 previousPage.visible = false;
-
+                pageIndex = 0; // This is used to prevent page stuck when pressing back button
             } else if (state == State.BUILDINGINFO) {
                 state = State.SELECTBULDING;
                 nextPage.visible = true;
@@ -352,8 +352,14 @@ public class GuiBuilder extends GuiBaseJob {
     @Override
     public void showMainMenu() {
         super.showMainMenu();
+        /*
+         * Because MAIN state is used for constructor and main menu these buttons are only visible when it's supposed to be
+         * meaning only when there's a construction they'll appear preventing random true/false buttons in the main block menu
+         * when pressing back.
+         */
         Build.visible = true;
-        shouldRenderButton.visible = true;
+        shouldRenderButton.visible = constructor.isBuilding();
+        showRemainingBlocks.visible = constructor.isBuilding();
     }
 
 
