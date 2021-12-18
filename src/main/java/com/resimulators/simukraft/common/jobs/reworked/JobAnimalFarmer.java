@@ -315,12 +315,6 @@ public class JobAnimalFarmer implements IReworkedJob {
         }
     }
 
-    private void getCurrentTarget() {
-        if (target != null) {
-            blockPos = target.blockPosition();
-        }
-    }
-
     private boolean addItemsToChests() {
         for (BlockPos pos : chests) {
             ChestTileEntity chest = (ChestTileEntity) world.getBlockEntity(pos);
