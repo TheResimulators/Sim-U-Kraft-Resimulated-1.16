@@ -1,5 +1,6 @@
 package com.resimulators.simukraft.common.tileentity;
 
+import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.client.gui.GuiHandler;
 import com.resimulators.simukraft.common.world.Faction;
 import com.resimulators.simukraft.common.world.SavedWorldData;
@@ -105,6 +106,7 @@ public class TileResidential extends TileEntity implements IControlBlock {
         ArrayList<Integer> ids = new ArrayList<>();
         Faction faction = SavedWorldData.get(this.getLevel()).getFaction(factionID);
         ArrayList<UUID> occupants = faction.getOccupants(getHouseID());
+        SimuKraft.LOGGER().info("Faction " + faction);
         for (UUID uuid : occupants) {
             ids.add(((ServerWorld) level).getEntity(uuid).getId());
         }
