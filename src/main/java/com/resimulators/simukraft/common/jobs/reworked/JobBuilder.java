@@ -538,13 +538,15 @@ public class JobBuilder implements IReworkedJob {
         blocksNeededCache.keySet().forEach(key -> {
             int amount = blocksNeeded.get(key);
             if (amount > 0)
-                string[0] += amount + " " + key.getDescription() + ", \n";
+                string[0] += amount + " " + key + ", \n";
         });
         if (!string[0].equals("") && notifyDelay < 0) {
             faction.sendFactionChatMessage(sim.getName().getString() + " still needs " + string[0], sim.level);
-            notifyDelay = 50;
-        }else if (notifyDelay > 0){
+            notifyDelay = 2400;
+        }else if (notifyDelay >= 0){
             notifyDelay--;
+        } else {
+            notifyDelay = 10;
         }
     }
 
