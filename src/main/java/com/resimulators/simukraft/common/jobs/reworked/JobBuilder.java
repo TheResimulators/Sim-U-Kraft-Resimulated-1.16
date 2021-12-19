@@ -35,6 +35,7 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.EmptyBlockReader;
 import net.minecraft.world.gen.feature.template.PlacementSettings;
 import net.minecraft.world.gen.feature.template.Template;
@@ -60,7 +61,7 @@ public class JobBuilder implements IReworkedJob {
     private State state = State.STARTING;
     private int blockIndex = 0;
     private int delay = 20;
-    private final int notifyDelay = 0;
+    private int notifyDelay = 10;
     private FakePlayer player;
     private PlacementSettings settings;
     private final ArrayList<BlockPos> chests = new ArrayList<>();
@@ -233,7 +234,7 @@ public class JobBuilder implements IReworkedJob {
             start();
         checkForInventories();
         if (delay <= 0) {
-            delay = 1;
+            delay = 2;
             if (state == State.STARTING) {
                 setBlocksNeeded();
                 constructor.setBlocksNeeded(blocksNeeded);
@@ -462,12 +463,16 @@ public class JobBuilder implements IReworkedJob {
 
         if (!settings.getKnownShape()) {
             BlockState blockstate1 = sim.level.getBlockState(blockPos);
+            sim.level.updateNeighborsAt(blockPos,blockstate.getBlock());
             BlockState blockstate3 = Block.updateFromNeighbourShapes(blockstate1, sim.level, blockPos);
+
             if (!blockstate1.equals(blockstate3)) {
                 sim.level.setBlock(blockPos, blockstate3, 2 & -2 | 16);
             }
             sim.level.blockUpdated(blockPos, blockstate3.getBlock());
-
+            blockstate3.updateIndirectNeighbourShapes(sim.level, blockPos, 2 & -2 | 16, 512 - 1);
+            blockstate3.updateNeighbourShapes(sim.level, blockPos, 2 & -2 | 16, 512 - 1);
+            blockstate3.updateIndirectNeighbourShapes(sim.level, blockPos, 2 & -2 | 16, 512 - 1);
             blockIndex++;
             chargeBlockIndexForward();
 
@@ -533,11 +538,13 @@ public class JobBuilder implements IReworkedJob {
         blocksNeededCache.keySet().forEach(key -> {
             int amount = blocksNeeded.get(key);
             if (amount > 0)
-                string[0] += amount + " " + key + ", \n";
+                string[0] += amount + " " + key.getDescription() + ", \n";
         });
-        if (!string[0].equals("")) {
+        if (!string[0].equals("") && notifyDelay < 0) {
             faction.sendFactionChatMessage(sim.getName().getString() + " still needs " + string[0], sim.level);
-            delay = 200;
+            notifyDelay = 50;
+        }else if (notifyDelay > 0){
+            notifyDelay--;
         }
     }
 
@@ -559,8 +566,8 @@ public class JobBuilder implements IReworkedJob {
 
     //Checks for inventories around position.
     private void checkForInventories() {
-        ArrayList<BlockPos> blocks = BlockUtils.getBlocksAroundAndBelowPosition(getWorkSpace(), 5);
-        blocks.addAll(BlockUtils.getBlocksAroundAndBelowPosition(getWorkSpace().above(), 5));
+        ArrayList<BlockPos> blocks = BlockUtils.getBlocksAroundAndBelowPosition(getWorkSpace(), 2);
+        blocks.addAll(BlockUtils.getBlocksAroundAndBelowPosition(getWorkSpace().above(), 2));
         blocks = (ArrayList<BlockPos>) blocks.stream().filter(pos -> sim.level.getBlockEntity(pos) != null).collect(Collectors.toList());
         for (BlockPos pos : blocks) {
             if (!chests.contains(pos) && sim.level.getBlockEntity(pos) instanceof ChestTileEntity) {
