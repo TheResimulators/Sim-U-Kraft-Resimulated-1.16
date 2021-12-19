@@ -187,7 +187,6 @@ public class JobAnimalFarmer implements IReworkedJob {
 
     @Override
     public void start() {
-
         sim.setItemInHand(Hand.MAIN_HAND, new ItemStack(Items.DIAMOND_SWORD));
         chests = Utils.findInventoriesAroundPos(sim.getJob().getWorkSpace(), 4, world);
         if (farm == null) {
@@ -197,7 +196,6 @@ public class JobAnimalFarmer implements IReworkedJob {
 
         }else{
             sim.setActivity(Activity.WORKING);
-            getNewTarget();
         }
     }
 
@@ -209,7 +207,8 @@ public class JobAnimalFarmer implements IReworkedJob {
         }
         if (tick <= 0) {
             spawnNewAnimals();
-            if (state == State.MOVING) {
+            if (blockPos != null) {
+                if (state == State.MOVING) {
                     sim.setStatus("Moving Towards target");
                     sim.getLookControl().setLookAt(new Vector3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()));
 
@@ -226,52 +225,53 @@ public class JobAnimalFarmer implements IReworkedJob {
                     }
 
 
-            } else if (state == State.ATTACKING) {
-                sim.setStatus("Attacking Target");
+                } else if (state == State.ATTACKING) {
+                    sim.setStatus("Attacking Target");
 
-                if (target != null){
-                    sim.getMainHandItem().getItem().hurtEnemy(sim.getMainHandItem(), target, sim);
-                    sim.doHurtTarget(target);
-                    sim.getLookControl().setLookAt(new Vector3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()));
-                    sim.swing(sim.getUsedItemHand(),true);
-                    if (target.isDeadOrDying()) {
-                        target = null;
-                        state = State.MOVING;
+                    if (target != null){
+                        sim.getMainHandItem().getItem().hurtEnemy(sim.getMainHandItem(), target, sim);
+                        sim.doHurtTarget(target);
+                        sim.getLookControl().setLookAt(new Vector3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()));
+                        sim.swing(sim.getUsedItemHand(),true);
+                        if (target.isDeadOrDying()) {
+                            target = null;
+                            state = State.MOVING;
 
-                        currentKillCount++;
-                        System.out.println(currentKillCount);
-                        if (currentKillCount >= killsBeforeEmpty) {
-                            state = State.RETURNING;
-                            LootContext.Builder builder = new LootContext.Builder((ServerWorld) sim.getCommandSenderWorld()).withRandom(new Random())
-                                    .withParameter(LootParameters.THIS_ENTITY, sim)
-                                    .withParameter(LootParameters.ORIGIN, sim.position())
-                                    .withParameter(LootParameters.DAMAGE_SOURCE, DamageSource.GENERIC);
-                            LootContext ctx = builder.create(LootParameterSets.ENTITY);
-                            table.getRandomItems(ctx).forEach(itemStack -> drops.add(itemStack.getItem()));
+                            currentKillCount++;
+                            System.out.println(currentKillCount);
+                            if (currentKillCount >= killsBeforeEmpty) {
+                                state = State.RETURNING;
+                                LootContext.Builder builder = new LootContext.Builder((ServerWorld) sim.getCommandSenderWorld()).withRandom(new Random())
+                                        .withParameter(LootParameters.THIS_ENTITY, sim)
+                                        .withParameter(LootParameters.ORIGIN, sim.position())
+                                        .withParameter(LootParameters.DAMAGE_SOURCE, DamageSource.GENERIC);
+                                LootContext ctx = builder.create(LootParameterSets.ENTITY);
+                                table.getRandomItems(ctx).forEach(itemStack -> drops.add(itemStack.getItem()));
 
-                            getCollectedItemStacks();
-                            currentKillCount = 0;
-                            sim.setStatus("Emptying inventory");
-                        }else{
-                            getNewTarget();
+                                getCollectedItemStacks();
+                                currentKillCount = 0;
+                                sim.setStatus("Emptying inventory");
+                            }else{
+                                getNewTarget();
+                            }
+
                         }
+                    }else{
+                        getNewTarget();
+                        state = State.MOVING;
+                    }
+
+                } else if (state == State.RETURNING) {
+                    addItemsToChests();
+                    state = State.MOVING;
+                    if (!(sim.getMainHandItem().getItem() instanceof SwordItem)) {
+                        sim.setItemInHand(Hand.MAIN_HAND, new ItemStack(Items.DIAMOND_SWORD));
 
                     }
-                }else{
-                    getNewTarget();
-                    state = State.MOVING;
                 }
-
-            } else if (state == State.RETURNING) {
-                addItemsToChests();
-                state = State.MOVING;
-                if (!(sim.getMainHandItem().getItem() instanceof SwordItem)) {
-                    sim.setItemInHand(Hand.MAIN_HAND, new ItemStack(Items.DIAMOND_SWORD));
-
-                }
+            } else {
+                getNewTarget();
             }
-
-
             tick = 20;
         } else {
             tick -= 1;

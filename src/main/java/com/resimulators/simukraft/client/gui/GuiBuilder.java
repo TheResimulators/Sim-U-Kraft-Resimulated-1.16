@@ -191,7 +191,7 @@ public class GuiBuilder extends GuiBaseJob {
                 controlCategoryButtons(true);
                 nextPage.visible = false;
                 previousPage.visible = false;
-
+                pageIndex = 0; // This is used to prevent page stuck when pressing back button
             } else if (state == State.BUILDINGINFO) {
                 state = State.SELECTBULDING;
                 nextPage.visible = true;
@@ -353,7 +353,8 @@ public class GuiBuilder extends GuiBaseJob {
     public void showMainMenu() {
         super.showMainMenu();
         Build.visible = true;
-        shouldRenderButton.visible = true;
+        shouldRenderButton.visible = constructor.isBuilding();
+        showRemainingBlocks.visible = constructor.isBuilding();
     }
 
 
