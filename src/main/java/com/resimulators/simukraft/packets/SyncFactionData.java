@@ -48,7 +48,6 @@ public class SyncFactionData implements IMessage {
     public void onExecute(NetworkEvent.Context ctxIn, boolean isLogicalServer) {
         World world = SimuKraft.proxy.getClientWorld();
         if (world != null) { // adds faction data to client so info can be shown in guis and on Hud's
-            SavedWorldData.get(world).clearAll();
             Faction faction = new Faction(id, world);
             faction.read(nbt);
             SavedWorldData.get(world).setFaction(id, faction);
