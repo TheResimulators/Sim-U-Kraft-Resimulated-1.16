@@ -3,6 +3,7 @@ package com.resimulators.simukraft.common.entity.sim;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.resimulators.simukraft.SimuKraft;
+import com.resimulators.simukraft.common.entity.goals.CustomWaterAvoidingRandomWalkingGoal;
 import com.resimulators.simukraft.common.entity.goals.GoToWorkGoal;
 import com.resimulators.simukraft.common.entity.goals.PickupItemGoal;
 import com.resimulators.simukraft.common.entity.goals.TalkingToPlayerGoal;
@@ -130,7 +131,7 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
         this.goalSelector.addGoal(8, new OpenGateGoal(this,true));
         this.goalSelector.addGoal(9, new OpenDoorGoal(this, true));
         this.goalSelector.addGoal(10, new LookAtGoal(this, PlayerEntity.class, 2.0f, 1.0f));
-        this.goalSelector.addGoal(11, new WaterAvoidingRandomWalkingGoal(this, 0.6d));
+        this.goalSelector.addGoal(11, new CustomWaterAvoidingRandomWalkingGoal(this, 0.6d));
         this.goalSelector.addGoal(12, new LookAtGoal(this, PlayerEntity.class, 8f));
         this.goalSelector.addGoal(13, new LookRandomlyGoal(this));
         //Job Important Goals
