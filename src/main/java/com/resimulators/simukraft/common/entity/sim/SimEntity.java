@@ -649,7 +649,7 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
                 this.foodStats.setFoodLevel(this.foodStats.getFoodLevel() + 1);
             }
         } else {
-            if (this.foodStats.shouldEat()) {
+            if (this.foodStats.shouldEat() || this.getHealth() < 12) {
                 if (this.canEat(false)) {
                     this.startUsingItem(this.getUsedItemHand());
                     this.selectSlot(this.inventory.getSlotFor(this.inventory.getFood()));
