@@ -214,13 +214,15 @@ public class JobAnimalFarmer implements IReworkedJob {
 
                     if (sim.getNavigation().getPath() != null){
                         if (!sim.getNavigation().getPath().sameAs(sim.getNavigation().createPath(blockPos,(int)sim.getSpeed() * 2))){
-                            sim.getNavigation().moveTo(blockPos.getX(), blockPos.getY(), blockPos.getZ(), sim.getSpeed() * 2);
+                            getNewPath();
+                        }else{
+                            sim.getNavigation().moveTo( sim.getNavigation().getPath(), sim.getSpeed() * 2);
                         }
                     }else{
-                        sim.getNavigation().moveTo(blockPos.getX(), blockPos.getY(), blockPos.getZ(), sim.getSpeed() * 2);
+                        getNewPath();
                     }
                     System.out.println(sim.blockPosition().distSqr(blockPos));
-                    if (sim.blockPosition().closerThan(blockPos, 6f)) {
+                    if (sim.blockPosition().closerThan(blockPos, 2f)) {
                         state = State.ATTACKING;
                     }
 
@@ -313,6 +315,10 @@ public class JobAnimalFarmer implements IReworkedJob {
             blockPos = entities.get(0).blockPosition();
             target = entities.get(0);
         }
+    }
+
+    private void getNewPath(){
+        sim.getNavigation().moveTo(blockPos.getX(), blockPos.getY(), blockPos.getZ(), sim.getSpeed() * 2);
     }
 
     private boolean addItemsToChests() {
