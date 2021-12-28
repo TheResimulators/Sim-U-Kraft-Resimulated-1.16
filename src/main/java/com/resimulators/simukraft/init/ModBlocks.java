@@ -4,6 +4,7 @@ import com.resimulators.simukraft.Reference;
 import com.resimulators.simukraft.common.block.*;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
+import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.material.MaterialColor;
 import net.minecraftforge.common.ToolType;
@@ -35,7 +36,7 @@ public final class ModBlocks {
     public static final RegistryObject<Block> LIGHT_RED = REGISTRY.register("light_red", () -> new BlockLight(AbstractBlock.Properties.of(Material.WOOL)));
     public static final RegistryObject<Block> LIGHT_BLACK = REGISTRY.register("light_black", () -> new BlockLight(AbstractBlock.Properties.of(Material.WOOL)));
     public static final RegistryObject<Block> CONSTRUCTOR_BOX = REGISTRY.register("constructor_box", () -> new BlockConstructor(AbstractBlock.Properties.of(Material.WOOD, MaterialColor.COLOR_BROWN).harvestTool(ToolType.AXE)));
-    public static final RegistryObject<Block> CONTROL_BLOCK = REGISTRY.register("control_block", () -> new BlockControlBlock(AbstractBlock.Properties.of(Material.STONE, MaterialColor.COLOR_GRAY).harvestTool(ToolType.PICKAXE)));
+    public static final RegistryObject<Block> CONTROL_BLOCK = REGISTRY.register("control_block", () -> new BlockControlBlock(AbstractBlock.Properties.of(Material.WOOD, MaterialColor.COLOR_GRAY).harvestTool(ToolType.PICKAXE).noDrops().sound(SoundType.WOOD).strength(10f)));
     public static final RegistryObject<Block> FARM_BOX = REGISTRY.register("farm_box", () -> new BlockFarmBox(AbstractBlock.Properties.of(Material.STONE, MaterialColor.COLOR_GRAY)));
     public static final RegistryObject<Block> RAINBOW_LIGHT = REGISTRY.register("rainbow_light", () -> new BlockLight(AbstractBlock.Properties.of(Material.WOOL)));
     public static final RegistryObject<Block> MINE_BOX = REGISTRY.register("mine_box", () -> new BlockMineBox(AbstractBlock.Properties.of(Material.WOOD)));
