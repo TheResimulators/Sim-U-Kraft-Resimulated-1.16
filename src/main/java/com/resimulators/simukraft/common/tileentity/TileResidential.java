@@ -104,14 +104,16 @@ public class TileResidential extends TileEntity implements IControlBlock {
 
     public void sendOccupantsIds(ServerPlayerEntity player) {
         ArrayList<Integer> ids = new ArrayList<>();
-        Faction faction = SavedWorldData.get(this.getLevel()).getFaction(factionID);
-        ArrayList<UUID> occupants = faction.getOccupants(getHouseID());
-        SimuKraft.LOGGER().info("Faction " + faction);
-        for (UUID uuid : occupants) {
-            ids.add(((ServerWorld) level).getEntity(uuid).getId());
-        }
-        SimUKraftPacketHandler.INSTANCE.sendTo(new HouseOccupantIdsPacket(ids), player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
+        if (factionID != 0){
+            Faction faction = SavedWorldData.get(this.getLevel()).getFaction(factionID);
+            ArrayList<UUID> occupants = faction.getOccupants(getHouseID());
+            SimuKraft.LOGGER().info("Faction " + faction);
+            for (UUID uuid : occupants) {
+                ids.add(((ServerWorld) level).getEntity(uuid).getId());
+            }
+            SimUKraftPacketHandler.INSTANCE.sendTo(new HouseOccupantIdsPacket(ids), player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
 
+        }
     }
 
     public UUID getHouseID() {
@@ -124,7 +126,9 @@ public class TileResidential extends TileEntity implements IControlBlock {
     }
 
     public void onDestroy(World world) {
-        SavedWorldData.get(world).getFaction(factionID).removeHouse(houseID, (ServerWorld) world);
+        if (factionID != 0){
+            SavedWorldData.get(world).getFaction(factionID).removeHouse(houseID, (ServerWorld) world);
+        }
     }
 
     @Override
