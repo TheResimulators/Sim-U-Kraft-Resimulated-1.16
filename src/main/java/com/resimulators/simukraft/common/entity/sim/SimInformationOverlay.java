@@ -58,7 +58,11 @@ public class SimInformationOverlay {
                 SimEntity sim = (SimEntity) entity;
                 if (faction == null) {
                     faction = SavedWorldData.get(sim.getCommandSenderWorld()).getFactionWithSim(sim.getUUID());
-                    house = faction.getHouseByID(sim.getHouseID());
+                    if (faction != null) {
+                        house = faction.getHouseByID(sim.getHouseID());
+                    }else{
+                        SimuKraft.LOGGER().warn("Sim With UUID " + sim.getUUID() + " Does not belong to a Faction");
+                    }
                 }
                 RenderSystem.pushMatrix();
                 saveGLState();
