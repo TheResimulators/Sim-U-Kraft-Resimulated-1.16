@@ -80,11 +80,27 @@ public class CustomTemplateManager {
         ArrayList<ResourceLocation> structures;
         structures = Arrays.stream(Objects.requireNonNull(path.toFile().listFiles()))
                 .filter(file -> !file.isDirectory())
-                .map(e -> new ResourceLocation(Reference.MODID, e.getName()))
+                .map(resource -> {
+                    try
+                    {
+                        return new ResourceLocation(Reference.MODID, resource.getName());
+                    } catch(ResourceLocationException e) {
+                        e.printStackTrace();
+                    }
+                    return null;
+                }).filter(Objects::nonNull)
                 .collect(Collectors.toCollection(ArrayList::new));
         folders.forEach(folder -> structures.addAll(Arrays.stream(Objects.requireNonNull(folder.listFiles()))
                 .filter(file -> !file.isDirectory())
-                .map(e -> new ResourceLocation(Reference.MODID, e.getName()))
+                .map(resource -> {
+                    try
+                    {
+                        return new ResourceLocation(Reference.MODID, resource.getName());
+                    } catch(ResourceLocationException e) {
+                        e.printStackTrace();
+                    }
+                    return null;
+                }).filter(Objects::nonNull)
                 .collect(Collectors.toList())));
 
         return structures;
