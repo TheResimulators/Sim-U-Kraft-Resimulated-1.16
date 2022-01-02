@@ -206,24 +206,26 @@ public class JobFarmer implements IReworkedJob {
 
     @Override
     public void start() {
-        sim.setItemInHand(sim.getUsedItemHand(), Items.DIAMOND_HOE.getDefaultInstance());
-
-        state = State.RESOURCES;
         farmerTile = (TileFarmer) world.getBlockEntity(getWorkSpace());
-        if (farmerTile != null) {
-            dir = farmerTile.getDir();
-        }
-        chests = BaseGoal.findChestsAroundTargetBlock(getWorkSpace(), 5, world);
-        width = farmerTile.getWidth() - 1;
-        depth = farmerTile.getDepth() - 1;
-        row = 0;
-        column = 0;
-        setDestination();
-        if (checkForHarvestable()) {
-            state = State.HARVESTING;
-        }
+        if (farmerTile.getMarker() != null){
+            sim.setItemInHand(sim.getUsedItemHand(), Items.DIAMOND_HOE.getDefaultInstance());
+            state = State.RESOURCES;
 
-        sim.setActivity(Activity.WORKING);
+            if (farmerTile != null) {
+                dir = farmerTile.getDir();
+            }
+            chests = BaseGoal.findChestsAroundTargetBlock(getWorkSpace(), 5, world);
+            width = farmerTile.getWidth() - 1;
+            depth = farmerTile.getDepth() - 1;
+            row = 0;
+            column = 0;
+            setDestination();
+            if (checkForHarvestable()) {
+                state = State.HARVESTING;
+            }
+
+            sim.setActivity(Activity.WORKING);
+        }
     }
 
     private void setDestination() {
@@ -242,6 +244,8 @@ public class JobFarmer implements IReworkedJob {
     }
 
     public void tick() {
+        if (farmerTile == null)sim.setActivity(Activity.FORCE_STOP);
+        if (farmerTile.getMarker() == null) sim.setActivity(Activity.FORCE_STOP);
         if (blockPos != null && !sim.blockPosition().closerThan(new Vector3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()), 2))
             sim.getNavigation().moveTo(blockPos.getX(), blockPos.getY(), blockPos.getZ(), sim.getSpeed() * 2);
         chests = Utils.findInventoriesAroundPos(getWorkSpace(), 5, world);
