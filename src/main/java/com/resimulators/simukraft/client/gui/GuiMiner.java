@@ -7,6 +7,8 @@ import com.resimulators.simukraft.common.tileentity.TileMiner;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 
 import java.awt.*;
@@ -31,7 +33,16 @@ public class GuiMiner extends GuiBaseJob {
                         BlockPos marker = tileEntity.getMarker();
                         font.draw(stack, "Markers Position:", 20, 90, Color.WHITE.getRGB());
                         font.draw(stack, String.format("X: %d, Y: %d, Z: %d", marker.getX(), marker.getY(), marker.getZ()), 20, 110, Color.WHITE.getRGB());
+                    }else
+                    {
+                        font.draw(stack, "Could Not Find Markers, Please place one marker in front block and one in forward direction and one in the right direction", 20, 90, Color.WHITE.getRGB());
+                    } {
+                        font.draw(stack, new StringTextComponent("Could Not Origin Marker:"), 20, 90, Color.WHITE.getRGB());
                     }
+                    font.draw(stack, String.format("Front Left: %s",tileEntity.getMarker() == null ? TextFormatting.RED + "Error" + TextFormatting.RESET : TextFormatting.GREEN + "Found" + TextFormatting.RESET), 200, 90, Color.WHITE.getRGB());
+                    font.draw(stack, String.format("Back Left: %s",tileEntity.getDepth() == 0 ? TextFormatting.RED + "Error"  + TextFormatting.RESET: TextFormatting.GREEN + "Found" + TextFormatting.RESET), 200, 110, Color.WHITE.getRGB());
+                    font.draw(stack, String.format("Front Right: %s",tileEntity.getWidth() == 0 ? TextFormatting.RED + "Error"  + TextFormatting.RESET: TextFormatting.GREEN +"Found" + TextFormatting.RESET), 200, 130, Color.WHITE.getRGB());
+                    font.draw(stack, String.format("Back Right: %s",(tileEntity.getDepth() == 0 || tileEntity.getWidth() == 0) ? TextFormatting.RED + "Error" + TextFormatting.RESET : TextFormatting.GREEN + "Found" + TextFormatting.RESET), 200, 150, Color.WHITE.getRGB());
                     if (tileEntity.getWidth() != 0) {
                         font.draw(stack, "Width: " + tileEntity.getWidth(), width - 80, 90, Color.WHITE.getRGB());
                         font.draw(stack, "Depth: " + tileEntity.getDepth(), width - 80, 120, Color.WHITE.getRGB());
