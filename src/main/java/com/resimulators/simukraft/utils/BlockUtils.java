@@ -66,13 +66,13 @@ public class BlockUtils {
         return world.getBlockState(pos.below()).canOcclude();
     }
 
-    public static boolean blocksAreValid(World world, ArrayList<BlockPos> blocksPos, SimEntity sim) {
+    public static boolean blocksAreValid(World world, ArrayList<BlockPos> blocksPos) {
         for (BlockPos blockPos : blocksPos)
-            if (!BlockUtils.blockIsValid(world, blockPos, sim)) return false;
+            if (!BlockUtils.blockIsValid(world, blockPos)) return false;
         return true;
     }
 
-    public static boolean blockIsValid(World world, BlockPos blockPos, SimEntity sim) {
+    public static boolean blockIsValid(World world, BlockPos blockPos) {
         if (!aboveBlocksValid(world, blockPos)) {
             SimuKraft.LOGGER().debug("Above blocks not valid");
             return false;

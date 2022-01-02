@@ -162,13 +162,13 @@ public class NewDayEvent implements INBTSerializable<CompoundNBT> {
         BlockPos groundBlockPos = BlockUtils.getGroundBlock(world, startingPos);
         SimuKraft.LOGGER().debug("ground block pos: " + groundBlockPos);
         // If the ground block is not valid, can't use it
-        if (!BlockUtils.blockIsValid(world, groundBlockPos, sim)) {
+        if (!BlockUtils.blockIsValid(world, groundBlockPos)) {
             SimuKraft.LOGGER().debug("Block is NOT valid");
             return null;
         }
         ArrayList<BlockPos> blocksAroundGroundBlock = BlockUtils.getBlocksAroundPosition(groundBlockPos, 1);
         // If the ground block is valid and the blocks around it are valid, return the block above
-        if (BlockUtils.blocksAreValid(world, blocksAroundGroundBlock, sim)) {
+        if (BlockUtils.blocksAreValid(world, blocksAroundGroundBlock)) {
             SimuKraft.LOGGER().debug("Block is valid");
             return groundBlockPos.above();
         }
