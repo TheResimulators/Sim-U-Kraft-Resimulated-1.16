@@ -2,7 +2,7 @@ package com.resimulators.simukraft.common.entity.goals;
 
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.enums.Seed;
-import com.resimulators.simukraft.common.jobs.JobBaker;
+import com.resimulators.simukraft.common.jobs.old.JobBaker;
 import com.resimulators.simukraft.common.jobs.Profession;
 import com.resimulators.simukraft.common.jobs.core.Activity;
 import com.resimulators.simukraft.common.jobs.reworked.JobFarmer;

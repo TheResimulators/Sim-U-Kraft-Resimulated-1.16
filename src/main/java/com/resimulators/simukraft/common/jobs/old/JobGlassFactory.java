@@ -1,47 +1,28 @@
-package com.resimulators.simukraft.common.jobs;
+package com.resimulators.simukraft.common.jobs.old;
 
-import com.resimulators.simukraft.common.building.BuildingTemplate;
-import com.resimulators.simukraft.common.entity.goals.BuilderGoal;
+import com.resimulators.simukraft.common.entity.goals.GlassFactoryGoal;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
+import com.resimulators.simukraft.common.jobs.Profession;
 import com.resimulators.simukraft.common.jobs.core.Activity;
 import com.resimulators.simukraft.common.jobs.core.IJob;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
-import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 
-
-public class JobBuilder implements IJob {
+public class JobGlassFactory implements IJob {
     private final SimEntity sim;
     private final Goal goal1;
-    private BuildingTemplate template;
     private int periodsworked = 0;
     private BlockPos workSpace;
     private Activity state = Activity.NOT_WORKING;
-    private Direction direction;
     private boolean finished;
 
-    public JobBuilder(SimEntity sim) {
-        this.sim = sim;
-        goal1 = new BuilderGoal(sim);
+
+    public JobGlassFactory(SimEntity simEntity) {
+        this.sim = simEntity;
+        goal1 = new GlassFactoryGoal(sim);
         addJobAi();
-    }
-
-    public BuildingTemplate getTemplate() {
-        return template;
-    }
-
-    public void setTemplate(BuildingTemplate template) {
-        this.template = template;
-    }
-
-    public Direction getDirection() {
-        return direction;
-    }
-
-    public void setDirection(Direction dir) {
-        this.direction = dir;
     }
 
     @Override
@@ -56,24 +37,22 @@ public class JobBuilder implements IJob {
 
     @Override
     public Profession jobType() {
-        return Profession.BUILDER;
+        return Profession.GLASS_FACTORY;
     }
 
     @Override
     public int intervalTime() {
-        return 200;
+        return 400;
     }
 
     @Override
     public int workTime() {
-        return 12000;
+        return 10000;
     }
 
     @Override
     public int maximumWorkPeriods() {
-        return -1;
-        //negative one so that it can work as much as it can. builder should work all day.
-        // if it can't find resources it take a 1000 tick break
+        return 3;
     }
 
     @Override
@@ -89,7 +68,6 @@ public class JobBuilder implements IJob {
     @Override
     public void addJobAi() {
         sim.goalSelector.addGoal(3, goal1);
-        System.out.println("Added " + goal1 + " to sim " + sim.getUUID());
     }
 
     @Override
@@ -109,9 +87,8 @@ public class JobBuilder implements IJob {
         if (workSpace != null) {
             other.putLong("jobpos", workSpace.asLong());
         }
-        other.putBoolean("finished", finished);
         nbt.add(other);
-
+        other.putBoolean("finished", finished);
         return nbt;
     }
 
@@ -133,7 +110,7 @@ public class JobBuilder implements IJob {
 
     @Override
     public void finishedWorkPeriod() {
-        setWorkedPeriods(periodsworked++);
+        setWorkedPeriods(++periodsworked);
     }
 
     @Override
@@ -163,7 +140,7 @@ public class JobBuilder implements IJob {
 
     @Override
     public double getWage() {
-        return 0;
+        return 0.7d;
     }
 
     @Override
@@ -175,6 +152,4 @@ public class JobBuilder implements IJob {
     public void setFinished(boolean finished) {
         this.finished = finished;
     }
-
-
 }

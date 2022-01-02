@@ -1,7 +1,8 @@
-package com.resimulators.simukraft.common.jobs;
+package com.resimulators.simukraft.common.jobs.old;
 
 import com.resimulators.simukraft.common.entity.goals.FisherGoal;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
+import com.resimulators.simukraft.common.jobs.Profession;
 import com.resimulators.simukraft.common.jobs.core.Activity;
 import com.resimulators.simukraft.common.jobs.core.IJob;
 import net.minecraft.entity.ai.goal.Goal;

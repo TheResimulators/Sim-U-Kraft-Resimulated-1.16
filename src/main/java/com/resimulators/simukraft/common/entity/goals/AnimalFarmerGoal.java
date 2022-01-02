@@ -1,7 +1,7 @@
 package com.resimulators.simukraft.common.entity.goals;
 
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
-import com.resimulators.simukraft.common.jobs.JobAnimalFarmer;
+import com.resimulators.simukraft.common.jobs.old.JobAnimalFarmer;
 import com.resimulators.simukraft.common.jobs.core.Activity;
 import com.resimulators.simukraft.common.tileentity.TileAnimalFarm;
 import net.minecraft.entity.passive.AnimalEntity;

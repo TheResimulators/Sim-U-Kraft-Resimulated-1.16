@@ -4,7 +4,7 @@ import com.mojang.authlib.GameProfile;
 import com.resimulators.simukraft.common.building.BuildingTemplate;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.enums.BuildingType;
-import com.resimulators.simukraft.common.jobs.JobBuilder;
+import com.resimulators.simukraft.common.jobs.old.JobBuilder;
 import com.resimulators.simukraft.common.jobs.core.Activity;
 import com.resimulators.simukraft.common.tileentity.TileResidential;
 import com.resimulators.simukraft.common.world.Faction;
