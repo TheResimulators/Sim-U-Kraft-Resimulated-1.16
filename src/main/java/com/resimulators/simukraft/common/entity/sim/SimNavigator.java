@@ -2,6 +2,8 @@ package com.resimulators.simukraft.common.entity.sim;
 
 import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.common.entity.pathfinding.CustomWalkNodeProcessor;
+import com.resimulators.simukraft.utils.BlockUtils;
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.network.DebugPacketSender;
 import net.minecraft.pathfinding.*;
@@ -12,6 +14,8 @@ import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.Comparator;
 
 public class SimNavigator extends GroundPathNavigator {
 
@@ -25,7 +29,23 @@ public class SimNavigator extends GroundPathNavigator {
         this.doStuckDetection(this.getTempMobPos());
         if ((path != null && path.getDistToTarget() > SimuKraft.config.getSims().teleportDistance.get()) || this.isStuck()) {
             //teleport
-            mob.setPos(getTargetPos().getX(), getTargetPos().getY(), getTargetPos().getZ());
+            BlockPos teleportPosition = getTargetPos();
+            ArrayList<BlockPos> blocks = BlockUtils.getBlocksAroundPosition(teleportPosition,1);
+            if(!BlockUtils.blocksAreValid(level,blocks)){
+                int radius = 5;
+                blocks = BlockUtils.getBlocksAroundPosition(teleportPosition,radius);
+                for (BlockPos pos : blocks){
+                    ArrayList<BlockPos> innerBlocks = BlockUtils.getBlocksAroundPosition(pos,1);
+                    innerBlocks.sort(Comparator.comparingDouble((block) -> getTargetPos().distSqr(block.getX(),block.getY(),block.getZ(),false)));
+                    if (BlockUtils.blocksAreValid(level,innerBlocks)){
+                        teleportPosition = pos;
+                        break;
+                    }
+
+                }
+            }
+            mob.setPos(teleportPosition.getX(), teleportPosition.getY(), teleportPosition.getZ());
+            recomputePath();
             return true;
         } else {
             if (path == null || !path.sameAs(this.path)) {

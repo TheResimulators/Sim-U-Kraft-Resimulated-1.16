@@ -39,8 +39,12 @@ public class WorkingController {
                 BlockPos pos = job.getWorkSpace();
                 if (Math.sqrt(sim.distanceToSqr(pos.getX(), pos.getY(), pos.getZ())) < 4) {
                     job.start();
+                    sim.setStatus("Arrived at Work");
                 } else {
-                    sim.getNavigation().moveTo(pos.getX() + 0.5, pos.getY() + 1, pos.getZ() + 0.5, sim.getSpeed() * 2);
+                    sim.setStatus("Going To Work");
+                    if (!sim.getNavigation().moveTo(pos.getX(), pos.getY() + 1, pos.getZ(), sim.getSpeed() * 2)){
+                        sim.getNavigation().recomputePath();}
+
                 }
             } else {
                 if (!sim.level.isDay()) {
