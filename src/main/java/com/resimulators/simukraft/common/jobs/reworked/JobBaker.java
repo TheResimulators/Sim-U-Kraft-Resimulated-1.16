@@ -1,6 +1,5 @@
 package com.resimulators.simukraft.common.jobs.reworked;
 
-import com.resimulators.simukraft.common.entity.goals.BakerGoal;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.enums.Seed;
 import com.resimulators.simukraft.common.jobs.Profession;
@@ -11,7 +10,6 @@ import com.resimulators.simukraft.common.world.Faction;
 import com.resimulators.simukraft.common.world.SavedWorldData;
 import com.resimulators.simukraft.utils.BlockUtils;
 import com.resimulators.simukraft.utils.Utils;
-import jdk.nashorn.internal.ir.Block;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
@@ -19,13 +17,11 @@ import net.minecraft.nbt.ListNBT;
 import net.minecraft.tileentity.ChestTileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.items.ItemHandlerHelper;
 import net.minecraftforge.items.wrapper.InvWrapper;
 
-import java.sql.Wrapper;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
@@ -42,7 +38,7 @@ public class JobBaker implements IReworkedJob {
     private Activity activity = Activity.NOT_WORKING;
     private boolean finished = false;
     private State state = State.WAITING;
-    private int tick, delay = 0, navigation, wheatAmount;
+    private int delay = 0, navigation, wheatAmount;
     private boolean validateSentence = false;
 
 
@@ -195,7 +191,7 @@ public class JobBaker implements IReworkedJob {
     @Override
     public void tick() {
 
-        tick++;
+
         delay++;
         navigation++;
         Utils.getInventoryAroundPos(getWorkSpace(), world);
@@ -207,7 +203,7 @@ public class JobBaker implements IReworkedJob {
             sim.getJob().setActivity(Activity.WORKING);
         }
         if (delay >= 20 * 5) { // For now it's 100 (20*5) to for testing purposes, will be changed later on
-            state = State.CHECKING_WHEAT;
+            state = State.CHECKING_FOR_WHEAT;
             wheatAmount = 0;
             checkForWheat();
             state = State.PRODUCING_BREAD;
@@ -290,7 +286,7 @@ public class JobBaker implements IReworkedJob {
         if (farmerWorkSpace.isEmpty() && state.equals(State.NAVIGATING_BACK)) {
             sim.getNavigation().moveTo(blockPos.getX(), blockPos.getY(), blockPos.getZ(), sim.getSpeed() * 2);
             if (sim.blockPosition().closerThan(new Vector3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()), 1)) {
-                state = State.CHECKING_WHEAT;
+                state = State.CHECKING_FOR_WHEAT;
             }
         }
     }
@@ -323,7 +319,7 @@ public class JobBaker implements IReworkedJob {
     }
 
     private void checkForWheat() {
-        if (state == State.CHECKING_WHEAT) {
+        if (state == State.CHECKING_FOR_WHEAT) {
             for (BlockPos chest : chests) {
                 ChestTileEntity chestTileEntity = (ChestTileEntity) world.getBlockEntity(chest);
                 if (chestTileEntity != null) {
@@ -448,7 +444,7 @@ public class JobBaker implements IReworkedJob {
 
     private enum State {
         WAITING,
-        CHECKING_WHEAT,
+        CHECKING_FOR_WHEAT,
         PRODUCING_BREAD,
         CHEST_INTERACTION,
         NAVIGATING,
