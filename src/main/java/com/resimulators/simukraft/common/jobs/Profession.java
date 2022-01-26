@@ -10,7 +10,8 @@ public enum Profession {
     FARMER("farmer", 4),
     GLASS_FACTORY("glass maker", 5),
     FISHER_MAN("fisher_man", 6),
-    BAKER("baker", 7);
+    BAKER("baker", 7),
+    BUTCHER("butcher",8);
 
 
     String name;
