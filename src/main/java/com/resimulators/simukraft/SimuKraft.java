@@ -66,6 +66,7 @@ public class SimuKraft {
     }
 
     private void setup(final FMLCommonSetupEvent event) {
+        new StructureInstaller();
         ModEntities.registerAttributes();
         MinecraftForge.EVENT_BUS.register(new NewDayEvent());
         MinecraftForge.EVENT_BUS.register(new FactionEvents());
