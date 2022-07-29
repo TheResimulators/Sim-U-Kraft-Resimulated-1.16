@@ -16,6 +16,7 @@ public class GuiHandler {
     public static final int BAKER = 7;
     public static final int FISHER_MAN = 8;
     public static final int RESIDENTIAL = 9;
+    public static final int BUTCHER = 10;
 
 
     public static void openGui(ArrayList<Integer> ints, BlockPos pos, int id, int guiId, String string) {
@@ -46,6 +47,9 @@ public class GuiHandler {
                 break;
             case RESIDENTIAL:
                 Minecraft.getInstance().setScreen(new GuiResidential(new StringTextComponent(string), pos));
+
+            case BUTCHER:
+                Minecraft.getInstance().setScreen(new GuiButcher(new StringTextComponent(string), ints, pos, id));
         }
     }
 }
