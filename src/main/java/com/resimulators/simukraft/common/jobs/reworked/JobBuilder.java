@@ -244,6 +244,7 @@ public class JobBuilder implements IReworkedJob {
                 chargeBlockIndexForward();
             }
             if (state == State.TRAVELING) {
+                sim.setStatus("Moving to next Block");
                 if (Math.sqrt(sim.distanceToSqr(blockPos.getX(), blockPos.getY(), blockPos.getZ())) < 8) {
                     state = State.BUILDING;
                     blockPos = blocks.get(blockIndex).pos;
@@ -252,6 +253,7 @@ public class JobBuilder implements IReworkedJob {
                 }
             }
             if (state == State.BUILDING) {
+                sim.setStatus("Building");
                 if (blockIndex < blocks.size()) {
                     Template.BlockInfo blockInfo = blocks.get(blockIndex);
                     BlockState blockstate = blockInfo.state;
@@ -287,6 +289,7 @@ public class JobBuilder implements IReworkedJob {
 
 
             if (state == State.COLLECTING) {
+                sim.setStatus("Collecting Resources");
                 if (sim.distanceToSqr(getWorkSpace().getX(), getWorkSpace().getY(), getWorkSpace().getZ()) < 10) {
                     setBlocksNeeded();
                     retrieveItemsFromChest();
