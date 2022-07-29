@@ -1,18 +1,20 @@
 package com.resimulators.simukraft.common.jobs.reworked;
 
+import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
-import com.resimulators.simukraft.common.enums.Seed;
 import com.resimulators.simukraft.common.jobs.Profession;
 import com.resimulators.simukraft.common.jobs.core.Activity;
 import com.resimulators.simukraft.common.jobs.core.IReworkedJob;
-import com.resimulators.simukraft.common.tileentity.TileFarmer;
+import com.resimulators.simukraft.common.tileentity.TileAnimalFarm;
 import com.resimulators.simukraft.common.world.Faction;
 import com.resimulators.simukraft.common.world.SavedWorldData;
 import com.resimulators.simukraft.utils.BlockUtils;
 import com.resimulators.simukraft.utils.Utils;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.item.ToolItem;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.tileentity.ChestTileEntity;
@@ -30,7 +32,7 @@ import java.util.UUID;
 public class JobButcher implements IReworkedJob {
     private final SimEntity sim;
     private final World world;
-    private final ArrayList<BlockPos> chests = new ArrayList<>();
+    private ArrayList<BlockPos> chests = new ArrayList<>();
     private final ArrayList<SimEntity> simAnimalFarmers = new ArrayList<>();
     private final ArrayList<BlockPos> animalFarmsWorkSpace = new ArrayList<>();
     private final HashMap<BlockPos, ArrayList<BlockPos>> farmChestsHashMap = new HashMap<>();
@@ -38,8 +40,9 @@ public class JobButcher implements IReworkedJob {
     private BlockPos workSpace, blockPos;
     private Activity activity = Activity.NOT_WORKING;
     private boolean finished = false;
-    private JobButcher.State state = JobButcher.State.WAITING;
-    private int delay = 0, navigation, meatAmount;
+    private State state = State.WAITING;
+    private int delay = 0;
+    private int targetIndex;
     private boolean validateSentence = false;
 
     public JobButcher(SimEntity simEntity) {
@@ -165,134 +168,130 @@ public class JobButcher implements IReworkedJob {
 
     @Override
     public void start() {
+        chests = Utils.findInventoriesAroundPos(getWorkSpace(),10,world);
+        if (!validateWorkArea()) {
+            sim.getJob().setActivity(Activity.NOT_WORKING);
+            return;
+        }
+        sim.setActivity(Activity.WORKING);
+        state = State.START;
 
-    }
+        }
+
 
     @Override
     public void tick() {
         delay++;
-        navigation++;
-        Utils.getInventoryAroundPos(getWorkSpace(), world);
-        putSimInvInChest();
-        if (!validateWorkArea()) {
-            validateSentence = false;
-            sim.getJob().setActivity(Activity.NOT_WORKING);
-        } else if (validateWorkArea()) {
-            sim.getJob().setActivity(Activity.WORKING);
-        }
+
         if (delay >= 20 * 5) { // For now it's 100 (20*5) to for testing purposes, will be changed later on
-            state = State.CHECKING_FOR_MEAT;
-            meatAmount = 0;
-            CheckChestForWheat();
-            state = State.PRODUCING_MEAT;
-            delay = 0;
-        }
-        if (navigation >= 20 * 8 && isEmptyChest()) {
-            if (animalFarmsWorkSpace.isEmpty()) {
-                getsimAnimalFarmers();
-                getFarmWorkSpace();
-                getFarmChests();
+
+            if (!validateWorkArea()) {
+                validateSentence = false;
+                sim.getJob().setActivity(Activity.NOT_WORKING);
             }
-            navigation = 0;
-        }
-        if (!animalFarmsWorkSpace.isEmpty()) {
-            state = JobButcher.State.NAVIGATING;
-            blockPos = animalFarmsWorkSpace.get(0);
-            sim.getNavigation().moveTo(blockPos.getX(), blockPos.getY(), blockPos.getZ(), sim.getSpeed() * 2);
-            if (sim.blockPosition().closerThan(new Vector3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()), 3)) {
-                state = JobButcher.State.COLLECTING_RAW_MEAT;
-                for (BlockPos workChests : farmChestsHashMap.get(blockPos)) {
-                    ChestTileEntity chestTileEntity = (ChestTileEntity) world.getBlockEntity(workChests);
-                    if (chestTileEntity != null) {
-                        int simInvLeftOver;
-                        int farmChestCount = Math.min(chestTileEntity.countItem(Items.WHEAT), 192);
-                        int simInvFarmStack = farmChestCount / 64;
-                        if (simInvFarmStack >= 1) simInvLeftOver = farmChestCount - (simInvFarmStack * 64);
-                        else {
-                            simInvFarmStack = 0;
-                            simInvLeftOver = farmChestCount;
-                        }
-                        for (int i = 0; i < chestTileEntity.getContainerSize(); i++) {
-                            ItemStack wheatFarmStack = chestTileEntity.getItem(i);
-                            int wheatFarmAmount = wheatFarmStack.getCount();
-                            if (wheatFarmStack.getItem().equals(Items.WHEAT)) {
-                                if (farmChestCount >= wheatFarmAmount) {
-                                    farmChestCount -= wheatFarmAmount;
-                                    chestTileEntity.setItem(i, ItemStack.EMPTY);
-                                } else {
-                                    int chestLeftOver = wheatFarmAmount - farmChestCount;
-                                    chestTileEntity.setItem(i, new ItemStack(Items.WHEAT, chestLeftOver));
-                                    farmChestCount = 0;
-                                }
-                            }
-                            if (farmChestCount == 0) break;
-                        }
-                        for (int i = 0; i < sim.getInventory().getContainerSize(); i++) {
-                            ItemStack simInvStack = sim.getInventory().getItem(i);
-                            if (simInvStack.isEmpty()) {
-                                if (simInvFarmStack != 0) {
-                                    simInvFarmStack--;
-                                    sim.getInventory().setItem(i, new ItemStack(Items.WHEAT, 64));
-                                } else {
-                                    sim.getInventory().setItem(i, new ItemStack(Items.WHEAT, simInvLeftOver));
-                                    break;
-                                }
+
+                if (state == State.START)
+                {
+                    if ( checkChestWorkplaceForRawMeat() > 0)
+                    {
+                        state = State.CHECKING_FOR_MEAT;
+                    }else {
+                        if (!animalFarmsWorkSpace.isEmpty())
+                        {
+                            targetIndex= 0;
+                            blockPos = animalFarmsWorkSpace.get(targetIndex);
+
+                            if (!sim.blockPosition().closerThan(new Vector3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()), 3))
+                            {
+                                state = State.NAVIGATING;
+                                sim.getNavigation().moveTo(blockPos.getX(), blockPos.getY(), blockPos.getZ(), sim.getSpeed() * 2);
+                            }else
+                            {
+                                state = State.COLLECTING_RAW_MEAT;
                             }
                         }
                     }
+                }
+            }
+
+
+            if (state == State.NAVIGATING)
+            {
+                if (sim.blockPosition().closerThan(new Vector3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()), 3))
+                {
+                    state = State.COLLECTING_RAW_MEAT;
+                }
+
+            }
+
+            if (state == State.COLLECTING_RAW_MEAT)
+            {
+                boolean full = false;
+                for (BlockPos workChests : farmChestsHashMap.get(blockPos)) {
+                    ChestTileEntity chestTileEntity = (ChestTileEntity) world.getBlockEntity(workChests);
+                    collectMeatFromFarm(chestTileEntity);
                     if (checkSimFull()) {
+                        state = State.NAVIGATING_BACK;
+                        blockPos = sim.getJob().getWorkSpace();
+                        animalFarmsWorkSpace.clear();
+                        full = true;
                         break;
                     }
                 }
-                if (checkSimFull()) {
-                    state = JobButcher.State.NAVIGATING_BACK;
-                    blockPos = sim.getJob().getWorkSpace();
-                    animalFarmsWorkSpace.clear();
-                } else {
-                    animalFarmsWorkSpace.remove(0);
-                    if (animalFarmsWorkSpace.isEmpty()) {
+                if (!full){
+                    targetIndex++;
+                    if (targetIndex > animalFarmsWorkSpace.size()) {
                         blockPos = sim.getJob().getWorkSpace();
-                        state = JobButcher.State.NAVIGATING_BACK;
+                        state = State.NAVIGATING_BACK;
+                    }else
+                    {
+                        state = State.NAVIGATING;
+                        blockPos = animalFarmsWorkSpace.get(targetIndex);
                     }
                 }
             }
-        }
-        if (animalFarmsWorkSpace.isEmpty() && state.equals(JobButcher.State.NAVIGATING_BACK)) {
-            sim.getNavigation().moveTo(blockPos.getX(), blockPos.getY(), blockPos.getZ(), sim.getSpeed() * 2);
-            if (sim.blockPosition().closerThan(new Vector3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()), 1)) {
-                state = State.CHECKING_FOR_MEAT;
-            }
-        }
+
+
     }
 
+
+    private void collectMeatFromFarm(ChestTileEntity farmChest)
+    {
+        if (farmChest != null) {
+            InvWrapper wrapper = new InvWrapper(farmChest);
+
+            for (int i = 0; i < farmChest.getContainerSize(); i++) {
+                if (sim.addItemStackToInventory(wrapper.getStackInSlot(i)))
+                {
+                    wrapper.setStackInSlot(i,ItemStack.EMPTY);
+                }
+            }
+
+        }
+    }
 
     private void putSimInvInChest() {
         Faction faction = SavedWorldData.get(world).getFactionWithSim(sim.getUUID());
-        int chestIndex = 0;
-        while (sim.getInventory().getSlotFor(new ItemStack(Items.WHEAT)) != -1){
-            int index = sim.getInventory().getSlotFor(new ItemStack(Items.WHEAT));
-            BlockPos entityPos = chests.get(chestIndex);
-            ChestTileEntity entity = (ChestTileEntity) world.getBlockEntity(entityPos);
-            if (entity == null){
-                chestIndex += 1;
-                if (chestIndex > chests.size()){
-                    break;
+        for (BlockPos chestPos: chests)
+        {
+            ChestTileEntity chest = (ChestTileEntity) world.getBlockEntity(chestPos);
+            InvWrapper wrapper = new InvWrapper((chest));
+            for (int i = 0; i < sim.getInventory().mainInventory.size(); i++) {
+                ItemStack stack = sim.getInventory().mainInventory.get(i);
+                if (!stack.equals(ItemStack.EMPTY) && !(stack.getItem() instanceof ToolItem) && MEATS.containsRawItem(stack.getItem())) {
+                    if (ItemHandlerHelper.insertItemStacked(wrapper,stack,false) != ItemStack.EMPTY){
+                        SimuKraft.LOGGER().debug("No Room in chest");
+                    }
                 }
-                continue;
             }
-            InvWrapper wrapper = new InvWrapper(entity);
-            ItemStack stack = sim.getInventory().getItem(index);
-            if(ItemHandlerHelper.insertItemStacked(wrapper,stack,false) == ItemStack.EMPTY){
-                sim.getInventory().setItem(index,ItemStack.EMPTY);
-            }else{
-                faction.sendFactionChatMessage("Baker " + sim.getName() + ", has ran out of inventory space",world);
-
-            }
-
+            break;
         }
-    }
+        if (countRawMeatItems(sim.getInventory()) > 0)
+            faction.sendFactionChatMessage("Butcher " + sim.getName() + ", has ran out of inventory space",world);
+            }
 
-    private void getsimAnimalFarmers() {
+
+    private void getSimAnimalFarmers() {
         Faction faction = SavedWorldData.get(world).getFactionWithSim(sim.getUUID());
         ArrayList<UUID> simAnimalFarmersUUID = faction.getEmployedSims();
         ServerWorld serverWorld = (ServerWorld) this.world;
@@ -308,11 +307,11 @@ public class JobButcher implements IReworkedJob {
 
     private void getFarmWorkSpace() {
         for (SimEntity simFarmer : simAnimalFarmers) {
-            JobFarmer jobFarmer = (JobFarmer) simFarmer.getJob();
+            JobAnimalFarmer jobFarmer = (JobAnimalFarmer) simFarmer.getJob();
             if (jobFarmer != null) {
-                TileFarmer tileFarmer = (TileFarmer) world.getBlockEntity(jobFarmer.getWorkSpace());
+                TileAnimalFarm tileFarmer = (TileAnimalFarm) world.getBlockEntity(jobFarmer.getWorkSpace());
                 if (tileFarmer != null) {
-                    if (tileFarmer.getSeed().equals(Seed.WHEAT) && !animalFarmsWorkSpace.contains(jobFarmer.getWorkSpace()) && tileHasMeat(jobFarmer.getWorkSpace())) {
+                    if (!animalFarmsWorkSpace.contains(jobFarmer.getWorkSpace()) && tileHasMeat(jobFarmer.getWorkSpace())) {
                         animalFarmsWorkSpace.add(jobFarmer.getWorkSpace());
                     }
                 }
@@ -326,7 +325,7 @@ public class JobButcher implements IReworkedJob {
             if (world.getBlockEntity(blockPos) instanceof ChestTileEntity) {
                 ChestTileEntity chestTileEntity = (ChestTileEntity) world.getBlockEntity(blockPos);
                 if (chestTileEntity != null) {
-                    if (chestTileEntity.countItem(Items.WHEAT) > 0) return true;
+                    if (countRawMeatItems(chestTileEntity) > 0) return true;
                 }
             }
         }
@@ -340,7 +339,7 @@ public class JobButcher implements IReworkedJob {
                 if (world.getBlockEntity(blockPos) instanceof ChestTileEntity) {
                     ChestTileEntity chestTileEntity = (ChestTileEntity) world.getBlockEntity(blockPos);
                     if (chestTileEntity != null) {
-                        if (chestTileEntity.countItem(Items.WHEAT) > 0) {
+                        if (countRawMeatItems(chestTileEntity) > 0) {
                             chestArrayList.add(blockPos);
                         }
                     }
@@ -354,10 +353,10 @@ public class JobButcher implements IReworkedJob {
         Faction faction = SavedWorldData.get(world).getFactionWithSim(sim.getUUID());
         if (getWorkSpace() != null) {
             if (chests.isEmpty()) {
-                faction.sendFactionChatMessage(sim.getDisplayName().getString() + " (JobBaker) has no inventory at: " + getWorkSpace(), world);
+                faction.sendFactionChatMessage(sim.getDisplayName().getString() + " (JobButcher) has no inventory at: " + getWorkSpace(), world);
             } else {
                 if (!validateSentence)
-                    faction.sendFactionChatMessage(sim.getDisplayName().getString() + " (JobBaker) has started working", world);
+                    faction.sendFactionChatMessage(sim.getDisplayName().getString() + " (JobButcher) has started working", world);
                 validateSentence = true;
                 return true;
             }
@@ -365,39 +364,74 @@ public class JobButcher implements IReworkedJob {
         return false;
     }
 
-    private void CheckChestForWheat() {
-        if (state == State.CHECKING_FOR_MEAT) {
-            for (BlockPos chest : chests) {
-                ChestTileEntity chestTileEntity = (ChestTileEntity) world.getBlockEntity(chest);
-                if (chestTileEntity != null) {
-                    meatAmount += chestTileEntity.countItem(Items.WHEAT);
-                }
+    private int checkChestWorkplaceForRawMeat() {
+        int meatAmount = 0;
+
+        for (BlockPos chest : chests) {
+            ChestTileEntity chestTileEntity = (ChestTileEntity) world.getBlockEntity(chest);
+            if (chestTileEntity != null) {
+                meatAmount += countRawMeatItems(chestTileEntity);
             }
         }
+        return meatAmount;
     }
 
     private boolean checkSimFull() {
-        return sim.getInventory().countItem(Items.WHEAT) >= 192;
+        return countRawMeatItems(sim.getInventory()) >= 192;
     }
 
     private boolean isEmptyChest() {
         for (BlockPos chest : chests) {
             ChestTileEntity chestTileEntity = (ChestTileEntity) world.getBlockEntity(chest);
             if (chestTileEntity != null) {
-                if (chestTileEntity.countItem(Items.BREAD) == 0) return true;
+                if (countAllMeatItems(chestTileEntity) == 0) return true;
             }
         }
         return false;
     }
 
+
+    private int countAllMeatItems(IInventory entity)
+    {
+        int count = 0;
+        for (MEATS meat: MEATS.values())
+        {
+            count += entity.countItem(meat.RawItem);
+            count += entity.countItem(meat.CookedItem);
+        }
+        return count;
+    }
+
+    private int countRawMeatItems(IInventory entity)
+    {
+        int count = 0;
+        for (MEATS meat: MEATS.values())
+        {
+            count += entity.countItem(meat.RawItem);
+        }
+        return count;
+    }
+
+
+    private int countCookedMeatItems(IInventory entity)
+    {
+        int count = 0;
+        for (MEATS meat: MEATS.values())
+        {
+            count += entity.countItem(meat.CookedItem);
+        }
+        return count;
+    }
+
     private enum State {
+        START,
         WAITING,
         CHECKING_FOR_MEAT,
+        COLLECTING_RAW_MEAT,
         PRODUCING_MEAT,
         CHEST_INTERACTION,
         NAVIGATING,
-        NAVIGATING_BACK,
-        COLLECTING_RAW_MEAT
+        NAVIGATING_BACK
     }
 
     private enum MEATS
@@ -415,6 +449,21 @@ public class JobButcher implements IReworkedJob {
         MEATS(Item RawItem,Item CookedItem) {
             this.RawItem = RawItem;
             this.CookedItem = CookedItem;
+        }
+
+
+        public static boolean containsRawItem(Item stack){
+            for (MEATS meat:  MEATS.values()){
+                if (meat.RawItem ==stack) return true;
+            }
+            return false;
+        }
+
+        public static Item getCookedRawItem(Item stack){
+            for (MEATS meat:  MEATS.values()){
+                if (meat.RawItem ==stack) return meat.CookedItem;
+            }
+            return null;
         }
     }
 }

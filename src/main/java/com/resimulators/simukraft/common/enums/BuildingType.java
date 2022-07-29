@@ -12,7 +12,7 @@ public enum BuildingType {
     SHEEP_FARMER("sheep farmer", ModTileEntities.SHEEP_FARMER, Category.INDUSTRIAL, 4),
     PIG_FARMER("pig farmer", ModTileEntities.PIG_FARMER, Category.INDUSTRIAL, 5),
     CHICKEN_FARMER("chicken farmer", ModTileEntities.CHICKEN_FARMER, Category.INDUSTRIAL, 6),
-    BUTCHER("butchery", ModTileEntities.GLASS_FACTORY, Category.COMMERCIAL, 7),
+    BUTCHER("butchery", ModTileEntities.BUTCHER, Category.COMMERCIAL, 7),
     BAKER("bakery", ModTileEntities.BAKER, Category.COMMERCIAL, 8),
     GROCER("grocery", ModTileEntities.GLASS_FACTORY, Category.COMMERCIAL, 9),
     RESIDENTIAL("residential", ModTileEntities.RESIDENTIAL, Category.RESIDENTIAL, 10),

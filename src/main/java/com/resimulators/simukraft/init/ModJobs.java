@@ -20,6 +20,7 @@ public class ModJobs {
             .put(Profession.BAKER.getId(), JobBaker::new)
             .put(Profession.FISHER_MAN.getId(),JobFisher::new)
             .put(Profession.ANIMAL_FARMER.getId(),JobAnimalFarmer::new)
+            .put(Profession.BUTCHER.getId(),JobButcher::new)
             .build();
 
 }
