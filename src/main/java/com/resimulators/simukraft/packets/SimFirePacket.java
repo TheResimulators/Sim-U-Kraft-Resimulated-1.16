@@ -54,7 +54,9 @@ public class SimFirePacket implements IMessage {
         if (world != null) {
             SimEntity sim = (SimEntity) world.getEntity(simId);
             if (sim != null) {
+                sim.setStatus("Fired");
                 sim.fireSim(sim, factionId, dying);
+
 
             }
         }

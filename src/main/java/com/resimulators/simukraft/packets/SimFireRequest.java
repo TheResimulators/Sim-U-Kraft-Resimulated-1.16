@@ -56,6 +56,7 @@ public class SimFireRequest implements IMessage {
                 int id = data.getFactionWithPlayer(player.getUUID()).getId();
                 SimEntity sim = (SimEntity) ((ServerWorld) player.level).getEntity(simId);
                 if (sim != null) {
+                    sim.setStatus("Fired");
                     sim.fireSim(sim, id, false);
                 }
             }
