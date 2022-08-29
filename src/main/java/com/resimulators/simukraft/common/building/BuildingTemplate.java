@@ -1,14 +1,9 @@
 package com.resimulators.simukraft.common.building;
 
-import com.google.common.collect.ImmutableList;
 import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.common.tileentity.TileCustomData;
-import it.unimi.dsi.fastutil.Hash;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
-import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.item.crafting.RecipeManager;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
@@ -21,13 +16,8 @@ import net.minecraft.world.IServerWorld;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.template.PlacementSettings;
 import net.minecraft.world.gen.feature.template.Template;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
-import sun.awt.windows.WPrinterJob;
-
 import java.util.*;
-import java.util.concurrent.BlockingDeque;
 
 public class BuildingTemplate extends Template {
     private BlockPos controlBlock = BlockPos.ZERO;
