@@ -49,3 +49,6 @@ run
 forge*changelog.txt
 
 CREDITS.txt
+
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
