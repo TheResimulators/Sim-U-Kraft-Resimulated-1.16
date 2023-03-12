@@ -47,13 +47,6 @@ run
 
 # Files from Forge MDK
 forge*changelog.txt
+src/generated/
 
-CREDITS.txt
-
-src/generated/resources/data/
-
-src/generated/
-.floo
-.flooignore
-setup.bat
-
+!gradle/wrapper/gradle-wrapper.jar
