@@ -408,6 +408,7 @@ public class JobFarmer implements IReworkedJob {
         }
     }
 
+
     private boolean hasSeeds() {
         int amount = 0;
         ItemStack seed = ((CropsBlock) (farmerTile.getSeed().getBlock())).getCloneItemStack(world, getWorkSpace(), world.getBlockState(getWorkSpace()));

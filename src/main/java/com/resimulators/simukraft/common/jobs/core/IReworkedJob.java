@@ -53,4 +53,5 @@ public interface IReworkedJob {
     void start();
 
     void tick();
+
 }

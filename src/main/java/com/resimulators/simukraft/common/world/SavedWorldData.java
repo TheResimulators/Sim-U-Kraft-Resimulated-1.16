@@ -18,7 +18,8 @@ import java.util.Random;
 import java.util.UUID;
 
 
-public class SavedWorldData extends WorldSavedData {
+public class
+SavedWorldData extends WorldSavedData {
     private static final String DATA_NAME = Reference.MODID + "_SavedWorldData";
     private static final SavedWorldData clientStorageCopy = new SavedWorldData();
     private static final Random rand = new Random();

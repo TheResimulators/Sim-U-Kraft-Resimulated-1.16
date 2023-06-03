@@ -255,6 +255,8 @@ public class JobButcher implements IReworkedJob {
     }
 
 
+
+
     private void collectMeatFromFarm(ChestTileEntity farmChest)
     {
         if (farmChest != null) {

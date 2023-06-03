@@ -327,6 +327,7 @@ public class JobBuilder implements IReworkedJob {
         }
     }
 
+
     public void setTemplate(BuildingTemplate template) {
         this.template = template;
     }

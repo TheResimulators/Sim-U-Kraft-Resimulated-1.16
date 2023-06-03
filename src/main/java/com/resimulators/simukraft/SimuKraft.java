@@ -12,6 +12,8 @@ import com.resimulators.simukraft.common.entity.sim.SimInformationOverlay;
 import com.resimulators.simukraft.common.events.world.MarkerBrokenEvent;
 import com.resimulators.simukraft.common.events.world.NewDayEvent;
 import com.resimulators.simukraft.common.events.world.SimDeathEvent;
+import com.resimulators.simukraft.common.events.world.SimLoadingUnloadingEvents;
+import com.resimulators.simukraft.handlers.ChunkLoadingCallback;
 import com.resimulators.simukraft.handlers.StructureHandler;
 import com.resimulators.simukraft.init.*;
 import com.resimulators.simukraft.proxy.ClientProxy;
@@ -26,16 +28,20 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.world.ForgeChunkManager;
 import net.minecraftforge.event.RegisterCommandsEvent;
+import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ExtensionPoint;
+import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.ParallelDispatchEvent;
 import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
@@ -73,7 +79,13 @@ public class SimuKraft {
         MinecraftForge.EVENT_BUS.register(new SimDeathEvent());
         MinecraftForge.EVENT_BUS.register(MarkerBrokenEvent.class);
         MinecraftForge.EVENT_BUS.register(this);
+        MinecraftForge.EVENT_BUS.register(new SimLoadingUnloadingEvents());
         Network.handler.init();
+        event.enqueueWork(() ->
+        {
+            ForgeChunkManager.setForcedChunkLoadingCallback(Reference.MODID,new ChunkLoadingCallback());
+        });
+
         //StructureHandler.createTemplateManager();
     }
 

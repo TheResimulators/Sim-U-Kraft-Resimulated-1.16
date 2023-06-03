@@ -2,11 +2,16 @@ package com.resimulators.simukraft.common.world;
 
 import com.google.common.collect.Lists;
 import com.resimulators.simukraft.Network;
+
 import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
+
+import com.resimulators.simukraft.common.jobs.core.IReworkedJob;
+import com.resimulators.simukraft.init.ModJobs;
 import com.resimulators.simukraft.packets.CreditUpdatePacket;
 import com.resimulators.simukraft.packets.IMessage;
 import com.resimulators.simukraft.packets.NewHousePacket;
+import com.resimulators.simukraft.packets.SimFirePacket;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -226,6 +231,9 @@ public class Faction {
                 simids.add(entity.getId());
             } else {
                 SimuKraft.LOGGER().error("Error: Entity doesn't exist in faction. Please contact the author.");
+                SimuKraft.LOGGER().error("Removing this entity to reduce future Errors");
+                removeSim(id);
+                sendPacketToFaction(new SimFirePacket());
             }
         }
         return simids;
@@ -241,6 +249,8 @@ public class Faction {
                 }
             } else {
                 SimuKraft.LOGGER().error("Error: Unemployed entity doesn't exist in faction while trying to get Unemployed Sims. Please contact the author.");
+                SimuKraft.LOGGER().error("Removing this entity to reduce future Errors");
+                removeSim(id);
             }
         }
         return simids;
@@ -293,10 +303,15 @@ public class Faction {
         sims.get(id).read(nbt);
     }
 
-    public CompoundNBT getSimInfo(UUID id) {
+    public CompoundNBT getSimInfoNbt(UUID id) {
         return sims.get(id).write();
     }
 
+
+    public SimInfo getSimInfo(UUID id)
+    {
+        return sims.get(id);
+    }
     public void sendFactionChatMessage(String string, World world) {
         for (UUID id : getPlayers()) {
             PlayerEntity entity = world.getPlayerByUUID(id);
@@ -417,11 +432,16 @@ public class Faction {
         return houses;
     }
 
-    static class SimInfo {
+    public static class SimInfo {
         private UUID sim;
         private boolean hired;
         private boolean homeless = true;
 
+        private boolean isUnloaded = false;
+
+
+        private String simName = "";
+        private IReworkedJob job;
         SimInfo(UUID sim) {
             this.sim = sim;
         }
@@ -436,7 +456,9 @@ public class Faction {
             nbt.putBoolean("homeless", homeless);
             nbt.putBoolean("hired", hired);
             nbt.putString("sim", sim.toString());
-
+            nbt.putBoolean("isUnloaded",isUnloaded);
+            nbt.put("Job nbt",job.writeToNbt(new ListNBT()));
+            nbt.putInt("Job Int" ,job.jobType().getId());
             return nbt;
         }
 
@@ -444,10 +466,47 @@ public class Faction {
             homeless = nbt.getBoolean("homeless");
             hired = nbt.getBoolean("hired");
             this.sim = UUID.fromString(nbt.getString("sim"));
+            isUnloaded = nbt.getBoolean("isUnloaded");
+            int id = nbt.getInt("Job Int");
+            createNewJobFromInt(id);
+
+            job.readFromNbt( (ListNBT) nbt.get("Job nbt"));
         }
 
 
+        public boolean isUnloaded()
+        {
+            return isUnloaded;
+        }
+
+
+        public void setUnloaded(boolean unloaded)
+        {
+            isUnloaded = unloaded;
+        }
+        public void createNewJobFromInt(int jobInt)
+        {
+            ModJobs.JOB_LOOKUP.get(jobInt);
+        }
+
+        public void setJob(IReworkedJob job)
+        {
+            this.job = job;
+
+        }
+
+        public void setSimName(String name)
+        {
+            this.simName = name;
+        }
+
+        public String getSimName()
+        {
+            return this.simName;
+        }
     }
+
+
 
 
     public static class House {

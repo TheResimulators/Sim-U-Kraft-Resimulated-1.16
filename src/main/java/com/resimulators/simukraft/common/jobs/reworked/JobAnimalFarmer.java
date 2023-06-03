@@ -281,6 +281,7 @@ public class JobAnimalFarmer implements IReworkedJob {
     }
 
 
+
     private void spawnNewAnimals() {
         if (!farm.hasMaxAnimals()) {
             farm.spawnAnimal();

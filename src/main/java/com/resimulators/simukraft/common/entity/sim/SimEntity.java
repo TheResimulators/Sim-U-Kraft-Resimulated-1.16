@@ -2,6 +2,7 @@ package com.resimulators.simukraft.common.entity.sim;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.resimulators.simukraft.Reference;
 import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.common.entity.goals.CustomWaterAvoidingRandomWalkingGoal;
 import com.resimulators.simukraft.common.entity.goals.GoToWorkGoal;
@@ -59,10 +60,12 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.IServerWorld;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.common.world.ForgeChunkManager;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.network.NetworkHooks;
 
@@ -143,11 +146,17 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
         return new SimNavigator(this, world);
     }
 
+
+
     //Updates
     @Override
     public void tick() {
         super.tick();
+
+
         if (!level.isClientSide()) {
+
+            ForgeChunkManager.forceChunk((ServerWorld) level, Reference.MODID,this, (int) (this.position().x/16), (int) (this.position().z/16),true,true);
             this.foodStats.tick(this);
             this.controller.tick();
             if (getHouseID() == null) {
@@ -308,7 +317,9 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
         super.die(cause);
         this.dropEquipment();
         Faction faction = SavedWorldData.get(level).getFactionWithSim(getUUID());
-        faction.removeSim(this.getUUID());
+        if (faction != null) {
+            faction.removeSim(this.getUUID());
+        }
     }
 
     @Override
@@ -540,14 +551,15 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
         } else {
             this.setFemale(Utils.randomizeBoolean());
             if (this.getFemale()) {
-                if (!SimuKraft.config.getNames().femaleNames.get().isEmpty())
+                if (!SimuKraft.config.getNames().femaleNames.get().isEmpty()) {
                     this.setCustomName(new StringTextComponent(SimuKraft.config.getNames().femaleNames.get().get(level.getRandom().nextInt(SimuKraft.config.getNames().femaleNames.get().size()))));
                     this.setVariation(level.getRandom().nextInt(femaleSkinCount));
-
+                }
             } else {
-                if (!SimuKraft.config.getNames().maleNames.get().isEmpty())
+                if (!SimuKraft.config.getNames().maleNames.get().isEmpty()){
                     this.setCustomName(new StringTextComponent(SimuKraft.config.getNames().maleNames.get().get(level.getRandom().nextInt(SimuKraft.config.getNames().maleNames.get().size()))));
                     this.setVariation(level.getRandom().nextInt(maleSkinCount));
+                }
             }
         }
         this.getNavigation().getNodeEvaluator().setCanOpenDoors(true);

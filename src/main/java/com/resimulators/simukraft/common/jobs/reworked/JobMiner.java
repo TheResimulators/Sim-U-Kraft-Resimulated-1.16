@@ -60,6 +60,11 @@ public class JobMiner implements IReworkedJob {
     private boolean finished;
     private boolean waitingForStairs= false;
 
+    private int jobIndex;
+
+
+
+
     public JobMiner(SimEntity sim) {
         this.sim = sim;
     }
@@ -343,6 +348,7 @@ public class JobMiner implements IReworkedJob {
             player.displayClientMessage(new StringTextComponent("Working at: " + minepos + "; and navigator set at: " + sim.getNavigation().getTargetPos() + "; inventory state: " + (sim.getInventory().getFirstEmptyStack() == -1 ? "Full" : "Not Full")), true);
         }
     }
+
 
     /**
      * Used to check where the next stair needs to be placed and places it. does not handle rotation handles placing

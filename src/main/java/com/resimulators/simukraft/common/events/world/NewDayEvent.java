@@ -98,7 +98,7 @@ public class NewDayEvent implements INBTSerializable<CompoundNBT> {
                         ArrayList<BlockPos> blocks = BlockUtils.getBlocksAroundPosition(player.blockPosition(), 10);
                         if (spawn(sWorld, sim, blocks)) {
                             worldData.addSimToFaction(faction.getId(), sim);
-                            faction.sendPacketToFaction(new UpdateSimPacket(sim.getUUID(), faction.getSimInfo(sim.getUUID()), faction.getId()));
+                            faction.sendPacketToFaction(new UpdateSimPacket(sim.getUUID(), faction.getSimInfoNbt(sim.getUUID()), faction.getId()));
                         }
                     }
                 }
