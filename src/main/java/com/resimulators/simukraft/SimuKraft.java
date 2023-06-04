@@ -24,6 +24,7 @@ import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.world.GameRules;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
@@ -37,6 +38,7 @@ import net.minecraftforge.fml.ExtensionPoint;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -47,6 +49,8 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.lang.reflect.Method;
+
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(Reference.MODID)
 public class SimuKraft {
@@ -55,6 +59,9 @@ public class SimuKraft {
     private static final Logger LOGGER = LogManager.getLogger();
 
     private int r = 0, g = 0, b = 0;
+
+
+
     public static Logger LOGGER() {
         return LOGGER;
     }
@@ -95,12 +102,11 @@ public class SimuKraft {
         MinecraftForge.EVENT_BUS.register(new SimInformationOverlay());
         MarkerEntityRender.register();
         TileConstructorRenderer.register();
-
         //Registering SkinCache and Special Skins
         SkinCacher skinCacher = new SkinCacher();
         skinCacher.initSkinService();
         skinCacher.registerSpecialSkins();
-
+        ModGameRules.setupGameRules();
         ModEntities.registerRenderers();
         ModContainers.registerScreens();
         StructureHandler.createTemplateManager();
@@ -127,6 +133,23 @@ public class SimuKraft {
         b = (b + 3) % 256;
       */
     }
+
+    public static GameRules.RuleType<GameRules.BooleanValue> create(boolean defaultValue) {
+        try {
+            Method createGameruleMethod = ObfuscationReflectionHelper.findMethod(GameRules.BooleanValue.class, "func_223568_b", boolean.class);
+            createGameruleMethod.setAccessible(true);
+            return (GameRules.RuleType<GameRules.BooleanValue>) createGameruleMethod.invoke(null, defaultValue);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
+
+
+
+
     @OnlyIn(Dist.CLIENT)
     public static void drawCube(RenderWorldLastEvent event, Vector3d pointA, Vector3d pointB, Vector3d color) {
         IRenderTypeBuffer.Impl buffer = Minecraft.getInstance().renderBuffers().bufferSource();

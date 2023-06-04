@@ -21,33 +21,36 @@ public class SimLoadingUnloadingEvents {
             SimEntity sim = (SimEntity) event.getEntity();
             SavedWorldData data = SavedWorldData.get(sim.getCommandSenderWorld());
             Faction faction = data.getFactionWithSim(sim.getUUID());
-            Faction.SimInfo simInfo = faction.getSimInfo(sim.getUUID());
+            if (faction != null) {
+                Faction.SimInfo simInfo = faction.getSimInfo(sim.getUUID());
 
 
-            if (simInfo.isUnloaded()) {
-                CompoundNBT nbt = faction.getSimInfoNbt(sim.getUUID());
-                sim.setJob(ModJobs.JOB_LOOKUP.get(nbt.getInt("Job int")).apply(sim));
-                sim.getJob().readFromNbt(nbt.getList("Job nbt", Constants.NBT.TAG_LIST));
-                simInfo.setUnloaded(false);
-                simInfo.setJob(null);
+                if (simInfo.isUnloaded()) {
+                    CompoundNBT nbt = faction.getSimInfoNbt(sim.getUUID());
+                    if(nbt.contains("Job int")){
+                        sim.setJob(ModJobs.JOB_LOOKUP.get(nbt.getInt("Job int")).apply(sim));
+                        sim.getJob().readFromNbt(nbt.getList("Job nbt", Constants.NBT.TAG_LIST));
+                    }
+                    simInfo.setUnloaded(false);
+                    simInfo.setJob(null);
+                }
             }
-
         }
     }
     @SubscribeEvent
     public void onEntityLeavesEvent(EntityLeaveWorldEvent event)
     {
-        if (event.getEntity() instanceof SimEntity)
-        {
-            SimEntity sim = (SimEntity)event.getEntity();
-            SavedWorldData data =  SavedWorldData.get(sim.getCommandSenderWorld());
-            Faction faction = data.getFactionWithSim(sim.getUUID());
-            Faction.SimInfo simInfo = faction.getSimInfo(sim.getUUID());
-            simInfo.setUnloaded(true);
-            simInfo.setJob(sim.getJob());
-            simInfo.setSimName(sim.getCustomName().getString());
+        if (event.getEntity() instanceof SimEntity) {
+            if ((((SimEntity) event.getEntity())).) {
+                SimEntity sim = (SimEntity) event.getEntity();
+                SavedWorldData data = SavedWorldData.get(sim.getCommandSenderWorld());
+                Faction faction = data.getFactionWithSim(sim.getUUID());
+                Faction.SimInfo simInfo = faction.getSimInfo(sim.getUUID());
+                simInfo.setUnloaded(true);
+                simInfo.setJob(sim.getJob());
+                simInfo.setSimName(sim.getCustomName().getString());
 
+            }
         }
-
     }
 }

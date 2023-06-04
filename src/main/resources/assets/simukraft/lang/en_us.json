@@ -32,5 +32,9 @@
   "entity.simukraft.sim": "Sim",
 
   "_comment": "MISC",
-  "itemGroup.Sim-U-Kraft": "Sim-U-Kraft"
+  "itemGroup.Sim-U-Kraft": "Sim-U-Kraft",
+
+
+  "_comment": "GameRule",
+  "gameRule.SimUKraft:Creative Build Mode": "Creative Build Mode"
 }

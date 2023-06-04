@@ -266,6 +266,20 @@ public class Faction {
 
     }
 
+    public ArrayList<UUID> getUnloadedSims()
+    {
+        ArrayList<UUID> unloadedSims = new ArrayList<>();
+        for (UUID id: getSims())
+        {
+            if(getSimInfo(id).isUnloaded)
+            {
+                unloadedSims.add(id);
+            }
+        }
+        return unloadedSims;
+
+    }
+
     public void addPlayer(UUID player) {
         this.players.add(player);
     }
@@ -457,8 +471,10 @@ public class Faction {
             nbt.putBoolean("hired", hired);
             nbt.putString("sim", sim.toString());
             nbt.putBoolean("isUnloaded",isUnloaded);
-            nbt.put("Job nbt",job.writeToNbt(new ListNBT()));
-            nbt.putInt("Job Int" ,job.jobType().getId());
+            if (job != null){
+                nbt.put("Job nbt",job.writeToNbt(new ListNBT()));
+                nbt.putInt("Job Int" ,job.jobType().getId());
+            }
             return nbt;
         }
 
@@ -467,10 +483,12 @@ public class Faction {
             hired = nbt.getBoolean("hired");
             this.sim = UUID.fromString(nbt.getString("sim"));
             isUnloaded = nbt.getBoolean("isUnloaded");
-            int id = nbt.getInt("Job Int");
-            createNewJobFromInt(id);
+            if (nbt.contains("Job nbt")){
+                int id = nbt.getInt("Job Int");
+                createNewJobFromInt(id);
 
-            job.readFromNbt( (ListNBT) nbt.get("Job nbt"));
+                job.readFromNbt( (ListNBT) nbt.get("Job nbt"));
+            }
         }
 
 

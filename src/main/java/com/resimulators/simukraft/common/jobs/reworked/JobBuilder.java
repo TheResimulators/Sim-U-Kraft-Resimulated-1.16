@@ -15,6 +15,7 @@ import com.resimulators.simukraft.common.world.SavedWorldData;
 import com.resimulators.simukraft.handlers.StructureHandler;
 import com.resimulators.simukraft.init.ModBlockProperties;
 import com.resimulators.simukraft.init.ModBlocks;
+import com.resimulators.simukraft.init.ModGameRules;
 import com.resimulators.simukraft.utils.BlockUtils;
 import net.minecraft.block.AirBlock;
 import net.minecraft.block.BedBlock;
@@ -245,6 +246,7 @@ public class JobBuilder implements IReworkedJob {
             }
             if (state == State.TRAVELING) {
                 sim.setStatus("Moving to next Block");
+                System.out.println(Math.sqrt(sim.distanceToSqr(blockPos.getX(), blockPos.getY(), blockPos.getZ())));
                 if (Math.sqrt(sim.distanceToSqr(blockPos.getX(), blockPos.getY(), blockPos.getZ())) < 8) {
                     state = State.BUILDING;
                     blockPos = blocks.get(blockIndex).pos;
@@ -260,7 +262,8 @@ public class JobBuilder implements IReworkedJob {
                     blockstate = blockstate.rotate(sim.level, blockInfo.pos, rotation.getRotated(template.getBlockRotation()));
 
 
-                    if ((blockInfo.state.getBlock() instanceof BlockControlBlock || sim.getInventory().hasItemStack(new ItemStack(blockInfo.state.getBlock()))) || (blockIgnorable(blockstate))) {
+                    if ((blockInfo.state.getBlock() instanceof BlockControlBlock || sim.getInventory().hasItemStack(new ItemStack(blockInfo.state.getBlock()))) || (blockIgnorable(blockstate)) || sim.getCommandSenderWorld().getGameRules().getBoolean(ModGameRules.Creative_Build_Mode_Rule)) {
+
                             int index = sim.getInventory().findSlotMatchingUnusedItem(new ItemStack(blockstate.getBlock()));
                         if (index >= 0 ) {
                             if (placeBlock(blockInfo, blockstate) ) {
@@ -278,6 +281,12 @@ public class JobBuilder implements IReworkedJob {
                                 constructor.updateBlockIndex(blockIndex+1);
                                 }
                             }
+                        else if (sim.getCommandSenderWorld().getGameRules().getBoolean(ModGameRules.Creative_Build_Mode_Rule))
+                        {
+                            if (placeBlock(blockInfo, blockstate)){
+                                constructor.updateBlockIndex(blockIndex+1);
+                            }
+                        }
                         updateIndex();
                     } else {
                         
@@ -290,7 +299,7 @@ public class JobBuilder implements IReworkedJob {
 
             if (state == State.COLLECTING) {
                 sim.setStatus("Collecting Resources");
-                if (sim.distanceToSqr(getWorkSpace().getX(), getWorkSpace().getY(), getWorkSpace().getZ()) < 10) {
+                if (sim.distanceToSqr(getWorkSpace().getX(), getWorkSpace().getY(), getWorkSpace().getZ()) < 5) {
                     setBlocksNeeded();
                     retrieveItemsFromChest();
                     state = State.STARTING;

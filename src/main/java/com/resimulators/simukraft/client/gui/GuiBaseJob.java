@@ -247,7 +247,6 @@ public class GuiBaseJob extends Screen {
         maxButtons = maxWidth * height / 30;
         for (int id : ids) {
             SimEntity sim = (SimEntity) player.getCommandSenderWorld().getEntity(id);
-
             if (sim != null) {
                 UUID uuid = sim.getUUID();
                 int index = i % maxButtons;
@@ -260,10 +259,15 @@ public class GuiBaseJob extends Screen {
                 }
             }else
             {
+               
+               
+            }
 
+            for (UUID unloadedSimUUID: data.getFaction(Id).getUnloadedSims())
+            {
                 int index = i % maxButtons;
 
-                if (data.getFaction(Id).getHired(uuid)) {
+                if (data.getFaction(Id).getHired(unloadedSimUUID)) {
                     SimButton button = new SimButton(ConstantXSpacing * (index % maxWidth) + 20, ConstantYSpacing * (index / maxWidth) + 40, 100, 20, sim.getName(), ids.get(i), this, 1);
                     employeeButtons.add(addButton(button));
                     button.visible = false;
