@@ -41,10 +41,11 @@ public class SimLoadingUnloadingEvents {
     public void onEntityLeavesEvent(EntityLeaveWorldEvent event)
     {
         if (event.getEntity() instanceof SimEntity) {
-            if ((((SimEntity) event.getEntity())).) {
+            if (!event.getEntity().isAlive()) {
                 SimEntity sim = (SimEntity) event.getEntity();
                 SavedWorldData data = SavedWorldData.get(sim.getCommandSenderWorld());
                 Faction faction = data.getFactionWithSim(sim.getUUID());
+                if (faction == null)return;
                 Faction.SimInfo simInfo = faction.getSimInfo(sim.getUUID());
                 simInfo.setUnloaded(true);
                 simInfo.setJob(sim.getJob());

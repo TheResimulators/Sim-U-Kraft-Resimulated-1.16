@@ -246,12 +246,17 @@ public class JobBuilder implements IReworkedJob {
             }
             if (state == State.TRAVELING) {
                 sim.setStatus("Moving to next Block");
-                System.out.println(Math.sqrt(sim.distanceToSqr(blockPos.getX(), blockPos.getY(), blockPos.getZ())));
                 if (Math.sqrt(sim.distanceToSqr(blockPos.getX(), blockPos.getY(), blockPos.getZ())) < 8) {
                     state = State.BUILDING;
                     blockPos = blocks.get(blockIndex).pos;
                 } else {
-                    sim.getNavigation().moveTo(blockPos.getX(), blockPos.getY(), blockPos.getZ(), sim.getSpeed() * 2);
+                    if (!sim.getNavigation().isInProgress()){
+                        boolean success = sim.getNavigation().moveTo(blockPos.getX(), blockPos.getY(), blockPos.getZ(), sim.getSpeed() * 2);
+                        System.out.println("Navigation to next block successfully? ->" + success);
+                }else
+                {
+                    sim.getNavigation().tick();
+                }
                 }
             }
             if (state == State.BUILDING) {
@@ -305,7 +310,8 @@ public class JobBuilder implements IReworkedJob {
                     state = State.STARTING;
                 } else {
                     blockPos = getWorkSpace();
-                    sim.getNavigation().moveTo(blockPos.getX(), blockPos.getY(), blockPos.getZ(), sim.getSpeed() * 2);
+                    boolean success = sim.getNavigation().moveTo(blockPos.getX(), blockPos.getY(), blockPos.getZ(), sim.getSpeed() * 2);
+                    System.out.println("Navigation to collect successfully? ->" + success);
                 }
             }
         } else {

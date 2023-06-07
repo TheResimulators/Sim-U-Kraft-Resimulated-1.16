@@ -3,6 +3,7 @@ package com.resimulators.simukraft.common.entity.sim;
 
 import com.resimulators.simukraft.common.jobs.core.Activity;
 import com.resimulators.simukraft.common.jobs.core.IReworkedJob;
+import net.minecraft.block.Blocks;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.BlockPos;
 
@@ -42,8 +43,14 @@ public class WorkingController {
                     sim.setStatus("Arrived at Work");
                 } else {
                     sim.setStatus("Going To Work");
-                    if (!sim.getNavigation().moveTo(pos.getX(), pos.getY() + 1, pos.getZ(), sim.getSpeed() * 2)){
-                        sim.getNavigation().recomputePath();}
+                    if (!sim.getNavigation().moveTo(pos.getX(), pos.getY(), pos.getZ(), sim.getSpeed() * 2)){
+                        sim.getNavigation().stop();
+                        sim.getNavigation().recomputePath();
+                        if (sim.getNavigation().getPath() != null) {
+                            sim.getNavigation().moveTo(sim.getNavigation().getPath(),sim.getSpeed() * 2);
+                            System.out.println(sim.getNavigation().getPath().canReach());
+                        }
+                    }
 
                 }
             } else {
