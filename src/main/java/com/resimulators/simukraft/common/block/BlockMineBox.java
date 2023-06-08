@@ -52,7 +52,7 @@ public class BlockMineBox extends BlockBase {
                 miner.onOpenGui(player.getMotionDirection());
                 if (miner.getHired()) {
                     SimEntity sim = (SimEntity) ((ServerWorld) world).getEntity(miner.getSimId());
-                    if (sim != null) {
+                    if (sim != null && sim.getJob() != null) {
                         hiredId = sim.getId();
                     } else {
                         miner.setHired(false);

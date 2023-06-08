@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.resimulators.simukraft.Network;
 
 import com.resimulators.simukraft.SimuKraft;
+import com.resimulators.simukraft.client.model.EntitySimModel;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
 
 import com.resimulators.simukraft.common.jobs.core.IReworkedJob;
@@ -444,6 +445,26 @@ public class Faction {
 
         }
         return houses;
+    }
+
+    public void resetWorkDay() {
+        for (UUID sim: sims.keySet())
+        {
+            if (sims.get(sim).isUnloaded)
+            {
+                if (sims.get(sim).job != null){
+                    sims.get(sim).job.resetPeriodsWorked();
+                }
+            }else
+            {
+                SimEntity simEntity = ((SimEntity)((ServerWorld)world).getEntity(sim));
+                if (simEntity != null){
+                    if (simEntity.getJob() != null){
+                        simEntity.getJob().resetPeriodsWorked();
+                    }
+                }
+            }
+        }
     }
 
     public static class SimInfo {

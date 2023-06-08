@@ -105,7 +105,7 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
     private int houseHuntDelay = 200;
 
     public static AttributeModifierMap.MutableAttribute createAttributes() {
-        return MobEntity.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 0.25D) //Movement Speed
+        return MobEntity.createMobAttributes().add(Attributes.MOVEMENT_SPEED, 0.5D) //Movement Speed
                 .add(Attributes.MAX_HEALTH, 20.0D) //Health
                 .add(Attributes.ATTACK_DAMAGE, 1.0D); //Base Attack Damage
     }
@@ -149,7 +149,7 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
 
     @Override
     public float getSpeed() {
-        return (float) getAttributes().getInstance(Attributes.MOVEMENT_SPEED).getValue();
+        return (float) getAttributes().getInstance(Attributes.MOVEMENT_SPEED).getValue() * 2;
     }
 
     //Updates

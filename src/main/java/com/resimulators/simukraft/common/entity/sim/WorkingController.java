@@ -20,7 +20,7 @@ public class WorkingController {
     public void tick() {
         IReworkedJob job = sim.getJob();
         if (job != null) {
-            if (sim.getActivity() != Activity.WORKING && sim.getActivity() != Activity.GOING_TO_WORK && sim.getActivity() != Activity.NOT_WORKING) {// only runs this if the sim is not working at all
+            if (sim.getActivity() != Activity.WORKING && sim.getActivity() != Activity.GOING_TO_WORK) {// only runs this if the sim is not working at all
                 if (tick >= job.intervalTime()) { //interval time makes it so it checks every x seconds to see if it can work
                     tick = 0;
                     //TODO add if idling condition to make sure that we don't interrupt anything else like eating or socializing add to the one below
@@ -36,6 +36,7 @@ public class WorkingController {
                         }
                     }
                 }
+                tick++;
             } else if (sim.getActivity() == Activity.GOING_TO_WORK) {
                 BlockPos pos = job.getWorkSpace();
                 if (Math.sqrt(sim.distanceToSqr(pos.getX(), pos.getY(), pos.getZ())) < 4) {
@@ -66,8 +67,11 @@ public class WorkingController {
                 } else
                     job.tick();
             }
+        }else if (sim.getActivity() == Activity.WORKING)
+        {
+            sim.setActivity(Activity.NOT_WORKING);
         }
-        tick++;
+
     }
 
 

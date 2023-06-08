@@ -188,8 +188,14 @@ public class JobMiner implements IReworkedJob {
     @Override
     public void start() {
         this.sim.getNavigation().stop();
+        sim.setActivity(Activity.WORKING);
         TileMiner miner = ((TileMiner) sim.level.getBlockEntity(getWorkSpace()));
         markerPos = miner.getMarker();
+        if (markerPos == null){
+            sim.setActivity(Activity.NOT_WORKING);
+            Faction faction = SavedWorldData.get(sim.getCommandSenderWorld()).getFactionWithSim(sim.getUUID());
+            faction.sendFactionChatMessage(sim.getName().getString() + " Miner can't find markers to outline the mining hole at " + sim.getJob().getWorkSpace(),sim.getCommandSenderWorld());
+        }
         dir = miner.getDir();
         offset = BlockPos.ZERO.relative(dir).relative(dir.getClockWise()).offset(0, -1, 0);
         width = miner.getWidth() - 1;
@@ -197,7 +203,7 @@ public class JobMiner implements IReworkedJob {
         height = miner.getYpos() - 1; // height from bedrock / y = 0
         if (!sim.getInventory().hasItemStack(new ItemStack(Items.DIAMOND_PICKAXE)))
             sim.addItemStackToInventory(new ItemStack(Items.DIAMOND_PICKAXE));
-        sim.setActivity(Activity.WORKING);
+
     }
 
     @Override
@@ -214,6 +220,7 @@ public class JobMiner implements IReworkedJob {
             }
             switch (currentTask) {
                 case MINING: {
+                    sim.setStatus("Mining blocks");
                     this.sim.getLookControl().setLookAt(Vector3d.atCenterOf(minepos));
                     this.sim.swing(Hand.MAIN_HAND, true);
                     if (delay <= 0) {// checks if the miner should be mining or doing a different task
@@ -223,8 +230,8 @@ public class JobMiner implements IReworkedJob {
                         Block block = state.getBlock();
                         //get distance from current block targeted to be mined.
                         if (block.isAir(state, world, minepos) || sim.position().distanceTo(new Vector3d(minepos.getX(), minepos.getY(), minepos.getZ())) < 6) {
-                            if (block == Blocks.BEDROCK || minepos.getY() <= 1) {
-                                currentTask = Task.RETURNING;
+                            if (block == Blocks.BEDROCK || minepos.getY() <= 0) {
+                                 currentTask = Task.RETURNING;
                             } else {
                                 currentTask = Task.TRAVELING;
                             }
@@ -249,6 +256,7 @@ public class JobMiner implements IReworkedJob {
 
                             if (!placeStairs(minepos)) {
                                 waitingForStairs = true;
+                                sim.setStatus("Waiting for stairs or slabs");
                                 break;
                             } else waitingForStairs = false;
 
@@ -266,6 +274,7 @@ public class JobMiner implements IReworkedJob {
                 }
                 // traveling is used when is to far away from a block and needs to move closer to it
                 case TRAVELING: {
+                    sim.setStatus("Traveling to Next Block");
                     minepos = offset;
                     minepos = minepos.offset(markerPos.getX(), markerPos.getY(), markerPos.getZ());
 
@@ -289,6 +298,7 @@ public class JobMiner implements IReworkedJob {
                     while (sim.getCommandSenderWorld().getBlockState(minepos).getBlock().isAir(sim.getCommandSenderWorld().getBlockState(minepos), sim.getCommandSenderWorld(), minepos) || sim.level.getBlockState(minepos).getBlock() == Blocks.OAK_STAIRS || sim.level.getBlockState(minepos).getBlock() == Blocks.OAK_SLAB && layer < depth) {
                         if (!placeStairs(minepos)) {
                             waitingForStairs = true;
+                            sim.setStatus("Waiting for stairs or slabs");
                             break;
                         } else waitingForStairs = false;
 
@@ -318,17 +328,21 @@ public class JobMiner implements IReworkedJob {
                 }
                 // returning to base to empty inventory
                 case RETURNING: {
+                    sim.setStatus("Returning to Base");
                     BlockPos pos = sim.getJob().getWorkSpace();
                     if ((sim.distanceToSqr(pos.getX(), pos.getY(), pos.getZ()) <= 5)) {
                         if (Utils.getInventoryAroundPos(sim.getJob().getWorkSpace(), sim.level) != null) {
                             if (Utils.addSimInventoryToChest(Utils.getInventoryAroundPos(sim.getJob().getWorkSpace(), sim.level), sim)) {
                                 sim.getJob().setActivity(Activity.NOT_WORKING);
                                 currentTask = Task.NONE;
+                                SavedWorldData.get(sim.level).getFactionWithSim(sim.getUUID()).sendFactionChatMessage(String.format("Sim %s Has reached bedrock and returned to base at %s", sim.getDisplayName().getString(), sim.getJob().getWorkSpace().toString()), sim.level);
                                 int id = SavedWorldData.get(sim.level).getFactionWithSim(sim.getUUID()).getId();
+
                                 sim.fireSim(sim, id, false);
+
                             } else {
                                 SimuKraft.LOGGER().debug("Unable to move Items into chest");
-                                SavedWorldData.get(sim.level).getFactionWithSim(sim.getUUID()).sendFactionChatMessage(String.format("Sim %s in unable to empty its invetory into a chest at %s", sim.getDisplayName().getString(), sim.getJob().getWorkSpace().toString()), sim.level);
+                                SavedWorldData.get(sim.level).getFactionWithSim(sim.getUUID()).sendFactionChatMessage(String.format("Sim %s in unable to empty its inventory into a chest at %s", sim.getDisplayName().getString(), sim.getJob().getWorkSpace().toString()), sim.level);
                             }
                         }
                     } else {

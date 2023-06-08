@@ -57,6 +57,7 @@ public class NewDayEvent implements INBTSerializable<CompoundNBT> {
         ArrayList<Faction> factions = worldData.getFactions();
         for (Faction faction : factions) {
             float rent = faction.getRent();
+            faction.resetWorkDay();
             faction.sendFactionChatMessage(rent + " Collected in rent today", world);
             faction.addCredits(rent);
 

@@ -27,8 +27,9 @@ public class TileBaseMarker extends TileEntity implements ITile {
 
     public void onOpenGui(Direction dir) {
         this.dir = dir;
-        setChanged();
         Scan();
+        setChanged();
+
     }
 
     public BlockPos getMarker() {
@@ -43,9 +44,9 @@ public class TileBaseMarker extends TileEntity implements ITile {
         if (dir != null) {
             if (level != null) {
                 if (level.getBlockEntity(worldPosition.relative(dir)) instanceof TileMarker) {
+                    ((TileMarker) level.getBlockEntity(worldPosition.relative(dir))).onRightClick(dir); //forces the Tile marker to calculate the associated markers, not requiring the right click on the marker
                     setMarker(worldPosition.relative(dir));
                     setDimensions();
-                    setChanged();
                     level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 2);
                 }
             }
@@ -56,8 +57,13 @@ public class TileBaseMarker extends TileEntity implements ITile {
         if (marker == null) {
             Scan();
         }
-        width = marker.distManhattan(((TileMarker) this.level.getBlockEntity(marker)).getFrontRight());
-        depth = marker.distManhattan(((TileMarker) this.level.getBlockEntity(marker)).getBackLeft());
+        if (((TileMarker) this.level.getBlockEntity(marker)).getFrontRight() != null){
+            width = marker.distManhattan(((TileMarker) this.level.getBlockEntity(marker)).getFrontRight());
+        }
+        if (((TileMarker) this.level.getBlockEntity(marker)).getBackLeft() != null){
+            depth = marker.distManhattan(((TileMarker) this.level.getBlockEntity(marker)).getBackLeft());
+        }
+
         height = marker.getY() - 1;
         setChanged();
 

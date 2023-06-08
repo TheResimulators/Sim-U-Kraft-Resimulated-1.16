@@ -50,6 +50,8 @@ public class JobGlassFactory implements IReworkedJob {
     private int furnaceIndex;
     private int chestIndex;
 
+    private int waitingDelay = 120;
+    private int waitingTick = 0;
 
     public JobGlassFactory(SimEntity simEntity) {
         this.sim = simEntity;
@@ -181,7 +183,7 @@ public class JobGlassFactory implements IReworkedJob {
         if (!furnaces.isEmpty()) {
             blockPos = furnaces.get(0);
             ValidateFurnaces();
-            state = State.FURNACE_INTERACTION;
+            state = State.COLLECT_FINISHED_PRODUCT;
             sim.setStatus("Checking Furnaces");
         } else {
             if (!validateWorkArea()) {
@@ -211,9 +213,25 @@ public class JobGlassFactory implements IReworkedJob {
 
         if (delay <= 0) {
             delay = 10;
-            if (state == State.FURNACE_INTERACTION) {
+            if (state == State.CHECK_FOR_SAND)
+            {
+                int targetAmount = furnaces.size() * 64;
+                int found = 0;
+
+                for (int i = 0; i< furnaces.size();i++) {
+                    found += getSandFromChest(i,targetAmount);
+                    targetAmount -= found;
+                    if (targetAmount <= 0)break;
+                }
+                state = State.SMELTING;
+                return;
+
+
+
+            }
+            if (state == State.COLLECT_FINISHED_PRODUCT) {
                 if (interactWithFurnace()) {
-                    state = State.CHEST_INTERACTION;
+                    state = State.PUT_AWAY_RESOURCES;
                     getItemsToMove();
                     ValidateChests();
                     if (!chests.isEmpty()) {
@@ -226,18 +244,25 @@ public class JobGlassFactory implements IReworkedJob {
                     return;
                 }
             }
-            if (state == State.CHEST_INTERACTION) {
+            if (state == State.PUT_AWAY_RESOURCES) {
                 sim.setStatus("Checking Chests");
                 if (!collected) { // just started shift
-                    getItemsToMove();
+                    getItemsToMove(); // gets glass to put away
                     if (emptyInventory()) {
-                        state = State.TRAVELING;
-                        BlockPos sand = findSand();
-                        if (sand != BlockPos.ZERO) {
-                            targetPos = sand;
-                            blockPos = sand;
+                        if (getSandStock() < 64){
+                            state = State.TRAVELING;
+                            BlockPos sand = findSand();
+                            if (sand != BlockPos.ZERO) {
+                                targetPos = sand;
+                                blockPos = sand;
+                            }
+                            return;
+                        }else
+                        {
+                            state = State.WAITING;
+                            waitingTick = 0;
+                            return;
                         }
-                        return;
                     }
                 } else {
                     getItemsToMove();
@@ -267,6 +292,18 @@ public class JobGlassFactory implements IReworkedJob {
                     if (sand != BlockPos.ZERO) {
                         targetPos = sand;
                         blockPos = sand;
+                    }else
+                    {
+                        sim.setActivity(Activity.NOT_WORKING);
+                        sim.setStatus("Finished work");
+                        finishedWorkPeriod();
+                        Faction faction = SavedWorldData.get(sim.getCommandSenderWorld()).getFactionWithSim(sim.getUUID());
+                        faction.sendFactionChatMessage(sim.getName().getString() + " Glass Factory Worker can't find any sand at " + sim.getJob().getWorkSpace(),sim.getCommandSenderWorld());
+                        if (getPeriodsWorked() >= maximumWorkPeriods())
+                        {
+                            faction.sendFactionChatMessage(sim.getName().getString() + " Glass Factory Worker has finished work for the day at " + sim.getJob().getWorkSpace(),sim.getCommandSenderWorld());
+                        }
+
                     }
                 }
             }
@@ -293,7 +330,7 @@ public class JobGlassFactory implements IReworkedJob {
                         return;
                     }
                 } else {
-                    //state = State.TRAVELING;
+                    state = State.TRAVELING;
                 }
             }
             if (state == State.RETURNING) {
@@ -303,7 +340,6 @@ public class JobGlassFactory implements IReworkedJob {
                     return;
                 }
             }
-
             if (state == State.SMELTING) {
                 sim.setStatus("Smelting Glass");
                 ArrayList<Integer> stacks = getSandInventory();
@@ -311,27 +347,38 @@ public class JobGlassFactory implements IReworkedJob {
                     int index = getBurnables();
                     if (index >= 0 || !checkFuelStatus()) {
                         if (!smeltSand(stacks, index)) {
-                            state = State.CHEST_INTERACTION;
+                            state = State.COLLECT_FINISHED_PRODUCT;
                             getSandToMove();
+                            getItemsToMove();
                         }
 
                     } else {
-                        state = State.CHEST_INTERACTION;
+                        state = State.COLLECT_FINISHED_PRODUCT;
                         getSandToMove();
                         getItemsToMove();
                     }
                 }else{
                     getItemsToMove();
-                    state = State.CHEST_INTERACTION;
+                    state = State.PUT_AWAY_RESOURCES;
 
                 }
 
             }
             if (state == State.NOTHING) {
-                state = State.FURNACE_INTERACTION;
+                state = State.COLLECT_FINISHED_PRODUCT;
                 blockPos = furnaces.get(0);
             }
+            if (state == State.WAITING)
+            {
+                if (waitingTick >= waitingDelay)
+                {
+                    state = State.CHECK_FOR_SAND;
+                }else
+                {
+                    waitingTick++;
+                }
 
+            }
 
         } else {
             delay--;
@@ -398,7 +445,7 @@ public class JobGlassFactory implements IReworkedJob {
             if (world.getBlockEntity(chest) instanceof FurnaceTileEntity) {
                 FurnaceTileEntity tileEntity = (FurnaceTileEntity) world.getBlockEntity(chest);
                 if (tileEntity == null) {
-                    chestsToBeRemoved.remove(chest);
+                    chestsToBeRemoved.add(chest);
                 }
             }
 
@@ -406,6 +453,43 @@ public class JobGlassFactory implements IReworkedJob {
         for (BlockPos chest : chestsToBeRemoved) {
             chests.remove(chest);
         }
+    }
+
+    private int getSandStock()
+    {
+        int sandCount = 0;
+        for(BlockPos chestPos: chests)
+        {
+            ChestTileEntity chestEntity = (ChestTileEntity) world.getBlockEntity(chestPos);
+            if (chestEntity != null)
+            {
+                sandCount += chestEntity.countItem(Items.SAND);
+            }
+        }
+
+
+
+        return sandCount;
+    }
+
+
+    private int getSandFromChest(int chestIndex,int targetAmount)
+    {
+        int sandCount = 0;
+        ChestTileEntity chestEntity = (ChestTileEntity) world.getBlockEntity(chests.get(chestIndex));
+        if (chestEntity != null) {
+            for (int i = 0; i < chestEntity.getContainerSize(); i++) {
+                if (chestEntity.getItem(i).getItem() == Items.SAND)
+                {
+                    sim.getInventory().addItemStackToInventory(chestEntity.getItem(i));
+                    sandCount = chestEntity.getItem(i).getCount();
+                    chestEntity.setItem(i,ItemStack.EMPTY);
+                    if (sandCount > targetAmount) return sandCount;
+                }
+            }
+        }
+
+        return sandCount;
     }
 
     private boolean emptyInventory() { // used directly after furnace interaction to empty the collected glass into chests
@@ -468,7 +552,7 @@ public class JobGlassFactory implements IReworkedJob {
             if (world.getBlockEntity(furnace) instanceof FurnaceTileEntity) {
                 FurnaceTileEntity tileEntity = (FurnaceTileEntity) world.getBlockEntity(furnace);
                 if (tileEntity == null) {
-                    furnacesToBeRemoved.remove(furnace);
+                    furnacesToBeRemoved.add(furnace);
                 }
             }
         }
@@ -479,7 +563,7 @@ public class JobGlassFactory implements IReworkedJob {
 
     private BlockPos findSand() {
         final BlockPos[] sand = {BlockPos.ZERO};
-        Iterable<BlockPos> blockPoses = BlockPos.betweenClosedStream(getWorkSpace().offset(-10, -3, -10), getWorkSpace().offset(10, 5, 10))
+        Iterable<BlockPos> blockPoses = BlockPos.betweenClosedStream(getWorkSpace().offset(-20, -3, -20), getWorkSpace().offset(20, 5, 20))
             .filter(blockPos -> world.getBlockState(blockPos).getBlock() == Blocks.SAND)
             .map(BlockPos::immutable)
             .sorted(Comparator.comparingDouble(blockPos -> getWorkSpace().distSqr(blockPos)))
@@ -694,13 +778,14 @@ public class JobGlassFactory implements IReworkedJob {
 
     private enum State {
         TRAVELING,
+        CHECK_FOR_SAND,
         COLLECTING,
         SMELTING,
         WAITING,
         RETURNING,
         NOTHING,
-        CHEST_INTERACTION,
-        FURNACE_INTERACTION
+        PUT_AWAY_RESOURCES,
+        COLLECT_FINISHED_PRODUCT
 
 
     }
