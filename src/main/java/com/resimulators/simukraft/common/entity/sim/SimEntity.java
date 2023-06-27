@@ -149,7 +149,7 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
 
     @Override
     public float getSpeed() {
-        return (float) getAttributes().getInstance(Attributes.MOVEMENT_SPEED).getValue() * 2;
+        return (float) getAttributes().getInstance(Attributes.MOVEMENT_SPEED).getValue();
     }
 
     //Updates

@@ -220,8 +220,11 @@ public class JobBuilder implements IReworkedJob {
             adjustBlocks();
             sortBlocks();
 
+
+            BlockPos size =  template.getSize();
+
             constructor = (TileConstructor) sim.level.getBlockEntity(workSpace);
-            constructor.setBuildingPositioning(blocks.get(blocks.size()-1).pos,direction);
+            constructor.setBuildingPositioning(origin.relative(direction,size.getZ()).relative(direction.getClockWise(),size.getX()).offset(0,size.getY(),0),direction);
             chargeBlockIndexForward();
             constructor.onStartBuilding(blockIndex+1,blocks.size());
         }

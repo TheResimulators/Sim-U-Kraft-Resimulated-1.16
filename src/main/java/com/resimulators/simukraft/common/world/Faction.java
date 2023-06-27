@@ -9,10 +9,7 @@ import com.resimulators.simukraft.common.entity.sim.SimEntity;
 
 import com.resimulators.simukraft.common.jobs.core.IReworkedJob;
 import com.resimulators.simukraft.init.ModJobs;
-import com.resimulators.simukraft.packets.CreditUpdatePacket;
-import com.resimulators.simukraft.packets.IMessage;
-import com.resimulators.simukraft.packets.NewHousePacket;
-import com.resimulators.simukraft.packets.SimFirePacket;
+import com.resimulators.simukraft.packets.*;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -230,12 +227,12 @@ public class Faction {
             Entity entity = world.getEntity(id);
             if (entity != null) {
                 simids.add(entity.getId());
-            } else {
-                SimuKraft.LOGGER().error("Error: Entity doesn't exist in faction. Please contact the author.");
-                SimuKraft.LOGGER().error("Removing this entity to reduce future Errors");
-                removeSim(id);
-                sendPacketToFaction(new SimFirePacket());
-            }
+            } else if (!sims.get(id).isUnloaded) {
+                    SimuKraft.LOGGER().error("Error: Entity doesn't exist in faction. Please contact the author.");
+                    SimuKraft.LOGGER().error("Removing this entity to reduce future Errors");
+                    removeSim(id);
+                    //sendPacketToFaction(new RemoveSimFromFactionPacket(this.id, id));
+                }
         }
         return simids;
     }

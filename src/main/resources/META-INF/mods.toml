@@ -20,7 +20,7 @@ ordering = "NONE"
 
 side = "BOTH"
 # Here's another dependency
-[[dependencies.suk]]
+[[dependencies.simukraft]]
 modId = "minecraft"
 mandatory = true
 versionRange = "[1.16.5]"
