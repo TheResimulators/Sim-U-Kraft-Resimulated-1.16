@@ -1,5 +1,8 @@
 package com.resimulators.simukraft;
 
+import com.mojang.authlib.minecraft.SocialInteractionsService;
+import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
+import com.mojang.authlib.yggdrasil.YggdrasilSocialInteractionsService;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import com.resimulators.simukraft.client.data.SkinCacher;
@@ -20,6 +23,7 @@ import com.resimulators.simukraft.proxy.ClientProxy;
 import com.resimulators.simukraft.proxy.IProxy;
 import com.resimulators.simukraft.proxy.ServerProxy;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.social.FilterManager;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.math.vector.Matrix4f;
@@ -31,25 +35,21 @@ import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.world.ForgeChunkManager;
 import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ExtensionPoint;
-import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.ParallelDispatchEvent;
 import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.lang.reflect.Method;
+import java.lang.reflect.*;
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(Reference.MODID)
@@ -73,7 +73,13 @@ public class SimuKraft {
 
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
         DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY, () -> GuiMod::openScreen));
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::doClientStuff);
+        FMLJavaModLoadingContext.get().getModEventBus().addListener((FMLClientSetupEvent event) -> {
+            try {
+                doClientStuff(event);
+            } catch (IllegalAccessException | NoSuchFieldException e) {
+                throw new RuntimeException(e);
+            }
+        });
 
         MinecraftForge.EVENT_BUS.register(this);
     }
@@ -96,7 +102,7 @@ public class SimuKraft {
         //StructureHandler.createTemplateManager();
     }
 
-    private void doClientStuff(final FMLClientSetupEvent event) {
+    private void doClientStuff(final FMLClientSetupEvent event) throws IllegalAccessException, NoSuchFieldException {
         // do something that can only be done on the client
         MinecraftForge.EVENT_BUS.register(new SimHud());
         MinecraftForge.EVENT_BUS.register(new SimInformationOverlay());
@@ -110,8 +116,13 @@ public class SimuKraft {
         ModEntities.registerRenderers();
         ModContainers.registerScreens();
         StructureHandler.createTemplateManager();
+        //Temporary
+        YggdrasilSocialInteractionsService service = ObfuscationReflectionHelper.getPrivateValue(Minecraft.class,Minecraft.getInstance(),"field_244734_au");
+        Field field = service.getClass().getDeclaredField("serversAllowed");
+        field.setAccessible(true);
+        field.set(service,true);
+        }
 
-    }
     @SubscribeEvent
     public void onServerStart(FMLServerAboutToStartEvent event){
         if (event.getServer().isDedicatedServer()){
