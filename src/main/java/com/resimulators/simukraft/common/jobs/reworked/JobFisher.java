@@ -1,5 +1,6 @@
 package com.resimulators.simukraft.common.jobs.reworked;
 
+import com.mojang.authlib.GameProfile;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.jobs.Profession;
 import com.resimulators.simukraft.common.jobs.core.Activity;
@@ -8,19 +9,25 @@ import com.resimulators.simukraft.common.world.Faction;
 import com.resimulators.simukraft.common.world.SavedWorldData;
 import com.resimulators.simukraft.utils.Utils;
 import net.minecraft.fluid.Fluids;
+import net.minecraft.item.FishingRodItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
+import net.minecraft.pathfinding.Path;
 import net.minecraft.tileentity.ChestTileEntity;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.items.ItemHandlerHelper;
 import net.minecraftforge.items.wrapper.InvWrapper;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
@@ -29,7 +36,7 @@ public class JobFisher implements IReworkedJob {
 
     private final SimEntity sim;
     private int periodsworked = 0;
-    private BlockPos workSpace,blockPos;
+    private BlockPos workSpace, blockPos;
     private Activity activity = Activity.NOT_WORKING;
     private boolean finished;
 
@@ -40,9 +47,16 @@ public class JobFisher implements IReworkedJob {
     private final Random rnd = new Random();
     private State state = State.WAITING;
     private int tick, fishTrigger;
+
+    private int fishCollectedCount = 0;
     private int delay = rnd.nextInt(41) + 5;
     private boolean validateSentence = false;
     private int index = -1;
+
+    private int waitingPeriod = 100;
+
+    private ArrayList<Integer> fishCaughtList;
+    private FakePlayer player;
 
     public JobFisher(SimEntity simEntity) {
         this.sim = simEntity;
@@ -91,6 +105,8 @@ public class JobFisher implements IReworkedJob {
     }
 
 
+
+
     @Override
     public ListNBT writeToNbt(ListNBT nbt) {
         CompoundNBT data = new CompoundNBT();
@@ -127,6 +143,7 @@ public class JobFisher implements IReworkedJob {
     @Override
     public void finishedWorkPeriod() {
         setWorkedPeriods(++periodsworked);
+        sim.setStatus("Stopped Working");
     }
 
     @Override
@@ -168,9 +185,25 @@ public class JobFisher implements IReworkedJob {
 
     @Override
     public void start() {
+
+
+
+
         sim.setItemInHand(sim.getUsedItemHand(), Items.FISHING_ROD.getDefaultInstance());
+
+        if (player == null && !sim.level.isClientSide) {
+            player = new FakePlayer((ServerWorld) sim.level, new GameProfile(null, "FisherMan_" + sim.getUUID()));
+        }
+
+
+
         if (!chests.isEmpty()) {
-            state = State.CHEST_INTERACTION;
+            sim.setActivity(Activity.WORKING);
+            state = State.FISHING;
+            if (fishCaughtList != null) fishCaughtList.clear();
+            else {
+                fishCaughtList = new ArrayList<>();
+            }
             blockPos = chests.get(0);
         } else {
             if (!validateWorkArea()) {
@@ -182,6 +215,7 @@ public class JobFisher implements IReworkedJob {
     private boolean validateWorkArea() {
         Faction faction = SavedWorldData.get(world).getFactionWithSim(sim.getUUID());
         if (getWorkSpace() != null) {
+            chests = Utils.findInventoriesAroundPos(getWorkSpace(), 5, world);
             if (chests.isEmpty()) {
                 if (!validateSentence)
                     faction.sendFactionChatMessage(sim.getDisplayName().getString() + " (Fisherman) has no inventory at " + getWorkSpace(), world);
@@ -223,56 +257,116 @@ public class JobFisher implements IReworkedJob {
         fishTrigger++;
 
 
-        if (fishTrigger >= delay * 20 && sim.getActivity().equals(Activity.WORKING)){
-            tick = 0;
-            chests = Utils.findInventoriesAroundPos(getWorkSpace(), 5, world);
-            if (!validateWorkArea()) {
-                setActivity(Activity.NOT_WORKING);
-                validateSentence = false;
-            } else if (validateWorkArea()) {
-                setActivity(Activity.WORKING);
-            }
-             if (state == State.FISHING) {
+        chests = Utils.findInventoriesAroundPos(getWorkSpace(), 5, world);
+        if (!validateWorkArea()) {
+            setActivity(Activity.NOT_WORKING);
+            validateSentence = false;
+        } else if (validateWorkArea()) {
+            setActivity(Activity.WORKING);
+        }
 
-                 double f = rnd.nextDouble();
+        if (sim.blockPosition().distManhattan(sim.getJob().getWorkSpace()) >= 2)
+        {
+            state = State.MOVING;
+        }
 
-                 if (f <= .02) { // Tropical Fish
-                     index = 0;
-                 } else if (f <= .10) { // PufferFish
-                     index = 1;
-                 } else if (f <= .30) { // Salmon
-                     index = 2;
-                 } else if (f <= .70) { // Cod
-                     index = 3;
-                 } else{
-                     index = -1;
-                     // did not find a fish
-                 }
-                 if (index != -1){
-                     state = State.CHEST_INTERACTION;
-                 }
+        if (state == State.MOVING)
+        {
+           Path path =  sim.getNavigation().createPath(sim.getJob().getWorkSpace(),(int)sim.getSpeed());
+           sim.getNavigation().moveTo(path,sim.getSpeed());
+            if(sim.blockPosition().distManhattan(sim.getJob().getWorkSpace()) < 2 )
+            {
+                state = State.FISHING;
             }
-            if (state == State.CHEST_INTERACTION){
+        }
+        if (state == State.FISHING) {
+
+            if (fishTrigger >= delay * 20) {
+
+                sim.setStatus("Fishing");
+                sim.swing(Hand.MAIN_HAND,true);
+                sim.getMainHandItem().getItem().use(sim.getCommandSenderWorld(),player,Hand.MAIN_HAND);
+                double f = rnd.nextDouble();
+
+                if (f <= .02) { // Tropical Fish
+                    index = 0;
+                } else if (f <= .10) { // PufferFish
+                    index = 1;
+                } else if (f <= .30) { // Salmon
+                    index = 2;
+                } else if (f <= .70) { // Cod
+                    index = 3;
+                } else {
+                    index = -1;
+                    // did not find a fish
+                }
+                if (index != -1) {
+
+                    fishTrigger = 0;
+                    fishCollectedCount++;
+                    delay = rnd.nextInt(2) + 5;
+                    fishCaughtList.add(index);
+                    if (fishCollectedCount >= 8) {
+                        state = State.CHEST_INTERACTION;
+
+                    }
+                }
+            } else {
+              fishTrigger++;
+            }
+
+        }
+        if (state == State.CHEST_INTERACTION) {
+            sim.setStatus("Putting fish away");
+            boolean success = false;
+            for (int fishIndex = 0; fishIndex < fishCaughtList.size() ; fishIndex++) {
                 for (BlockPos chest : chests) {
                     ChestTileEntity chestEntity = (ChestTileEntity) world.getBlockEntity(chest);
                     InvWrapper wrapper = new InvWrapper(chestEntity);
                     if (chestEntity != null) {
-                        if (ItemHandlerHelper.insertItemStacked(wrapper,new ItemStack(fish[index]),false) == ItemStack.EMPTY){
+                        if (ItemHandlerHelper.insertItemStacked(wrapper, new ItemStack(fish[fishCaughtList.get(fishIndex)]), false) == ItemStack.EMPTY) {
+                            state = State.WAITING;
+                            success = true;
                             break;
                         }
                     }
                 }
-            }
 
+                if(!success)
+                {
+                    SavedWorldData.get(sim.getCommandSenderWorld()).getFactionWithSim(sim.getUUID()).sendFactionChatMessage(
+                            "Sim " + sim.getCustomName() + "Has ran out of space for its fish at " + sim.getJob().getWorkSpace().toString(),sim.getCommandSenderWorld());
+                    finishedWorkPeriod();
+                    sim.setActivity(Activity.NOT_WORKING);
+                    break;
+
+                }
+
+            }
+            fishCaughtList.clear();
         }
-        delay = rnd.nextInt(41) + 5;
-        fishTrigger = 0;
+
+        if (state == State.WAITING) {
+
+            if (tick >= waitingPeriod) {
+                state = State.FISHING;
+                tick = 0;
+                fishCollectedCount = 0;
+            }else {
+
+                sim.setStatus("Waiting to Fish");
+                tick++;
+            }
+        }
     }
+
 
     private enum State {
         FISHING,
         CHEST_INTERACTION,
-        WAITING
+        WAITING,
+
+        MOVING
     }
 }
 
