@@ -65,6 +65,7 @@ public class BlockControlBlock extends BlockBase {
 
     @Override
     public boolean hasTileEntity(final BlockState state) {
+
         return true;
     }
 
