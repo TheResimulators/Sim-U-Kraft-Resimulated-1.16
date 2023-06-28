@@ -21,6 +21,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.items.ItemHandlerHelper;
 import net.minecraftforge.items.wrapper.InvWrapper;
@@ -55,6 +56,10 @@ public class JobFisher implements IReworkedJob {
 
     private int waitingPeriod = 100;
 
+
+    private int workRotation; // amount of fished rotations in this current work period
+
+    private int maxWorkRotations = 8; // the max amount of fish rotations in a work period
     private ArrayList<Integer> fishCaughtList;
     private FakePlayer player;
 
@@ -104,9 +109,6 @@ public class JobFisher implements IReworkedJob {
         return periodsworked;
     }
 
-
-
-
     @Override
     public ListNBT writeToNbt(ListNBT nbt) {
         CompoundNBT data = new CompoundNBT();
@@ -115,12 +117,29 @@ public class JobFisher implements IReworkedJob {
         CompoundNBT ints = new CompoundNBT();
         ints.putInt("periodsworked", periodsworked);
         nbt.add(ints);
-        CompoundNBT other = new CompoundNBT(); // other info that is unique to the miner
+        CompoundNBT other = new CompoundNBT(); // other info that is unique to the Fisherman
         if (workSpace != null) {
             other.putLong("jobpos", workSpace.asLong());
         }
         nbt.add(other);
         other.putBoolean("finished", finished);
+        CompoundNBT fishData = new CompoundNBT();
+        ListNBT caughtFish = new ListNBT();
+        if (fishCaughtList != null){
+            for (Integer integer : fishCaughtList) {
+                CompoundNBT fish = new CompoundNBT();
+                fish.putInt("fishId", integer);
+                caughtFish.add(fish);
+            }
+        }
+        fishData.put("FishIDs",caughtFish);
+        fishData.putInt("CollectedFish",fishCollectedCount);
+        fishData.putInt("fishTrigger",fishTrigger);
+        fishData.putInt("fishDelay",delay);
+        fishData.putInt("workRotation",workRotation);
+        CompoundNBT fishyData = new CompoundNBT();
+        fishyData.put("FishData",fishData);
+        nbt.add(fishyData);
         return nbt;
     }
 
@@ -136,6 +155,20 @@ public class JobFisher implements IReworkedJob {
             }
             if (list.contains("finished")) {
                 finished = list.getBoolean("finished");
+            }
+            if (list.contains("FishData"))
+            {
+                CompoundNBT fishData = list.getCompound("FishData");
+                fishCollectedCount = fishData.getInt("CollectedFish");
+                fishTrigger = fishData.getInt("fishTrigger");
+                delay = fishData.getInt("fishDelay");
+                workRotation = fishData.getInt("workRotation");
+                ListNBT fishIndex = fishData.getList("FishIDs", Constants.NBT.TAG_COMPOUND);
+                if (fishCaughtList == null)fishCaughtList = new ArrayList<>(fishIndex.size());
+                for (int j = 0; j < fishIndex.size(); j++) {
+                        CompoundNBT compound = fishIndex.getCompound(j);
+                        fishCaughtList.add(compound.getInt("fishId"));
+                }
             }
         }
     }
@@ -285,7 +318,6 @@ public class JobFisher implements IReworkedJob {
 
                 sim.setStatus("Fishing");
                 sim.swing(Hand.MAIN_HAND,true);
-                sim.getMainHandItem().getItem().use(sim.getCommandSenderWorld(),player,Hand.MAIN_HAND);
                 double f = rnd.nextDouble();
 
                 if (f <= .02) { // Tropical Fish
@@ -319,12 +351,12 @@ public class JobFisher implements IReworkedJob {
         if (state == State.CHEST_INTERACTION) {
             sim.setStatus("Putting fish away");
             boolean success = false;
-            for (int fishIndex = 0; fishIndex < fishCaughtList.size() ; fishIndex++) {
+            for (Integer integer : fishCaughtList) {
                 for (BlockPos chest : chests) {
                     ChestTileEntity chestEntity = (ChestTileEntity) world.getBlockEntity(chest);
                     InvWrapper wrapper = new InvWrapper(chestEntity);
                     if (chestEntity != null) {
-                        if (ItemHandlerHelper.insertItemStacked(wrapper, new ItemStack(fish[fishCaughtList.get(fishIndex)]), false) == ItemStack.EMPTY) {
+                        if (ItemHandlerHelper.insertItemStacked(wrapper, new ItemStack(fish[integer]), false) == ItemStack.EMPTY) {
                             state = State.WAITING;
                             success = true;
                             break;
@@ -332,10 +364,9 @@ public class JobFisher implements IReworkedJob {
                     }
                 }
 
-                if(!success)
-                {
+                if (!success) {
                     SavedWorldData.get(sim.getCommandSenderWorld()).getFactionWithSim(sim.getUUID()).sendFactionChatMessage(
-                            "Sim " + sim.getCustomName() + "Has ran out of space for its fish at " + sim.getJob().getWorkSpace().toString(),sim.getCommandSenderWorld());
+                            "Sim " + sim.getCustomName() + "Has ran out of space for its fish at " + sim.getJob().getWorkSpace().toString(), sim.getCommandSenderWorld());
                     finishedWorkPeriod();
                     sim.setActivity(Activity.NOT_WORKING);
                     break;
@@ -344,6 +375,13 @@ public class JobFisher implements IReworkedJob {
 
             }
             fishCaughtList.clear();
+            workRotation++;
+            if (workRotation >= maxWorkRotations)
+            {
+                workRotation = 0;
+                finishedWorkPeriod();
+                sim.setActivity(Activity.NOT_WORKING);
+            }
         }
 
         if (state == State.WAITING) {
