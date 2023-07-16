@@ -6,36 +6,28 @@ import com.resimulators.simukraft.common.jobs.core.Activity;
 import com.resimulators.simukraft.common.jobs.core.IReworkedJob;
 import com.resimulators.simukraft.common.tileentity.TileAnimalFarm;
 import com.resimulators.simukraft.common.world.SavedWorldData;
-import com.resimulators.simukraft.utils.BlockUtils;
 import com.resimulators.simukraft.utils.Utils;
+import jdk.jfr.internal.tool.Main;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.SwordItem;
-import net.minecraft.loot.LootContext;
-import net.minecraft.loot.LootParameterSets;
-import net.minecraft.loot.LootParameters;
-import net.minecraft.loot.LootTable;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tileentity.ChestTileEntity;
-import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.items.ItemHandlerHelper;
 import net.minecraftforge.items.wrapper.InvWrapper;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Random;
 import java.util.stream.Collectors;
 
 public class JobAnimalFarmer implements IReworkedJob {
@@ -55,7 +47,9 @@ public class JobAnimalFarmer implements IReworkedJob {
     private TileAnimalFarm farm;
     private State state = State.MOVING;
     private AnimalEntity target;
-    private LootTable table;
+
+    private int killCycles;
+    private int maxKillCycles = 5;
 
     public JobAnimalFarmer(SimEntity sim) {
         this.sim = sim;
@@ -187,17 +181,29 @@ public class JobAnimalFarmer implements IReworkedJob {
 
     @Override
     public void start() {
-        sim.setItemInHand(Hand.MAIN_HAND, new ItemStack(Items.DIAMOND_SWORD));
-        chests = Utils.findInventoriesAroundPos(sim.getJob().getWorkSpace(), 4, world);
         if (farm == null) {
             farm = (TileAnimalFarm) world.getBlockEntity(getWorkSpace());
-            ResourceLocation resourcelocation = farm.getAnimal().getAnimal().getDefaultLootTable();
-            table = this.world.getServer().getLootTables().get(resourcelocation);
+        }
 
-        }else{
+
+        chests = Utils.findInventoriesAroundPos(sim.getJob().getWorkSpace(), 4, world);
+        if (!(sim.getMainHandItem().getItem() instanceof SwordItem)) {
+            if(!CheckForTool())
+            {
+                SavedWorldData.get(sim.level).getFactionWithSim(sim.getUUID()).sendFactionChatMessage( String.format("%s %s can not find the tools he needs to work, " +
+                        "please supply him with a sword",farm.getName() +"er",sim.getCustomName().getString()),world);
+                sim.setActivity(Activity.NOT_WORKING);
+
+
+            }else{
+                sim.setActivity(Activity.WORKING);
+            }
+        }
+        else{
             sim.setActivity(Activity.WORKING);
         }
     }
+
 
     @Override
     public void tick() {
@@ -213,10 +219,10 @@ public class JobAnimalFarmer implements IReworkedJob {
                     sim.getLookControl().setLookAt(new Vector3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()));
 
                     if (sim.getNavigation().getPath() != null){
-                        if (!sim.getNavigation().getPath().sameAs(sim.getNavigation().createPath(blockPos,(int)sim.getSpeed() * 2))){
+                        if (!sim.getNavigation().getPath().sameAs(sim.getNavigation().createPath(blockPos,(int)sim.getSpeed()))){
                             getNewPath();
                         }else{
-                            sim.getNavigation().moveTo( sim.getNavigation().getPath(), sim.getSpeed() * 2);
+                            sim.getNavigation().moveTo( sim.getNavigation().getPath(), sim.getSpeed());
                         }
                     }else{
                         getNewPath();
@@ -233,6 +239,7 @@ public class JobAnimalFarmer implements IReworkedJob {
                     if (target != null){
                         sim.getMainHandItem().getItem().hurtEnemy(sim.getMainHandItem(), target, sim);
                         sim.doHurtTarget(target);
+                        sim.getMainHandItem().getItem().hurtEnemy(sim.getMainHandItem(),sim,target);
                         sim.getLookControl().setLookAt(new Vector3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()));
                         sim.swing(sim.getUsedItemHand(),true);
                         if (target.isDeadOrDying()) {
@@ -240,15 +247,11 @@ public class JobAnimalFarmer implements IReworkedJob {
                             state = State.MOVING;
 
                             currentKillCount++;
-                            System.out.println(currentKillCount);
+
                             if (currentKillCount >= killsBeforeEmpty) {
+                                killCycles++;
                                 state = State.RETURNING;
-                                LootContext.Builder builder = new LootContext.Builder((ServerWorld) sim.getCommandSenderWorld()).withRandom(new Random())
-                                        .withParameter(LootParameters.THIS_ENTITY, sim)
-                                        .withParameter(LootParameters.ORIGIN, sim.position())
-                                        .withParameter(LootParameters.DAMAGE_SOURCE, DamageSource.GENERIC);
-                                LootContext ctx = builder.create(LootParameterSets.ENTITY);
-                                table.getRandomItems(ctx).forEach(itemStack -> drops.add(itemStack.getItem()));
+                                drops.addAll(((TileAnimalFarm)sim.getCommandSenderWorld().getBlockEntity(sim.getJob().getWorkSpace())).getLootItems());
 
                                 getCollectedItemStacks();
                                 currentKillCount = 0;
@@ -267,8 +270,19 @@ public class JobAnimalFarmer implements IReworkedJob {
                     addItemsToChests();
                     state = State.MOVING;
                     if (!(sim.getMainHandItem().getItem() instanceof SwordItem)) {
-                        sim.setItemInHand(Hand.MAIN_HAND, new ItemStack(Items.DIAMOND_SWORD));
+                        if(!CheckForTool())
+                        {
+                            SavedWorldData.get(sim.level).getFactionWithSim(sim.getUUID()).sendFactionChatMessage( String.format("%s %s can not find the tools he needs to work, " +
+                                    "please supply him with a sword",farm.getName() +"er",sim.getCustomName().getString()),world);
+                            sim.setActivity(Activity.NOT_WORKING);
 
+                        }
+                    }
+                    if (killCycles >= maxKillCycles)
+                    {
+                        finishedWorkPeriod();
+                        sim.setActivity(Activity.NOT_WORKING);
+                        killCycles = 0;
                     }
                 }
             } else {
@@ -280,6 +294,29 @@ public class JobAnimalFarmer implements IReworkedJob {
         }
     }
 
+
+
+    private boolean CheckForTool()
+    {
+        for(BlockPos chestPos: chests)
+        {
+            ChestTileEntity chest = (ChestTileEntity) world.getBlockEntity(chestPos);
+            for (int i = 0; i < chest.getContainerSize(); i++) {
+                ItemStack stack = chest.getItem(i);
+                if (stack.getItem() instanceof SwordItem)
+                {
+                    ItemStack firstSlot = sim.getInventory().getItem(0);
+
+                    sim.setItemInHand(Hand.MAIN_HAND,chest.getItem(i));
+                    sim.getInventory().setItem(0,chest.getItem(i));
+                    sim.getInventory().addItemStackToInventory(firstSlot);
+                    chest.removeItem(i,10);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
 
     private void spawnNewAnimals() {
@@ -334,16 +371,17 @@ public class JobAnimalFarmer implements IReworkedJob {
             for (int i = 0; i < invStacks.size(); i++) {
                 if (ItemHandlerHelper.insertItemStacked(wrapper, sim.getInventory().getItem(invStacks.get(i)), false) == ItemStack.EMPTY)
                 {
-                    sim.getInventory().setItem(i, ItemStack.EMPTY);
+                    sim.getInventory().setItem(invStacks.get(i), ItemStack.EMPTY);
                     itemsToMove.remove(invStacks.get(i));
                 }
                 if (itemsToMove.size() == 0) {
-                    break; //all items have been added
+                    return true;
                 }
             }
         }
         if (itemsToMove.size() != 0){
-            SavedWorldData.get(sim.level).getFactionWithSim(sim.getUUID()).sendFactionChatMessage(String.format("%s %s has no more inventory space to empty collected items",farm.getName() +"er",sim.getCustomName().getString()),world);
+            SavedWorldData.get(sim.level).getFactionWithSim(sim.getUUID()).sendFactionChatMessage(
+                    String.format("%s %s has no more inventory space to empty collected items",farm.getName() +"er",sim.getCustomName().getString()),world);
             sim.setActivity(Activity.FORCE_STOP);
             sim.setStatus("Not working");
         }

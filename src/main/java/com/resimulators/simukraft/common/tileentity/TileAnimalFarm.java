@@ -5,6 +5,7 @@ import com.resimulators.simukraft.common.enums.Animal;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.passive.AnimalEntity;
+import net.minecraft.item.Item;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SUpdateTileEntityPacket;
@@ -13,6 +14,7 @@ import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.server.ServerWorld;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -25,8 +27,11 @@ public class TileAnimalFarm extends TileEntity implements IControlBlock {
     private boolean hired;
     private UUID simId;
 
-    public TileAnimalFarm(TileEntityType<?> tileEntityTypeIn, Animal entity, String name) {
+
+    private List<Item> lootItems;
+    public TileAnimalFarm(TileEntityType<?> tileEntityTypeIn, Animal entity, String name,List<Item> lootItems) {
         super(tileEntityTypeIn);
+        this.lootItems = lootItems;
         this.entity = entity;
         maxAnimals = 5;
         this.name = name;
@@ -145,4 +150,7 @@ public class TileAnimalFarm extends TileEntity implements IControlBlock {
     }
 
 
+    public List<Item> getLootItems() {
+        return lootItems;
+    }
 }

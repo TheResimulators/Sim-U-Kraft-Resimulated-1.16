@@ -223,7 +223,8 @@ public class Faction {
 
     public ArrayList<Integer> getSimIds(ServerWorld world) {
         ArrayList<Integer> simids = new ArrayList<>();
-        for (UUID id : sims.keySet()) {
+        ArrayList<UUID> simsKeys = new ArrayList<>(sims.keySet());
+        for (UUID id : simsKeys) {
             Entity entity = world.getEntity(id);
             if (entity != null) {
                 simids.add(entity.getId());
@@ -231,7 +232,7 @@ public class Faction {
                     SimuKraft.LOGGER().error("Error: Entity doesn't exist in faction. Please contact the author.");
                     SimuKraft.LOGGER().error("Removing this entity to reduce future Errors");
                     removeSim(id);
-                    //sendPacketToFaction(new RemoveSimFromFactionPacket(this.id, id));
+
                 }
         }
         return simids;
