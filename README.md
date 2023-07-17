@@ -14,3 +14,5 @@ Rewrite of the mod Sim-U-Kraft for 1.15/1.16
   6. Checkout the develop branch to gain the update to date progress.
   
   ### Note: these instructions can easily be translated to other ide's, 
+
+# If you dont get the mod loaded, and all else fails, switch to build with intellj 
