@@ -9,6 +9,7 @@ import com.resimulators.simukraft.common.world.SavedWorldData;
 import com.resimulators.simukraft.utils.Utils;
 import jdk.jfr.internal.tool.Main;
 import net.minecraft.entity.passive.AnimalEntity;
+import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -23,6 +24,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraftforge.items.ItemHandlerHelper;
+import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.items.wrapper.InvWrapper;
 
 import java.util.ArrayList;
@@ -306,11 +308,15 @@ public class JobAnimalFarmer implements IReworkedJob {
                 if (stack.getItem() instanceof SwordItem)
                 {
                     ItemStack firstSlot = sim.getInventory().getItem(0);
+                    ItemStack targetStack = chest.removeItem(i,1);
+                    sim.setItemInHand(Hand.MAIN_HAND,targetStack);
 
-                    sim.setItemInHand(Hand.MAIN_HAND,chest.getItem(i));
-                    sim.getInventory().setItem(0,chest.getItem(i));
-                    sim.getInventory().addItemStackToInventory(firstSlot);
-                    chest.removeItem(i,10);
+                    //sim.getInventory().add(0,chest.getItem(i));
+                    if (!firstSlot.isEmpty()){
+                        sim.getInventory().addItemStackToInventory(firstSlot);
+                    }
+
+
                     return true;
                 }
             }
@@ -356,7 +362,7 @@ public class JobAnimalFarmer implements IReworkedJob {
     }
 
     private void getNewPath(){
-        sim.getNavigation().moveTo(blockPos.getX(), blockPos.getY(), blockPos.getZ(), sim.getSpeed() * 2);
+        sim.getNavigation().moveTo(blockPos.getX(), blockPos.getY(), blockPos.getZ(), sim.getSpeed());
     }
 
     private boolean addItemsToChests() {

@@ -166,6 +166,7 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
             if (getHouseID() == null) {
                 if (houseHuntDelay <= 0) {
                     findHouseToLive();
+                    houseHuntDelay = 100;
                 } else {
                     houseHuntDelay--;
 
