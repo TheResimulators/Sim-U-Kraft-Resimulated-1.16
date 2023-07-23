@@ -116,11 +116,16 @@ public class BanHammer extends Item {
                     //kills targeted sim
                     case 0:
                         entity.kill();
-                        ((SimEntity) entity).fireSim(((SimEntity)entity),SavedWorldData.get(entity.level).getFactionWithSim(entity.getUUID()).getId(),true);
+                        if ( ((SimEntity) entity).getJob() != null){
+                        ((SimEntity) entity).fireSim(((SimEntity)entity),SavedWorldData.get(entity.level).getFactionWithSim(entity.getUUID()).getId(),true);}
                         break;
                     //fires targeted sim
                     case 1:
-                        ((SimEntity) entity).fireSim(((SimEntity)entity),SavedWorldData.get(entity.level).getFactionWithSim(entity.getUUID()).getId(),false);                        break;
+                        if ( ((SimEntity) entity).getJob() != null)
+                        {
+                            ((SimEntity) entity).fireSim(((SimEntity)entity),SavedWorldData.get(entity.level).getFactionWithSim(entity.getUUID()).getId(),true);
+                        }
+                        break;
                     //removes targeted sim from faction
                     case 2:
                         SavedWorldData.get(player.level).getFactionWithSim(entity.getUUID()).removeSim(entity.getUUID());
