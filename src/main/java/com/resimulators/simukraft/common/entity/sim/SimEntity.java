@@ -299,6 +299,7 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
     public void findHouseToLive() {
         Faction faction = SavedWorldData.get(level).getFactionWithSim(this.getUUID());
         if (faction != null) {
+            faction.validateHouses();
             UUID house = faction.getFreeHouse();
             if (house != null) {
                 faction.addSimToHouse(house, getUUID());

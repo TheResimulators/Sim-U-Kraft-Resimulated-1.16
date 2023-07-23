@@ -109,7 +109,9 @@ public class TileResidential extends TileEntity implements IControlBlock {
             ArrayList<UUID> occupants = faction.getOccupants(getHouseID());
             SimuKraft.LOGGER().info("Faction " + faction);
             for (UUID uuid : occupants) {
-                ids.add(((ServerWorld) level).getEntity(uuid).getId());
+                if (((ServerWorld) level).getEntity(uuid) != null){
+                    ids.add(((ServerWorld) level).getEntity(uuid).getId());
+                }
             }
             SimUKraftPacketHandler.INSTANCE.sendTo(new HouseOccupantIdsPacket(ids), player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
 

@@ -8,6 +8,7 @@ import com.resimulators.simukraft.client.model.EntitySimModel;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
 
 import com.resimulators.simukraft.common.jobs.core.IReworkedJob;
+import com.resimulators.simukraft.common.tileentity.TileResidential;
 import com.resimulators.simukraft.init.ModJobs;
 import com.resimulators.simukraft.packets.*;
 import net.minecraft.entity.Entity;
@@ -389,13 +390,41 @@ public class Faction {
         return houses.get(houseID).simOccupants;
     }
 
-    public UUID getFreeHouse() {
+    public void validateHouses()
+    {
+
+
+        ArrayList<UUID> housesToRemove = new ArrayList<>();
         for (UUID house : houses.keySet()) {
+            if (!(world.getBlockEntity(houses.get(house).position) instanceof TileResidential))
+            {
+                housesToRemove.add(house);
+            }
+        }
+
+        for (UUID houseToRemove: housesToRemove)
+        {
+            houses.remove(houseToRemove);
+
+        }
+    }
+
+    public UUID getFreeHouse() {
+
+
+        for (UUID house : houses.keySet()) {
+            if (world.getBlockEntity(houses.get(house).position) instanceof TileResidential){
             if (houses.get(house).simOccupants.isEmpty()) {
                 return house;
             }
+            }else
+            {
+
+                SimuKraft.LOGGER().warn("House does not exist " + house);
+            }
 
         }
+
         return null;
     }
 
@@ -462,6 +491,14 @@ public class Faction {
                     }
                 }
             }
+        }
+    }
+
+    public void setFactionDirty()
+    {
+        if(!world.isClientSide())
+        {
+
         }
     }
 
