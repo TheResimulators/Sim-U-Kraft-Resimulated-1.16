@@ -84,13 +84,10 @@ public class BanHammer extends Item {
 
                     for (UUID simUUID : simList) {
 
-                        System.out.print(faction.getSimIds((ServerWorld) world));
-                        if (((ServerWorld) world).getEntity(simUUID) != null){
-                        if (!((ServerWorld) world).getEntity(simUUID).isAddedToWorld()) {
-                            System.out.print(faction.getSimIds((ServerWorld) world));
-                            faction.removeSim(((ServerWorld) world).getEntity(simUUID).getUUID());
-                            System.out.print(simList);
 
+                        if ((((ServerWorld) world).getEntity(simUUID)) != null){
+                        if (!((((ServerWorld) world).getEntity(simUUID)).isAddedToWorld())) {
+                            SavedWorldData.get(world).removeSimFromFaction(faction.getId(),(SimEntity) ((ServerWorld) world).getEntity(simUUID));
                         }
                         System.out.print(faction.getSimIds((ServerWorld) world));
                     }
@@ -128,7 +125,8 @@ public class BanHammer extends Item {
                         break;
                     //removes targeted sim from faction
                     case 2:
-                        SavedWorldData.get(player.level).getFactionWithSim(entity.getUUID()).removeSim(entity.getUUID());
+                        Faction faction  = SavedWorldData.get(player.level).getFactionWithSim(entity.getUUID());
+                        SavedWorldData.get(player.level).removeSimFromFaction(faction.getId(), (SimEntity) entity);
                         break;
                     //resets targeted sim's inventory
                     case 3:
@@ -138,7 +136,7 @@ public class BanHammer extends Item {
 
             }
 
-            //thanos snaps all non existing sims
+            //thanos snaps all non-existing sims
             else if (entity instanceof PlayerEntity && item.getOrCreateTag().getInt("state") == 4 && !player.isShiftKeyDown()) {
 
                 Faction faction = SavedWorldData.get(entity.level).getFactionWithPlayer(entity.getUUID());
@@ -148,7 +146,7 @@ public class BanHammer extends Item {
                     if (entity.level.getEntity(simUUID) == null) {
 
                         //I hate uuids and the fact that its not always used
-                        faction.removeSim(UUID.fromString(String.valueOf(simUUID)));
+                        SavedWorldData.get(entity.level).removeSimFromFaction(faction.getId(), (SimEntity) entity.level.getEntity(simUUID));
                     }
                 }
             }

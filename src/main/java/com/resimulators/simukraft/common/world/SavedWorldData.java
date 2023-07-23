@@ -175,12 +175,14 @@ SavedWorldData extends WorldSavedData {
 
     /** sets sim to be hired, used to see which sims are unemployed */
     public void hireSim(int id, SimEntity sim) {
+        setDirty();
         getFaction(id).hireSim(sim);
     }
 
     /** fires sim to make it available for hire */
     public void fireSim(int id, SimEntity sim) {
         getFaction(id).fireSim(sim);
+        setDirty();
     }
 
     /** used to clear all stored data */

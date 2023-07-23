@@ -61,15 +61,17 @@ public class GuiResidential extends Screen {
 
             for (int id : occupants) {
                 SimEntity sim = (SimEntity) SimuKraft.proxy.getClientWorld().getEntity(id);
-                font.draw(stack, sim.getCustomName().getString(), 40, height / 2 - 10 + i * 20, Color.WHITE.getRGB());
-                i++;
+                if (sim != null){
+                    font.draw(stack, sim.getCustomName().getString(), 40, height / 2 - 10 + i * 20, Color.WHITE.getRGB());
+                    i++;
+            }
             }
         }
         if (offlineOccupants != null)
         {
-            for (int id : occupants) {
-                SimEntity sim = (SimEntity) SimuKraft.proxy.getClientWorld().getEntity(id);
-                font.draw(stack, sim.getCustomName().getString(), 40, height / 2 - 10 + i * 20, Color.WHITE.getRGB());
+            for (UUID id : offlineOccupants) {
+                String name  = faction.getSimInfo(id).getSimName();
+                font.draw(stack, name, 40, height / 2 - 10 + i * 20, Color.WHITE.getRGB());
                 i++;
             }
         }

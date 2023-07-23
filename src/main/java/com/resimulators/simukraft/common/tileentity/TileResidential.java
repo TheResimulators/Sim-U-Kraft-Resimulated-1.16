@@ -8,6 +8,7 @@ import com.resimulators.simukraft.handlers.SimUKraftPacketHandler;
 import com.resimulators.simukraft.init.ModTileEntities;
 import com.resimulators.simukraft.packets.HouseOccupantIdsPacket;
 import net.minecraft.block.BlockState;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.NetworkManager;
@@ -109,8 +110,11 @@ public class TileResidential extends TileEntity implements IControlBlock {
             ArrayList<UUID> occupants = faction.getOccupants(getHouseID());
             SimuKraft.LOGGER().info("Faction " + faction);
             for (UUID uuid : occupants) {
-                if (((ServerWorld) level).getEntity(uuid) != null){
-                    ids.add(((ServerWorld) level).getEntity(uuid).getId());
+                Entity entity = ((ServerWorld) level).getEntity(uuid);
+                if (entity != null){
+                    if (!faction.getUnloadedSims().contains(entity.getUUID())){
+                        ids.add(((ServerWorld) level).getEntity(uuid).getId());
+                    }
                 }
             }
             SimUKraftPacketHandler.INSTANCE.sendTo(new HouseOccupantIdsPacket(ids), player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);

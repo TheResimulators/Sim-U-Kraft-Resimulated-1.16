@@ -323,9 +323,7 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
         super.die(cause);
         this.dropEquipment();
         Faction faction = SavedWorldData.get(level).getFactionWithSim(getUUID());
-        if (faction != null) {
-            faction.removeSim(this.getUUID());
-        }
+        SavedWorldData.get(level).removeSimFromFaction(faction.getId(),this);
     }
 
     @Override
