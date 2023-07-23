@@ -47,7 +47,7 @@ public class GuiHandler {
                 break;
             case RESIDENTIAL:
                 Minecraft.getInstance().setScreen(new GuiResidential(new StringTextComponent(string), pos));
-
+                break;
             case BUTCHER:
                 Minecraft.getInstance().setScreen(new GuiButcher(new StringTextComponent(string), ints, pos, id));
         }

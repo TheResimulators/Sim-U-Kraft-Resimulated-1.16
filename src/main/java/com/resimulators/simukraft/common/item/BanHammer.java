@@ -4,6 +4,7 @@ import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.tileentity.TileMarker;
 import com.resimulators.simukraft.common.world.Faction;
 import com.resimulators.simukraft.common.world.SavedWorldData;
+import com.resimulators.simukraft.packets.SyncFactionData;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -51,22 +52,22 @@ public class BanHammer extends Item {
                 if (nbt.getInt("state") == 4) {
 
                     nbt.putInt("state", 0);
-                    player.displayClientMessage(new StringTextComponent(String.format("Switched to Kill Sim Mode")), true);
+                    player.displayClientMessage(new StringTextComponent("Switched to Kill Sim Mode"), true);
                 } else {
 
                     nbt.putInt("state", nbt.getInt("state") + 1);
                     switch (nbt.getInt("state")) {
                         case 1:
-                            player.displayClientMessage(new StringTextComponent(String.format("Switched to Fire Sim Mode")), true);
+                            player.displayClientMessage(new StringTextComponent("Switched to Fire Sim Mode"), true);
                             break;
                         case 2:
-                            player.displayClientMessage(new StringTextComponent(String.format("Switched to Remove Sim From Faction Mode")), true);
+                            player.displayClientMessage(new StringTextComponent("Switched to Remove Sim From Faction Mode"), true);
                             break;
                         case 3:
-                            player.displayClientMessage(new StringTextComponent(String.format("Switched to Reset Targeted Sim's Inventory")), true);
+                            player.displayClientMessage(new StringTextComponent("Switched to Reset Targeted Sim's Inventory"), true);
                             break;
                         case 4:
-                            player.displayClientMessage(new StringTextComponent(String.format("Switched to Purge Bugged Sims Mode")), true);
+                            player.displayClientMessage(new StringTextComponent("Switched to Purge Bugged Sims Mode"), true);
                             break;
                     }
                 }
@@ -75,28 +76,29 @@ public class BanHammer extends Item {
 
                 if (nbt.getInt("state") == 4) {
 
-                    ArrayList<Integer> simList = new ArrayList<>();
+                    ArrayList<UUID> simList = new ArrayList<>();
                     Faction faction = SavedWorldData.get(world).getFactionWithPlayer(player.getUUID());
-                    if (world.isClientSide()) {
-                        simList = faction.getSimIds((ServerWorld) world);
+                    if (!world.isClientSide()) {
+                        simList = faction.getSims();
                     }
 
-                    for (int simUUID : simList) {
+                    for (UUID simUUID : simList) {
 
                         System.out.print(faction.getSimIds((ServerWorld) world));
-                        if (world.getEntity(simUUID).isAddedToWorld()) {
+                        if (((ServerWorld) world).getEntity(simUUID) != null){
+                        if (!((ServerWorld) world).getEntity(simUUID).isAddedToWorld()) {
                             System.out.print(faction.getSimIds((ServerWorld) world));
-                            faction.removeSim(world.getEntity(simUUID).getUUID());
+                            faction.removeSim(((ServerWorld) world).getEntity(simUUID).getUUID());
                             System.out.print(simList);
 
                         }
                         System.out.print(faction.getSimIds((ServerWorld) world));
                     }
+                    }
                     System.out.print(faction.getSimIds((ServerWorld) world));
+                    faction.sendPacketToFaction(new SyncFactionData(faction.write(new CompoundNBT()),faction.getId()));
                 }
-                System.out.print("kyle");
             }
-            System.out.print("kyle");
         }
         return super.use(world, player, hand);
     }

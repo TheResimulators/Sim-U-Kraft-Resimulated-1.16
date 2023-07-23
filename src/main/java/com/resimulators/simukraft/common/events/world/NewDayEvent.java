@@ -104,7 +104,7 @@ public class NewDayEvent implements INBTSerializable<CompoundNBT> {
                     }
                 }
             } else {
-                SimuKraft.LOGGER().debug("There are unemployed sims");
+                SimuKraft.LOGGER().debug("There are Homeless sims");
             }
         }
     }

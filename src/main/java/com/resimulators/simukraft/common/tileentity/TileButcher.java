@@ -58,6 +58,7 @@ public class TileButcher extends TileEntity implements IControlBlock{
 
     @Override
     public void load(BlockState state, CompoundNBT nbt) {
+        super.load(state,nbt);
         hired = nbt.getBoolean("hired");
         if (nbt.contains("simid")) {
             simID = nbt.getUUID("simid");
@@ -66,6 +67,7 @@ public class TileButcher extends TileEntity implements IControlBlock{
 
     @Override
     public CompoundNBT save(CompoundNBT nbt) {
+        super.save(nbt);
         nbt.putBoolean("hired", hired);
         if (simID != null) {
             nbt.putUUID("simid", simID);

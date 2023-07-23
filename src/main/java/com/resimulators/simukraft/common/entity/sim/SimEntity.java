@@ -149,7 +149,7 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
 
     @Override
     public float getSpeed() {
-        return (float) getAttributes().getInstance(Attributes.MOVEMENT_SPEED).getValue() * 2;
+        return (float) getAttributes().getInstance(Attributes.MOVEMENT_SPEED).getValue();
     }
 
     //Updates
@@ -166,6 +166,7 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
             if (getHouseID() == null) {
                 if (houseHuntDelay <= 0) {
                     findHouseToLive();
+                    houseHuntDelay = 100;
                 } else {
                     houseHuntDelay--;
 
