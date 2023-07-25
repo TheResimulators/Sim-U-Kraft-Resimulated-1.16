@@ -62,6 +62,7 @@ public class TileConstructor extends TileEntity implements ITile {
     public void setHired(boolean hired) {
         this.hired = hired;
         setChanged();
+        level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 2);
     }
 
     @Override
@@ -73,6 +74,7 @@ public class TileConstructor extends TileEntity implements ITile {
     public void setSimId(UUID id) {
         this.simId = id;
         setChanged();
+        level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 2);
     }
 
     @Override
@@ -84,6 +86,8 @@ public class TileConstructor extends TileEntity implements ITile {
         wagePayed = 0;
         wageTotal = 0;
         wagePerBlock = 0;
+        setChanged();
+        level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 2);
     }
 
     @Override
@@ -180,8 +184,9 @@ public class TileConstructor extends TileEntity implements ITile {
         cornerPosition = size;
         //BlockPos.ZERO.relative(direction).relative(direction.getClockWise(),size.getX()).relative(direction,size.getZ()).above(size.getY());
         this.origin = this.getBlockPos().relative(direction);
-        level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 2);
         setChanged();
+        level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 2);
+
 
     }
 

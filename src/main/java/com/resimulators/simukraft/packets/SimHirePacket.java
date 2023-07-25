@@ -12,17 +12,18 @@ import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 import javax.annotation.Nullable;
+import java.util.UUID;
 
 public class SimHirePacket implements IMessage {
     private int factionId;
-    private int simId;
+    private UUID simId;
     private BlockPos pos;
     private int job;
 
     public SimHirePacket() {
     }
 
-    public SimHirePacket(int simId, int factionId, BlockPos pos, int job) {
+    public SimHirePacket(UUID simId, int factionId, BlockPos pos, int job) {
         this.pos = pos;
         this.factionId = factionId;
         this.simId = simId;
@@ -33,7 +34,7 @@ public class SimHirePacket implements IMessage {
     public void toBytes(PacketBuffer buf) {
         buf.writeBlockPos(pos);
         buf.writeInt(factionId);
-        buf.writeInt(simId);
+        buf.writeUUID(simId);
         buf.writeInt(job);
     }
 
@@ -41,7 +42,7 @@ public class SimHirePacket implements IMessage {
     public void fromBytes(PacketBuffer buf) {
         this.pos = buf.readBlockPos();
         this.factionId = buf.readInt();
-        this.simId = buf.readInt();
+        this.simId = buf.readUUID();
         this.job = buf.readInt();
     }
 
@@ -53,13 +54,8 @@ public class SimHirePacket implements IMessage {
 
     @Override
     public void onExecute(NetworkEvent.Context ctxIn, boolean isLogicalServer) {
-        SimEntity sim = (SimEntity) Minecraft.getInstance().level.getEntity(simId);
-        SavedWorldData.get(SimuKraft.proxy.getClientWorld()).getFaction(factionId).hireSim(sim.getUUID());
+        SavedWorldData.get(SimuKraft.proxy.getClientWorld()).getFaction(factionId).hireSim(simId);
         ((ITile) Minecraft.getInstance().level.getBlockEntity(pos)).setHired(true);
-        ((ITile) Minecraft.getInstance().level.getBlockEntity(pos)).setSimId(sim.getUUID());
-        sim.setJob(ModJobs.JOB_LOOKUP.get(job).apply(sim));
-        sim.setProfession(job);
-        sim.getProfession();
-        sim.getJob().setWorkSpace(pos);
+        ((ITile) Minecraft.getInstance().level.getBlockEntity(pos)).setSimId(simId);
     }
 }

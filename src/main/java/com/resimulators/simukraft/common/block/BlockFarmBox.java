@@ -45,13 +45,18 @@ public class BlockFarmBox extends BlockBase {
             ArrayList<Integer> simids = faction.getSimIds((ServerWorld) world);
             System.out.println(world.getBlockEntity(pos));
             ITile tile = (ITile) world.getBlockEntity(pos);
+            ArrayList<SimEntity> sims = new ArrayList<>();
+            for (Integer simId: simids)
+            {
+                sims.add((SimEntity) world.getEntity(simId));
+            }
             if (tile != null) {
                 ((TileFarmer) tile).onOpenGui(player.getMotionDirection());
                 if (tile.getHired()) {
                     int hiredId = ((ServerWorld) world).getEntity(((ITile) world.getBlockEntity(pos)).getSimId()).getId();
-                    SimUKraftPacketHandler.INSTANCE.sendTo(new OpenJobGuiPacket(simids, pos, hiredId, GuiHandler.FARMER, "Farmer"), ((ServerPlayerEntity) player).connection.connection, NetworkDirection.PLAY_TO_CLIENT);// used when there is a sim hired
+                    SimUKraftPacketHandler.INSTANCE.sendTo(new OpenJobGuiPacket(sims, pos, hiredId, GuiHandler.FARMER, "Farmer"), ((ServerPlayerEntity) player).connection.connection, NetworkDirection.PLAY_TO_CLIENT);// used when there is a sim hired
                 } else {
-                    SimUKraftPacketHandler.INSTANCE.sendTo(new OpenJobGuiPacket(simids, pos, GuiHandler.FARMER, "Farmer"), ((ServerPlayerEntity) player).connection.connection, NetworkDirection.PLAY_TO_CLIENT);//used when there is no sim employed at this block
+                    SimUKraftPacketHandler.INSTANCE.sendTo(new OpenJobGuiPacket(sims, pos, GuiHandler.FARMER, "Farmer"), ((ServerPlayerEntity) player).connection.connection, NetworkDirection.PLAY_TO_CLIENT);//used when there is no sim employed at this block
                 }
             }
         }

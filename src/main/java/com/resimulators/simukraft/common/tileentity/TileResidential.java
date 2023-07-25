@@ -2,6 +2,7 @@ package com.resimulators.simukraft.common.tileentity;
 
 import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.client.gui.GuiHandler;
+import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.world.Faction;
 import com.resimulators.simukraft.common.world.SavedWorldData;
 import com.resimulators.simukraft.handlers.SimUKraftPacketHandler;
@@ -109,15 +110,13 @@ public class TileResidential extends TileEntity implements IControlBlock {
             Faction faction = SavedWorldData.get(this.getLevel()).getFaction(factionID);
             ArrayList<UUID> occupants = faction.getOccupants(getHouseID());
             SimuKraft.LOGGER().info("Faction " + faction);
-            for (UUID uuid : occupants) {
-                Entity entity = ((ServerWorld) level).getEntity(uuid);
-                if (entity != null){
-                    if (!faction.getUnloadedSims().contains(entity.getUUID())){
-                        ids.add(((ServerWorld) level).getEntity(uuid).getId());
-                    }
-                }
+            ArrayList<SimEntity> sims = new ArrayList<>();
+            for (UUID simId: occupants)
+            {
+                sims.add((SimEntity) ((ServerWorld)level).getEntity(simId));
             }
-            SimUKraftPacketHandler.INSTANCE.sendTo(new HouseOccupantIdsPacket(ids), player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
+
+            SimUKraftPacketHandler.INSTANCE.sendTo(new HouseOccupantIdsPacket(sims), player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
 
         }
     }

@@ -3,6 +3,7 @@ package com.resimulators.simukraft.client.gui;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.resimulators.simukraft.Network;
 import com.resimulators.simukraft.SimuKraft;
+import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.enums.Seed;
 import com.resimulators.simukraft.common.jobs.Profession;
 import com.resimulators.simukraft.common.tileentity.TileFarmer;
@@ -25,7 +26,7 @@ public class GuiFarmer extends GuiBaseJob {
     private Button seedButton;
     private Button confirmSeed;
 
-    public GuiFarmer(ITextComponent component, ArrayList<Integer> ids, BlockPos pos, int id) {
+    public GuiFarmer(ITextComponent component, ArrayList<SimEntity> ids, BlockPos pos, int id) {
         super(component, ids, pos, id, Profession.FARMER.getId());
         farmer = (TileFarmer) Minecraft.getInstance().level.getBlockEntity(pos);
         title = component.getString();

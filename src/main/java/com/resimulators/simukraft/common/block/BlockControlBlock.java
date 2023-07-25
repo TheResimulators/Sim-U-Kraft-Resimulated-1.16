@@ -45,16 +45,21 @@ public class BlockControlBlock extends BlockBase {
             Faction faction = SavedWorldData.get(world).getFactionWithPlayer(player.getUUID());
             ArrayList<Integer> simids = faction.getSimIds((ServerWorld) world);
             IControlBlock controlBlock = (IControlBlock) world.getBlockEntity(pos);
+            ArrayList<SimEntity> sims = new ArrayList<>();
+            for (Integer simId: simids)
+            {
+                sims.add((SimEntity) world.getEntity(simId));
+            }
 
             if (controlBlock != null) {
                 if (controlBlock.getHired()) {
                     Entity entity = ((ServerWorld) world).getEntity(controlBlock.getSimId());
                     if (entity != null) {
                         int hiredId = entity.getId();
-                        SimUKraftPacketHandler.INSTANCE.sendTo(new OpenJobGuiPacket(simids, pos, hiredId, controlBlock.getGui(), controlBlock.getName()), ((ServerPlayerEntity) player).connection.connection, NetworkDirection.PLAY_TO_CLIENT);// used when there is a sim hired
+                        SimUKraftPacketHandler.INSTANCE.sendTo(new OpenJobGuiPacket(sims, pos, hiredId, controlBlock.getGui(), controlBlock.getName()), ((ServerPlayerEntity) player).connection.connection, NetworkDirection.PLAY_TO_CLIENT);// used when there is a sim hired
                     }
                 } else {
-                    SimUKraftPacketHandler.INSTANCE.sendTo(new OpenJobGuiPacket(simids, pos, controlBlock.getGui(), controlBlock.getName()), ((ServerPlayerEntity) player).connection.connection, NetworkDirection.PLAY_TO_CLIENT);//used when there is no sim employed at this block
+                    SimUKraftPacketHandler.INSTANCE.sendTo(new OpenJobGuiPacket(sims, pos, controlBlock.getGui(), controlBlock.getName()), ((ServerPlayerEntity) player).connection.connection, NetworkDirection.PLAY_TO_CLIENT);//used when there is no sim employed at this block
                 }
             }
         }
@@ -93,7 +98,7 @@ public class BlockControlBlock extends BlockBase {
                     if (sim != null) {
                         int id = SavedWorldData.get(worldIn).getFactionWithPlayer(player.getUUID()).getId();
                         SavedWorldData.get(worldIn).fireSim(id, sim);
-                        SavedWorldData.get(worldIn).getFaction(id).sendPacketToFaction(new SimFirePacket(id, sim.getId(), pos, false));
+                        SavedWorldData.get(worldIn).getFaction(id).sendPacketToFaction(new SimFirePacket(id, sim.getUUID(), pos, false));
                         sim.fireSim(sim, id, false);
                     }
                 } else {

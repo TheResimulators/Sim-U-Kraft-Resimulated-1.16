@@ -2,6 +2,7 @@ package com.resimulators.simukraft.client.gui;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.resimulators.simukraft.SimuKraft;
+import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.jobs.Profession;
 import com.resimulators.simukraft.common.tileentity.IControlBlock;
 import net.minecraft.util.math.BlockPos;
@@ -14,7 +15,7 @@ public class GuiAnimal extends GuiBaseJob {
     IControlBlock farm;
     String name;
 
-    public GuiAnimal(ITextComponent component, ArrayList<Integer> ids, BlockPos pos, int id) {
+    public GuiAnimal(ITextComponent component, ArrayList<SimEntity> ids, BlockPos pos, int id) {
         super(component, ids, pos, id, Profession.ANIMAL_FARMER.getId());
         name = component.getString();
         farm = (IControlBlock) SimuKraft.proxy.getClientWorld().getBlockEntity(pos);
