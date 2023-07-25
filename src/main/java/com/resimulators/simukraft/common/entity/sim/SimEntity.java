@@ -299,6 +299,7 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
     public void findHouseToLive() {
         Faction faction = SavedWorldData.get(level).getFactionWithSim(this.getUUID());
         if (faction != null) {
+            faction.validateHouses();
             UUID house = faction.getFreeHouse();
             if (house != null) {
                 faction.addSimToHouse(house, getUUID());
@@ -322,9 +323,7 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
         super.die(cause);
         this.dropEquipment();
         Faction faction = SavedWorldData.get(level).getFactionWithSim(getUUID());
-        if (faction != null) {
-            faction.removeSim(this.getUUID());
-        }
+        SavedWorldData.get(level).removeSimFromFaction(faction.getId(),this);
     }
 
     @Override

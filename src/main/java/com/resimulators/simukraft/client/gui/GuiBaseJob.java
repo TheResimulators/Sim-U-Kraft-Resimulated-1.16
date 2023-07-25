@@ -48,6 +48,8 @@ public class GuiBaseJob extends Screen {
     private int pageIndex;
     private int maxButtons;
 
+    private ArrayList<UUID> unloadedSims;
+
     public GuiBaseJob(ITextComponent component, ArrayList<Integer> ids, BlockPos pos, int id, int job) {
         super(component);
         this.hiredId = id;
@@ -58,6 +60,7 @@ public class GuiBaseJob extends Screen {
         this.pos = pos;
         this.job = job;
         this.component = component;
+        unloadedSims =  data.getFaction(Id).getUnloadedSims();
     }
 
     public void hideMainMenu() {
@@ -83,7 +86,7 @@ public class GuiBaseJob extends Screen {
             if (isHired()) {
                 font.draw(stack, "Level: WIP", (float) 20, 70, Color.white.getRGB());
                 if (hiredId != 0) {
-                    font.draw(stack, "Name: " + Minecraft.getInstance().level.getEntity(hiredId).getDisplayName().getString(), (float) 20, 50, Color.white.getRGB());
+                    font.draw(stack, "Name: " + Minecraft.getInstance().level.getEntity(hiredId).getDisplayName(), (float) 20, 50, Color.white.getRGB());
                 }
             }
         } else if (state == State.HIRE_INFO) {
@@ -263,18 +266,14 @@ public class GuiBaseJob extends Screen {
                     button.visible = false;
                     i++;
                 }
-            }else
-            {
-               
-               
             }
-
-            for (UUID unloadedSimUUID: data.getFaction(Id).getUnloadedSims())
+            for (UUID unloadedSimUUID: unloadedSims)
             {
                 int index = i % maxButtons;
 
                 if (data.getFaction(Id).getHired(unloadedSimUUID)) {
-                    SimButton button = new SimButton(ConstantXSpacing * (index % maxWidth) + 20, ConstantYSpacing * (index / maxWidth) + 40, 100, 20, sim.getName(), ids.get(i), this, 1);
+                    SimButton button = new SimButton(ConstantXSpacing * (index % maxWidth) + 20,
+                            ConstantYSpacing * (index / maxWidth) + 40, 100, 20, new StringTextComponent(data.getFaction(Id).getSimInfo(unloadedSimUUID).getSimName()), ids.get(i), this, 1);
                     employeeButtons.add(addButton(button));
                     button.visible = false;
                     i++;

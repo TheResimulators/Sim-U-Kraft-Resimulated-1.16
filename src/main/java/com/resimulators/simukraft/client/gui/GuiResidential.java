@@ -17,6 +17,9 @@ import net.minecraft.util.text.StringTextComponent;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 
 public class GuiResidential extends Screen {
@@ -27,6 +30,7 @@ public class GuiResidential extends Screen {
     private String name;
     private Button Done;
     private ArrayList<Integer> occupants;
+    private List<UUID> offlineOccupants;
 
     protected GuiResidential(ITextComponent titleIn, BlockPos pos) {
         super(titleIn);
@@ -52,11 +56,23 @@ public class GuiResidential extends Screen {
         font.draw(stack, getTitle().getString(), (width / 2) - font.width(getTitle().getString()) / 2, height / 6 - 20, Color.WHITE.getRGB());
         font.draw(stack, "Name: " + name.replace("_", " "), 30, height / 2 - 50, Color.WHITE.getRGB());
         font.draw(stack, "Occupants: ", 30, height / 2 - 30, Color.WHITE.getRGB());
+        int i = 0;
         if (occupants != null) {
-            int i = 0;
+
             for (int id : occupants) {
                 SimEntity sim = (SimEntity) SimuKraft.proxy.getClientWorld().getEntity(id);
-                font.draw(stack, sim.getCustomName().getString(), 40, height / 2 - 10 + i * 20, Color.WHITE.getRGB());
+                if (sim != null){
+                    font.draw(stack, sim.getCustomName().getString(), 40, height / 2 - 10 + i * 20, Color.WHITE.getRGB());
+                    i++;
+            }
+            }
+        }
+        if (offlineOccupants != null)
+        {
+            for (UUID id : offlineOccupants) {
+                String name  = faction.getSimInfo(id).getSimName();
+                font.draw(stack, name, 40, height / 2 - 10 + i * 20, Color.WHITE.getRGB());
+                i++;
             }
         }
     }
@@ -73,6 +89,13 @@ public class GuiResidential extends Screen {
 
     public void setOccupants(ArrayList<Integer> ids) {
         this.occupants = ids;
+        getOfflineOccupants();
 
+
+    }
+
+    private void getOfflineOccupants()
+    {
+        offlineOccupants = (faction.getOccupants(tile.getHouseID()).stream().filter(sim -> faction.getSimInfo(sim).isUnloaded()).collect(Collectors.toList()));
     }
 }

@@ -8,6 +8,7 @@ import com.resimulators.simukraft.client.model.EntitySimModel;
 import com.resimulators.simukraft.common.entity.sim.SimEntity;
 
 import com.resimulators.simukraft.common.jobs.core.IReworkedJob;
+import com.resimulators.simukraft.common.tileentity.TileResidential;
 import com.resimulators.simukraft.init.ModJobs;
 import com.resimulators.simukraft.packets.*;
 import net.minecraft.entity.Entity;
@@ -147,9 +148,6 @@ public class Faction {
             }
         }
     }
-    public void removeSim(UUID id) {
-        sims.remove(id);
-    }
 
 
     public void addCredits(double credits) {
@@ -165,6 +163,7 @@ public class Faction {
         if (world != null) {
             if (!world.isClientSide) {
                 updateCredits();
+                setFactionDirty();
             }
         }
     }
@@ -228,12 +227,7 @@ public class Faction {
             Entity entity = world.getEntity(id);
             if (entity != null) {
                 simids.add(entity.getId());
-            } else if (!sims.get(id).isUnloaded) {
-                    SimuKraft.LOGGER().error("Error: Entity doesn't exist in faction. Please contact the author.");
-                    SimuKraft.LOGGER().error("Removing this entity to reduce future Errors");
-                    removeSim(id);
-
-                }
+            }
         }
         return simids;
     }
@@ -246,10 +240,6 @@ public class Faction {
                 if (!sims.get(id).hired) {
                     simids.add(entity.getId());
                 }
-            } else {
-                SimuKraft.LOGGER().error("Error: Unemployed entity doesn't exist in faction while trying to get Unemployed Sims. Please contact the author.");
-                SimuKraft.LOGGER().error("Removing this entity to reduce future Errors");
-                removeSim(id);
             }
         }
         return simids;
@@ -351,6 +341,7 @@ public class Faction {
         House house = new House(pos, name, rent);
         houses.put(id, house);
         sendPacketToFaction(new NewHousePacket(house, id, this.id));
+        setFactionDirty();
         return id;
     }
 
@@ -364,6 +355,7 @@ public class Faction {
 
         }
         houses.remove(id);
+        setFactionDirty();
         return true;
     }
 
@@ -372,11 +364,13 @@ public class Faction {
         House house = houses.get(houseID);
         sims.get(simID).homeless = false;
         house.simOccupants.add(simID);
+        setFactionDirty();
     }
 
     public boolean removeSimFromHouse(UUID houseID, UUID simID) {
         House house = houses.get(houseID);
         sims.get(simID).homeless = true;
+        setFactionDirty();
         return house.simOccupants.remove(simID);
 
     }
@@ -389,13 +383,42 @@ public class Faction {
         return houses.get(houseID).simOccupants;
     }
 
-    public UUID getFreeHouse() {
+    public void validateHouses()
+    {
+
+        boolean changed = false;
+        ArrayList<UUID> housesToRemove = new ArrayList<>();
         for (UUID house : houses.keySet()) {
+            if (!(world.getBlockEntity(houses.get(house).position) instanceof TileResidential))
+            {
+                housesToRemove.add(house);
+            }
+        }
+
+        for (UUID houseToRemove: housesToRemove)
+        {
+            houses.remove(houseToRemove);
+            changed = true;
+        }
+        if (changed)setFactionDirty();
+    }
+
+    public UUID getFreeHouse() {
+
+
+        for (UUID house : houses.keySet()) {
+            if (world.getBlockEntity(houses.get(house).position) instanceof TileResidential){
             if (houses.get(house).simOccupants.isEmpty()) {
                 return house;
             }
+            }else
+            {
+
+                SimuKraft.LOGGER().warn("House does not exist " + house);
+            }
 
         }
+
         return null;
     }
 
@@ -422,7 +445,6 @@ public class Faction {
 
     public void addHouse(House house, UUID houseID) {
         houses.put(houseID, house);
-
     }
 
     public float getRent() {
@@ -462,6 +484,14 @@ public class Faction {
                     }
                 }
             }
+        }
+    }
+
+    public void setFactionDirty()
+    {
+        if(!world.isClientSide())
+        {
+            SavedWorldData.get(world).setDirty();
         }
     }
 
