@@ -13,6 +13,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
 import net.minecraftforge.items.wrapper.InvWrapper;
+import org.lwjgl.system.CallbackI;
 
 import javax.annotation.Nonnull;
 import java.math.BigDecimal;
@@ -110,5 +111,14 @@ public class Utils {
             }
         }
         return blocks;
+    }
+
+    public static String uppercaseFirstLetterInEveryWord(String input) {
+        String[] ss = input.split(" ");
+        StringBuilder builder = new StringBuilder();
+        for (String s : ss) {
+            builder.append(s.substring(0, 1).toUpperCase()).append(s.substring(1)).append(" ");
+        }
+        return builder.toString().trim();
     }
 }

@@ -17,6 +17,7 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
@@ -350,7 +351,7 @@ public class Faction {
         for (UUID simID : houses.get(id).simOccupants) {
             SimEntity entity = (SimEntity) world.getEntity(simID);
             if (entity != null) {
-                entity.removeHouse();
+                entity.setHouseID(null);
             }
 
         }
@@ -362,14 +363,34 @@ public class Faction {
 
     public void addSimToHouse(UUID houseID, UUID simID) {
         House house = houses.get(houseID);
-        sims.get(simID).homeless = false;
+        sims.get(simID).house = houseID;
+        MinecraftServer server = world.getServer();
+        if (server != null) {
+            server.getAllLevels().forEach(serverWorld -> {
+                Entity entity = serverWorld.getEntity(simID);
+                if (entity instanceof SimEntity) {
+                    SimEntity sim = (SimEntity) entity;
+                    sim.setHouseID(houseID);
+                }
+            });
+        }
         house.simOccupants.add(simID);
         setFactionDirty();
     }
 
     public boolean removeSimFromHouse(UUID houseID, UUID simID) {
         House house = houses.get(houseID);
-        sims.get(simID).homeless = true;
+        sims.get(simID).house = null;
+        MinecraftServer server = world.getServer();
+        if (server != null) {
+            server.getAllLevels().forEach(serverWorld -> {
+                Entity entity = serverWorld.getEntity(simID);
+                if (entity instanceof SimEntity) {
+                    SimEntity sim = (SimEntity) entity;
+                    sim.setHouseID(null);
+                }
+            });
+        }
         setFactionDirty();
         return house.simOccupants.remove(simID);
 
@@ -436,7 +457,7 @@ public class Faction {
     public int getHomelessSimCount() {
         int count = 0;
         for (SimInfo info : sims.values()) {
-            if (info.homeless) {
+            if (info.getHouse() == null) {
                 count++;
             }
         }
@@ -498,7 +519,7 @@ public class Faction {
     public static class SimInfo {
         private UUID sim;
         private boolean hired;
-        private boolean homeless = true;
+        private UUID house = null;
 
         private boolean isUnloaded = false;
 
@@ -516,10 +537,12 @@ public class Faction {
 
         public CompoundNBT write() {
             CompoundNBT nbt = new CompoundNBT();
-            nbt.putBoolean("homeless", homeless);
             nbt.putBoolean("hired", hired);
             nbt.putString("sim", sim.toString());
             nbt.putBoolean("isUnloaded",isUnloaded);
+            if (house != null) {
+                nbt.putUUID("house", house);
+            }
             if (job != null){
                 nbt.put("Job nbt",job.writeToNbt(new ListNBT()));
                 nbt.putInt("Job Int" ,job.jobType().getId());
@@ -528,10 +551,12 @@ public class Faction {
         }
 
         public void read(CompoundNBT nbt) {
-            homeless = nbt.getBoolean("homeless");
             hired = nbt.getBoolean("hired");
             this.sim = UUID.fromString(nbt.getString("sim"));
             isUnloaded = nbt.getBoolean("isUnloaded");
+            if (nbt.contains("house")) {
+                house = nbt.getUUID("house");
+            }
             if (nbt.contains("Job nbt")){
                 int id = nbt.getInt("Job Int");
                 createNewJobFromInt(id);
@@ -570,6 +595,14 @@ public class Faction {
         public String getSimName()
         {
             return this.simName;
+        }
+
+        public boolean isHired() {
+            return hired;
+        }
+
+        public UUID getHouse() {
+            return house;
         }
     }
 

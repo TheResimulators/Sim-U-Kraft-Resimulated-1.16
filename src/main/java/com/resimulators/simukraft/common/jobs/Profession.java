@@ -23,7 +23,7 @@ public enum Profession {
                 return job.name;
             }
         }
-        return null;
+        return "Unemployed";
     }
 
     public static int getIDFromName(String name) {

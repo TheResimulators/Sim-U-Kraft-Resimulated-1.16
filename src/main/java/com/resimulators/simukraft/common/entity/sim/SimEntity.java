@@ -282,8 +282,9 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
 
     public UUID getHouseID() {
         try {
-            return this.entityData.get(HOUSE_ID).get();
+            return this.entityData.get(HOUSE_ID).orElse(null);
         } catch (Exception e) {
+            e.printStackTrace();
             return null;
         }
     }
@@ -391,10 +392,8 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
 
     //resets the sim's inventory
     public void resetInventory(){
-
         for(int i = 0; i < this.inventory.getContainerSize(); ++i) {
-            //this might cause a crash.......too bad!
-            this.inventory.setItemStack(null);
+            this.inventory.setItemStack(ItemStack.EMPTY);
         }
     }
 
@@ -427,7 +426,7 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
         return (this.getEntityData().get(MODEL_FLAG) & part.getMask()) == part.getMask();
     }
 
-        public void fireSim(SimEntity sim, int factionID,boolean dying){
+    public void fireSim(SimEntity sim, int factionID,boolean dying){
         if (sim.getJob() != null) {
             if (sim.getJob().getWorkSpace() != null){
                 SavedWorldData.get(level).fireSim(factionID, sim);
@@ -443,8 +442,6 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
                 sim.setProfession(0);
             }
         }
-
-
     }
 
     public IReworkedJob getJob() {
@@ -452,6 +449,7 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
     }
 
     public void setJob(IReworkedJob job) {
+        this.setProfession(job.jobType().getId());
         this.job = job;
     }
 
@@ -463,28 +461,18 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
         ArrayList<UUID> list = SavedWorldData.get(level).getFactionWithSim(this.getUUID()).getOccupants(getHouseID());
         list.remove(this.getUUID());
         return list;
-
     }
 
-    public void moveHouse(UUID currentHouseID, UUID newHouseID) {
+    public void moveHouse(UUID newHouseID) {
         Faction faction = SavedWorldData.get(level).getFactionWithSim(this.getUUID());
         removeFromHouse(faction);
         faction.addSimToHouse(newHouseID, getUUID());
         setHouseID(newHouseID);
-
     }
 
     public void removeFromHouse(Faction faction) {
         faction.removeSimFromHouse(getHouseID(), this.getUUID());
-        removeHouse();
-    }
-
-    public void removeHouse() {
         setHouseID(null);
-    }
-
-    public boolean isHomeless() {
-        return getHouseID() == null;
     }
 
     @Override
@@ -596,11 +584,12 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
         compound.putString("Status", this.getStatus());
         compound.putInt("activity", this.getActivity().id);
         this.foodStats.write(compound);
+        if (getHouseID() != null) {
+            compound.putUUID("houseID", this.getHouseID());
+        }
         if (job != null) {
             compound.put("job", this.job.writeToNbt(new ListNBT()));
         }
-
-
         if (controller != null) {
             compound.put("working controller", controller.serializeNBT());
         }
@@ -630,8 +619,10 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
         if (compound.contains("Status"))
             this.setStatus(compound.getString("Status"));
         this.foodStats.read(compound);
+        if (compound.contains("houseID")) {
+            this.setHouseID(compound.getUUID("houseID"));
+        }
         ListNBT nbt = compound.getList("job", Constants.NBT.TAG_COMPOUND);
-
         int jobType = nbt.getCompound(0).getInt("id");
         if (jobType != 0) {
             job = ModJobs.JOB_LOOKUP.get(jobType).apply(this);

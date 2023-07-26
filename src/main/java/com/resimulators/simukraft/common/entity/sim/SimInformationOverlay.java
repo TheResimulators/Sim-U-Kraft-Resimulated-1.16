@@ -3,6 +3,7 @@ package com.resimulators.simukraft.common.entity.sim;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.datafixers.util.Pair;
 import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.client.gui.GuiSimInventory;
 import com.resimulators.simukraft.common.jobs.Profession;
@@ -11,6 +12,7 @@ import com.resimulators.simukraft.common.world.SavedWorldData;
 import com.resimulators.simukraft.utils.ColorHelper;
 import com.resimulators.simukraft.utils.Icons;
 import com.resimulators.simukraft.utils.RayTraceHelper;
+import com.resimulators.simukraft.utils.Utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.screen.ChatScreen;
@@ -23,11 +25,13 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import org.apache.commons.lang3.StringUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
+import org.lwjgl.system.CallbackI;
 
 import java.awt.*;
+import java.util.*;
+import java.util.List;
 
 public class SimInformationOverlay {
     protected static boolean hasLight;
@@ -46,7 +50,7 @@ public class SimInformationOverlay {
     @SubscribeEvent
     public void renderSimOverlay(TickEvent.RenderTickEvent event) {
         RayTraceHelper.INSTANCE.ray();
-        if (RayTraceHelper.INSTANCE.getTarget() != null && (minecraft.screen == null || minecraft.screen instanceof ChatScreen) || minecraft.screen instanceof GuiSimInventory) {
+        if (RayTraceHelper.INSTANCE.getTarget() != null && (minecraft.screen == null) || minecraft.screen instanceof GuiSimInventory) {
             Entity entity = null;
             if (minecraft.screen instanceof GuiSimInventory)
                 entity = pastEntity;
@@ -58,13 +62,16 @@ public class SimInformationOverlay {
                 SimEntity sim = (SimEntity) entity;
                 if (faction == null) {
                     faction = SavedWorldData.get(sim.getCommandSenderWorld()).getFactionWithSim(sim.getUUID());
-                    if (faction != null) {
-                        house = faction.getHouseByID(sim.getHouseID());
-                    }else{
-                        SimuKraft.LOGGER().warn("Sim With UUID " + sim.getUUID() + " Does not belong to a Faction");
-                    }
                 }
-                RenderSystem.pushMatrix();
+                if (faction != null) {
+                    house = faction.getHouseByID(sim.getHouseID());
+                } else {
+                    house = null;
+                    SimuKraft.LOGGER().warn("Sim With UUID " + sim.getUUID() + " Does not belong to a Faction");
+                }
+
+                MatrixStack stack = new MatrixStack();
+                stack.pushPose();
                 saveGLState();
 
                 int guiScale = minecraft.options.guiScale;
@@ -76,28 +83,46 @@ public class SimInformationOverlay {
                 int posY = (minecraft.getWindow().getScreenHeight() / (guiScale)) / 2;
 
                 if (minecraft.screen instanceof GuiSimInventory) {
-                    posX = ((minecraft.getWindow().getScreenWidth() / guiScale) / 2) - ((GuiSimInventory) minecraft.screen).getXSize() / 2 - 90;
                     posY = ((minecraft.getWindow().getScreenHeight() / (guiScale)) / 2) - ((GuiSimInventory) minecraft.screen).getYSize() / 2;
-                    scale = 1;
                 }
 
-                RenderSystem.scalef(scale, scale, 1);
+                stack.scale(scale, scale, 1);
 
                 RenderSystem.disableRescaleNormal();
                 RenderHelper.turnOff();
                 RenderSystem.disableLighting();
                 RenderSystem.disableDepthTest();
-                int rectangleHeight = 86;
-                if (house != null) {
-                    rectangleHeight = 99;
 
+                List<Pair<Integer, Pair<RenderPosition, String>>> strings = new ArrayList<>();
+                int stringPosY = posY + 48;
+                int width = 90;
+
+                //INFO: Add information entries below
+                strings.add(createTextPositionPair(new RenderPosition(posX, stringPosY), sim.getFemale() ? "Female" : "Male"));
+                strings.add(createTextPositionPair(new RenderPosition(posX, stringPosY += 11), "Single (WIP)"));
+                strings.add(createTextPositionPair(new RenderPosition(posX, stringPosY += 11), house != null ? "Lives in " + Utils.uppercaseFirstLetterInEveryWord(house.getName().replace("_", " ")) : "Homeless"));
+                strings.add(createTextPositionPair(new RenderPosition(posX, stringPosY += 11), sim.getProfession() != 0 ? Utils.uppercaseFirstLetterInEveryWord(Profession.getNameFromID(sim.getProfession())) : "Unemployed"));
+
+                //Calculate the width of the box.
+                for (Pair<Integer, Pair<RenderPosition, String>> string : strings) {
+                    int temp = string.getFirst();
+                    if (width < temp) {
+                        width = temp + 10;
+                    }
                 }
-                Rectangle rectangle = new Rectangle(posX, posY, 90, rectangleHeight);
+
+                if (minecraft.screen instanceof GuiSimInventory) {
+                    posX = ((minecraft.getWindow().getScreenWidth() / guiScale) / 2) - ((GuiSimInventory) minecraft.screen).getXSize() / 2 - width;
+                }
+
+                //Draw the box
+                Rectangle rectangle = new Rectangle(posX, posY, width, stringPosY - posY + 11);
                 drawTooltipBox(rectangle.x, rectangle.y, rectangle.width, rectangle.height, new Color(0, 0, 0, 150).getRGB(), ColorHelper.getColorFromDye(sim.getNameColor()).getRGB(), Color.BLACK.getRGB());
 
                 RenderSystem.enableBlend();
                 RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 
+                //Health Bar
                 float health = sim.getHealth() / 2;
                 float maxHealth = sim.getMaxHealth();
                 int heartCount = MathHelper.ceil(maxHealth) / 2;
@@ -126,7 +151,8 @@ public class SimInformationOverlay {
                     }
                 }
 
-                float armor = sim.getArmorValue() / 2;
+                //Armor Bar
+                float armor = sim.getArmorValue() / 2f;
                 float maxArmor = 20;
                 int armorCount = MathHelper.ceil(maxArmor) / 2;
 
@@ -146,7 +172,8 @@ public class SimInformationOverlay {
                     }
                 }
 
-                float hunger = sim.foodStats.getFoodLevel() / 2;
+                //Hunger Bar
+                float hunger = sim.foodStats.getFoodLevel() / 2f;
                 float maxHunger = 20;
                 int hungerCount = MathHelper.ceil(maxHunger) / 2;
 
@@ -167,38 +194,40 @@ public class SimInformationOverlay {
                     }
                 }
 
+                //Draw name and information lines.
+                drawLine(stack, new RenderPosition(posX, posY + 5), (SimuKraft.config.getSims().coloredNames.get() ? TextFormatting.getById(ColorHelper.convertDyeToTF(sim.getNameColor())) : TextFormatting.WHITE) + sim.getName().getString());
+                for (Pair<Integer, Pair<RenderPosition, String>> pair : strings) {
+                    drawLine(stack, posX, pair.getSecond().getFirst().getY(), pair.getSecond().getSecond());
+                }
+
                 RenderSystem.disableBlend();
                 RenderSystem.enableRescaleNormal();
                 loadGLState();
                 RenderSystem.enableDepthTest();
-                int jobYPos = 76;
-                minecraft.font.draw(new MatrixStack(), (SimuKraft.config.getSims().coloredNames.get() ? TextFormatting.getById(ColorHelper.convertDyeToTF(sim.getNameColor())) : TextFormatting.WHITE) + sim.getName().getString(), posX + 5, posY + 5, Color.WHITE.getRGB());
-
-                //TODO: WIP Couple Status (Temp)
-                minecraft.font.draw(new MatrixStack(), "Single (WIP)" + TextFormatting.RESET, posX + 5, posY + 50, Color.WHITE.getRGB());
 
 
-                //TODO:WIP HOUSE STATUS (TEMP)
-                if (house != null) {
-                    minecraft.font.draw(new MatrixStack(), "Lives in " + TextFormatting.RESET, posX + 5, posY + 63, Color.WHITE.getRGB());
-                    minecraft.font.draw(new MatrixStack(), house.getName().replace("_", " ") + TextFormatting.RESET, posX + 5, posY + 76, Color.WHITE.getRGB());
-                    jobYPos = 89;
-                } else {
-                    minecraft.font.draw(new MatrixStack(), "Homeless" + TextFormatting.RESET, posX + 5, posY + 63, Color.WHITE.getRGB());
-                }
-                if (sim.getJob() == null) {
 
-                    minecraft.font.draw(new MatrixStack(), "Unemployed" + TextFormatting.RESET, posX + 5, posY + jobYPos, Color.WHITE.getRGB());
-                } else {
-                    String profession = Profession.getNameFromID(sim.getProfession());
-
-                    minecraft.font.draw(new MatrixStack(), StringUtils.capitalize(profession) + TextFormatting.RESET, posX + 5, posY + jobYPos, Color.WHITE.getRGB());
-
-                }
-                RenderSystem.popMatrix();
+                stack.popPose();
             }
         }
         RayTraceHelper.INSTANCE.reset();
+    }
+
+    private void drawLine(MatrixStack stack, RenderPosition pos, String s) {
+        drawLine(stack, pos.getX(), pos.getY(), s);
+    }
+
+    private void drawLine(MatrixStack stack, int x, int y, String s) {
+        minecraft.font.draw(stack, s + TextFormatting.RESET, x + 5, y, Color.WHITE.getRGB());
+    }
+
+    private Pair<Integer, Pair<RenderPosition, String>> createTextPositionPair(int x, int y, String s) {
+        return createTextPositionPair(new RenderPosition(x, y), s);
+    }
+
+    private Pair<Integer, Pair<RenderPosition, String>> createTextPositionPair(RenderPosition renderPosition, String s) {
+        int width = Minecraft.getInstance().font.width(s);
+        return new Pair<>(width, new Pair<>(renderPosition, s));
     }
 
     public static void saveGLState() {
@@ -306,5 +335,23 @@ public class SimInformationOverlay {
         buffer.vertex(x + width, y, zLevel).uv(((float) (textureX + tw) * f), ((float) (textureY) * f1)).endVertex();
         buffer.vertex(x, y, zLevel).uv(((float) (textureX) * f), ((float) (textureY) * f1)).endVertex();
         tessellator.end();
+    }
+
+    static class RenderPosition {
+        private final int x;
+        private final int y;
+
+        public RenderPosition(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
+
+        public int getX() {
+            return x;
+        }
+
+        public int getY() {
+            return y;
+        }
     }
 }
