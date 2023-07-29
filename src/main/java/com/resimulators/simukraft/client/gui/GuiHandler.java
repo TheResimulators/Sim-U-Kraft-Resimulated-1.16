@@ -19,6 +19,8 @@ public class GuiHandler {
     public static final int RESIDENTIAL = 9;
     public static final int BUTCHER = 10;
 
+    public static final int GROCER = 11;
+
 
     public static void openGui(ArrayList<SimEntity> ints, BlockPos pos, int id, int guiId, String string) {
         switch (guiId) {
@@ -51,6 +53,10 @@ public class GuiHandler {
                 break;
             case BUTCHER:
                 Minecraft.getInstance().setScreen(new GuiButcher(new StringTextComponent(string), ints, pos, id));
+                break;
+            case GROCER:
+                //Minecraft.getInstance().setScreen(new GuiGrocer(new StringTextComponent(string), ints, pos, id));
+                Minecraft.getInstance().setScreen(new GuiGrocer(new StringTextComponent(string)));
         }
     }
 

@@ -24,6 +24,7 @@ public class ModTileEntities {
     public static final RegistryObject<TileEntityType<TileFisher>> FISHER_MAN = REGISTRY.register("fisher_man", () -> TileEntityType.Builder.of(TileFisher::new, ModBlocks.CONTROL_BLOCK.get()).build(null));
     public static final RegistryObject<TileEntityType<TileResidential>> RESIDENTIAL = REGISTRY.register("residential", () -> TileEntityType.Builder.of(TileResidential::new, ModBlocks.CONTROL_BLOCK.get()).build(null));
     public static final RegistryObject<TileEntityType<TileButcher>> BUTCHER = REGISTRY.register("butcher", () -> TileEntityType.Builder.of(TileButcher::new, ModBlocks.CONTROL_BLOCK.get()).build(null));
+    public static final RegistryObject<TileEntityType<TileGrocer>> GROCER = REGISTRY.register("grocer", () -> TileEntityType.Builder.of(TileGrocer::new, ModBlocks.CONTROL_BLOCK.get()).build(null));
 
     public ModTileEntities() {
         REGISTRY.register(FMLJavaModLoadingContext.get().getModEventBus());

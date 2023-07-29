@@ -449,7 +449,6 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
     }
 
     public void setJob(IReworkedJob job) {
-        this.setProfession(job.jobType().getId());
         this.job = job;
     }
 

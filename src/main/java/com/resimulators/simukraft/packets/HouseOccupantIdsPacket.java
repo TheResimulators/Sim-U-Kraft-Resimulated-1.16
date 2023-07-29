@@ -24,7 +24,7 @@ public class HouseOccupantIdsPacket implements IMessage {
     }
 
     @Override
-    public void toBytes(PacketBuffer buf) {
+    public void toBytes(PacketBuffer buf) { 
         buf.writeInt(ids.size());
         for (SimEntity id : ids) {
             buf.writeNbt(id.getGuiInfo(new CompoundNBT()));

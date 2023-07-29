@@ -254,7 +254,7 @@ public class JobBuilder implements IReworkedJob {
                     blockPos = blocks.get(blockIndex).pos;
                 } else {
                     if (!sim.getNavigation().isInProgress()){
-                        boolean success = sim.getNavigation().moveTo(blockPos.getX(), blockPos.getY(), blockPos.getZ(), sim.getSpeed() * 2);
+                        boolean success = sim.getNavigation().moveTo(blockPos.getX(), blockPos.getY(), blockPos.getZ(), sim.getSpeed());
                         System.out.println("Navigation to next block successfully? ->" + success);
                 }else
                 {
@@ -313,7 +313,7 @@ public class JobBuilder implements IReworkedJob {
                     state = State.STARTING;
                 } else {
                     blockPos = getWorkSpace();
-                    boolean success = sim.getNavigation().moveTo(blockPos.getX(), blockPos.getY(), blockPos.getZ(), sim.getSpeed() * 2);
+                    boolean success = sim.getNavigation().moveTo(blockPos.getX(), blockPos.getY(), blockPos.getZ(), sim.getSpeed());
                     System.out.println("Navigation to collect successfully? ->" + success);
                 }
             }
