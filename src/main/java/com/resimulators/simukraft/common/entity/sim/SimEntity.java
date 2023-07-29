@@ -430,7 +430,7 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
         if (sim.getJob() != null) {
             if (sim.getJob().getWorkSpace() != null){
                 SavedWorldData.get(level).fireSim(factionID, sim);
-                if (!level.isClientSide) SavedWorldData.get(level).getFaction(factionID).sendPacketToFaction(new SimFirePacket(factionID, sim.getId(), sim.getJob().getWorkSpace(),dying));
+                if (!level.isClientSide) SavedWorldData.get(level).getFaction(factionID).sendPacketToFaction(new SimFirePacket(factionID, sim.getUUID(), sim.getJob().getWorkSpace(),dying));
                 BlockPos jobPos = sim.getJob().getWorkSpace();
                 ITile tile = (ITile) sim.level.getBlockEntity(jobPos);
                 if (tile != null) {
@@ -596,6 +596,31 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
         compound.putUUID("uuid", getUUID());
     }
 
+    public CompoundNBT getGuiInfo(CompoundNBT nbt)
+    {
+        nbt.putInt("id",this.getId());
+        nbt.putUUID("UUID",this.getUUID());
+        nbt.putBoolean("hasJob",this.hasJob());
+        nbt.putString("name",getCustomName().getString());
+        if (job != null){
+            nbt.putInt("jobID",getProfession());
+            nbt.put("job",this.job.writeToNbt(new ListNBT()));
+        }
+        return nbt;
+    }
+
+    public void readGuiInfo(CompoundNBT nbt)
+    {
+        this.setId(nbt.getInt("id"));
+        this.setUUID(nbt.getUUID("UUID"));
+        this.setCustomName(new StringTextComponent(nbt.getString("name")));
+        if (nbt.getBoolean("hasJob"))
+        {
+            ListNBT listNBT = (ListNBT) nbt.get("job");
+            this.job = ModJobs.JOB_LOOKUP.get(nbt.getInt("jobID")).apply(this);
+            job.readFromNbt(listNBT);
+        }
+    }
 
     @Override
     public void readAdditionalSaveData(CompoundNBT compound) {

@@ -2,6 +2,7 @@ package com.resimulators.simukraft.client.gui;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.resimulators.simukraft.SimuKraft;
+import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.jobs.Profession;
 import com.resimulators.simukraft.common.tileentity.TileMiner;
 import net.minecraft.client.Minecraft;
@@ -17,7 +18,7 @@ import java.util.ArrayList;
 public class GuiMiner extends GuiBaseJob {
 
 
-    public GuiMiner(ITextComponent component, ArrayList<Integer> ids, BlockPos pos, int id) {
+    public GuiMiner(ITextComponent component, ArrayList<SimEntity> ids, BlockPos pos, int id) {
         super(component, ids, pos, id, Profession.MINER.getId());
     }
 

@@ -33,7 +33,7 @@ public class GuiBaseJob extends Screen {
     Button nextPage;
     Button previousPage;
     PlayerEntity player;
-    ArrayList<Integer> ids;
+    ArrayList<SimEntity> simEntities;
     ArrayList<SimButton> simButtons = new ArrayList<>();
     ArrayList<SimButton> employeeButtons = new ArrayList<>();
     SimEntity selectedSim;
@@ -43,20 +43,20 @@ public class GuiBaseJob extends Screen {
     boolean firing = false;
     int hiredId;
     int job;
-    ArrayList<Button> mainMenu = new ArrayList<Button>() {{
-    }};
+    ArrayList<Button> mainMenu = new ArrayList<Button>() {
+    };
     private int pageIndex;
     private int maxButtons;
 
     private ArrayList<UUID> unloadedSims;
 
-    public GuiBaseJob(ITextComponent component, ArrayList<Integer> ids, BlockPos pos, int id, int job) {
+    public GuiBaseJob(ITextComponent component, ArrayList<SimEntity> simEntities, BlockPos pos, int id, int job) {
         super(component);
         this.hiredId = id;
         this.player = Minecraft.getInstance().player;
         data = SavedWorldData.get(player.level);
         Id = data.getFactionWithPlayer(player.getUUID()).getId();
-        this.ids = ids;
+        this.simEntities = simEntities;
         this.pos = pos;
         this.job = job;
         this.component = component;
@@ -86,7 +86,7 @@ public class GuiBaseJob extends Screen {
             if (isHired()) {
                 font.draw(stack, "Level: WIP", (float) 20, 70, Color.white.getRGB());
                 if (hiredId != 0) {
-                    font.draw(stack, "Name: " + Minecraft.getInstance().level.getEntity(hiredId).getDisplayName(), (float) 20, 50, Color.white.getRGB());
+                    font.draw(stack, "Name: " + getSimWithID(hiredId).getDisplayName().getString(), (float) 20, 50, Color.white.getRGB());
                 }
             }
         } else if (state == State.HIRE_INFO) {
@@ -101,7 +101,7 @@ public class GuiBaseJob extends Screen {
         if (state == State.Firing) {
             font.draw(stack, "Level: WIP", (float) 20, 70, Color.white.getRGB());
             if (hiredId != 0) {
-                font.draw(stack, "Name: " + Minecraft.getInstance().level.getEntity(hiredId).getDisplayName().getString(), (float) 20, 50, Color.white.getRGB());
+                font.draw(stack, "Name: " + getSimWithID(hiredId).getDisplayName().getString(), (float) 20, 50, Color.white.getRGB());
             }
         }
 
@@ -254,30 +254,19 @@ public class GuiBaseJob extends Screen {
         int maxWidth = width / 125;
         int i = 0;
         maxButtons = maxWidth * height / 30;
-        for (int id : ids) {
-            SimEntity sim = (SimEntity) player.getCommandSenderWorld().getEntity(id);
+        for (SimEntity sim : simEntities) {
+
             if (sim != null) {
                 UUID uuid = sim.getUUID();
                 int index = i % maxButtons;
 
                 if (data.getFaction(Id).getHired(uuid)) {
-                    SimButton button = new SimButton(ConstantXSpacing * (index % maxWidth) + 20, ConstantYSpacing * (index / maxWidth) + 40, 100, 20, sim.getName(), ids.get(i), this, 1);
+                    SimButton button = new SimButton(ConstantXSpacing * (index % maxWidth) + 20, ConstantYSpacing * (index / maxWidth) + 40, 100, 20, sim.getName(), sim.getId(), this, 1);
                     employeeButtons.add(addButton(button));
                     button.visible = false;
                     i++;
                 }
-            }
-            for (UUID unloadedSimUUID: unloadedSims)
-            {
-                int index = i % maxButtons;
 
-                if (data.getFaction(Id).getHired(unloadedSimUUID)) {
-                    SimButton button = new SimButton(ConstantXSpacing * (index % maxWidth) + 20,
-                            ConstantYSpacing * (index / maxWidth) + 40, 100, 20, new StringTextComponent(data.getFaction(Id).getSimInfo(unloadedSimUUID).getSimName()), ids.get(i), this, 1);
-                    employeeButtons.add(addButton(button));
-                    button.visible = false;
-                    i++;
-                }
             }
         }
     }
@@ -310,17 +299,19 @@ public class GuiBaseJob extends Screen {
         int maxWidth = width / 125;
         int i = 0;
         maxButtons = maxWidth * (height - 150) / 30;
-        for (int id : ids) {
-            SimEntity sim = (SimEntity) player.getCommandSenderWorld().getEntity(id);
+        for (SimEntity sim : simEntities) {
+
             if (sim != null) {
                 UUID uuid = sim.getUUID();
                 int index = i % maxButtons;
                 if (!data.getFaction(Id).getHired(uuid)) {
-                    SimButton button = new SimButton(ConstantXSpacing * (index % maxWidth) + 40, ConstantYSpacing * (index / maxWidth) + 40, 100, 20, sim.getName(), ids.get(i), this, 0);
+                    SimButton button = new SimButton(ConstantXSpacing * (index % maxWidth) + 40, ConstantYSpacing * (index / maxWidth) + 40,
+                            100, 20, sim.getName(),sim.getId(), this, 0);
                     simButtons.add(addButton(button));
                     button.visible = false;
                     i++;
                 }
+
             }
 
         }
@@ -392,15 +383,23 @@ public class GuiBaseJob extends Screen {
 
     private void showSimInfo(int id) {
         hideAll();
-        selectedSim = (SimEntity) player.level.getEntity(id);
+        selectedSim = getSimWithID(id);
         state = State.SIM_HIRING_INFO;
         Back.visible = true;
         Confirm.visible = true;
     }
 
+    private SimEntity getSimWithID(int id)
+    {
+        for (SimEntity entity: simEntities)
+        {
+            if (entity.getId() == id) return entity;
+        }
+        return null;
+    }
     private void showEmployeeInfo(int id) {
         hideAll();
-        selectedSim = (SimEntity) player.level.getEntity(id);
+        selectedSim = getSimWithID(id);
         state = State.SIM_EMPLOYEE_INFO;
         Back.visible = true;
         Confirm.visible = false;

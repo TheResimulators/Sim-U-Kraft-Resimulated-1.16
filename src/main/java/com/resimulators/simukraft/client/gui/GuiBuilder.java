@@ -8,6 +8,7 @@ import com.resimulators.simukraft.Reference;
 import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.common.block.BlockControlBlock;
 import com.resimulators.simukraft.common.building.BuildingTemplate;
+import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import com.resimulators.simukraft.common.enums.BuildingType;
 import com.resimulators.simukraft.common.enums.Category;
 import com.resimulators.simukraft.common.jobs.Profession;
@@ -65,7 +66,7 @@ public class GuiBuilder extends GuiBaseJob {
     private Button shouldRenderButton;
     private TileConstructor constructor;
 
-    public GuiBuilder(ITextComponent component, ArrayList<Integer> ids, BlockPos pos, @Nullable int id) {
+    public GuiBuilder(ITextComponent component, ArrayList<SimEntity> ids, BlockPos pos, @Nullable int id) {
         super(component, ids, pos, id, Profession.BUILDER.getId());
         constructor = (TileConstructor) SimuKraft.proxy.getClientWorld().getBlockEntity(pos);
     }

@@ -1,7 +1,10 @@
 package com.resimulators.simukraft.packets;
 
+import com.resimulators.simukraft.SimuKraft;
 import com.resimulators.simukraft.client.gui.GuiResidential;
+import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import net.minecraft.client.Minecraft;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.network.NetworkEvent;
@@ -11,20 +14,20 @@ import java.util.ArrayList;
 
 public class HouseOccupantIdsPacket implements IMessage {
 
-    ArrayList<Integer> ids = new ArrayList<>();
+    ArrayList<SimEntity> ids = new ArrayList<>();
 
     public HouseOccupantIdsPacket() {
     }
 
-    public HouseOccupantIdsPacket(ArrayList<Integer> ids) {
+    public HouseOccupantIdsPacket(ArrayList<SimEntity> ids) {
         this.ids = ids;
     }
 
     @Override
     public void toBytes(PacketBuffer buf) {
         buf.writeInt(ids.size());
-        for (int id : ids) {
-            buf.writeInt(id);
+        for (SimEntity id : ids) {
+            buf.writeNbt(id.getGuiInfo(new CompoundNBT()));
         }
     }
 
@@ -32,7 +35,9 @@ public class HouseOccupantIdsPacket implements IMessage {
     public void fromBytes(PacketBuffer buf) {
         int size = buf.readInt();
         for (int i = 0; i < size; i++) {
-            ids.add(buf.readInt());
+            SimEntity entity = new SimEntity(SimuKraft.proxy.getClientWorld());
+            entity.readGuiInfo(buf.readNbt());
+            ids.add(entity);
         }
     }
 

@@ -62,9 +62,11 @@ public class SimHireRequest implements IMessage {
                 SavedWorldData data = SavedWorldData.get(player.level);
                 int id = data.getFactionWithPlayer(player.getUUID()).getId();
                 data.hireSim(id, (SimEntity) player.level.getEntity(simId));
-                ((ITile) player.level.getBlockEntity(pos)).setHired(true);
+
                 SimEntity sim = ((SimEntity) player.level.getEntity(simId));
                 if (sim != null) {
+                    ((ITile) player.level.getBlockEntity(pos)).setHired(true);
+                    ((ITile) player.level.getBlockEntity(pos)).setSimId(sim.getUUID());
                     sim.setJob(ModJobs.JOB_LOOKUP.get(job).apply(sim));
                     sim.setProfession(job);
 
@@ -75,7 +77,7 @@ public class SimHireRequest implements IMessage {
                         sim.getJob().setWorkSpace(pos);
 
                         data.getFaction(id).subCredits(sim.getJob().getWage());
-                        data.getFaction(id).sendPacketToFaction(new SimHirePacket(simId, id, pos, job));
+                        data.getFaction(id).sendPacketToFaction(new SimHirePacket(sim.getUUID(), id, pos, job));
                         sim.getController().setTick(sim.getJob().intervalTime());
                     }
                 }

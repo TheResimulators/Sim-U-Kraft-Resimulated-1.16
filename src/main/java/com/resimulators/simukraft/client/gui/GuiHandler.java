@@ -1,5 +1,6 @@
 package com.resimulators.simukraft.client.gui;
 
+import com.resimulators.simukraft.common.entity.sim.SimEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.StringTextComponent;
@@ -19,7 +20,7 @@ public class GuiHandler {
     public static final int BUTCHER = 10;
 
 
-    public static void openGui(ArrayList<Integer> ints, BlockPos pos, int id, int guiId, String string) {
+    public static void openGui(ArrayList<SimEntity> ints, BlockPos pos, int id, int guiId, String string) {
         switch (guiId) {
             case BUILDER:
                 Minecraft.getInstance().setScreen(new GuiBuilder(new StringTextComponent(string), ints, pos, id));
@@ -52,4 +53,7 @@ public class GuiHandler {
                 Minecraft.getInstance().setScreen(new GuiButcher(new StringTextComponent(string), ints, pos, id));
         }
     }
+
+
+
 }

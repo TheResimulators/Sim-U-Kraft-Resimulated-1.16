@@ -29,7 +29,7 @@ public class GuiResidential extends Screen {
     private final BlockPos pos;
     private String name;
     private Button Done;
-    private ArrayList<Integer> occupants;
+    private ArrayList<SimEntity> occupants;
     private List<UUID> offlineOccupants;
 
     protected GuiResidential(ITextComponent titleIn, BlockPos pos) {
@@ -59,8 +59,8 @@ public class GuiResidential extends Screen {
         int i = 0;
         if (occupants != null) {
 
-            for (int id : occupants) {
-                SimEntity sim = (SimEntity) SimuKraft.proxy.getClientWorld().getEntity(id);
+            for (SimEntity sim : occupants) {
+
                 if (sim != null){
                     font.draw(stack, sim.getCustomName().getString(), 40, height / 2 - 10 + i * 20, Color.WHITE.getRGB());
                     i++;
@@ -87,15 +87,11 @@ public class GuiResidential extends Screen {
     }
 
 
-    public void setOccupants(ArrayList<Integer> ids) {
+    public void setOccupants(ArrayList<SimEntity> ids) {
         this.occupants = ids;
-        getOfflineOccupants();
 
 
     }
 
-    private void getOfflineOccupants()
-    {
-        offlineOccupants = (faction.getOccupants(tile.getHouseID()).stream().filter(sim -> faction.getSimInfo(sim).isUnloaded()).collect(Collectors.toList()));
-    }
+
 }
