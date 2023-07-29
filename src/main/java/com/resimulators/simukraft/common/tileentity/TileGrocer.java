@@ -23,7 +23,7 @@ public class TileGrocer extends TileEntity implements IControlBlock {
 
     @Override
     public int getGui() {
-        return GuiHandler.GLASS_FACTORY;
+        return GuiHandler.GROCER;
     }
 
     @Override
