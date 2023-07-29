@@ -120,7 +120,14 @@ public class JobBuilder implements IReworkedJob {
     public ListNBT writeToNbt(ListNBT nbt) {
         CompoundNBT data = new CompoundNBT();
         data.putInt("id", sim.getProfession());
+        if (template != null ) {
+            data.put("template", template.save(new CompoundNBT()));
+        }
+        if (direction != null){
+            data.putInt("dir",getDirection().get2DDataValue());
+        }
         nbt.add(data);
+
         CompoundNBT ints = new CompoundNBT();
         ints.putInt("periodsworked", periodsworked);
         nbt.add(ints);
@@ -154,6 +161,16 @@ public class JobBuilder implements IReworkedJob {
             }
             if (list.contains("item count")){
                 itemCount = list.getInt("item count");
+            }
+
+            if (list.contains("template"))
+            {
+                template = new BuildingTemplate();
+                template.load(list.getCompound("template"));
+            }
+            if (list.contains("dir"))
+            {
+                direction = Direction.from2DDataValue(list.getInt("dir"));
             }
         }
     }
@@ -342,6 +359,7 @@ public class JobBuilder implements IReworkedJob {
                 template = null;
             }
             sim.fireSim(sim, faction.getId(), false);
+
         }
     }
 

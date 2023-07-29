@@ -440,6 +440,7 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
             if (!dying){
                 sim.setJob(null);
                 sim.setProfession(0);
+                sim.setStatus("Fired");
             }
         }
     }
