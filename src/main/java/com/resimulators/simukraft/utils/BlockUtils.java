@@ -62,7 +62,7 @@ public class BlockUtils {
         return world.getBlockState(pos.above()).canOcclude();
     }
 
-    private static boolean isBlockBelowSolid(World world, BlockPos pos) {
+    public static boolean isBlockBelowSolid(World world, BlockPos pos) {
         return world.getBlockState(pos.below()).canOcclude();
     }
 
@@ -88,4 +88,5 @@ public class BlockUtils {
         }
         return true;
     }
+
 }
