@@ -238,10 +238,10 @@ public class JobBuilder implements IReworkedJob {
             sortBlocks();
 
 
-            BlockPos size =  template.getSize();
+            BlockPos size =  template.getSize(orgDir);
 
             constructor = (TileConstructor) sim.level.getBlockEntity(workSpace);
-            constructor.setBuildingPositioning(origin.relative(direction,size.getZ()).relative(direction.getClockWise(),size.getX()).offset(0,size.getY(),0),direction);
+            constructor.setBuildingPositioning(constructor.getBlockPos().relative(direction,size.getX()).relative(direction.getClockWise(),size.getZ()-1).offset(0,size.getY()-1,0),direction);
             chargeBlockIndexForward();
             constructor.onStartBuilding(blockIndex+1,blocks.size());
         }

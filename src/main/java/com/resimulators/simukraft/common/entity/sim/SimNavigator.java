@@ -30,14 +30,14 @@ public class SimNavigator extends GroundPathNavigator {
         if ((path != null && path.getDistToTarget() > SimuKraft.config.getSims().teleportDistance.get()) || this.isStuck()) {
             //teleport
             BlockPos teleportPosition = getTargetPos();
-            ArrayList<BlockPos> blocks = BlockUtils.getBlocksAroundPosition(teleportPosition,2);
-            if(!BlockUtils.blocksAreValid(level,blocks) && BlockUtils.isBlockBelowSolid(level,teleportPosition)){
-                int radius = 6;
+            ArrayList<BlockPos> blocks = BlockUtils.getBlocksAroundPosition(teleportPosition,3);
+            if(!BlockUtils.blocksAreValid(level,blocks) && BlockUtils.isBlocksBelowTheseSolid(level,blocks)){
+                int radius = 8;
                 blocks = BlockUtils.getBlocksAroundPosition(teleportPosition,radius);
                 for (BlockPos pos : blocks){
-                    ArrayList<BlockPos> innerBlocks = BlockUtils.getBlocksAroundPosition(pos,2);
+                    ArrayList<BlockPos> innerBlocks = BlockUtils.getBlocksAroundPosition(pos,3);
                     innerBlocks.sort(Comparator.comparingDouble((block) -> getTargetPos().distSqr(block.getX(),block.getY(),block.getZ(),false)));
-                    if (BlockUtils.blocksAreValid(level,innerBlocks) && BlockUtils.isBlockBelowSolid(level,pos)){
+                    if (BlockUtils.blocksAreValid(level,innerBlocks) && BlockUtils.isBlocksBelowTheseSolid(level,innerBlocks)){
                         teleportPosition = pos;
                         break;
                     }
