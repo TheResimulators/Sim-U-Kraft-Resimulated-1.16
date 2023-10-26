@@ -23,11 +23,7 @@ import com.resimulators.simukraft.utils.Utils;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.attributes.AttributeModifierMap;
 import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.entity.ai.goal.LookAtGoal;
-import net.minecraft.entity.ai.goal.LookRandomlyGoal;
-import net.minecraft.entity.ai.goal.OpenDoorGoal;
-import net.minecraft.entity.ai.goal.SwimGoal;
-import net.minecraft.entity.ai.goal.WaterAvoidingRandomWalkingGoal;
+import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerModelPart;
@@ -120,6 +116,7 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
         this.foodStats = new FoodStats(this);
         ((GroundPathNavigator) this.getNavigation()).setCanOpenDoors(true);
         this.getNavigation().getNodeEvaluator().setCanPassDoors(true);
+
 
     }
 
@@ -440,6 +437,7 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
             if (!dying){
                 sim.setJob(null);
                 sim.setProfession(0);
+                sim.setStatus("Fired");
             }
         }
     }
@@ -449,7 +447,6 @@ public class SimEntity extends AgeableEntity implements INPC, IEntityAdditionalS
     }
 
     public void setJob(IReworkedJob job) {
-        this.setProfession(job.jobType().getId());
         this.job = job;
     }
 

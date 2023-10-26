@@ -62,8 +62,16 @@ public class BlockUtils {
         return world.getBlockState(pos.above()).canOcclude();
     }
 
-    private static boolean isBlockBelowSolid(World world, BlockPos pos) {
+    public static boolean isBlockBelowSolid(World world, BlockPos pos) {
         return world.getBlockState(pos.below()).canOcclude();
+    }
+
+    public static boolean isBlocksBelowTheseSolid(World world, ArrayList<BlockPos> poses)
+    {
+        for (BlockPos pose : poses) {
+            if (!isBlockBelowSolid(world, pose)) return false;
+        }
+        return true;
     }
 
     public static boolean blocksAreValid(World world, ArrayList<BlockPos> blocksPos) {
@@ -88,4 +96,5 @@ public class BlockUtils {
         }
         return true;
     }
+
 }

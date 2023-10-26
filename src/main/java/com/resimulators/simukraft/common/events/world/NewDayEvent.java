@@ -86,7 +86,7 @@ public class NewDayEvent implements INBTSerializable<CompoundNBT> {
         ServerWorld sWorld = (ServerWorld) world;
 
 
-        if (sWorld.players().size() == 0) return;
+        if (sWorld.players().isEmpty()) return;
         for (Faction faction : factions) {
             if (faction.getHomelessSimCount() < 1 && faction.getOnlineFactionPlayer() != null) { // temporary for testing and until residential system is done
                 ArrayList<SimEntity> simsToSpawn = new ArrayList<>();

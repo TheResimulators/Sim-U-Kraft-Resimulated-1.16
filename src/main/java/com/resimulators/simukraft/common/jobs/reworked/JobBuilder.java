@@ -120,7 +120,14 @@ public class JobBuilder implements IReworkedJob {
     public ListNBT writeToNbt(ListNBT nbt) {
         CompoundNBT data = new CompoundNBT();
         data.putInt("id", sim.getProfession());
+        if (template != null ) {
+            data.put("template", template.save(new CompoundNBT()));
+        }
+        if (direction != null){
+            data.putInt("dir",getDirection().get2DDataValue());
+        }
         nbt.add(data);
+
         CompoundNBT ints = new CompoundNBT();
         ints.putInt("periodsworked", periodsworked);
         nbt.add(ints);
@@ -154,6 +161,16 @@ public class JobBuilder implements IReworkedJob {
             }
             if (list.contains("item count")){
                 itemCount = list.getInt("item count");
+            }
+
+            if (list.contains("template"))
+            {
+                template = new BuildingTemplate();
+                template.load(list.getCompound("template"));
+            }
+            if (list.contains("dir"))
+            {
+                direction = Direction.from2DDataValue(list.getInt("dir"));
             }
         }
     }
@@ -221,10 +238,10 @@ public class JobBuilder implements IReworkedJob {
             sortBlocks();
 
 
-            BlockPos size =  template.getSize();
+            BlockPos size =  template.getSize(orgDir);
 
             constructor = (TileConstructor) sim.level.getBlockEntity(workSpace);
-            constructor.setBuildingPositioning(origin.relative(direction,size.getZ()).relative(direction.getClockWise(),size.getX()).offset(0,size.getY(),0),direction);
+            constructor.setBuildingPositioning(constructor.getBlockPos().relative(direction,size.getX()).relative(direction.getClockWise(),size.getZ()-1).offset(0,size.getY()-1,0),direction);
             chargeBlockIndexForward();
             constructor.onStartBuilding(blockIndex+1,blocks.size());
         }
@@ -249,12 +266,24 @@ public class JobBuilder implements IReworkedJob {
             }
             if (state == State.TRAVELING) {
                 sim.setStatus("Moving to next Block");
-                if (Math.sqrt(sim.distanceToSqr(blockPos.getX(), blockPos.getY(), blockPos.getZ())) < 8) {
+                if (Math.sqrt(sim.distanceToSqr(blockPos.getX(), Math.abs(sim.getY() - blockPos.getY()) > template.getSize().getY()/2? sim.getY(): blockPos.getY(), blockPos.getZ())) < 8 ) {
+                    if(Math.sqrt(sim.distanceToSqr(blockPos.getX(), Math.abs(sim.getY() - blockPos.getY()) > template.getSize().getY()/2? sim.getY(): blockPos.getY(), blockPos.getZ())) < 2f)
+                    {
+                        if (!sim.getNavigation().isInProgress())
+                        {
+                            Random random = new Random();
+                            int randomX = random.nextInt(6)-3;
+                            int randomZ = random.nextInt(6)-3;
+
+                            sim.getNavigation().moveTo(sim.getNavigation().createPath(blockPos.getX() + randomX, blockPos.getY(), blockPos.getZ()+randomZ,2), sim.getSpeed());
+                        }
+                    }
                     state = State.BUILDING;
                     blockPos = blocks.get(blockIndex).pos;
                 } else {
                     if (!sim.getNavigation().isInProgress()){
-                        boolean success = sim.getNavigation().moveTo(blockPos.getX(), blockPos.getY(), blockPos.getZ(), sim.getSpeed() * 2);
+                        boolean success = sim.getNavigation().moveTo(sim.getNavigation().createPath(blockPos.getX(), blockPos.getY(), blockPos.getZ(),3), sim.getSpeed());
+
                         System.out.println("Navigation to next block successfully? ->" + success);
                 }else
                 {
@@ -313,7 +342,7 @@ public class JobBuilder implements IReworkedJob {
                     state = State.STARTING;
                 } else {
                     blockPos = getWorkSpace();
-                    boolean success = sim.getNavigation().moveTo(blockPos.getX(), blockPos.getY(), blockPos.getZ(), sim.getSpeed() * 2);
+                    boolean success = sim.getNavigation().moveTo(blockPos.getX(), blockPos.getY(), blockPos.getZ(), sim.getSpeed());
                     System.out.println("Navigation to collect successfully? ->" + success);
                 }
             }
@@ -342,6 +371,7 @@ public class JobBuilder implements IReworkedJob {
                 template = null;
             }
             sim.fireSim(sim, faction.getId(), false);
+
         }
     }
 
